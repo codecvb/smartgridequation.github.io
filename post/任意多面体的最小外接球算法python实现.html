@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>任意多面体的最小外接球算法Python实现 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">任意多面体的最小外接球算法Python实现</h1>
+        <p class="post-deck">以下是使用Python实现任意多面体的最小外接球（最小包围球）算法的代码。该算法基于Welzl算法，能够高效地计算任意多面体的最小外接球。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.512Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>18 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>以下是使用Python实现任意多面体的最小外接球（最小包围球）算法的代码。该算法基于Welzl算法，能够高效地计算任意多面体的最小外接球。</p>
+<p><img src="../uploads/csdn/%E4%BB%BB%E6%84%8F%E5%A4%9A%E9%9D%A2%E4%BD%93%E7%9A%84%E6%9C%80%E5%B0%8F%E5%A4%96%E6%8E%A5%E7%90%83%E7%AE%97%E6%B3%95python%E5%AE%9E%E7%8E%B0/img-01.png" alt=""></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> random
+<span class="hljs-keyword">import</span> math
+<span class="hljs-keyword">from</span> scipy.spatial <span class="hljs-keyword">import</span> ConvexHull
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3D
+<span class="hljs-keyword">from</span> mpl_toolkits.mplot3d.art3d <span class="hljs-keyword">import</span> Poly3DCollection
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">generate_random_polyhedron</span>(<span class="hljs-params">num_vertices=<span class="hljs-number">10</span>, radius=<span class="hljs-number">5.0</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;生成随机多面体（凸包）&quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 生成随机点集</span>
+    points = np.random.uniform(-radius, radius, (num_vertices, <span class="hljs-number">3</span>))
+
+    <span class="hljs-comment"># 计算凸包</span>
+    hull = ConvexHull(points)
+
+    <span class="hljs-comment"># 返回凸包顶点和面</span>
+    <span class="hljs-keyword">return</span> points, hull
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">sphere_contains_points</span>(<span class="hljs-params">center, radius, points, tolerance=<span class="hljs-number">1e-6</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;检查球体是否包含所有点&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">for</span> point <span class="hljs-keyword">in</span> points:
+        <span class="hljs-keyword">if</span> np.linalg.norm(point - center) &gt; radius + tolerance:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">min_sphere_2_points</span>(<span class="hljs-params">p1, p2</span>):
+    <span class="hljs-string">&quot;&quot;&quot;两点的最小外接球&quot;&quot;&quot;</span>
+    center = (p1 + p2) / <span class="hljs-number">2.0</span>
+    radius = np.linalg.norm(p1 - p2) / <span class="hljs-number">2.0</span>
+    <span class="hljs-keyword">return</span> center, radius
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">min_sphere_3_points</span>(<span class="hljs-params">p1, p2, p3</span>):
+    <span class="hljs-string">&quot;&quot;&quot;三点的最小外接球&quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 计算三角形的外接圆</span>
+    a = p2 - p1
+    b = p3 - p1
+
+    <span class="hljs-comment"># 计算法向量</span>
+    n = np.cross(a, b)
+
+    <span class="hljs-comment"># 如果三点共线，则返回两点最大距离的球</span>
+    <span class="hljs-keyword">if</span> np.linalg.norm(n) &lt; <span class="hljs-number">1e-10</span>:
+        <span class="hljs-keyword">return</span> min_sphere_2_points(
+            p1,
+            p2 <span class="hljs-keyword">if</span> np.linalg.norm(p2-p1) &gt; np.linalg.norm(p3-p1) <span class="hljs-keyword">else</span> p3
+        )
+
+    <span class="hljs-comment"># 计算圆心</span>
+    a_cross_b = np.cross(a, b)
+    numerator = np.cross(np.dot(a, a) * b - np.dot(b, b) * a, a_cross_b)
+    denominator = <span class="hljs-number">2.0</span> * np.dot(a_cross_b, a_cross_b)
+    center = p1 + numerator / denominator
+
+    radius = np.linalg.norm(center - p1)
+    <span class="hljs-keyword">return</span> center, radius
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">min_sphere_4_points</span>(<span class="hljs-params">p1, p2, p3, p4</span>):
+    <span class="hljs-string">&quot;&quot;&quot;四点的最小外接球&quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 尝试所有三点的组合</span>
+    spheres = [
+        min_sphere_3_points(p1, p2, p3),
+        min_sphere_3_points(p1, p2, p4),
+        min_sphere_3_points(p1, p3, p4),
+        min_sphere_3_points(p2, p3, p4)
+    ]
+
+    <span class="hljs-comment"># 找到包含所有点的最小球</span>
+    <span class="hljs-keyword">for</span> center, radius <span class="hljs-keyword">in</span> spheres:
+        <span class="hljs-keyword">if</span> sphere_contains_points(center, radius, [p1, p2, p3, p4]):
+            <span class="hljs-keyword">return</span> center, radius
+
+    <span class="hljs-comment"># 如果三点球不包含所有点，则计算四面体的外接球</span>
+    A = np.vstack([<span class="hljs-number">2</span>*(p2-p1), <span class="hljs-number">2</span>*(p3-p1), <span class="hljs-number">2</span>*(p4-p1)])
+    b = np.array([
+        np.dot(p2, p2) - np.dot(p1, p1),
+        np.dot(p3, p3) - np.dot(p1, p1),
+        np.dot(p4, p4) - np.dot(p1, p1)
+    ])
+
+    <span class="hljs-keyword">try</span>:
+        center = np.linalg.solve(A, b)
+        radius = np.linalg.norm(center - p1)
+        <span class="hljs-keyword">return</span> center, radius
+    <span class="hljs-keyword">except</span> np.linalg.LinAlgError:
+        <span class="hljs-comment"># 如果四点共面，返回最大的三点球</span>
+        max_radius = <span class="hljs-number">0</span>
+        best_sphere = <span class="hljs-literal">None</span>
+        <span class="hljs-keyword">for</span> sphere <span class="hljs-keyword">in</span> spheres:
+            <span class="hljs-keyword">if</span> sphere[<span class="hljs-number">1</span>] &gt; max_radius:
+                max_radius = sphere[<span class="hljs-number">1</span>]
+                best_sphere = sphere
+        <span class="hljs-keyword">return</span> best_sphere
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">welzl</span>(<span class="hljs-params">points, support=[]</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Welzl算法计算最小外接球&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(points) == <span class="hljs-number">0</span> <span class="hljs-keyword">or</span> <span class="hljs-built_in">len</span>(support) == <span class="hljs-number">4</span>:
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(support) == <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">return</span> np.array([<span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>]), <span class="hljs-number">0.0</span>
+        <span class="hljs-keyword">elif</span> <span class="hljs-built_in">len</span>(support) == <span class="hljs-number">1</span>:
+            <span class="hljs-keyword">return</span> support[<span class="hljs-number">0</span>], <span class="hljs-number">0.0</span>
+        <span class="hljs-keyword">elif</span> <span class="hljs-built_in">len</span>(support) == <span class="hljs-number">2</span>:
+            <span class="hljs-keyword">return</span> min_sphere_2_points(support[<span class="hljs-number">0</span>], support[<span class="hljs-number">1</span>])
+        <span class="hljs-keyword">elif</span> <span class="hljs-built_in">len</span>(support) == <span class="hljs-number">3</span>:
+            <span class="hljs-keyword">return</span> min_sphere_3_points(support[<span class="hljs-number">0</span>], support[<span class="hljs-number">1</span>], support[<span class="hljs-number">2</span>])
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">return</span> min_sphere_4_points(support[<span class="hljs-number">0</span>], support[<span class="hljs-number">1</span>], support[<span class="hljs-number">2</span>], support[<span class="hljs-number">3</span>])
+
+    <span class="hljs-comment"># 随机选择一个点</span>
+    p = points[<span class="hljs-number">0</span>]
+    other_points = points[<span class="hljs-number">1</span>:]
+
+    <span class="hljs-comment"># 递归计算其他点的最小球</span>
+    center, radius = welzl(other_points, support)
+
+    <span class="hljs-comment"># 如果当前点不在球内，则将其加入支撑集</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> sphere_contains_points(center, radius, [p]):
+        support.append(p)
+        center, radius = welzl(other_points, support)
+        support.pop()
+
+    <span class="hljs-keyword">return</span> center, radius
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">min_bounding_sphere</span>(<span class="hljs-params">points</span>):
+    <span class="hljs-string">&quot;&quot;&quot;计算点集的最小外接球&quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 随机打乱点集以提高算法效率</span>
+    shuffled_points = points.copy()
+    np.random.shuffle(shuffled_points)
+
+    <span class="hljs-comment"># 使用Welzl算法</span>
+    center, radius = welzl(shuffled_points, [])
+
+    <span class="hljs-keyword">return</span> center, radius
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">create_sphere_mesh</span>(<span class="hljs-params">center, radius, num_points=<span class="hljs-number">20</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;创建球体的网格&quot;&quot;&quot;</span>
+    u = np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">2</span> * np.pi, num_points)
+    v = np.linspace(<span class="hljs-number">0</span>, np.pi, num_points)
+
+    x = center[<span class="hljs-number">0</span>] + radius * np.outer(np.cos(u), np.sin(v))
+    y = center[<span class="hljs-number">1</span>] + radius * np.outer(np.sin(u), np.sin(v))
+    z = center[<span class="hljs-number">2</span>] + radius * np.outer(np.ones(np.size(u)), np.cos(v))
+
+    <span class="hljs-keyword">return</span> x, y, z
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">visualize_polyhedron_and_sphere</span>(<span class="hljs-params">points, hull, center, radius</span>):
+    <span class="hljs-string">&quot;&quot;&quot;可视化多面体和最小外接球&quot;&quot;&quot;</span>
+    fig = plt.figure(figsize=(<span class="hljs-number">12</span>, <span class="hljs-number">10</span>))
+    ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+    <span class="hljs-comment"># 绘制多面体顶点</span>
+    ax.scatter(points[:, <span class="hljs-number">0</span>], points[:, <span class="hljs-number">1</span>], points[:, <span class="hljs-number">2</span>], c=<span class="hljs-string">&#x27;red&#x27;</span>, s=<span class="hljs-number">100</span>, label=<span class="hljs-string">&#x27;top point&#x27;</span>, depthshade=<span class="hljs-literal">False</span>)
+
+    <span class="hljs-comment"># 绘制多面体面</span>
+    faces = []
+    <span class="hljs-keyword">for</span> simplex <span class="hljs-keyword">in</span> hull.simplices:
+        faces.append(points[simplex])
+
+    poly3d = Poly3DCollection(faces, alpha=<span class="hljs-number">0.2</span>, edgecolor=<span class="hljs-string">&#x27;k&#x27;</span>, linewidths=<span class="hljs-number">1</span>)
+    poly3d.set_facecolor(<span class="hljs-string">&#x27;cyan&#x27;</span>)
+    ax.add_collection3d(poly3d)
+
+    <span class="hljs-comment"># 绘制最小外接球</span>
+    x, y, z = create_sphere_mesh(center, radius)
+    ax.plot_wireframe(x, y, z, color=<span class="hljs-string">&#x27;blue&#x27;</span>, alpha=<span class="hljs-number">0.3</span>, label=<span class="hljs-string">&#x27;minimum enclosing sphere&#x27;</span>)
+
+    <span class="hljs-comment"># 绘制球心</span>
+    ax.scatter([center[<span class="hljs-number">0</span>]], [center[<span class="hljs-number">1</span>]], [center[<span class="hljs-number">2</span>]], c=<span class="hljs-string">&#x27;green&#x27;</span>, s=<span class="hljs-number">100</span>, marker=<span class="hljs-string">&#x27;*&#x27;</span>, label=<span class="hljs-string">&#x27;center of a sphere&#x27;</span>)
+
+    <span class="hljs-comment"># 设置坐标轴标签</span>
+    ax.set_xlabel(<span class="hljs-string">&#x27;X轴&#x27;</span>)
+    ax.set_ylabel(<span class="hljs-string">&#x27;Y轴&#x27;</span>)
+    ax.set_zlabel(<span class="hljs-string">&#x27;Z轴&#x27;</span>)
+
+    <span class="hljs-comment"># 设置标题</span>
+    ax.set_title(<span class="hljs-string">&#x27;Polyhedrons and their smallest circumscribed spheres&#x27;</span>, fontsize=<span class="hljs-number">14</span>)
+
+    <span class="hljs-comment"># 添加图例</span>
+    ax.legend()
+
+    <span class="hljs-comment"># 设置等比例坐标轴</span>
+    max_range = np.array([points[:,<span class="hljs-number">0</span>].<span class="hljs-built_in">max</span>()-points[:,<span class="hljs-number">0</span>].<span class="hljs-built_in">min</span>(),
+                         points[:,<span class="hljs-number">1</span>].<span class="hljs-built_in">max</span>()-points[:,<span class="hljs-number">1</span>].<span class="hljs-built_in">min</span>(),
+                         points[:,<span class="hljs-number">2</span>].<span class="hljs-built_in">max</span>()-points[:,<span class="hljs-number">2</span>].<span class="hljs-built_in">min</span>()]).<span class="hljs-built_in">max</span>() / <span class="hljs-number">2.0</span>
+
+    mid_x = (points[:,<span class="hljs-number">0</span>].<span class="hljs-built_in">max</span>()+points[:,<span class="hljs-number">0</span>].<span class="hljs-built_in">min</span>()) * <span class="hljs-number">0.5</span>
+    mid_y = (points[:,<span class="hljs-number">1</span>].<span class="hljs-built_in">max</span>()+points[:,<span class="hljs-number">1</span>].<span class="hljs-built_in">min</span>()) * <span class="hljs-number">0.5</span>
+    mid_z = (points[:,<span class="hljs-number">2</span>].<span class="hljs-built_in">max</span>()+points[:,<span class="hljs-number">2</span>].<span class="hljs-built_in">min</span>()) * <span class="hljs-number">0.5</span>
+
+    ax.set_xlim(mid_x - max_range, mid_x + max_range)
+    ax.set_ylim(mid_y - max_range, mid_y + max_range)
+    ax.set_zlim(mid_z - max_range, mid_z + max_range)
+
+    <span class="hljs-comment"># 添加网格</span>
+    ax.grid(<span class="hljs-literal">True</span>)
+
+    plt.tight_layout()
+    plt.show()
+
+<span class="hljs-comment"># 生成随机多面体</span>
+num_vertices = <span class="hljs-number">15</span>
+points, hull = generate_random_polyhedron(num_vertices)
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;多面体顶点坐标:&quot;</span>)
+<span class="hljs-keyword">for</span> i, vertex <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(points[hull.vertices]):
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;顶点 <span class="hljs-subst">{i+<span class="hljs-number">1</span>}</span>: <span class="hljs-subst">{vertex}</span>&quot;</span>)
+
+<span class="hljs-comment"># 计算最小外接球</span>
+center, radius = min_bounding_sphere(points[hull.vertices])
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n最小外接球中心: <span class="hljs-subst">{center}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;最小外接球半径: <span class="hljs-subst">{radius:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+
+<span class="hljs-comment"># 验证所有点是否在球内</span>
+all_inside = sphere_contains_points(center, radius, points[hull.vertices])
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;所有顶点是否在球内: <span class="hljs-subst">{all_inside}</span>&quot;</span>)
+
+<span class="hljs-comment"># 可视化</span>
+visualize_polyhedron_and_sphere(points, hull, center, radius)
+</code></pre>
+<h3 id="可视化功能说明" class="prose-heading">可视化功能说明</h3>
+<ol>
+<li></li>
+</ol>
+<pre><code>**多面体绘制**：
+
+
+-
+
+    红色点：多面体顶点
+
+
+-
+
+    青色半透明面：多面体的各个面
+
+
+-
+
+    黑色边线：多面体的边
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>**外接球绘制**：
+
+
+-
+
+    蓝色线框：最小外接球的表面
+
+
+-
+
+    绿色星号：球心位置
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>**视角设置**：
+
+
+-
+
+    自动调整坐标轴范围，确保所有元素可见
+
+
+-
+
+    等比例坐标轴，保持3D图形的正确比例
+
+
+-
+
+    添加网格以便更好地观察空间关系
+</code></pre>
+<h3 id="运行结果" class="prose-heading">运行结果</h3>
+<p>运行代码后，你将看到：</p>
+<ol>
+<li></li>
+</ol>
+<pre><code>控制台输出多面体顶点坐标、最小外接球中心和半径
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>一个3D可视化窗口，显示多面体和它的最小外接球
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>可以旋转、缩放3D图形来从不同角度观察
+</code></pre>
+<p>这个可视化帮助直观地理解最小外接球如何完美地包围给定的多面体。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-3" href="#可视化功能说明">可视化功能说明</a>
+          
+            <a class="toc-level-3" href="#运行结果">运行结果</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/使用pythonpyqt5vscode制作流水灯或者交通灯.html">
+      <span>上一篇</span>
+      <strong>使用PythonPyQt5vscode制作流水灯或者交通灯</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/一个模拟四轴飞行器在随机气流扰动下悬停飞行的交互式3d仿真网页包含飞行器建模与pid控制算法.html">
+      <span>下一篇</span>
+      <strong>一个模拟四轴飞行器在随机气流扰动下悬停飞行的交互式3D仿真网页包含飞行器建模与PID控制算法</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

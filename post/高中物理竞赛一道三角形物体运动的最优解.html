@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>高中物理竞赛一道三角形物体运动的最优解 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">高中物理竞赛一道三角形物体运动的最优解</h1>
+        <p class="post-deck">Python代码</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.935Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>5 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-20.html">物理仿真</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p><img src="../uploads/csdn/%E9%AB%98%E4%B8%AD%E7%89%A9%E7%90%86%E7%AB%9E%E8%B5%9B%E4%B8%80%E9%81%93%E4%B8%89%E8%A7%92%E5%BD%A2%E7%89%A9%E4%BD%93%E8%BF%90%E5%8A%A8%E7%9A%84%E6%9C%80%E4%BC%98%E8%A7%A3/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/%E9%AB%98%E4%B8%AD%E7%89%A9%E7%90%86%E7%AB%9E%E8%B5%9B%E4%B8%80%E9%81%93%E4%B8%89%E8%A7%92%E5%BD%A2%E7%89%A9%E4%BD%93%E8%BF%90%E5%8A%A8%E7%9A%84%E6%9C%80%E4%BC%98%E8%A7%A3/img-02.png" alt=""><img src="../uploads/csdn/%E9%AB%98%E4%B8%AD%E7%89%A9%E7%90%86%E7%AB%9E%E8%B5%9B%E4%B8%80%E9%81%93%E4%B8%89%E8%A7%92%E5%BD%A2%E7%89%A9%E4%BD%93%E8%BF%90%E5%8A%A8%E7%9A%84%E6%9C%80%E4%BC%98%E8%A7%A3/img-03.png" alt=""><img src="../uploads/csdn/%E9%AB%98%E4%B8%AD%E7%89%A9%E7%90%86%E7%AB%9E%E8%B5%9B%E4%B8%80%E9%81%93%E4%B8%89%E8%A7%92%E5%BD%A2%E7%89%A9%E4%BD%93%E8%BF%90%E5%8A%A8%E7%9A%84%E6%9C%80%E4%BC%98%E8%A7%A3/img-04.png" alt=""><img src="../uploads/csdn/%E9%AB%98%E4%B8%AD%E7%89%A9%E7%90%86%E7%AB%9E%E8%B5%9B%E4%B8%80%E9%81%93%E4%B8%89%E8%A7%92%E5%BD%A2%E7%89%A9%E4%BD%93%E8%BF%90%E5%8A%A8%E7%9A%84%E6%9C%80%E4%BC%98%E8%A7%A3/img-05.png" alt=""></p>
+<p>Python代码</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> math
+
+g = <span class="hljs-number">9.8</span>
+l = <span class="hljs-number">1.0</span>          <span class="hljs-comment"># 水平长度</span>
+h = <span class="hljs-number">0.75</span> * l     <span class="hljs-comment"># 竖直高度</span>
+ratio = h / l    <span class="hljs-comment"># 0.75</span>
+
+<span class="hljs-comment"># 最短时间路径 (A-&gt;B-&gt;C)</span>
+t_min_vertical = math.sqrt(<span class="hljs-number">2</span> * h / g)
+t_min_horizontal = l / math.sqrt(<span class="hljs-number">2</span> * g * h)
+T_min = t_min_vertical + t_min_horizontal
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;最短时间 T_min = <span class="hljs-subst">{T_min:<span class="hljs-number">.6</span>f}</span> s&quot;</span>)
+
+<span class="hljs-comment"># 最大时间理论值 (沿斜边极限)</span>
+t_max_vertical = t_min_vertical
+t_max_horizontal = <span class="hljs-number">2</span> * l / math.sqrt(<span class="hljs-number">2</span> * g * h)
+T_max_theory = t_max_vertical + t_max_horizontal
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;最长时间理论值 T_max = <span class="hljs-subst">{T_max_theory:<span class="hljs-number">.6</span>f}</span> s&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;理论比值 T_max/T_min = <span class="hljs-subst">{T_max_theory / T_min:<span class="hljs-number">.6</span>f}</span> = 7/5 = 1.4\n&quot;</span>)
+
+<span class="hljs-comment"># 不同分段数 N 的阶梯路径 (等比例 Δy = (h/l) Δx)</span>
+<span class="hljs-keyword">for</span> N <span class="hljs-keyword">in</span> [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">5</span>, <span class="hljs-number">10</span>, <span class="hljs-number">20</span>, <span class="hljs-number">50</span>, <span class="hljs-number">100</span>, <span class="hljs-number">200</span>]:
+    dx = l / N
+    dy = ratio * dx   <span class="hljs-comment"># 每段竖直下降</span>
+    <span class="hljs-comment"># 累计下降和水平位置</span>
+    S = <span class="hljs-number">0.0</span>   <span class="hljs-comment"># 累计下降</span>
+    X = <span class="hljs-number">0.0</span>   <span class="hljs-comment"># 累计水平</span>
+    T_h = <span class="hljs-number">0.0</span>
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(N):
+        S += dy          <span class="hljs-comment"># 第i段水平开始时的累计下降</span>
+        v = math.sqrt(<span class="hljs-number">2</span> * g * S)
+        T_h += dx / v
+    T_total = t_min_vertical + T_h
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;N = <span class="hljs-subst">{N:3d}</span>, T_total = <span class="hljs-subst">{T_total:<span class="hljs-number">.6</span>f}</span> s, 比值 = <span class="hljs-subst">{T_total / T_min:<span class="hljs-number">.6</span>f}</span>&quot;</span>)
+</code></pre>
+<p><strong>输出示例</strong>（数值接近理论值）：</p>
+<pre class="hljs"><code class="language-html">最短时间 T_min = 0.654654 s
+最长时间理论值 T_max = 0.916515 s
+理论比值 T_max/T_min = 1.400000 = 7/5 = 1.4
+
+N =   1, T_total = 0.654654 s, 比值 = 1.000000
+N =   2, T_total = 0.784198 s, 比值 = 1.197981
+N =   5, T_total = 0.856766 s, 比值 = 1.308747
+N =  10, T_total = 0.884284 s, 比值 = 1.350868
+N =  20, T_total = 0.899579 s, 比值 = 1.374235
+N =  50, T_total = 0.909485 s, 比值 = 1.389369
+N = 100, T_total = 0.912985 s, 比值 = 1.394582
+N = 200, T_total = 0.914746 s, 比值 = 1.397270
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/麦克斯韦方程组电磁效应python展示.html">
+      <span>上一篇</span>
+      <strong>麦克斯韦方程组电磁效应Python展示</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/阿尔忒弥斯二号任务的核心轨迹.html">
+      <span>下一篇</span>
+      <strong>阿尔忒弥斯二号任务的核心轨迹</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/物理竞赛书籍按层级堆叠求质心的问题附带matlab仿真代码和数学求导过程.html">物理竞赛书籍按层级堆叠求质心的问题附带MATLAB仿真代码和数学求导过程</a></h3>
+        <p class="post-excerpt">三、MATLAB 仿真：可视化堆叠与质心计算</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.661Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

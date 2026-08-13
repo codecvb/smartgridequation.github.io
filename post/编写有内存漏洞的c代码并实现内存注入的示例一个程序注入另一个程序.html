@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>编写有内存漏洞的C代码并实现内存注入的示例一个程序注入另一个程序 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/c-c-与-rust.html">C/C++ 与 Rust</a>
+        </nav>
+        <h1 class="post-title">编写有内存漏洞的C代码并实现内存注入的示例一个程序注入另一个程序</h1>
+        <p class="post-deck">实现思路</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.956Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>10 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-7.html">C/C++</a>
+          
+            <a class="tag-chip" href="../tags/tag-8.html">Rust</a>
+          
+            <a class="tag-chip" href="../tags/tag-9.html">C</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <h4 id="实现思路" class="prose-heading">实现思路</h4>
+<p>在 Windows 平台下，可以使用 Windows API 编写一个程序来对另一个目标程序进行内存注入。基本步骤如下：</p>
+<ol>
+<li><strong>查找目标进程</strong>：通过进程名找到目标进程的 ID。</li>
+<li><strong>打开目标进程</strong>：使用 <code>OpenProcess</code> 函数打开目标进程，获取进程句柄。</li>
+<li><strong>在目标进程中分配内存</strong>：使用 <code>VirtualAllocEx</code> 函数在目标进程的地址空间中分配一块内存。</li>
+<li><strong>将数据写入目标进程的内存</strong>：使用 <code>WriteProcessMemory</code> 函数将数据写入到目标进程分配的内存中。</li>
+<li><strong>执行注入的代码（可选）</strong>：可以使用 <code>CreateRemoteThread</code> 函数在目标进程中创建一个新的线程来执行注入的代码。</li>
+</ol>
+<h4 id="示例代码" class="prose-heading">示例代码</h4>
+<h5 id="目标程序-被注入的程序" class="prose-heading">目标程序（被注入的程序）</h5>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;windows.h&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-type">int</span> value = <span class="hljs-number">10</span>;
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Original value: &quot;</span> &lt;&lt; value &lt;&lt; std::endl;
+    <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {
+        <span class="hljs-built_in">Sleep</span>(<span class="hljs-number">1000</span>);
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<h5 id="注入程序" class="prose-heading">注入程序</h5>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">undef</span>   UNICODE</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;windows.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;tlhelp32.h&gt;</span></span>
+
+<span class="hljs-comment">// 通过进程名获取进程 ID</span>
+<span class="hljs-function">DWORD <span class="hljs-title">GetProcessId</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span>* processName)</span> </span>{
+	PROCESSENTRY32 processEntry;
+	processEntry.dwSize = <span class="hljs-built_in">sizeof</span>(PROCESSENTRY32);
+
+	HANDLE snapshot = <span class="hljs-built_in">CreateToolhelp32Snapshot</span>(TH32CS_SNAPPROCESS, <span class="hljs-literal">NULL</span>);
+	<span class="hljs-keyword">if</span> (snapshot == INVALID_HANDLE_VALUE) {
+		<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+	}
+
+	<span class="hljs-keyword">if</span> (<span class="hljs-built_in">Process32First</span>(snapshot, &amp;processEntry)) {
+		<span class="hljs-keyword">do</span> {
+			<span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(processEntry.szExeFile, processName) == <span class="hljs-number">0</span>) {
+				<span class="hljs-built_in">CloseHandle</span>(snapshot);
+				<span class="hljs-keyword">return</span> processEntry.th32ProcessID;
+			}
+		} <span class="hljs-keyword">while</span> (<span class="hljs-built_in">Process32Next</span>(snapshot, &amp;processEntry));
+	}
+
+	<span class="hljs-built_in">CloseHandle</span>(snapshot);
+	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+	<span class="hljs-type">const</span> <span class="hljs-type">char</span>* targetProcessName = <span class="hljs-string">&quot;Project1.exe&quot;</span>;  <span class="hljs-comment">// 目标程序的可执行文件名</span>
+	DWORD targetProcessId = <span class="hljs-built_in">GetProcessId</span>(targetProcessName);
+	<span class="hljs-keyword">if</span> (targetProcessId == <span class="hljs-number">0</span>) {
+		std::cout &lt;&lt; <span class="hljs-string">&quot;Target process not found.&quot;</span> &lt;&lt; std::endl;
+		<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+	}
+
+	<span class="hljs-comment">// 打开目标进程</span>
+	HANDLE targetProcessHandle = <span class="hljs-built_in">OpenProcess</span>(PROCESS_ALL_ACCESS, FALSE, targetProcessId);
+	<span class="hljs-keyword">if</span> (targetProcessHandle == <span class="hljs-literal">NULL</span>) {
+		std::cout &lt;&lt; <span class="hljs-string">&quot;Failed to open target process.&quot;</span> &lt;&lt; std::endl;
+		<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+	}
+
+	<span class="hljs-comment">// 在目标进程中分配内存</span>
+	<span class="hljs-type">int</span> newValue = <span class="hljs-number">20</span>;
+	SIZE_T bytesToWrite = <span class="hljs-built_in">sizeof</span>(newValue);
+	LPVOID remoteAddress = <span class="hljs-built_in">VirtualAllocEx</span>(targetProcessHandle, <span class="hljs-literal">NULL</span>, bytesToWrite, MEM_COMMIT, PAGE_READWRITE);
+	<span class="hljs-keyword">if</span> (remoteAddress == <span class="hljs-literal">NULL</span>) {
+		std::cout &lt;&lt; <span class="hljs-string">&quot;Failed to allocate memory in target process.&quot;</span> &lt;&lt; std::endl;
+		<span class="hljs-built_in">CloseHandle</span>(targetProcessHandle);
+		<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+	}
+
+	<span class="hljs-comment">// 将数据写入目标进程的内存</span>
+	BOOL writeResult = <span class="hljs-built_in">WriteProcessMemory</span>(targetProcessHandle, remoteAddress, &amp;newValue, bytesToWrite, <span class="hljs-literal">NULL</span>);
+	<span class="hljs-keyword">if</span> (!writeResult) {
+		std::cout &lt;&lt; <span class="hljs-string">&quot;Failed to write memory in target process.&quot;</span> &lt;&lt; std::endl;
+		<span class="hljs-built_in">VirtualFreeEx</span>(targetProcessHandle, remoteAddress, <span class="hljs-number">0</span>, MEM_RELEASE);
+		<span class="hljs-built_in">CloseHandle</span>(targetProcessHandle);
+		<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+	}
+
+	std::cout &lt;&lt; <span class="hljs-string">&quot;Memory injection successful.&quot;</span> &lt;&lt; std::endl;
+
+	<span class="hljs-comment">// 假设我们知道 value 变量在目标进程中的地址，这里只是示例地址，实际需要调试获取</span>
+	LPVOID targetAddress = remoteAddress; <span class="hljs-comment">// 替换为实际地址</span>
+
+	<span class="hljs-type">int</span> readValue;
+	SIZE_T bytesRead;
+	BOOL readResult = <span class="hljs-built_in">ReadProcessMemory</span>(targetProcessHandle, targetAddress, &amp;readValue, <span class="hljs-built_in">sizeof</span>(readValue), &amp;bytesRead);
+	<span class="hljs-keyword">if</span> (readResult) {
+		std::cout &lt;&lt; <span class="hljs-string">&quot;Value read from target process: &quot;</span> &lt;&lt; readValue &lt;&lt; std::endl;
+	}
+	<span class="hljs-keyword">else</span> {
+		std::cout &lt;&lt; <span class="hljs-string">&quot;Failed to read memory from target process.&quot;</span> &lt;&lt; std::endl;
+	}
+
+	<span class="hljs-comment">// 释放资源</span>
+	<span class="hljs-built_in">VirtualFreeEx</span>(targetProcessHandle, remoteAddress, <span class="hljs-number">0</span>, MEM_RELEASE);
+	<span class="hljs-built_in">CloseHandle</span>(targetProcessHandle);
+
+	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<h4 id="代码解释" class="prose-heading">代码解释</h4>
+<ol>
+<li><strong><code>GetProcessId</code> 函数</strong>：通过进程名查找目标进程的 ID。使用 <code>CreateToolhelp32Snapshot</code> 函数创建一个系统进程快照，然后遍历快照中的所有进程，找到与指定进程名匹配的进程，并返回其 ID。</li>
+<li><strong><code>main</code> 函数</strong>：
+<ul>
+<li>调用 <code>GetProcessId</code> 函数获取目标进程的 ID。</li>
+<li>使用 <code>OpenProcess</code> 函数打开目标进程，获取进程句柄。</li>
+<li>使用 <code>VirtualAllocEx</code> 函数在目标进程的地址空间中分配一块内存。</li>
+<li>使用 <code>WriteProcessMemory</code> 函数将新值 <code>20</code> 写入到目标进程分配的内存中。</li>
+<li>最后释放分配的内存并关闭进程句柄。</li>
+</ul>
+</li>
+</ol>
+<h4 id="现象和结果" class="prose-heading">现象和结果</h4>
+<ul>
+<li><strong>现象</strong>：注入程序成功运行后，会在目标进程的地址空间中分配一块内存，并将新值 <code>20</code> 写入该内存。</li>
+<li><strong>结果</strong>：由于目标程序没有主动读取注入的内存，所以在目标程序的控制台窗口中看不到明显的变化。但可以使用调试器（如 Visual Studio 调试器）来查看目标进程的内存，验证注入的内存是否包含新值 <code>20</code>。</li>
+</ul>
+<h4 id="注意事项" class="prose-heading">注意事项</h4>
+<ul>
+<li>这种内存注入方法需要管理员权限才能正常运行，因为需要访问其他进程的内存。</li>
+<li>内存注入应该仅在合法的调试和测试环境中使用，不要用于非法目的。</li>
+<li>效果如下</li>
+<li><img src="../uploads/csdn/%E7%BC%96%E5%86%99%E6%9C%89%E5%86%85%E5%AD%98%E6%BC%8F%E6%B4%9E%E7%9A%84c%E4%BB%A3%E7%A0%81%E5%B9%B6%E5%AE%9E%E7%8E%B0%E5%86%85%E5%AD%98%E6%B3%A8%E5%85%A5%E7%9A%84%E7%A4%BA%E4%BE%8B%E4%B8%80%E4%B8%AA%E7%A8%8B%E5%BA%8F%E6%B3%A8%E5%85%A5%E5%8F%A6%E4%B8%80%E4%B8%AA%E7%A8%8B%E5%BA%8F/img-01.png" alt=""></li>
+</ul>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#实现思路">实现思路</a>
+          
+            <a class="toc-level-4" href="#示例代码">示例代码</a>
+          
+            <a class="toc-level-5" href="#目标程序-被注入的程序">目标程序（被注入的程序）</a>
+          
+            <a class="toc-level-5" href="#注入程序">注入程序</a>
+          
+            <a class="toc-level-4" href="#代码解释">代码解释</a>
+          
+            <a class="toc-level-4" href="#现象和结果">现象和结果</a>
+          
+            <a class="toc-level-4" href="#注意事项">注意事项</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/low-light-image低照度图像matlab代码增强还原.html">
+      <span>上一篇</span>
+      <strong>low light image低照度图像MATLAB代码增强还原</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/用c语言实现的回调函数案例涵盖基础用法及不同消息机制gui模拟网络请求模拟状态机消息队列.html">
+      <span>下一篇</span>
+      <strong>用C语言实现的回调函数案例涵盖基础用法及不同消息机制GUI模拟网络请求模拟状态机消息队列</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/用c语言实现的回调函数案例涵盖基础用法及不同消息机制gui模拟网络请求模拟状态机消息队列.html">用C语言实现的回调函数案例涵盖基础用法及不同消息机制GUI模拟网络请求模拟状态机消息队列</a></h3>
+        <p class="post-excerpt">以下是用 C 语言实现的回调函数案例，涵盖基础用法及不同消息机制（GUI 模拟、网络请求模拟、状态机、消息队列），包含详细注释和解释。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.946Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/推荐比mini-stl更好的c实现项目代码.html">推荐比mini stl更好的C实现项目代码</a></h3>
+        <p class="post-excerpt">代码来源 -- STL模拟: STL模拟 的各类实现 - Gitee.com</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.937Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/修复代码漏洞的具体案例c-html-php-sql-javascript.html">修复代码漏洞的具体案例C HTML PHP SQL JavaScript</a></h3>
+        <p class="post-excerpt">以下是一些修复代码漏洞的具体案例：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.929Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

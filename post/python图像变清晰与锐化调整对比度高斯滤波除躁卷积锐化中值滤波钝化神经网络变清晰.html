@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Python图像变清晰与锐化调整对比度高斯滤波除躁卷积锐化中值滤波钝化神经网络变清晰 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">Python图像变清晰与锐化调整对比度高斯滤波除躁卷积锐化中值滤波钝化神经网络变清晰</h1>
+        <p class="post-deck">本次使用图片来源于百度</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.732Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>9 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-5.html">人工智能</a>
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+            <a class="tag-chip" href="../tags/tag-21.html">神经网络</a>
+          
+            <a class="tag-chip" href="../tags/tag-14.html">图像处理</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本次使用图片来源于百度</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> cv2
+<span class="hljs-keyword">import</span> time
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> pywt
+
+<span class="hljs-keyword">from</span> PIL <span class="hljs-keyword">import</span> Image, ImageEnhance
+
+<span class="hljs-comment">#-i https://pypi.mirrors.ustc.edu.cn/simple</span>
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">super_resolution</span>(<span class="hljs-params">input_path, output_path, model_path, scale=<span class="hljs-number">4</span></span>):
+    <span class="hljs-comment"># 初始化超分辨率模型</span>
+    sr = cv2.dnn_superres.DnnSuperResImpl_create()
+    sr.readModel(model_path)
+    sr.setModel(<span class="hljs-string">&quot;edsr&quot;</span>, scale)  <span class="hljs-comment"># 模型类型需与文件名匹配</span>
+
+    <span class="hljs-comment"># 读取低分辨率图像</span>
+    img_lr = cv2.imread(input_path)
+    <span class="hljs-keyword">if</span> img_lr <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Error: 输入图像加载失败&quot;</span>)
+        <span class="hljs-keyword">return</span>
+
+    <span class="hljs-comment"># 执行超分辨率重建</span>
+    start_time = time.time()
+    img_sr = sr.upsample(img_lr)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;推理耗时: <span class="hljs-subst">{time.time() - start_time:<span class="hljs-number">.2</span>f}</span>s&quot;</span>)
+
+    <span class="hljs-comment"># 保存结果</span>
+    cv2.imwrite(output_path, img_sr)
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;高分辨率图像已保存至: <span class="hljs-subst">{output_path}</span>&quot;</span>)
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">wavelet_denoise</span>(<span class="hljs-params">image, wavelet=<span class="hljs-string">&#x27;db4&#x27;</span>, level=<span class="hljs-number">1</span>, mode=<span class="hljs-string">&#x27;soft&#x27;</span></span>):
+    <span class="hljs-comment"># 将图像转换为灰度图</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(image.shape) == <span class="hljs-number">3</span>:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    <span class="hljs-comment"># 进行小波分解</span>
+    coeffs = pywt.wavedec2(image, wavelet, level=level)
+
+    <span class="hljs-comment"># 对每个细节系数应用阈值处理</span>
+    threshold = np.std(coeffs[-<span class="hljs-number">1</span>]) * np.sqrt(<span class="hljs-number">2</span> * np.log2(image.size))
+    new_coeffs = [coeffs[<span class="hljs-number">0</span>]]
+    <span class="hljs-keyword">for</span> detail_coeffs <span class="hljs-keyword">in</span> coeffs[<span class="hljs-number">1</span>:]:
+        new_detail_coeffs = [pywt.threshold(d, threshold, mode=mode) <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> detail_coeffs]
+        new_coeffs.append(new_detail_coeffs)
+
+    <span class="hljs-comment"># 进行小波重构</span>
+    denoised_image = pywt.waverec2(new_coeffs, wavelet)
+
+    <span class="hljs-comment"># 将像素值限制在 0 到 255 之间</span>
+    denoised_image = np.clip(denoised_image, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>).astype(np.uint8)
+
+    <span class="hljs-keyword">return</span> denoised_image
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    <span class="hljs-comment"># 参数配置</span>
+    input_img = <span class="hljs-string">&quot;3.jpeg&quot;</span>    <span class="hljs-comment"># 低分辨率图像路径</span>
+    output_img = <span class="hljs-string">&quot;high_res3.jpg&quot;</span>  <span class="hljs-comment"># 输出图像路径</span>
+    model_file = <span class="hljs-string">&quot;EDSR_x4.pb&quot;</span>    <span class="hljs-comment"># 预训练模型路径</span>
+
+    <span class="hljs-comment"># 定义锐化卷积核</span>
+    kernel = np.array([[<span class="hljs-number">0</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+                   [-<span class="hljs-number">1</span>, <span class="hljs-number">5</span>, -<span class="hljs-number">1</span>],
+                   [<span class="hljs-number">0</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span>]])
+
+    <span class="hljs-comment"># 执行重建</span>
+    super_resolution(input_img, output_img, model_file)
+
+    <span class="hljs-comment">#打开图片</span>
+
+    image = Image.<span class="hljs-built_in">open</span>(<span class="hljs-string">&#x27;4.jpg&#x27;</span>)
+
+    <span class="hljs-comment">#调整对比度</span>
+
+    contrast = ImageEnhance.Contrast(image)
+
+    image = contrast.enhance(<span class="hljs-number">1.5</span>)
+
+    <span class="hljs-comment">#调整亮度</span>
+
+    brightness = ImageEnhance.Brightness(image)
+
+
+    image = brightness.enhance(<span class="hljs-number">1.2</span>)
+
+
+    <span class="hljs-comment">#保存处理后的图片</span>
+
+    image.save(<span class="hljs-string">&#x27;enhanced_image.jpg&#x27;</span>)
+
+    img = cv2.imread(<span class="hljs-string">&quot;enhanced_image.jpg&quot;</span>)
+
+    <span class="hljs-keyword">if</span> img <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;none&#x27;</span>)
+
+    denoised_image = wavelet_denoise(img)
+
+    cv2.imwrite(<span class="hljs-string">&#x27;result.png&#x27;</span>, denoised_image)
+
+    sharpened = cv2.filter2D(denoised_image, -<span class="hljs-number">1</span>, kernel)  <span class="hljs-comment"># 应用卷积核</span>
+
+    <span class="hljs-comment">#laplacian = cv2.Laplacian(denoised_image, cv2.CV_64F)</span>
+    <span class="hljs-comment">#sharpened = cv2.convertScaleAbs(laplacian - 0.5*laplacian)  # 调节0.7系数控制锐化强度</span>
+
+    cv2.imwrite(<span class="hljs-string">&quot;output4.jpg&quot;</span>, sharpened)
+
+    image = cv2.imread(<span class="hljs-string">&#x27;output4.jpg&#x27;</span>, cv2.IMREAD_GRAYSCALE)
+
+    <span class="hljs-comment">#高斯滤波</span>
+
+    gaussian_filtered_image = cv2.GaussianBlur(image, (<span class="hljs-number">3</span>, <span class="hljs-number">3</span>), <span class="hljs-number">0.02</span>)
+
+    <span class="hljs-comment">#保存处理后的图片</span>
+
+    cv2.imwrite(<span class="hljs-string">&#x27;gaussian_filtered_image.jpg&#x27;</span>, gaussian_filtered_image)
+
+    <span class="hljs-comment">#中值滤波</span>
+
+    median_filtered_image = cv2.medianBlur(gaussian_filtered_image, <span class="hljs-number">5</span>)
+
+    <span class="hljs-comment">#保存处理后的图片</span>
+
+    cv2.imwrite(<span class="hljs-string">&#x27;median_filtered_image.jpg&#x27;</span>, median_filtered_image)
+</code></pre>
+<p><img src="../uploads/csdn/python%E5%9B%BE%E5%83%8F%E5%8F%98%E6%B8%85%E6%99%B0%E4%B8%8E%E9%94%90%E5%8C%96%E8%B0%83%E6%95%B4%E5%AF%B9%E6%AF%94%E5%BA%A6%E9%AB%98%E6%96%AF%E6%BB%A4%E6%B3%A2%E9%99%A4%E8%BA%81%E5%8D%B7%E7%A7%AF%E9%94%90%E5%8C%96%E4%B8%AD%E5%80%BC%E6%BB%A4%E6%B3%A2%E9%92%9D%E5%8C%96%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%98%E6%B8%85%E6%99%B0/img-01.png" alt=""></p>
+<p>原始图像</p>
+<p><img src="../uploads/csdn/python%E5%9B%BE%E5%83%8F%E5%8F%98%E6%B8%85%E6%99%B0%E4%B8%8E%E9%94%90%E5%8C%96%E8%B0%83%E6%95%B4%E5%AF%B9%E6%AF%94%E5%BA%A6%E9%AB%98%E6%96%AF%E6%BB%A4%E6%B3%A2%E9%99%A4%E8%BA%81%E5%8D%B7%E7%A7%AF%E9%94%90%E5%8C%96%E4%B8%AD%E5%80%BC%E6%BB%A4%E6%B3%A2%E9%92%9D%E5%8C%96%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%98%E6%B8%85%E6%99%B0/img-02.png" alt=""></p>
+<p>亮度增强</p>
+<p><img src="../uploads/csdn/python%E5%9B%BE%E5%83%8F%E5%8F%98%E6%B8%85%E6%99%B0%E4%B8%8E%E9%94%90%E5%8C%96%E8%B0%83%E6%95%B4%E5%AF%B9%E6%AF%94%E5%BA%A6%E9%AB%98%E6%96%AF%E6%BB%A4%E6%B3%A2%E9%99%A4%E8%BA%81%E5%8D%B7%E7%A7%AF%E9%94%90%E5%8C%96%E4%B8%AD%E5%80%BC%E6%BB%A4%E6%B3%A2%E9%92%9D%E5%8C%96%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%98%E6%B8%85%E6%99%B0/img-03.png" alt=""></p>
+<p>高斯滤波</p>
+<p><img src="../uploads/csdn/python%E5%9B%BE%E5%83%8F%E5%8F%98%E6%B8%85%E6%99%B0%E4%B8%8E%E9%94%90%E5%8C%96%E8%B0%83%E6%95%B4%E5%AF%B9%E6%AF%94%E5%BA%A6%E9%AB%98%E6%96%AF%E6%BB%A4%E6%B3%A2%E9%99%A4%E8%BA%81%E5%8D%B7%E7%A7%AF%E9%94%90%E5%8C%96%E4%B8%AD%E5%80%BC%E6%BB%A4%E6%B3%A2%E9%92%9D%E5%8C%96%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%98%E6%B8%85%E6%99%B0/img-04.png" alt=""></p>
+<p>卷积锐化</p>
+<p><img src="../uploads/csdn/python%E5%9B%BE%E5%83%8F%E5%8F%98%E6%B8%85%E6%99%B0%E4%B8%8E%E9%94%90%E5%8C%96%E8%B0%83%E6%95%B4%E5%AF%B9%E6%AF%94%E5%BA%A6%E9%AB%98%E6%96%AF%E6%BB%A4%E6%B3%A2%E9%99%A4%E8%BA%81%E5%8D%B7%E7%A7%AF%E9%94%90%E5%8C%96%E4%B8%AD%E5%80%BC%E6%BB%A4%E6%B3%A2%E9%92%9D%E5%8C%96%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8F%98%E6%B8%85%E6%99%B0/img-05.png" alt=""></p>
+<p>中值平滑</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/python图片文字识别ocr-tesseract版本.html">
+      <span>上一篇</span>
+      <strong>Python图片文字识别OCR Tesseract版本</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/python使用rrt算法进行无人机路径规划空中飞行.html">
+      <span>下一篇</span>
+      <strong>Python使用RRT算法进行无人机路径规划空中飞行</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/python图片文字识别ocr-tesseract版本.html">Python图片文字识别OCR Tesseract版本</a></h3>
+        <p class="post-excerpt">这段Python代码实现了一个基于Tesseract OCR引擎的图片文字识别工具。主要功能包括：自动检测Tesseract安装路径，支持多语言识别（默认中英文混合），检查语言包可用性，并提供友好的错误提示。使用时需通过命令行传入图片路径，程序会输出识别结果。依赖pytesseract和Pillow库，需要预先安装Tesseract OCR引擎（Windows版建议从指定链接下载并安装中文语言包）…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.750Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/matlab实现神经网络的ocr识别.html">MATLAB实现神经网络的OCR识别</a></h3>
+        <p class="post-excerpt">使用说明：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.694Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/详细案例说明ai所用的算法列出公式用python代码说明用法.html">详细案例说明AI所用的算法列出公式用Python代码说明用法</a></h3>
+        <p class="post-excerpt">我们来详细拆解一个最经典、最基础的 AI 算法 ——线性回归 (Linear Regression)。它是理解几乎所有更复杂 AI 模型（如神经网络）的基石。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.312Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

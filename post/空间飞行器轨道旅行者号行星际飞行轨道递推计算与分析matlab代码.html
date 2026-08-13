@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>空间飞行器轨道旅行者号行星际飞行轨道递推计算与分析Matlab代码 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">空间飞行器轨道旅行者号行星际飞行轨道递推计算与分析Matlab代码</h1>
+        <p class="post-deck">本文基于Wagner和Wie的论文思路，实现了旅行者号引力辅助(MGA)轨迹的教学版仿真。程序首先计算各行星在简化圆轨道下的日心状态，通过分段Lambert求解得到转移轨道。核心部分分析了飞越点的关键参数：相对速度(vinf)、转角(delta)、近拱点距离(rp)和速度增量(DeltaV\GA)。结果显示木星、土星、天王星飞越时的转角分别为47.8°、83.3°和88.1°。程序还提供了3D可视…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.721Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>24 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+            <a class="tag-chip" href="../tags/tag-15.html">卫星</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文基于Wagner和Wie的论文思路，实现了旅行者号引力辅助(MGA)轨迹的教学版仿真。程序首先计算各行星在简化圆轨道下的日心状态，通过分段Lambert求解得到转移轨道。核心部分分析了飞越点的关键参数：相对速度(vinf)、转角(delta)、近拱点距离(rp)和速度增量(DeltaV_GA)。结果显示木星、土星、天王星飞越时的转角分别为47.8°、83.3°和88.1°。程序还提供了3D可视化功能，展示了航天器轨迹与行星轨道的空间关系，包括引力辅助过程和后续逃逸轨迹。该实现采用简化模型，但保留了MGA的核心物理原理，可作为深空探测任务轨道设计的教学案例。</p>
+<p><img src="../uploads/csdn/%E7%A9%BA%E9%97%B4%E9%A3%9E%E8%A1%8C%E5%99%A8%E8%BD%A8%E9%81%93%E6%97%85%E8%A1%8C%E8%80%85%E5%8F%B7%E8%A1%8C%E6%98%9F%E9%99%85%E9%A3%9E%E8%A1%8C%E8%BD%A8%E9%81%93%E9%80%92%E6%8E%A8%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%88%86%E6%9E%90matlab%E4%BB%A3%E7%A0%81/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/%E7%A9%BA%E9%97%B4%E9%A3%9E%E8%A1%8C%E5%99%A8%E8%BD%A8%E9%81%93%E6%97%85%E8%A1%8C%E8%80%85%E5%8F%B7%E8%A1%8C%E6%98%9F%E9%99%85%E9%A3%9E%E8%A1%8C%E8%BD%A8%E9%81%93%E9%80%92%E6%8E%A8%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%88%86%E6%9E%90matlab%E4%BB%A3%E7%A0%81/img-02.png" alt=""></p>
+<p><img src="../uploads/csdn/%E7%A9%BA%E9%97%B4%E9%A3%9E%E8%A1%8C%E5%99%A8%E8%BD%A8%E9%81%93%E6%97%85%E8%A1%8C%E8%80%85%E5%8F%B7%E8%A1%8C%E6%98%9F%E9%99%85%E9%A3%9E%E8%A1%8C%E8%BD%A8%E9%81%93%E9%80%92%E6%8E%A8%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%88%86%E6%9E%90matlab%E4%BB%A3%E7%A0%81/img-03.png" alt=""></p>
+<p><img src="../uploads/csdn/%E7%A9%BA%E9%97%B4%E9%A3%9E%E8%A1%8C%E5%99%A8%E8%BD%A8%E9%81%93%E6%97%85%E8%A1%8C%E8%80%85%E5%8F%B7%E8%A1%8C%E6%98%9F%E9%99%85%E9%A3%9E%E8%A1%8C%E8%BD%A8%E9%81%93%E9%80%92%E6%8E%A8%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%88%86%E6%9E%90matlab%E4%BB%A3%E7%A0%81/img-04.jpeg" alt=""></p>
+<p><img src="../uploads/csdn/%E7%A9%BA%E9%97%B4%E9%A3%9E%E8%A1%8C%E5%99%A8%E8%BD%A8%E9%81%93%E6%97%85%E8%A1%8C%E8%80%85%E5%8F%B7%E8%A1%8C%E6%98%9F%E9%99%85%E9%A3%9E%E8%A1%8C%E8%BD%A8%E9%81%93%E9%80%92%E6%8E%A8%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%88%86%E6%9E%90matlab%E4%BB%A3%E7%A0%81/img-05.jpeg" alt=""></p>
+<p><img src="../uploads/csdn/%E7%A9%BA%E9%97%B4%E9%A3%9E%E8%A1%8C%E5%99%A8%E8%BD%A8%E9%81%93%E6%97%85%E8%A1%8C%E8%80%85%E5%8F%B7%E8%A1%8C%E6%98%9F%E9%99%85%E9%A3%9E%E8%A1%8C%E8%BD%A8%E9%81%93%E9%80%92%E6%8E%A8%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%88%86%E6%9E%90matlab%E4%BB%A3%E7%A0%81/img-06.jpeg" alt=""></p>
+<p><img src="../uploads/csdn/%E7%A9%BA%E9%97%B4%E9%A3%9E%E8%A1%8C%E5%99%A8%E8%BD%A8%E9%81%93%E6%97%85%E8%A1%8C%E8%80%85%E5%8F%B7%E8%A1%8C%E6%98%9F%E9%99%85%E9%A3%9E%E8%A1%8C%E8%BD%A8%E9%81%93%E9%80%92%E6%8E%A8%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%88%86%E6%9E%90matlab%E4%BB%A3%E7%A0%81/img-07.jpeg" alt=""></p>
+<p><img src="../uploads/csdn/%E7%A9%BA%E9%97%B4%E9%A3%9E%E8%A1%8C%E5%99%A8%E8%BD%A8%E9%81%93%E6%97%85%E8%A1%8C%E8%80%85%E5%8F%B7%E8%A1%8C%E6%98%9F%E9%99%85%E9%A3%9E%E8%A1%8C%E8%BD%A8%E9%81%93%E9%80%92%E6%8E%A8%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%88%86%E6%9E%90matlab%E4%BB%A3%E7%A0%81/img-08.jpeg" alt=""><img src="../uploads/csdn/%E7%A9%BA%E9%97%B4%E9%A3%9E%E8%A1%8C%E5%99%A8%E8%BD%A8%E9%81%93%E6%97%85%E8%A1%8C%E8%80%85%E5%8F%B7%E8%A1%8C%E6%98%9F%E9%99%85%E9%A3%9E%E8%A1%8C%E8%BD%A8%E9%81%93%E9%80%92%E6%8E%A8%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%88%86%E6%9E%90matlab%E4%BB%A3%E7%A0%81/img-09.jpeg" alt=""></p>
+<p><img src="../uploads/csdn/%E7%A9%BA%E9%97%B4%E9%A3%9E%E8%A1%8C%E5%99%A8%E8%BD%A8%E9%81%93%E6%97%85%E8%A1%8C%E8%80%85%E5%8F%B7%E8%A1%8C%E6%98%9F%E9%99%85%E9%A3%9E%E8%A1%8C%E8%BD%A8%E9%81%93%E9%80%92%E6%8E%A8%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%88%86%E6%9E%90matlab%E4%BB%A3%E7%A0%81/img-10.jpeg" alt=""><img src="../uploads/csdn/%E7%A9%BA%E9%97%B4%E9%A3%9E%E8%A1%8C%E5%99%A8%E8%BD%A8%E9%81%93%E6%97%85%E8%A1%8C%E8%80%85%E5%8F%B7%E8%A1%8C%E6%98%9F%E9%99%85%E9%A3%9E%E8%A1%8C%E8%BD%A8%E9%81%93%E9%80%92%E6%8E%A8%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%88%86%E6%9E%90matlab%E4%BB%A3%E7%A0%81/img-11.jpeg" alt=""></p>
+<p><img src="../uploads/csdn/%E7%A9%BA%E9%97%B4%E9%A3%9E%E8%A1%8C%E5%99%A8%E8%BD%A8%E9%81%93%E6%97%85%E8%A1%8C%E8%80%85%E5%8F%B7%E8%A1%8C%E6%98%9F%E9%99%85%E9%A3%9E%E8%A1%8C%E8%BD%A8%E9%81%93%E9%80%92%E6%8E%A8%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%88%86%E6%9E%90matlab%E4%BB%A3%E7%A0%81/img-12.jpeg" alt=""></p>
+<p><img src="../uploads/csdn/%E7%A9%BA%E9%97%B4%E9%A3%9E%E8%A1%8C%E5%99%A8%E8%BD%A8%E9%81%93%E6%97%85%E8%A1%8C%E8%80%85%E5%8F%B7%E8%A1%8C%E6%98%9F%E9%99%85%E9%A3%9E%E8%A1%8C%E8%BD%A8%E9%81%93%E9%80%92%E6%8E%A8%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%88%86%E6%9E%90matlab%E4%BB%A3%E7%A0%81/img-13.jpeg" alt=""><img src="../uploads/csdn/%E7%A9%BA%E9%97%B4%E9%A3%9E%E8%A1%8C%E5%99%A8%E8%BD%A8%E9%81%93%E6%97%85%E8%A1%8C%E8%80%85%E5%8F%B7%E8%A1%8C%E6%98%9F%E9%99%85%E9%A3%9E%E8%A1%8C%E8%BD%A8%E9%81%93%E9%80%92%E6%8E%A8%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%88%86%E6%9E%90matlab%E4%BB%A3%E7%A0%81/img-14.jpeg" alt=""><img src="../uploads/csdn/%E7%A9%BA%E9%97%B4%E9%A3%9E%E8%A1%8C%E5%99%A8%E8%BD%A8%E9%81%93%E6%97%85%E8%A1%8C%E8%80%85%E5%8F%B7%E8%A1%8C%E6%98%9F%E9%99%85%E9%A3%9E%E8%A1%8C%E8%BD%A8%E9%81%93%E9%80%92%E6%8E%A8%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%88%86%E6%9E%90matlab%E4%BB%A3%E7%A0%81/img-15.jpeg" alt=""></p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">%% voyager_mga_demo.m</span>
+<span class="hljs-comment">% 基于 Wagner &amp; Wie 文中 MGA 思路的教学版实现</span>
+<span class="hljs-comment">% 功能：</span>
+<span class="hljs-comment">% 1) 给定旅行者号飞越时间节点（转移点）</span>
+<span class="hljs-comment">% 2) 分段解 Lambert 得到日心转移轨道</span>
+<span class="hljs-comment">% 3) 在飞越点计算 v_infty、转角 delta、rp 与 DeltaV_GA（论文式(10)）</span>
+<span class="hljs-comment">% 4) 输出并绘图</span>
+<span class="hljs-comment">%</span>
+<span class="hljs-comment">% 说明：为保证“可跑通”，这里使用简化圆轨道星历（非JPL高精度）。</span>
+<span class="hljs-comment">% 若你有 Aerospace Toolbox/SPICE，可替换 planetStateCircular()。</span>
+
+clear; clc; close all;
+
+<span class="hljs-comment">%% 常数</span>
+muSun = <span class="hljs-number">1.32712440018e11</span>;     <span class="hljs-comment">% km^3/s^2</span>
+AU    = <span class="hljs-number">1.495978707e8</span>;        <span class="hljs-comment">% km</span>
+
+<span class="hljs-comment">% 行星引力参数 mu_p (km^3/s^2) 与半径 R_p (km)</span>
+P.Earth.mu   = <span class="hljs-number">3.986004418e5</span>; P.Earth.R = <span class="hljs-number">6378.1363</span>;
+P.Jupiter.mu = <span class="hljs-number">1.26686534e8</span>;  P.Jupiter.R = <span class="hljs-number">71492</span>;
+P.Saturn.mu  = <span class="hljs-number">3.7931187e7</span>;   P.Saturn.R = <span class="hljs-number">60268</span>;
+P.Uranus.mu  = <span class="hljs-number">5.793939e6</span>;    P.Uranus.R = <span class="hljs-number">25559</span>;
+P.Neptune.mu = <span class="hljs-number">6.836529e6</span>;    P.Neptune.R = <span class="hljs-number">24764</span>;
+
+<span class="hljs-comment">%% Voyager 2 近似关键时间（可自行微调）</span>
+<span class="hljs-comment">% Earth launch, Jupiter, Saturn, Uranus, Neptune encounters</span>
+t = datetime([ ...
+    <span class="hljs-number">1977</span> <span class="hljs-number">8</span> <span class="hljs-number">20</span>;   <span class="hljs-comment">% Earth departure</span>
+    <span class="hljs-number">1979</span> <span class="hljs-number">7</span>  <span class="hljs-number">9</span>;   <span class="hljs-comment">% Jupiter flyby</span>
+    <span class="hljs-number">1981</span> <span class="hljs-number">8</span> <span class="hljs-number">26</span>;   <span class="hljs-comment">% Saturn flyby</span>
+    <span class="hljs-number">1986</span> <span class="hljs-number">1</span> <span class="hljs-number">24</span>;   <span class="hljs-comment">% Uranus flyby</span>
+    <span class="hljs-number">1989</span> <span class="hljs-number">8</span> <span class="hljs-number">25</span>]); <span class="hljs-comment">% Neptune flyby</span>
+
+names = {<span class="hljs-string">&#x27;Earth&#x27;</span>,<span class="hljs-string">&#x27;Jupiter&#x27;</span>,<span class="hljs-string">&#x27;Saturn&#x27;</span>,<span class="hljs-string">&#x27;Uranus&#x27;</span>,<span class="hljs-string">&#x27;Neptune&#x27;</span>};
+N = <span class="hljs-built_in">numel</span>(names);
+
+<span class="hljs-comment">%% 计算各转移点行星日心状态（简化）</span>
+R = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">3</span>,N); Vp = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">3</span>,N);
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:N
+    [R(:,<span class="hljs-built_in">i</span>), Vp(:,<span class="hljs-built_in">i</span>)] = planetStateCircular(names{<span class="hljs-built_in">i</span>}, t(<span class="hljs-built_in">i</span>), muSun);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 分段Lambert（转移轨道）</span>
+Vdep = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">3</span>,N<span class="hljs-number">-1</span>); Varr = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">3</span>,N<span class="hljs-number">-1</span>);
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:N<span class="hljs-number">-1</span>
+    dt = seconds(t(<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>)-t(<span class="hljs-built_in">i</span>));  <span class="hljs-comment">% sec</span>
+    [v1, v2] = lambert_universal(R(:,<span class="hljs-built_in">i</span>), R(:,<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>), dt, muSun, +<span class="hljs-number">1</span>);
+    Vdep(:,<span class="hljs-built_in">i</span>) = v1;
+    Varr(:,<span class="hljs-built_in">i</span>) = v2;
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 飞越分析（论文核心量）</span>
+<span class="hljs-comment">% 对每个中间飞越点 i=2..N-1:</span>
+<span class="hljs-comment">% incoming heliocentric vel = 上一段到达速度 Varr(:,i-1)</span>
+<span class="hljs-comment">% outgoing heliocentric vel = 下一段出发速度 Vdep(:,i)</span>
+<span class="hljs-comment">% 转到行星系得到 v_inf_in/out，并计算 delta/rp/DeltaV_GA</span>
+fprintf(<span class="hljs-string">&#x27;\n===== Flyby Summary (Voyager-style MGA) =====\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;%8s | %10s | %10s | %10s | %10s\n&#x27;</span>, ...
+    <span class="hljs-string">&#x27;Planet&#x27;</span>,<span class="hljs-string">&#x27;|vinf_in|&#x27;</span>,<span class="hljs-string">&#x27;|vinf_out|&#x27;</span>,<span class="hljs-string">&#x27;delta(deg)&#x27;</span>,<span class="hljs-string">&#x27;DeltaV_GA&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;%s\n&#x27;</span>, <span class="hljs-built_in">repmat</span>(<span class="hljs-string">&#x27;-&#x27;</span>,<span class="hljs-number">1</span>,<span class="hljs-number">62</span>));
+
+flybyData = struct([]);
+k = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">2</span>:N<span class="hljs-number">-1</span>
+    k = k + <span class="hljs-number">1</span>;
+    planet = names{<span class="hljs-built_in">i</span>};
+
+    vinf_in_vec  = Varr(:,<span class="hljs-built_in">i</span><span class="hljs-number">-1</span>) - Vp(:,<span class="hljs-built_in">i</span>);
+    vinf_out_vec = Vdep(:,<span class="hljs-built_in">i</span>)   - Vp(:,<span class="hljs-built_in">i</span>);
+
+    vinf_in  = norm(vinf_in_vec);
+    vinf_out = norm(vinf_out_vec);
+
+    <span class="hljs-comment">% 论文无动力飞越约束（式16）：|vinf_in|=|vinf_out|</span>
+    vinf_avg = <span class="hljs-number">0.5</span>*(vinf_in + vinf_out);
+
+    <span class="hljs-comment">% 转角 delta</span>
+    cang = <span class="hljs-built_in">dot</span>(vinf_in_vec, vinf_out_vec)/(vinf_in*vinf_out);
+    cang = <span class="hljs-built_in">max</span>(<span class="hljs-number">-1</span>,<span class="hljs-built_in">min</span>(<span class="hljs-number">1</span>,cang));
+    delta = <span class="hljs-built_in">acos</span>(cang);  <span class="hljs-comment">% rad</span>
+
+    muP = P.(planet).mu;
+    RP  = P.(planet).R;
+
+    <span class="hljs-comment">% 双曲线关系：delta = 2*asin(1/e), rp = mu/v_inf^2*(e-1)</span>
+    e_hyp = <span class="hljs-number">1</span>/<span class="hljs-built_in">sin</span>(delta/<span class="hljs-number">2</span>);
+    rp    = muP/(vinf_avg^<span class="hljs-number">2</span>)*(e_hyp - <span class="hljs-number">1</span>);   <span class="hljs-comment">% km</span>
+    alt   = rp - RP;
+
+    <span class="hljs-comment">% 论文式(10) 对应 patch 点速度差（这里给出计算值）</span>
+    dV_GA = <span class="hljs-built_in">abs</span>( <span class="hljs-built_in">sqrt</span>(vinf_in^<span class="hljs-number">2</span>  + <span class="hljs-number">2</span>*muP/rp) ...
+               - <span class="hljs-built_in">sqrt</span>(vinf_out^<span class="hljs-number">2</span> + <span class="hljs-number">2</span>*muP/rp) );
+
+    fprintf(<span class="hljs-string">&#x27;%8s | %10.4f | %10.4f | %10.4f | %10.6f\n&#x27;</span>, ...
+        planet, vinf_in, vinf_out, rad2deg(delta), dV_GA);
+
+    flybyData(k).planet = planet;
+    flybyData(k).vinf_in_vec  = vinf_in_vec;
+    flybyData(k).vinf_out_vec = vinf_out_vec;
+    flybyData(k).delta = delta;
+    flybyData(k).rp = rp;
+    flybyData(k).altitude = alt;
+    flybyData(k).dV_GA = dV_GA;
+
+    <span class="hljs-comment">% 演示 VNC&lt;-&gt;ecliptic 变换（论文式40-43）</span>
+    T_vnc2ecl = TVNC2ECL(R(:,<span class="hljs-built_in">i</span>), Vp(:,<span class="hljs-built_in">i</span>));
+    vinf_in_vnc = T_vnc2ecl \ vinf_in_vec; <span class="hljs-comment">%#ok&lt;MINV&gt;</span>
+    flybyData(k).vinf_in_vnc = vinf_in_vnc;
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 输出转移点（位置）</span>
+fprintf(<span class="hljs-string">&#x27;\n===== Transfer Points (Heliocentric, AU) =====\n&#x27;</span>);
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:N
+    fprintf(<span class="hljs-string">&#x27;%8s @ %s : [%.6f, %.6f, %.6f] AU\n&#x27;</span>, names{<span class="hljs-built_in">i</span>}, datestr(t(<span class="hljs-built_in">i</span>)), ...
+        R(<span class="hljs-number">1</span>,<span class="hljs-built_in">i</span>)/AU, R(<span class="hljs-number">2</span>,<span class="hljs-built_in">i</span>)/AU, R(<span class="hljs-number">3</span>,<span class="hljs-built_in">i</span>)/AU);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 绘图：转移点+分段轨道</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;w&#x27;</span>); <span class="hljs-built_in">hold</span> on; grid on; axis equal;
+title(<span class="hljs-string">&#x27;Voyager MGA Transfer Points and Transfer Arcs (Simplified)&#x27;</span>);
+xlabel(<span class="hljs-string">&#x27;x (AU)&#x27;</span>); ylabel(<span class="hljs-string">&#x27;y (AU)&#x27;</span>);
+
+<span class="hljs-comment">% 画行星转移点</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:N
+    <span class="hljs-built_in">plot</span>(R(<span class="hljs-number">1</span>,<span class="hljs-built_in">i</span>)/AU, R(<span class="hljs-number">2</span>,<span class="hljs-built_in">i</span>)/AU, <span class="hljs-string">&#x27;o&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">7</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>);
+    text(R(<span class="hljs-number">1</span>,<span class="hljs-built_in">i</span>)/AU, R(<span class="hljs-number">2</span>,<span class="hljs-built_in">i</span>)/AU, [<span class="hljs-string">&#x27;  &#x27;</span> names{<span class="hljs-built_in">i</span>}], <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">9</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 每段二体传播画轨道弧</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:N<span class="hljs-number">-1</span>
+    dt = seconds(t(<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>)-t(<span class="hljs-built_in">i</span>));
+    rr = propagateArcTwoBody(R(:,<span class="hljs-built_in">i</span>), Vdep(:,<span class="hljs-built_in">i</span>), dt, muSun, <span class="hljs-number">250</span>);
+    <span class="hljs-built_in">plot</span>(rr(<span class="hljs-number">1</span>,:)/AU, rr(<span class="hljs-number">2</span>,:)/AU, <span class="hljs-string">&#x27;-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.2</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-built_in">legend</span>([names, strcat(names(<span class="hljs-number">1</span>:<span class="hljs-keyword">end</span><span class="hljs-number">-1</span>),<span class="hljs-string">&#x27;-arc&#x27;</span>)], <span class="hljs-string">&#x27;Location&#x27;</span>,<span class="hljs-string">&#x27;bestoutside&#x27;</span>);
+
+<span class="hljs-comment">%% ========== 新增：3D行星轨道和航天器轨迹可视化 ==========</span>
+<span class="hljs-comment">% 生成时间序列用于绘制完整行星轨道</span>
+t_start = datetime(<span class="hljs-number">1977</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>);
+t_end = datetime(<span class="hljs-number">1990</span>,<span class="hljs-number">12</span>,<span class="hljs-number">31</span>);
+t_orbit = t_start:days(<span class="hljs-number">30</span>):t_end;  <span class="hljs-comment">% 每月一个点</span>
+
+<span class="hljs-comment">% 计算行星轨道位置</span>
+planet_names = {<span class="hljs-string">&#x27;Earth&#x27;</span>,<span class="hljs-string">&#x27;Jupiter&#x27;</span>,<span class="hljs-string">&#x27;Saturn&#x27;</span>,<span class="hljs-string">&#x27;Uranus&#x27;</span>,<span class="hljs-string">&#x27;Neptune&#x27;</span>};
+colors = {<span class="hljs-string">&#x27;b&#x27;</span>,<span class="hljs-string">&#x27;r&#x27;</span>,<span class="hljs-string">&#x27;g&#x27;</span>,<span class="hljs-string">&#x27;m&#x27;</span>,<span class="hljs-string">&#x27;c&#x27;</span>};
+
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;w&#x27;</span>,<span class="hljs-string">&#x27;Position&#x27;</span>,[<span class="hljs-number">100</span>,<span class="hljs-number">100</span>,<span class="hljs-number">1200</span>,<span class="hljs-number">900</span>]);
+ax = axes(<span class="hljs-string">&#x27;Parent&#x27;</span>,gcf);
+view(<span class="hljs-number">3</span>);  <span class="hljs-comment">% 设置三维视角</span>
+<span class="hljs-built_in">hold</span> on; grid on; box on;
+title(<span class="hljs-string">&#x27;Voyager 2 太阳系引力弹弓轨迹 (3D视图)&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">14</span>);
+xlabel(<span class="hljs-string">&#x27;X (AU)&#x27;</span>); ylabel(<span class="hljs-string">&#x27;Y (AU)&#x27;</span>); zlabel(<span class="hljs-string">&#x27;Z (AU)&#x27;</span>);
+
+<span class="hljs-comment">% 绘制太阳</span>
+<span class="hljs-built_in">scatter3</span>(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">200</span>,<span class="hljs-string">&#x27;y&#x27;</span>,<span class="hljs-string">&#x27;filled&#x27;</span>,<span class="hljs-string">&#x27;DisplayName&#x27;</span>,<span class="hljs-string">&#x27;太阳&#x27;</span>);
+
+<span class="hljs-comment">% 绘制各行星轨道（完整轨道）</span>
+<span class="hljs-keyword">for</span> p = <span class="hljs-number">1</span>:<span class="hljs-built_in">length</span>(planet_names)
+    R_orbit = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">3</span>, <span class="hljs-built_in">length</span>(t_orbit));
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:<span class="hljs-built_in">length</span>(t_orbit)
+        [R_orbit(:,<span class="hljs-built_in">i</span>), ~] = planetStateCircular(planet_names{p}, t_orbit(<span class="hljs-built_in">i</span>), muSun);
+    <span class="hljs-keyword">end</span>
+    <span class="hljs-built_in">plot3</span>(R_orbit(<span class="hljs-number">1</span>,:)/AU, R_orbit(<span class="hljs-number">2</span>,:)/AU, R_orbit(<span class="hljs-number">3</span>,:)/AU, ...
+          <span class="hljs-string">&#x27;--&#x27;</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, colors{p}, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">0.8</span>, ...
+          <span class="hljs-string">&#x27;DisplayName&#x27;</span>, [planet_names{p} <span class="hljs-string">&#x27;轨道&#x27;</span>]);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 绘制航天器转移轨迹（分段二体传播）</span>
+trajectory_colors = [<span class="hljs-number">0.8</span> <span class="hljs-number">0.4</span> <span class="hljs-number">0.1</span>; <span class="hljs-number">0.2</span> <span class="hljs-number">0.6</span> <span class="hljs-number">0.8</span>; <span class="hljs-number">0.9</span> <span class="hljs-number">0.3</span> <span class="hljs-number">0.5</span>; <span class="hljs-number">0.4</span> <span class="hljs-number">0.7</span> <span class="hljs-number">0.3</span>];
+arc_names = {<span class="hljs-string">&#x27;地球→木星&#x27;</span>, <span class="hljs-string">&#x27;木星→土星&#x27;</span>, <span class="hljs-string">&#x27;土星→天王星&#x27;</span>, <span class="hljs-string">&#x27;天王星→海王星&#x27;</span>};
+
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:N<span class="hljs-number">-1</span>
+    dt = seconds(t(<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>)-t(<span class="hljs-built_in">i</span>));
+    rr = propagateArcTwoBody(R(:,<span class="hljs-built_in">i</span>), Vdep(:,<span class="hljs-built_in">i</span>), dt, muSun, <span class="hljs-number">500</span>);
+    <span class="hljs-built_in">plot3</span>(rr(<span class="hljs-number">1</span>,:)/AU, rr(<span class="hljs-number">2</span>,:)/AU, rr(<span class="hljs-number">3</span>,:)/AU, ...
+          <span class="hljs-string">&#x27;-&#x27;</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, trajectory_colors(<span class="hljs-built_in">i</span>,:), <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2.5</span>, ...
+          <span class="hljs-string">&#x27;DisplayName&#x27;</span>, arc_names{<span class="hljs-built_in">i</span>});
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 标记飞越点</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:N
+    <span class="hljs-built_in">scatter3</span>(R(<span class="hljs-number">1</span>,<span class="hljs-built_in">i</span>)/AU, R(<span class="hljs-number">2</span>,<span class="hljs-built_in">i</span>)/AU, R(<span class="hljs-number">3</span>,<span class="hljs-built_in">i</span>)/AU, <span class="hljs-number">100</span>, colors{<span class="hljs-built_in">i</span>}, <span class="hljs-string">&#x27;filled&#x27;</span>, ...
+             <span class="hljs-string">&#x27;DisplayName&#x27;</span>, [names{<span class="hljs-built_in">i</span>} <span class="hljs-string">&#x27;飞越点&#x27;</span>]);
+    text(R(<span class="hljs-number">1</span>,<span class="hljs-built_in">i</span>)/AU+<span class="hljs-number">0.1</span>, R(<span class="hljs-number">2</span>,<span class="hljs-built_in">i</span>)/AU+<span class="hljs-number">0.1</span>, R(<span class="hljs-number">3</span>,<span class="hljs-built_in">i</span>)/AU+<span class="hljs-number">0.05</span>, ...
+         names{<span class="hljs-built_in">i</span>}, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">10</span>, <span class="hljs-string">&#x27;FontWeight&#x27;</span>, <span class="hljs-string">&#x27;bold&#x27;</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 设置视角和比例</span>
+axis equal;
+view(<span class="hljs-number">45</span>, <span class="hljs-number">25</span>);
+camproj(<span class="hljs-string">&#x27;perspective&#x27;</span>);
+<span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x27;Location&#x27;</span>, <span class="hljs-string">&#x27;eastoutside&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">9</span>);
+
+<span class="hljs-comment">%% ========== 新增：离开太阳系的逃逸轨迹（扩展视图） ==========</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;w&#x27;</span>,<span class="hljs-string">&#x27;Position&#x27;</span>,[<span class="hljs-number">100</span>,<span class="hljs-number">100</span>,<span class="hljs-number">1400</span>,<span class="hljs-number">1000</span>]);
+ax2 = axes(<span class="hljs-string">&#x27;Parent&#x27;</span>,gcf);
+view(<span class="hljs-number">3</span>);
+<span class="hljs-built_in">hold</span> on; grid on; box on;
+title(<span class="hljs-string">&#x27;Voyager 2 太阳系逃逸轨迹 (扩展视图)&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">14</span>);
+xlabel(<span class="hljs-string">&#x27;X (AU)&#x27;</span>); ylabel(<span class="hljs-string">&#x27;Y (AU)&#x27;</span>); zlabel(<span class="hljs-string">&#x27;Z (AU)&#x27;</span>);
+
+<span class="hljs-comment">% 绘制太阳</span>
+<span class="hljs-built_in">scatter3</span>(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">300</span>,<span class="hljs-string">&#x27;y&#x27;</span>,<span class="hljs-string">&#x27;filled&#x27;</span>,<span class="hljs-string">&#x27;DisplayName&#x27;</span>,<span class="hljs-string">&#x27;太阳&#x27;</span>);
+
+<span class="hljs-comment">% 绘制行星轨道（简化显示）</span>
+<span class="hljs-keyword">for</span> p = <span class="hljs-number">1</span>:<span class="hljs-built_in">length</span>(planet_names)
+    theta = <span class="hljs-built_in">linspace</span>(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>*<span class="hljs-built_in">pi</span>, <span class="hljs-number">200</span>);
+    a = norm(R(:,p))/AU;  <span class="hljs-comment">% 近似轨道半径</span>
+    orbit_x = a * <span class="hljs-built_in">cos</span>(theta);
+    orbit_y = a * <span class="hljs-built_in">sin</span>(theta);
+    orbit_z = <span class="hljs-built_in">zeros</span>(<span class="hljs-built_in">size</span>(theta));
+    <span class="hljs-built_in">plot3</span>(orbit_x, orbit_y, orbit_z, <span class="hljs-string">&#x27;--&#x27;</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, colors{p}, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">0.6</span>, ...
+          <span class="hljs-string">&#x27;HandleVisibility&#x27;</span>, <span class="hljs-string">&#x27;off&#x27;</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 绘制航天器轨迹（包含逃逸段）</span>
+<span class="hljs-comment">% 实际观测轨迹 + 外推逃逸轨迹</span>
+t_extended = <span class="hljs-built_in">linspace</span>(<span class="hljs-number">0</span>, seconds(datetime(<span class="hljs-number">2020</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)-t(<span class="hljs-number">1</span>)), <span class="hljs-number">2000</span>);  <span class="hljs-comment">% 到2020年</span>
+rr_extended = propagateArcTwoBody(R(:,<span class="hljs-number">1</span>), Vdep(:,<span class="hljs-number">1</span>), t_extended(<span class="hljs-keyword">end</span>), muSun, <span class="hljs-number">2000</span>);
+<span class="hljs-built_in">plot3</span>(rr_extended(<span class="hljs-number">1</span>,:)/AU, rr_extended(<span class="hljs-number">2</span>,:)/AU, rr_extended(<span class="hljs-number">3</span>,:)/AU, ...
+      <span class="hljs-string">&#x27;k-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>, <span class="hljs-string">&#x27;DisplayName&#x27;</span>, <span class="hljs-string">&#x27;Voyager 2 逃逸轨迹&#x27;</span>);
+
+<span class="hljs-comment">% 标记行星位置</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:N
+    <span class="hljs-built_in">scatter3</span>(R(<span class="hljs-number">1</span>,<span class="hljs-built_in">i</span>)/AU, R(<span class="hljs-number">2</span>,<span class="hljs-built_in">i</span>)/AU, R(<span class="hljs-number">3</span>,<span class="hljs-built_in">i</span>)/AU, <span class="hljs-number">80</span>, colors{<span class="hljs-built_in">i</span>}, <span class="hljs-string">&#x27;filled&#x27;</span>, ...
+             <span class="hljs-string">&#x27;DisplayName&#x27;</span>, names{<span class="hljs-built_in">i</span>});
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 添加逃逸方向指示</span>
+<span class="hljs-keyword">if</span> <span class="hljs-built_in">size</span>(rr_extended,<span class="hljs-number">2</span>) &gt; <span class="hljs-number">100</span>
+    idx_end = <span class="hljs-built_in">size</span>(rr_extended,<span class="hljs-number">2</span>);
+    idx_start = idx_end - <span class="hljs-number">50</span>;
+    escape_dir = rr_extended(:,idx_end) - rr_extended(:,idx_start);
+    escape_dir = escape_dir / norm(escape_dir) * <span class="hljs-number">10</span>;  <span class="hljs-comment">% 归一化并缩放</span>
+    quiver3(rr_extended(<span class="hljs-number">1</span>,idx_end)/AU, rr_extended(<span class="hljs-number">2</span>,idx_end)/AU, rr_extended(<span class="hljs-number">3</span>,idx_end)/AU, ...
+            escape_dir(<span class="hljs-number">1</span>)/AU, escape_dir(<span class="hljs-number">2</span>)/AU, escape_dir(<span class="hljs-number">3</span>)/AU, ...
+            <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;r&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;MaxHeadSize&#x27;</span>, <span class="hljs-number">0.5</span>, ...
+            <span class="hljs-string">&#x27;DisplayName&#x27;</span>, <span class="hljs-string">&#x27;逃逸方向&#x27;</span>);
+<span class="hljs-keyword">end</span>
+
+axis equal;
+view(<span class="hljs-number">30</span>, <span class="hljs-number">20</span>);
+camproj(<span class="hljs-string">&#x27;perspective&#x27;</span>);
+<span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x27;Location&#x27;</span>, <span class="hljs-string">&#x27;eastoutside&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">9</span>);
+
+fprintf(<span class="hljs-string">&#x27;\n===== 3D可视化已生成 =====\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;图1: 太阳系引力弹弓轨迹 (3D视图)\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;图2: 太阳系逃逸轨迹 (扩展视图)\n&#x27;</span>);
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/群时变中子扩散方程求解与可视化玻尔兹曼输运方程的一个简化版本matlab.html">
+      <span>上一篇</span>
+      <strong>群时变中子扩散方程求解与可视化玻尔兹曼输运方程的一个简化版本MATLAB</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/用matlab实现的三体运动模拟代码包含实时轨迹显示和动态坐标系调整功能也可以是太阳系三体模拟.html">
+      <span>下一篇</span>
+      <strong>用MATLAB实现的三体运动模拟代码包含实时轨迹显示和动态坐标系调整功能也可以是太阳系三体模拟</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/计算卫星与地面时差用广义相对论给出计算公式与matlab代码.html">计算卫星与地面时差用广义相对论给出计算公式与MATLAB代码</a></h3>
+        <p class="post-excerpt">一、相对论时差的主要来源</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.817Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/嫦娥号地月轨道环月一个月matlab仿真.html">嫦娥号地月轨道环月一个月MATLAB仿真</a></h3>
+        <p class="post-excerpt">本文基于MATLAB实现了嫦娥系列探测器登月任务的轨道仿真，包含地月转移轨道和30天的环月轨道运行。仿真考虑了地球停泊轨道（200km）、地月转移轨道（200×405000km）、中途修正、月球捕获和环月轨道（100km）等关键阶段。结果显示：总速度增量约3.3km/s，转移时间约5.2天，30天环月运行约450圈轨道。通过数值积分和可视化分析，验证了轨道设计的合理性。该仿真为深空探测任务提供了轨…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.515Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

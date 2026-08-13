@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Python写一个标准版和程序员版计算器 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">Python写一个标准版和程序员版计算器</h1>
+        <p class="post-deck">本文介绍了一个基于Tkinter的多功能计算器实现。该计算器支持标准模式和程序员模式：标准模式提供基本运算、三角函数、对数等数学函数；程序员模式支持二进制/八进制/十六进制运算及位操作。程序采用了面向对象设计，通过Calculator类实现核心功能，包括进制转换、表达式验证、错误处理等。计算器界面包含多进制实时显示区域、主显示屏和动态切换的按钮面板，针对不同模式提供相应的计算功能。特别优化了负号处…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.222Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>49 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-10.html">科技</a>
+          
+            <a class="tag-chip" href="../tags/tag-11.html">社会</a>
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文介绍了一个基于Tkinter的多功能计算器实现。该计算器支持标准模式和程序员模式：标准模式提供基本运算、三角函数、对数等数学函数；程序员模式支持二进制/八进制/十六进制运算及位操作。程序采用了面向对象设计，通过Calculator类实现核心功能，包括进制转换、表达式验证、错误处理等。计算器界面包含多进制实时显示区域、主显示屏和动态切换的按钮面板，针对不同模式提供相应的计算功能。特别优化了负号处理、表达式验证和进制转换逻辑，确保计算准确性和用户体验。</p>
+<p><img src="../uploads/csdn/python%E5%86%99%E4%B8%80%E4%B8%AA%E6%A0%87%E5%87%86%E7%89%88%E5%92%8C%E7%A8%8B%E5%BA%8F%E5%91%98%E7%89%88%E8%AE%A1%E7%AE%97%E5%99%A8/img-01.png" alt=""></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> tkinter <span class="hljs-keyword">as</span> tk
+<span class="hljs-keyword">from</span> tkinter <span class="hljs-keyword">import</span> ttk, messagebox
+<span class="hljs-keyword">import</span> math
+<span class="hljs-keyword">import</span> re
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Calculator</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, root</span>):
+        <span class="hljs-variable language_">self</span>.root = root
+        <span class="hljs-variable language_">self</span>.root.title(<span class="hljs-string">&quot;多功能计算器&quot;</span>)
+        <span class="hljs-variable language_">self</span>.root.geometry(<span class="hljs-string">&quot;700x750&quot;</span>)
+        <span class="hljs-variable language_">self</span>.root.resizable(<span class="hljs-literal">False</span>, <span class="hljs-literal">False</span>)
+
+        <span class="hljs-comment"># 初始化变量</span>
+        <span class="hljs-variable language_">self</span>.mode = <span class="hljs-string">&quot;standard&quot;</span>
+        <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-string">&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.current_base = <span class="hljs-number">10</span>  <span class="hljs-comment"># 默认十进制</span>
+        <span class="hljs-variable language_">self</span>.create_widgets()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">create_widgets</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 多进制显示区域 - 移到最上方，按列排列</span>
+        <span class="hljs-variable language_">self</span>.base_display_frame = ttk.Frame(<span class="hljs-variable language_">self</span>.root)
+        <span class="hljs-variable language_">self</span>.base_display_frame.pack(fill=tk.X, padx=<span class="hljs-number">10</span>, pady=<span class="hljs-number">5</span>)
+
+        <span class="hljs-comment"># 二进制显示 - 第一列</span>
+        bin_frame = ttk.Frame(<span class="hljs-variable language_">self</span>.base_display_frame)
+        bin_frame.grid(row=<span class="hljs-number">0</span>, column=<span class="hljs-number">0</span>, sticky=tk.W, padx=<span class="hljs-number">5</span>, pady=<span class="hljs-number">2</span>)
+        ttk.Label(bin_frame, text=<span class="hljs-string">&quot;二进制 (Bin):&quot;</span>).pack(anchor=tk.W)
+        <span class="hljs-variable language_">self</span>.bin_var = tk.StringVar()
+        ttk.Entry(bin_frame, textvariable=<span class="hljs-variable language_">self</span>.bin_var, state=<span class="hljs-string">&quot;readonly&quot;</span>, width=<span class="hljs-number">30</span>).pack(fill=tk.X)
+
+        <span class="hljs-comment"># 八进制显示 - 第二列</span>
+        oct_frame = ttk.Frame(<span class="hljs-variable language_">self</span>.base_display_frame)
+        oct_frame.grid(row=<span class="hljs-number">0</span>, column=<span class="hljs-number">1</span>, sticky=tk.W, padx=<span class="hljs-number">5</span>, pady=<span class="hljs-number">2</span>)
+        ttk.Label(oct_frame, text=<span class="hljs-string">&quot;八进制 (Oct):&quot;</span>).pack(anchor=tk.W)
+        <span class="hljs-variable language_">self</span>.oct_var = tk.StringVar()
+        ttk.Entry(oct_frame, textvariable=<span class="hljs-variable language_">self</span>.oct_var, state=<span class="hljs-string">&quot;readonly&quot;</span>, width=<span class="hljs-number">20</span>).pack(fill=tk.X)
+
+        <span class="hljs-comment"># 十进制显示 - 第三列</span>
+        dec_frame = ttk.Frame(<span class="hljs-variable language_">self</span>.base_display_frame)
+        dec_frame.grid(row=<span class="hljs-number">0</span>, column=<span class="hljs-number">2</span>, sticky=tk.W, padx=<span class="hljs-number">5</span>, pady=<span class="hljs-number">2</span>)
+        ttk.Label(dec_frame, text=<span class="hljs-string">&quot;十进制 (Dec):&quot;</span>).pack(anchor=tk.W)
+        <span class="hljs-variable language_">self</span>.dec_var = tk.StringVar()
+        ttk.Entry(dec_frame, textvariable=<span class="hljs-variable language_">self</span>.dec_var, state=<span class="hljs-string">&quot;readonly&quot;</span>, width=<span class="hljs-number">20</span>).pack(fill=tk.X)
+
+        <span class="hljs-comment"># 十六进制显示 - 第四列</span>
+        hex_frame = ttk.Frame(<span class="hljs-variable language_">self</span>.base_display_frame)
+        hex_frame.grid(row=<span class="hljs-number">0</span>, column=<span class="hljs-number">3</span>, sticky=tk.W, padx=<span class="hljs-number">5</span>, pady=<span class="hljs-number">2</span>)
+        ttk.Label(hex_frame, text=<span class="hljs-string">&quot;十六进制 (Hex):&quot;</span>).pack(anchor=tk.W)
+        <span class="hljs-variable language_">self</span>.hex_var = tk.StringVar()
+        ttk.Entry(hex_frame, textvariable=<span class="hljs-variable language_">self</span>.hex_var, state=<span class="hljs-string">&quot;readonly&quot;</span>, width=<span class="hljs-number">20</span>).pack(fill=tk.X)
+
+        <span class="hljs-comment"># 模式切换框架</span>
+        mode_frame = ttk.Frame(<span class="hljs-variable language_">self</span>.root)
+        mode_frame.pack(fill=tk.X, padx=<span class="hljs-number">5</span>, pady=<span class="hljs-number">5</span>)
+
+        ttk.Button(mode_frame, text=<span class="hljs-string">&quot;标准版&quot;</span>, command=<span class="hljs-variable language_">self</span>.switch_to_standard).pack(side=tk.LEFT, padx=<span class="hljs-number">5</span>)
+        ttk.Button(mode_frame, text=<span class="hljs-string">&quot;程序员版&quot;</span>, command=<span class="hljs-variable language_">self</span>.switch_to_programmer).pack(side=tk.LEFT, padx=<span class="hljs-number">5</span>)
+
+        <span class="hljs-comment"># 主显示框</span>
+        <span class="hljs-variable language_">self</span>.display_var = tk.StringVar()
+        <span class="hljs-variable language_">self</span>.display = ttk.Entry(<span class="hljs-variable language_">self</span>.root, textvariable=<span class="hljs-variable language_">self</span>.display_var, font=(<span class="hljs-string">&#x27;Arial&#x27;</span>, <span class="hljs-number">24</span>), justify=tk.RIGHT)
+        <span class="hljs-variable language_">self</span>.display.pack(fill=tk.X, padx=<span class="hljs-number">10</span>, pady=<span class="hljs-number">10</span>)
+        <span class="hljs-variable language_">self</span>.display.config(state=<span class="hljs-string">&#x27;readonly&#x27;</span>)
+
+        <span class="hljs-comment"># 按钮框架</span>
+        <span class="hljs-variable language_">self</span>.buttons_frame = ttk.Frame(<span class="hljs-variable language_">self</span>.root)
+        <span class="hljs-variable language_">self</span>.buttons_frame.pack(fill=tk.BOTH, expand=<span class="hljs-literal">True</span>, padx=<span class="hljs-number">10</span>, pady=<span class="hljs-number">10</span>)
+
+        <span class="hljs-comment"># 初始显示标准版</span>
+        <span class="hljs-variable language_">self</span>.create_standard_buttons()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">switch_to_standard</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.mode = <span class="hljs-string">&quot;standard&quot;</span>
+        <span class="hljs-comment"># 清空现有按钮</span>
+        <span class="hljs-keyword">for</span> widget <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.buttons_frame.winfo_children():
+            widget.destroy()
+        <span class="hljs-variable language_">self</span>.create_standard_buttons()
+        <span class="hljs-variable language_">self</span>.clear_display()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">switch_to_programmer</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.mode = <span class="hljs-string">&quot;programmer&quot;</span>
+        <span class="hljs-comment"># 清空现有按钮</span>
+        <span class="hljs-keyword">for</span> widget <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.buttons_frame.winfo_children():
+            widget.destroy()
+        <span class="hljs-variable language_">self</span>.create_programmer_buttons()
+        <span class="hljs-variable language_">self</span>.clear_display()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">create_standard_buttons</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 按钮布局</span>
+        buttons = [
+            (<span class="hljs-string">&#x27;7&#x27;</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>), (<span class="hljs-string">&#x27;8&#x27;</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>), (<span class="hljs-string">&#x27;9&#x27;</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>), (<span class="hljs-string">&#x27;/&#x27;</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>), (<span class="hljs-string">&#x27;C&#x27;</span>, <span class="hljs-number">1</span>, <span class="hljs-number">4</span>),
+            (<span class="hljs-string">&#x27;4&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>), (<span class="hljs-string">&#x27;5&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>), (<span class="hljs-string">&#x27;6&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>), (<span class="hljs-string">&#x27;*&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>), (<span class="hljs-string">&#x27;⌫&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>),
+            (<span class="hljs-string">&#x27;1&#x27;</span>, <span class="hljs-number">3</span>, <span class="hljs-number">0</span>), (<span class="hljs-string">&#x27;2&#x27;</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>), (<span class="hljs-string">&#x27;3&#x27;</span>, <span class="hljs-number">3</span>, <span class="hljs-number">2</span>), (<span class="hljs-string">&#x27;-&#x27;</span>, <span class="hljs-number">3</span>, <span class="hljs-number">3</span>), (<span class="hljs-string">&#x27;±&#x27;</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>),
+            (<span class="hljs-string">&#x27;0&#x27;</span>, <span class="hljs-number">4</span>, <span class="hljs-number">0</span>), (<span class="hljs-string">&#x27;.&#x27;</span>, <span class="hljs-number">4</span>, <span class="hljs-number">1</span>), (<span class="hljs-string">&#x27;=&#x27;</span>, <span class="hljs-number">4</span>, <span class="hljs-number">2</span>), (<span class="hljs-string">&#x27;+&#x27;</span>, <span class="hljs-number">4</span>, <span class="hljs-number">3</span>), (<span class="hljs-string">&#x27;^&#x27;</span>, <span class="hljs-number">4</span>, <span class="hljs-number">4</span>),
+            (<span class="hljs-string">&#x27;sin&#x27;</span>, <span class="hljs-number">5</span>, <span class="hljs-number">0</span>), (<span class="hljs-string">&#x27;cos&#x27;</span>, <span class="hljs-number">5</span>, <span class="hljs-number">1</span>), (<span class="hljs-string">&#x27;tan&#x27;</span>, <span class="hljs-number">5</span>, <span class="hljs-number">2</span>), (<span class="hljs-string">&#x27;log&#x27;</span>, <span class="hljs-number">5</span>, <span class="hljs-number">3</span>), (<span class="hljs-string">&#x27;√&#x27;</span>, <span class="hljs-number">5</span>, <span class="hljs-number">4</span>),
+            (<span class="hljs-string">&#x27;π&#x27;</span>, <span class="hljs-number">6</span>, <span class="hljs-number">0</span>), (<span class="hljs-string">&#x27;e&#x27;</span>, <span class="hljs-number">6</span>, <span class="hljs-number">1</span>), (<span class="hljs-string">&#x27;exp&#x27;</span>, <span class="hljs-number">6</span>, <span class="hljs-number">2</span>), (<span class="hljs-string">&#x27;ln&#x27;</span>, <span class="hljs-number">6</span>, <span class="hljs-number">3</span>), (<span class="hljs-string">&#x27;!&#x27;</span>, <span class="hljs-number">6</span>, <span class="hljs-number">4</span>)
+        ]
+
+        <span class="hljs-comment"># 设置网格权重</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">7</span>):
+            <span class="hljs-variable language_">self</span>.buttons_frame.grid_rowconfigure(i, weight=<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">5</span>):
+            <span class="hljs-variable language_">self</span>.buttons_frame.grid_columnconfigure(i, weight=<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 创建按钮</span>
+        <span class="hljs-keyword">for</span> text, row, col <span class="hljs-keyword">in</span> buttons:
+            btn = ttk.Button(<span class="hljs-variable language_">self</span>.buttons_frame, text=text, command=<span class="hljs-keyword">lambda</span> t=text: <span class="hljs-variable language_">self</span>.on_button_click(t))
+            btn.grid(row=row, column=col, padx=<span class="hljs-number">5</span>, pady=<span class="hljs-number">5</span>, sticky=<span class="hljs-string">&quot;nsew&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">create_programmer_buttons</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 进制选择</span>
+        base_frame = ttk.Frame(<span class="hljs-variable language_">self</span>.buttons_frame)
+        base_frame.grid(row=<span class="hljs-number">0</span>, column=<span class="hljs-number">0</span>, columnspan=<span class="hljs-number">5</span>, sticky=<span class="hljs-string">&quot;nsew&quot;</span>, padx=<span class="hljs-number">5</span>, pady=<span class="hljs-number">5</span>)
+
+        ttk.Button(base_frame, text=<span class="hljs-string">&quot;二进制&quot;</span>, command=<span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.set_base(<span class="hljs-number">2</span>)).pack(side=tk.LEFT, padx=<span class="hljs-number">2</span>, expand=<span class="hljs-literal">True</span>, fill=tk.X)
+        ttk.Button(base_frame, text=<span class="hljs-string">&quot;八进制&quot;</span>, command=<span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.set_base(<span class="hljs-number">8</span>)).pack(side=tk.LEFT, padx=<span class="hljs-number">2</span>, expand=<span class="hljs-literal">True</span>, fill=tk.X)
+        ttk.Button(base_frame, text=<span class="hljs-string">&quot;十进制&quot;</span>, command=<span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.set_base(<span class="hljs-number">10</span>)).pack(side=tk.LEFT, padx=<span class="hljs-number">2</span>, expand=<span class="hljs-literal">True</span>, fill=tk.X)
+        ttk.Button(base_frame, text=<span class="hljs-string">&quot;十六进制&quot;</span>, command=<span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.set_base(<span class="hljs-number">16</span>)).pack(side=tk.LEFT, padx=<span class="hljs-number">2</span>, expand=<span class="hljs-literal">True</span>, fill=tk.X)
+
+        <span class="hljs-comment"># 程序员版按钮布局（修复空按钮问题，替换为空文本按钮为退格）</span>
+        buttons = [
+            (<span class="hljs-string">&#x27;A&#x27;</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>), (<span class="hljs-string">&#x27;B&#x27;</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>), (<span class="hljs-string">&#x27;C&#x27;</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>), (<span class="hljs-string">&#x27;D&#x27;</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>), (<span class="hljs-string">&#x27;E&#x27;</span>, <span class="hljs-number">1</span>, <span class="hljs-number">4</span>),
+            (<span class="hljs-string">&#x27;F&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>), (<span class="hljs-string">&#x27;7&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>), (<span class="hljs-string">&#x27;8&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>), (<span class="hljs-string">&#x27;9&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>), (<span class="hljs-string">&#x27;/&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>),
+            (<span class="hljs-string">&#x27;4&#x27;</span>, <span class="hljs-number">3</span>, <span class="hljs-number">0</span>), (<span class="hljs-string">&#x27;5&#x27;</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>), (<span class="hljs-string">&#x27;6&#x27;</span>, <span class="hljs-number">3</span>, <span class="hljs-number">2</span>), (<span class="hljs-string">&#x27;*&#x27;</span>, <span class="hljs-number">3</span>, <span class="hljs-number">3</span>), (<span class="hljs-string">&#x27;%&#x27;</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>),
+            (<span class="hljs-string">&#x27;1&#x27;</span>, <span class="hljs-number">4</span>, <span class="hljs-number">0</span>), (<span class="hljs-string">&#x27;2&#x27;</span>, <span class="hljs-number">4</span>, <span class="hljs-number">1</span>), (<span class="hljs-string">&#x27;3&#x27;</span>, <span class="hljs-number">4</span>, <span class="hljs-number">2</span>), (<span class="hljs-string">&#x27;-&#x27;</span>, <span class="hljs-number">4</span>, <span class="hljs-number">3</span>), (<span class="hljs-string">&#x27;&lt;&lt;&#x27;</span>, <span class="hljs-number">4</span>, <span class="hljs-number">4</span>),
+            (<span class="hljs-string">&#x27;0&#x27;</span>, <span class="hljs-number">5</span>, <span class="hljs-number">0</span>), (<span class="hljs-string">&#x27;⌫&#x27;</span>, <span class="hljs-number">5</span>, <span class="hljs-number">1</span>), (<span class="hljs-string">&#x27;=&#x27;</span>, <span class="hljs-number">5</span>, <span class="hljs-number">2</span>), (<span class="hljs-string">&#x27;+&#x27;</span>, <span class="hljs-number">5</span>, <span class="hljs-number">3</span>), (<span class="hljs-string">&#x27;&gt;&gt;&#x27;</span>, <span class="hljs-number">5</span>, <span class="hljs-number">4</span>),
+            (<span class="hljs-string">&#x27;&amp;&#x27;</span>, <span class="hljs-number">6</span>, <span class="hljs-number">0</span>), (<span class="hljs-string">&#x27;|&#x27;</span>, <span class="hljs-number">6</span>, <span class="hljs-number">1</span>), (<span class="hljs-string">&#x27;^&#x27;</span>, <span class="hljs-number">6</span>, <span class="hljs-number">2</span>), (<span class="hljs-string">&#x27;~&#x27;</span>, <span class="hljs-number">6</span>, <span class="hljs-number">3</span>), (<span class="hljs-string">&#x27;C&#x27;</span>, <span class="hljs-number">6</span>, <span class="hljs-number">4</span>)
+        ]
+
+        <span class="hljs-comment"># 设置网格权重</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">7</span>):
+            <span class="hljs-variable language_">self</span>.buttons_frame.grid_rowconfigure(i, weight=<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">5</span>):
+            <span class="hljs-variable language_">self</span>.buttons_frame.grid_columnconfigure(i, weight=<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 创建按钮</span>
+        <span class="hljs-keyword">for</span> text, row, col <span class="hljs-keyword">in</span> buttons:
+            btn = ttk.Button(<span class="hljs-variable language_">self</span>.buttons_frame, text=text, command=<span class="hljs-keyword">lambda</span> t=text: <span class="hljs-variable language_">self</span>.on_button_click(t))
+            btn.grid(row=row, column=col, padx=<span class="hljs-number">5</span>, pady=<span class="hljs-number">5</span>, sticky=<span class="hljs-string">&quot;nsew&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">set_base</span>(<span class="hljs-params">self, base</span>):
+        <span class="hljs-string">&quot;&quot;&quot;切换当前进制，并转换现有表达式（修复进制转换逻辑）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.current_expression:
+            <span class="hljs-keyword">try</span>:
+                <span class="hljs-comment"># 先将当前表达式按原进制解析为十进制（处理负号）</span>
+                <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.current_expression.startswith(<span class="hljs-string">&#x27;-&#x27;</span>):
+                    decimal_val = -<span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.current_expression[<span class="hljs-number">1</span>:], <span class="hljs-variable language_">self</span>.current_base)
+                <span class="hljs-keyword">else</span>:
+                    decimal_val = <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.current_expression, <span class="hljs-variable language_">self</span>.current_base)
+                <span class="hljs-comment"># 再转换为新进制字符串（负号单独处理）</span>
+                <span class="hljs-keyword">if</span> decimal_val &lt; <span class="hljs-number">0</span>:
+                    <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-string">&#x27;-&#x27;</span> + <span class="hljs-variable language_">self</span>.convert_base(-decimal_val, base)
+                <span class="hljs-keyword">else</span>:
+                    <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-variable language_">self</span>.convert_base(decimal_val, base)
+                <span class="hljs-variable language_">self</span>.display_var.<span class="hljs-built_in">set</span>(<span class="hljs-variable language_">self</span>.current_expression)
+            <span class="hljs-keyword">except</span> ValueError:
+                messagebox.showerror(<span class="hljs-string">&quot;进制错误&quot;</span>, <span class="hljs-string">&quot;当前表达式包含无效字符，无法转换&quot;</span>)
+                <span class="hljs-variable language_">self</span>.clear_display()
+        <span class="hljs-comment"># 更新当前进制</span>
+        <span class="hljs-variable language_">self</span>.current_base = base
+        <span class="hljs-comment"># 刷新多进制显示</span>
+        <span class="hljs-variable language_">self</span>.update_base_display()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_button_click</span>(<span class="hljs-params">self, text</span>):
+        <span class="hljs-string">&quot;&quot;&quot;统一按钮点击处理（修复位运算按钮逻辑）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> text == <span class="hljs-string">&#x27;=&#x27;</span>:
+            <span class="hljs-variable language_">self</span>.calculate()
+        <span class="hljs-keyword">elif</span> text == <span class="hljs-string">&#x27;C&#x27;</span>:
+            <span class="hljs-variable language_">self</span>.clear_display()
+        <span class="hljs-keyword">elif</span> text == <span class="hljs-string">&#x27;⌫&#x27;</span>:
+            <span class="hljs-variable language_">self</span>.backspace()
+        <span class="hljs-keyword">elif</span> text == <span class="hljs-string">&#x27;±&#x27;</span>:
+            <span class="hljs-variable language_">self</span>.toggle_sign()
+        <span class="hljs-keyword">elif</span> text <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;sin&#x27;</span>, <span class="hljs-string">&#x27;cos&#x27;</span>, <span class="hljs-string">&#x27;tan&#x27;</span>, <span class="hljs-string">&#x27;log&#x27;</span>, <span class="hljs-string">&#x27;ln&#x27;</span>, <span class="hljs-string">&#x27;√&#x27;</span>, <span class="hljs-string">&#x27;exp&#x27;</span>, <span class="hljs-string">&#x27;!&#x27;</span>]:
+            <span class="hljs-variable language_">self</span>.function_operation(text)
+        <span class="hljs-keyword">elif</span> text <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;π&#x27;</span>, <span class="hljs-string">&#x27;e&#x27;</span>]:
+            <span class="hljs-variable language_">self</span>.constant_operation(text)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 所有输入（数字、运算符）统一走表达式拼接</span>
+            <span class="hljs-variable language_">self</span>.append_to_expression(text)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">append_to_expression</span>(<span class="hljs-params">self, text</span>):
+        <span class="hljs-string">&quot;&quot;&quot;拼接表达式，增加严格合法性校验（修复连续运算符问题）&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 1. 程序员模式输入校验</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.mode == <span class="hljs-string">&quot;programmer&quot;</span>:
+            <span class="hljs-comment"># 非十六进制不允许输入A-F</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.current_base != <span class="hljs-number">16</span> <span class="hljs-keyword">and</span> text <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;A&#x27;</span>, <span class="hljs-string">&#x27;B&#x27;</span>, <span class="hljs-string">&#x27;C&#x27;</span>, <span class="hljs-string">&#x27;D&#x27;</span>, <span class="hljs-string">&#x27;E&#x27;</span>, <span class="hljs-string">&#x27;F&#x27;</span>]:
+                messagebox.showwarning(<span class="hljs-string">&quot;输入错误&quot;</span>, <span class="hljs-string">f&quot;<span class="hljs-subst">{self.current_base}</span>进制仅支持0-<span class="hljs-subst">{self.current_base-<span class="hljs-number">1</span>}</span>&quot;</span>)
+                <span class="hljs-keyword">return</span>
+            <span class="hljs-comment"># 二进制只允许0、1和运算符</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.current_base == <span class="hljs-number">2</span> <span class="hljs-keyword">and</span> text <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;0&#x27;</span>, <span class="hljs-string">&#x27;1&#x27;</span>, <span class="hljs-string">&#x27;+&#x27;</span>, <span class="hljs-string">&#x27;-&#x27;</span>, <span class="hljs-string">&#x27;*&#x27;</span>, <span class="hljs-string">&#x27;/&#x27;</span>, <span class="hljs-string">&#x27;&amp;&#x27;</span>, <span class="hljs-string">&#x27;|&#x27;</span>, <span class="hljs-string">&#x27;^&#x27;</span>, <span class="hljs-string">&#x27;~&#x27;</span>, <span class="hljs-string">&#x27;&lt;&lt;&#x27;</span>, <span class="hljs-string">&#x27;&gt;&gt;&#x27;</span>, <span class="hljs-string">&#x27;%&#x27;</span>]:
+                messagebox.showwarning(<span class="hljs-string">&quot;输入错误&quot;</span>, <span class="hljs-string">&quot;二进制仅支持输入0、1和运算符&quot;</span>)
+                <span class="hljs-keyword">return</span>
+
+        <span class="hljs-comment"># 2. 避免开头为无效运算符（除负号）</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.current_expression:
+            <span class="hljs-keyword">if</span> text <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;+&#x27;</span>, <span class="hljs-string">&#x27;*&#x27;</span>, <span class="hljs-string">&#x27;/&#x27;</span>, <span class="hljs-string">&#x27;^&#x27;</span>, <span class="hljs-string">&#x27;&amp;&#x27;</span>, <span class="hljs-string">&#x27;|&#x27;</span>, <span class="hljs-string">&#x27;&lt;&lt;&#x27;</span>, <span class="hljs-string">&#x27;&gt;&gt;&#x27;</span>, <span class="hljs-string">&#x27;%&#x27;</span>]:
+                messagebox.showwarning(<span class="hljs-string">&quot;输入错误&quot;</span>, <span class="hljs-string">&quot;表达式不能以运算符开头&quot;</span>)
+                <span class="hljs-keyword">return</span>
+
+        <span class="hljs-comment"># 3. 避免连续运算符（修复运算符叠加问题）</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.current_expression:
+            last_char = <span class="hljs-variable language_">self</span>.current_expression[-<span class="hljs-number">1</span>]
+            <span class="hljs-comment"># 检测上一个字符是否为运算符（含双字符运算符&lt;&lt;、&gt;&gt;）</span>
+            is_last_op = (last_char <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;+&#x27;</span>, <span class="hljs-string">&#x27;-&#x27;</span>, <span class="hljs-string">&#x27;*&#x27;</span>, <span class="hljs-string">&#x27;/&#x27;</span>, <span class="hljs-string">&#x27;^&#x27;</span>, <span class="hljs-string">&#x27;&amp;&#x27;</span>, <span class="hljs-string">&#x27;|&#x27;</span>, <span class="hljs-string">&#x27;%&#x27;</span>]) <span class="hljs-keyword">or</span> \
+                         (<span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.current_expression)&gt;=<span class="hljs-number">2</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.current_expression[-<span class="hljs-number">2</span>:] <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;&lt;&lt;&#x27;</span>, <span class="hljs-string">&#x27;&gt;&gt;&#x27;</span>])
+            <span class="hljs-comment"># 检测当前输入是否为运算符</span>
+            is_current_op = (text <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;+&#x27;</span>, <span class="hljs-string">&#x27;-&#x27;</span>, <span class="hljs-string">&#x27;*&#x27;</span>, <span class="hljs-string">&#x27;/&#x27;</span>, <span class="hljs-string">&#x27;^&#x27;</span>, <span class="hljs-string">&#x27;&amp;&#x27;</span>, <span class="hljs-string">&#x27;|&#x27;</span>, <span class="hljs-string">&#x27;%&#x27;</span>]) <span class="hljs-keyword">or</span> (text <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;&lt;&lt;&#x27;</span>, <span class="hljs-string">&#x27;&gt;&gt;&#x27;</span>])
+
+            <span class="hljs-keyword">if</span> is_last_op <span class="hljs-keyword">and</span> is_current_op:
+                messagebox.showwarning(<span class="hljs-string">&quot;输入错误&quot;</span>, <span class="hljs-string">&quot;不允许连续输入运算符&quot;</span>)
+                <span class="hljs-keyword">return</span>
+
+        <span class="hljs-comment"># 4. 拼接表达式并更新显示</span>
+        <span class="hljs-variable language_">self</span>.current_expression += <span class="hljs-built_in">str</span>(text)
+        <span class="hljs-variable language_">self</span>.display_var.<span class="hljs-built_in">set</span>(<span class="hljs-variable language_">self</span>.current_expression)
+        <span class="hljs-variable language_">self</span>.update_base_display()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">clear_display</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;清空表达式和所有显示&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-string">&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.display_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;&quot;</span>)
+        <span class="hljs-variable language_">self</span>.update_base_display()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">backspace</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;退格删除最后一个字符（修复多字符运算符删除）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.current_expression:
+            <span class="hljs-comment"># 处理双字符运算符（&lt;&lt;、&gt;&gt;）</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.current_expression)&gt;=<span class="hljs-number">2</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.current_expression[-<span class="hljs-number">2</span>:] <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;&lt;&lt;&#x27;</span>, <span class="hljs-string">&#x27;&gt;&gt;&#x27;</span>]:
+                <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-variable language_">self</span>.current_expression[:-<span class="hljs-number">2</span>]
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-variable language_">self</span>.current_expression[:-<span class="hljs-number">1</span>]
+            <span class="hljs-variable language_">self</span>.display_var.<span class="hljs-built_in">set</span>(<span class="hljs-variable language_">self</span>.current_expression)
+            <span class="hljs-variable language_">self</span>.update_base_display()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">toggle_sign</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;切换正负号（修复负号位置错误）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.current_expression:
+            <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-string">&#x27;-&#x27;</span>
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.current_expression == <span class="hljs-string">&#x27;-&#x27;</span>:
+            <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-string">&quot;&quot;</span>
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.current_expression.startswith(<span class="hljs-string">&#x27;-&#x27;</span>):
+            <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-variable language_">self</span>.current_expression[<span class="hljs-number">1</span>:]
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 仅在表达式开头添加负号（避免中间加负号）</span>
+            <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-string">&#x27;-&#x27;</span> + <span class="hljs-variable language_">self</span>.current_expression
+        <span class="hljs-variable language_">self</span>.display_var.<span class="hljs-built_in">set</span>(<span class="hljs-variable language_">self</span>.current_expression)
+        <span class="hljs-variable language_">self</span>.update_base_display()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">function_operation</span>(<span class="hljs-params">self, func</span>):
+        <span class="hljs-string">&quot;&quot;&quot;处理数学函数运算（修复函数计算逻辑）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.current_expression:
+                <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;请先输入运算数值&quot;</span>)
+
+            <span class="hljs-comment"># 解析当前表达式为数值（支持小数）</span>
+            value = <span class="hljs-built_in">float</span>(<span class="hljs-variable language_">self</span>.current_expression)
+            result = <span class="hljs-number">0</span>
+
+            <span class="hljs-comment"># 函数计算（确保数学正确性）</span>
+            <span class="hljs-keyword">if</span> func == <span class="hljs-string">&#x27;sin&#x27;</span>:
+                result = math.sin(math.radians(value))  <span class="hljs-comment"># 角度转弧度（符合日常使用习惯）</span>
+            <span class="hljs-keyword">elif</span> func == <span class="hljs-string">&#x27;cos&#x27;</span>:
+                result = math.cos(math.radians(value))
+            <span class="hljs-keyword">elif</span> func == <span class="hljs-string">&#x27;tan&#x27;</span>:
+                result = math.tan(math.radians(value))
+            <span class="hljs-keyword">elif</span> func == <span class="hljs-string">&#x27;log&#x27;</span>:
+                <span class="hljs-keyword">if</span> value &lt;= <span class="hljs-number">0</span>:
+                    <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;对数参数必须大于0&quot;</span>)
+                result = math.log10(value)
+            <span class="hljs-keyword">elif</span> func == <span class="hljs-string">&#x27;ln&#x27;</span>:
+                <span class="hljs-keyword">if</span> value &lt;= <span class="hljs-number">0</span>:
+                    <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;自然对数参数必须大于0&quot;</span>)
+                result = math.log(value)
+            <span class="hljs-keyword">elif</span> func == <span class="hljs-string">&#x27;√&#x27;</span>:
+                <span class="hljs-keyword">if</span> value &lt; <span class="hljs-number">0</span>:
+                    <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;平方根参数不能为负数&quot;</span>)
+                result = math.sqrt(value)
+            <span class="hljs-keyword">elif</span> func == <span class="hljs-string">&#x27;exp&#x27;</span>:
+                result = math.exp(value)  <span class="hljs-comment"># 计算 e^value</span>
+            <span class="hljs-keyword">elif</span> func == <span class="hljs-string">&#x27;!&#x27;</span>:
+                <span class="hljs-keyword">if</span> value &lt; <span class="hljs-number">0</span> <span class="hljs-keyword">or</span> <span class="hljs-keyword">not</span> value.is_integer():
+                    <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;阶乘仅支持非负整数&quot;</span>)
+                result = math.factorial(<span class="hljs-built_in">int</span>(value))
+
+            <span class="hljs-comment"># 处理结果显示（移除末尾多余的0和小数点）</span>
+            <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-built_in">str</span>(<span class="hljs-built_in">round</span>(result, <span class="hljs-number">10</span>))
+            <span class="hljs-keyword">if</span> <span class="hljs-string">&#x27;.&#x27;</span> <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.current_expression:
+                <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-variable language_">self</span>.current_expression.rstrip(<span class="hljs-string">&#x27;0&#x27;</span>).rstrip(<span class="hljs-string">&#x27;.&#x27;</span>)
+            <span class="hljs-variable language_">self</span>.display_var.<span class="hljs-built_in">set</span>(<span class="hljs-variable language_">self</span>.current_expression)
+            <span class="hljs-variable language_">self</span>.update_base_display()
+
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            messagebox.showerror(<span class="hljs-string">&quot;函数错误&quot;</span>, <span class="hljs-built_in">str</span>(e))
+            <span class="hljs-variable language_">self</span>.clear_display()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">constant_operation</span>(<span class="hljs-params">self, const</span>):
+        <span class="hljs-string">&quot;&quot;&quot;插入数学常数（修复常数显示格式）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> const == <span class="hljs-string">&#x27;π&#x27;</span>:
+            <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-built_in">str</span>(<span class="hljs-built_in">round</span>(math.pi, <span class="hljs-number">10</span>))
+        <span class="hljs-keyword">elif</span> const == <span class="hljs-string">&#x27;e&#x27;</span>:
+            <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-built_in">str</span>(<span class="hljs-built_in">round</span>(math.e, <span class="hljs-number">10</span>))
+
+        <span class="hljs-comment"># 清理显示格式（如 3.1415926536 而非 3.141592653589793）</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-string">&#x27;.&#x27;</span> <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.current_expression:
+            <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-variable language_">self</span>.current_expression.rstrip(<span class="hljs-string">&#x27;0&#x27;</span>).rstrip(<span class="hljs-string">&#x27;.&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.display_var.<span class="hljs-built_in">set</span>(<span class="hljs-variable language_">self</span>.current_expression)
+        <span class="hljs-variable language_">self</span>.update_base_display()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">calculate</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;核心计算逻辑（区分标准版/程序员版，修复表达式解析错误）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.current_expression:
+                <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;请先输入运算表达式&quot;</span>)
+
+            result = <span class="hljs-number">0</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.mode == <span class="hljs-string">&quot;standard&quot;</span>:
+                <span class="hljs-comment"># 标准版：支持小数、幂运算和数学函数，处理角度转弧度</span>
+                expr = <span class="hljs-variable language_">self</span>.current_expression.replace(<span class="hljs-string">&#x27;^&#x27;</span>, <span class="hljs-string">&#x27;**&#x27;</span>)  <span class="hljs-comment"># 幂运算转为Python语法</span>
+
+                <span class="hljs-comment"># 定义安全的数学函数环境（确保sin/cos等使用角度计算，符合日常习惯）</span>
+                <span class="hljs-keyword">def</span> <span class="hljs-title function_">safe_sin</span>(<span class="hljs-params">x</span>):
+                    <span class="hljs-keyword">return</span> math.sin(math.radians(x))  <span class="hljs-comment"># 角度→弧度</span>
+                <span class="hljs-keyword">def</span> <span class="hljs-title function_">safe_cos</span>(<span class="hljs-params">x</span>):
+                    <span class="hljs-keyword">return</span> math.cos(math.radians(x))
+                <span class="hljs-keyword">def</span> <span class="hljs-title function_">safe_tan</span>(<span class="hljs-params">x</span>):
+                    <span class="hljs-keyword">return</span> math.tan(math.radians(x))
+
+                <span class="hljs-comment"># 安全执行表达式（仅暴露必要函数，禁止危险操作）</span>
+                result = <span class="hljs-built_in">eval</span>(
+                    expr,
+                    {<span class="hljs-string">&quot;__builtins__&quot;</span>: <span class="hljs-literal">None</span>},  <span class="hljs-comment"># 禁用所有内置函数</span>
+                    {
+                        <span class="hljs-string">&quot;sin&quot;</span>: safe_sin,
+                        <span class="hljs-string">&quot;cos&quot;</span>: safe_cos,
+                        <span class="hljs-string">&quot;tan&quot;</span>: safe_tan,
+                        <span class="hljs-string">&quot;log10&quot;</span>: math.log10,
+                        <span class="hljs-string">&quot;log&quot;</span>: math.log,
+                        <span class="hljs-string">&quot;sqrt&quot;</span>: math.sqrt,
+                        <span class="hljs-string">&quot;exp&quot;</span>: math.exp,
+                        <span class="hljs-string">&quot;factorial&quot;</span>: math.factorial,
+                        <span class="hljs-string">&quot;pi&quot;</span>: math.pi,
+                        <span class="hljs-string">&quot;e&quot;</span>: math.e
+                    }
+                )
+
+                <span class="hljs-comment"># 处理结果显示格式（移除末尾多余的0和小数点）</span>
+                <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-built_in">str</span>(<span class="hljs-built_in">round</span>(result, <span class="hljs-number">10</span>))
+                <span class="hljs-keyword">if</span> <span class="hljs-string">&#x27;.&#x27;</span> <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.current_expression:
+                    <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-variable language_">self</span>.current_expression.rstrip(<span class="hljs-string">&#x27;0&#x27;</span>).rstrip(<span class="hljs-string">&#x27;.&#x27;</span>)
+
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-comment"># 程序员版：仅整数运算，先按当前进制解析为十进制计算</span>
+                expr = <span class="hljs-variable language_">self</span>.current_expression
+                <span class="hljs-comment"># 1. 处理取反运算符~（Python中~x = -x-1，需单独处理负号）</span>
+                expr = expr.replace(<span class="hljs-string">&#x27;~&#x27;</span>, <span class="hljs-string">&#x27;-~&#x27;</span>)  <span class="hljs-comment"># 修复取反逻辑：~5 → -~5 = -6（符合二进制取反）</span>
+
+                <span class="hljs-comment"># 2. 正则匹配表达式中的数字（含负号，如-1A、-10），转为十进制</span>
+                <span class="hljs-keyword">def</span> <span class="hljs-title function_">parse_num</span>(<span class="hljs-params"><span class="hljs-keyword">match</span></span>):
+                    num_str = <span class="hljs-keyword">match</span>.group()
+                    <span class="hljs-comment"># 分离负号和数字本体</span>
+                    sign = -<span class="hljs-number">1</span> <span class="hljs-keyword">if</span> num_str.startswith(<span class="hljs-string">&#x27;-&#x27;</span>) <span class="hljs-keyword">else</span> <span class="hljs-number">1</span>
+                    pure_num = num_str.lstrip(<span class="hljs-string">&#x27;-&#x27;</span>)
+
+                    <span class="hljs-comment"># 按当前进制解析数字</span>
+                    <span class="hljs-keyword">try</span>:
+                        <span class="hljs-keyword">return</span> <span class="hljs-built_in">str</span>(sign * <span class="hljs-built_in">int</span>(pure_num, <span class="hljs-variable language_">self</span>.current_base))
+                    <span class="hljs-keyword">except</span> ValueError:
+                        <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">f&quot;无效<span class="hljs-subst">{self.current_base}</span>进制数字：<span class="hljs-subst">{num_str}</span>&quot;</span>)
+
+                <span class="hljs-comment"># 匹配规则：负号（可选）+ 数字/字母（0-9A-F），避免匹配运算符</span>
+                expr_dec = re.sub(<span class="hljs-string">r&#x27;-?[0-9A-Fa-f]+&#x27;</span>, parse_num, expr)
+
+                <span class="hljs-comment"># 3. 执行十进制运算（位运算、算术运算）</span>
+                result = <span class="hljs-built_in">eval</span>(
+                    expr_dec,
+                    {<span class="hljs-string">&quot;__builtins__&quot;</span>: <span class="hljs-literal">None</span>},
+                    {}  <span class="hljs-comment"># 程序员模式无需额外函数</span>
+                )
+
+                <span class="hljs-comment"># 4. 结果转为当前进制（处理负号：负号单独显示，数字部分转正）</span>
+                <span class="hljs-keyword">if</span> result &lt; <span class="hljs-number">0</span>:
+                    <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-string">&#x27;-&#x27;</span> + <span class="hljs-variable language_">self</span>.convert_base(-result, <span class="hljs-variable language_">self</span>.current_base)
+                <span class="hljs-keyword">else</span>:
+                    <span class="hljs-variable language_">self</span>.current_expression = <span class="hljs-variable language_">self</span>.convert_base(result, <span class="hljs-variable language_">self</span>.current_base)
+
+            <span class="hljs-comment"># 更新主显示和多进制显示</span>
+            <span class="hljs-variable language_">self</span>.display_var.<span class="hljs-built_in">set</span>(<span class="hljs-variable language_">self</span>.current_expression)
+            <span class="hljs-variable language_">self</span>.update_base_display()
+
+        <span class="hljs-keyword">except</span> ValueError <span class="hljs-keyword">as</span> ve:
+            messagebox.showerror(<span class="hljs-string">&quot;计算错误&quot;</span>, <span class="hljs-built_in">str</span>(ve))
+            <span class="hljs-variable language_">self</span>.clear_display()
+        <span class="hljs-keyword">except</span> ZeroDivisionError:
+            messagebox.showerror(<span class="hljs-string">&quot;计算错误&quot;</span>, <span class="hljs-string">&quot;除数不能为0&quot;</span>)
+            <span class="hljs-variable language_">self</span>.clear_display()
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            messagebox.showerror(<span class="hljs-string">&quot;计算错误&quot;</span>, <span class="hljs-string">f&quot;表达式格式无效：<span class="hljs-subst">{<span class="hljs-built_in">str</span>(e)}</span>&quot;</span>)
+            <span class="hljs-variable language_">self</span>.clear_display()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">convert_base</span>(<span class="hljs-params">self, num, base</span>):
+        <span class="hljs-string">&quot;&quot;&quot;完整实现十进制转目标进制（支持2/8/10/16，处理0的特殊情况）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> num == <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;0&quot;</span>  <span class="hljs-comment"># 避免0转换后为空</span>
+
+        digits = <span class="hljs-string">&quot;0123456789ABCDEF&quot;</span>
+        result_str = <span class="hljs-string">&quot;&quot;</span>
+
+        <span class="hljs-keyword">while</span> num &gt; <span class="hljs-number">0</span>:
+            remainder = num % base
+            result_str = digits[remainder] + result_str  <span class="hljs-comment"># 余数逆序拼接</span>
+            num = num // base
+
+        <span class="hljs-keyword">return</span> result_str
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update_base_display</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;修复多进制显示逻辑（确保实时同步当前表达式的各进制值）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.current_expression:
+            <span class="hljs-variable language_">self</span>.bin_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;&quot;</span>)
+            <span class="hljs-variable language_">self</span>.oct_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;&quot;</span>)
+            <span class="hljs-variable language_">self</span>.dec_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;&quot;</span>)
+            <span class="hljs-variable language_">self</span>.hex_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;&quot;</span>)
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-comment"># 1. 解析当前表达式为十进制（区分标准版和程序员版）</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.mode == <span class="hljs-string">&quot;standard&quot;</span>:
+                <span class="hljs-comment"># 标准版可能含小数，先转为float再取整（多进制显示仅支持整数）</span>
+                decimal_val = <span class="hljs-built_in">int</span>(<span class="hljs-built_in">float</span>(<span class="hljs-variable language_">self</span>.current_expression))
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-comment"># 程序员版按当前进制解析</span>
+                <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.current_expression.startswith(<span class="hljs-string">&#x27;-&#x27;</span>):
+                    decimal_val = -<span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.current_expression[<span class="hljs-number">1</span>:], <span class="hljs-variable language_">self</span>.current_base)
+                <span class="hljs-keyword">else</span>:
+                    decimal_val = <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.current_expression, <span class="hljs-variable language_">self</span>.current_base)
+
+            <span class="hljs-comment"># 2. 转换为各进制并更新显示</span>
+            <span class="hljs-variable language_">self</span>.bin_var.<span class="hljs-built_in">set</span>(<span class="hljs-variable language_">self</span>.convert_base(<span class="hljs-built_in">abs</span>(decimal_val), <span class="hljs-number">2</span>) <span class="hljs-keyword">if</span> decimal_val !=<span class="hljs-number">0</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;0&quot;</span>)
+            <span class="hljs-variable language_">self</span>.oct_var.<span class="hljs-built_in">set</span>(<span class="hljs-variable language_">self</span>.convert_base(<span class="hljs-built_in">abs</span>(decimal_val), <span class="hljs-number">8</span>) <span class="hljs-keyword">if</span> decimal_val !=<span class="hljs-number">0</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;0&quot;</span>)
+            <span class="hljs-variable language_">self</span>.dec_var.<span class="hljs-built_in">set</span>(<span class="hljs-built_in">str</span>(decimal_val))
+            <span class="hljs-variable language_">self</span>.hex_var.<span class="hljs-built_in">set</span>(<span class="hljs-variable language_">self</span>.convert_base(<span class="hljs-built_in">abs</span>(decimal_val), <span class="hljs-number">16</span>) <span class="hljs-keyword">if</span> decimal_val !=<span class="hljs-number">0</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;0&quot;</span>)
+
+            <span class="hljs-comment"># 3. 负号标注（在各进制前添加负号）</span>
+            <span class="hljs-keyword">if</span> decimal_val &lt; <span class="hljs-number">0</span>:
+                <span class="hljs-variable language_">self</span>.bin_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;-&quot;</span> + <span class="hljs-variable language_">self</span>.bin_var.get())
+                <span class="hljs-variable language_">self</span>.oct_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;-&quot;</span> + <span class="hljs-variable language_">self</span>.oct_var.get())
+                <span class="hljs-variable language_">self</span>.hex_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;-&quot;</span> + <span class="hljs-variable language_">self</span>.hex_var.get())
+
+        <span class="hljs-keyword">except</span>:
+            <span class="hljs-comment"># 表达式无效时清空多进制显示</span>
+            <span class="hljs-variable language_">self</span>.bin_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;（无效表达式）&quot;</span>)
+            <span class="hljs-variable language_">self</span>.oct_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;（无效表达式）&quot;</span>)
+            <span class="hljs-variable language_">self</span>.dec_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;（无效表达式）&quot;</span>)
+            <span class="hljs-variable language_">self</span>.hex_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;（无效表达式）&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    root = tk.Tk()
+    app = Calculator(root)
+    root.mainloop()
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    main()
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/python利用海龟画图turtle库做一个篮球比赛计时画面.html">
+      <span>上一篇</span>
+      <strong>Python利用海龟画图turtle库做一个篮球比赛计时画面</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/python使用shapelygeopandasmatplotlib绘制全国各个省份2023年gdp.html">
+      <span>下一篇</span>
+      <strong>Python使用shapelygeopandasmatplotlib绘制全国各个省份2023年GDP</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/科学家的祛魅与返魅论当代学生科学职业理想式微的背后.html">科学家的祛魅与返魅论当代学生科学职业理想式微的背后</a></h3>
+        <p class="post-excerpt">小学作文里，“我的理想是当科学家”曾是与“当老师”“当医生”并列的标准答案。那时的科学家在孩子心中是一个光辉而模糊的符号——穿着白大褂，拿着试管，代表着智慧与荣耀。然而，当这批孩子成长为高中生、大学生，真正面临职业选择时，“科学家”却成了一个被谨慎回避的选项。中国人民大学统计学院的一项调查显示，58%的大学生希望成为职场精英，仅有15%希望成为专业领域内的一流专家 \-7。另一项面向全国20个城市…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.271Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/目前地理信息科学与气候技术需要什么样的编程技术推荐几篇相关论文.html">目前地理信息科学与气候技术需要什么样的编程技术推荐几篇相关论文</a></h3>
+        <p class="post-excerpt">需要回答的问题：“目前地理信息科学与气候技术需要什么样的编程技术？推荐几篇相关论文。” 首先，我要回顾之前的对话历史，用户之前询问了未来科学软件开发趋势以及地球气候变化科学软件的开发技术和人才需求，而我的回答详细涵盖了 AI、量子计算、开源生态等方面的技术，以及数据处理、模型开发、应用层的具体技术工具和人才类型。现在用户进一步询问地理信息科学（GIS）与气候技术所需的编程技术，并要求推荐相关论文。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.241Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/当代科学技术视角下值得学习的知识-豆包问答分享.html">当代科学技术视角下值得学习的知识 豆包问答分享</a></h3>
+        <p class="post-excerpt">探讨最值得学习的知识以及如何学习，还要详细说明学习步骤。首先，我需要确定在当前科技环境下，哪些知识领域是核心且具有前瞻性的。考虑到 2025 年的时间点，可能需要涵盖人工智能、大数据、量子计算、生物技术、新能源、跨学科方法等。这些领域不仅是当前的热点，也是推动未来科技发展的关键。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.178Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

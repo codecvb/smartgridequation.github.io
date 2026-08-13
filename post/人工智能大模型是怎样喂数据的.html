@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>人工智能大模型是怎样喂数据的 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">人工智能大模型是怎样喂数据的</h1>
+        <p class="post-deck">人工智能大模型喂数据是一个系统且精细的过程，涵盖数据收集、预处理、划分、投喂等多个关键环节，每个环节都对模型训练效果有着重要影响：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.898Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>4 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-5.html">人工智能</a>
+          
+            <a class="tag-chip" href="../tags/tag-16.html">AI</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>人工智能大模型喂数据是一个系统且精细的过程，涵盖数据收集、预处理、划分、投喂等多个关键环节，每个环节都对模型训练效果有着重要影响：</p>
+<ol>
+<li>
+<p><strong>数据收集与来源</strong>：数据收集需从多渠道进行，以保证数据的多样性和广泛性。常见来源包括：</p>
+<ul>
+<li><strong>公共网络抓取</strong>：像 Common Crawl 这样的大型公开网页语料库，是主流大模型的基础数据源。此外，社交媒体平台（如 Reddit、Twitter）以及专业网站（如 GitHub、ArXiv）等也是重要的数据来源。但原始网络数据质量参差不齐，需要筛选，例如 Google 对 Common Crawl 数据进行语言检测、句子长度验证等一系列过滤后，仅保留约 15% 的数据 。</li>
+<li><strong>垂直领域数据整合</strong>：垂直领域数据（如医疗领域的 PubMed 学术论文、医院临床记录，需脱敏 ）专业性强、质量高。多语言数据的构建需考虑语言的多样性，如中文数据要平衡简体与繁体，考虑方言和网络用语等。同时，要注意通用与专业数据的比例平衡，经验比例约为 7:3，具体依场景调整 。</li>
+<li><strong>合成数据生成与增强</strong>：基于已有大语言模型（LLM）生成训练数据的方式逐渐流行，例如用已有模型对原始文本改写、扩展等。但合成数据可能放大原始模型的错误或偏见，一般将其限制在总数据集的 20% 以内，并进行多重验证 。</li>
+</ul>
+</li>
+<li>
+<p><strong>数据预处理</strong>：原始数据通常杂乱、冗余、格式不统一，需要预处理，具体包括：</p>
+<ul>
+<li><strong>数据清洗</strong>：去除垃圾内容，如删除乱码、重复、无意义内容（网页模板、广告脚本），过滤脏话、有害或有法律风险的数据，去除格式混乱、解析失败的数据行 。</li>
+<li><strong>数据切分与标注</strong>：将长文本拆分为适合模型处理的 “小段落”，并添加结构信息，如把小说按段落、句子分开，并添加 “文档类型”“语言”“来源” 等元信息。在图像或多模态数据中标注出 “物体边界”“图文对齐关系” 等 。</li>
+<li><strong>数据规范化</strong>：将所有数据转换成统一格式，方便模型输入，如把文本统一成 UTF - 8 编码，把图像转换为固定尺寸、通道数，把视频抽帧、音频转频谱图等 。</li>
+<li><strong>Tokenization（分词与编码）</strong>：将文本拆解成一个个 Token（符号单元）后输入模型，再转换成数字 ID。不同模型使用不同的 Tokenizer（如 BPE、SentencePiece、tiktoken 等） 。</li>
+</ul>
+</li>
+<li>
+<p><strong>数据集划分</strong>：将预处理后的数据合理划分为训练集、验证集和测试集。常见划分比例为训练集占 70% - 80%，用于模型训练；验证集占 10% - 15%，用于训练过程中评估模型性能，调整超参数；测试集占 10% - 15%，用于模型训练完成后的最终性能评估 。</p>
+</li>
+<li>
+<p><strong>数据投喂方式</strong>：在模型训练阶段，常采用批量投喂方式，即将数据分成若干小批量（batch）依次输入模型训练。批量大小（batch size）是重要超参数，需依据模型复杂度、数据集大小和计算资源等因素调整。另外，可随机打乱数据顺序，避免模型学习到数据的顺序信息，提升模型泛化能力 。</p>
+</li>
+</ol>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/关于贝叶斯分类器实现手写数字识别的解读bayesclassifier.html">
+      <span>上一篇</span>
+      <strong>关于贝叶斯分类器实现手写数字识别的解读bayesClassifier</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/一个完整的神经网络识别0-9手写数字的matlab神经网络.html">
+      <span>下一篇</span>
+      <strong>一个完整的神经网络识别0 9手写数字的MATLAB神经网络</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/详细案例说明ai所用的算法列出公式用python代码说明用法.html">详细案例说明AI所用的算法列出公式用Python代码说明用法</a></h3>
+        <p class="post-excerpt">我们来详细拆解一个最经典、最基础的 AI 算法 ——线性回归 (Linear Regression)。它是理解几乎所有更复杂 AI 模型（如神经网络）的基石。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.312Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/用ai训练数据预测房地产价格走势.html">用AI训练数据预测房地产价格走势</a></h3>
+        <p class="post-excerpt">房地产数据分析与预测系统开发报告</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.186Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/ai算力需要数据库吗和数据库是什么关系什么样的数据库才能更好地匹配ai算力.html">AI算力需要数据库吗和数据库是什么关系什么样的数据库才能更好地匹配AI算力</a></h3>
+        <p class="post-excerpt">AI 算力离不开数据库，二者是 “协同支撑” 关系 —— 数据库负责高效存储和管理 AI 所需的海量数据，AI 算力则依赖这些数据进行模型训练和推理，缺少优质数据库支撑的 AI 算力会陷入 “无米之炊” 的困境。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.676Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

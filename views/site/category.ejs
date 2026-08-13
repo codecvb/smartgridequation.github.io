@@ -1,0 +1,13 @@
+<section class="page-head">
+  <div class="wrap">
+    <p class="kicker">COLLECTION</p>
+    <h1><%= selected.name %></h1>
+    <p class="page-desc">共 <%= posts.length %> 篇，按时间倒序排列。</p>
+    <div class="page-actions">
+      <a class="btn-ghost" href="/categories">全部分类</a>
+      <a class="btn-ghost" href="/archive">全部文章</a>
+    </div>
+  </div>
+</section>
+
+<%- include('_post-list', { posts: posts }) %>

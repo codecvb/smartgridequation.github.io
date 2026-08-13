@@ -73,7 +73,7 @@ function copyFile(src, dest) {
   fs.copyFileSync(src, dest);
 }
 
-function staticLinks(html, tagFiles) {
+function staticLinks(html, tagFiles, categoryFiles = new Map()) {
   return html
     .replace(/href="\/post\/([^"?#]+)"/g, (match, slug) => `href="/post/${slug}.html"`)
     .replace(/href="\/tags\?tag=([^"]+)"/g, (match, encoded) => {
@@ -83,14 +83,24 @@ function staticLinks(html, tagFiles) {
     })
     .replace(/href="\/archive"/g, 'href="/archive.html"')
     .replace(/href="\/tags"/g, 'href="/tags.html"')
-    .replace(/href="\/about"/g, 'href="/about.html"');
+    .replace(/href="\/about"/g, 'href="/about.html"')
+    .replace(/href="\/categories"/g, 'href="/categories.html"')
+    .replace(/href="\/category\/([^"?#]+)"/g, (match, slug) => {
+      const file = categoryFiles.get(slug) || 'categories.html';
+      return `href="/category/${file}"`;
+    });
 }
 
 function build() {
   const published = store.listPosts({ status: 'published' });
   const tags = store.getTags();
+  const categories = store.getCategories();
   const stats = store.getStats();
   const tagFiles = new Map(tags.map((tag, index) => [tag.name.toLowerCase(), `tag-${index + 1}.html`]));
+  const categoryFiles = new Map(categories.map((category) => [category.slug, `${category.slug}.html`]));
+  const groups = categories
+    .map((category) => ({ ...category, posts: store.listPosts({ status: 'published', category: category.name }) }))
+    .filter((group) => group.posts.length);
 
   writePage('index.html', staticLinks(renderSite('home', {
     path: '/',
@@ -98,17 +108,36 @@ function build() {
     featured: published[0] || null,
     posts: published.slice(1),
     stats,
-    tags: tags.slice(0, 8)
-  }), tagFiles));
+    tags: tags.slice(0, 8),
+    categories
+  }), tagFiles, categoryFiles));
 
   writePage('archive.html', staticLinks(renderSite('archive', {
     path: '/archive',
     pageTitle: '归档',
     heading: '全部文章',
-    description: `按时间倒序排列，一共 ${published.length} 篇。`,
+    description: `按分类整理，一共 ${published.length} 篇。`,
     posts: published,
+    categories,
+    groups,
     tags: []
-  }), tagFiles));
+  }), tagFiles, categoryFiles));
+
+  writePage('categories.html', staticLinks(renderSite('categories', {
+    path: '/categories',
+    pageTitle: '分类',
+    categories
+  }), tagFiles, categoryFiles));
+
+  categories.forEach((category) => {
+    writePage(`category/${category.slug}.html`, staticLinks(renderSite('category', {
+      path: `/category/${category.slug}`,
+      pageTitle: category.name,
+      selected: category,
+      posts: store.listPosts({ status: 'published', category: category.name }),
+      categories
+    }), tagFiles, categoryFiles));
+  });
 
   writePage('tags.html', staticLinks(renderSite('tags', {
     path: '/tags',
@@ -116,7 +145,7 @@ function build() {
     selected: '',
     posts: [],
     tags
-  }), tagFiles));
+  }), tagFiles, categoryFiles));
 
   tags.forEach((tag, index) => {
     writePage(`tags/tag-${index + 1}.html`, staticLinks(renderSite('tags', {
@@ -125,12 +154,13 @@ function build() {
       selected: tag.name,
       posts: store.listPosts({ status: 'published', tag: tag.name }),
       tags
-    }), tagFiles));
+    }), tagFiles, categoryFiles));
   });
 
   for (const post of published) {
     const postView = {
       ...post,
+      categorySlug: store.slugify(post.category || '随笔'),
       contentHtml: renderMarkdown(post.content),
       toc: getToc(post.content),
       readMinutes: readTime(post.content)
@@ -142,20 +172,20 @@ function build() {
       prev: store.getAdjacent(post.id, 'prev'),
       next: store.getAdjacent(post.id, 'next'),
       related: store.getRelated(post.id, post.tags, 3)
-    }), tagFiles));
+    }), tagFiles, categoryFiles));
   }
 
   writePage('about.html', staticLinks(renderSite('about', {
     path: '/about',
     pageTitle: '关于'
-  }), tagFiles));
+  }), tagFiles, categoryFiles));
 
   writePage('404.html', staticLinks(renderSite('error', {
     path: '/',
     pageTitle: '未找到',
     statusCode: 404,
     message: '页面不存在或已被移走。'
-  }), tagFiles));
+  }), tagFiles, categoryFiles));
 
   const searchTemplate = fs.readFileSync(path.join(VIEWS_DIR, 'static-search.ejs'), 'utf8');
   const searchHtml = ejs.render(searchTemplate, {
@@ -194,7 +224,7 @@ function build() {
   fs.writeFileSync(cssPath, css);
   writeFile('.nojekyll', '');
 
-  console.log(`Static site generated: ${published.length} posts, ${tags.length} tags.`);
+  console.log(`Static site generated: ${published.length} posts, ${tags.length} tags, ${categories.length} categories.`);
 }
 
 build();

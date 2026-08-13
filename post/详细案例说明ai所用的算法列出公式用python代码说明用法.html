@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>详细案例说明AI所用的算法列出公式用Python代码说明用法 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">详细案例说明AI所用的算法列出公式用Python代码说明用法</h1>
+        <p class="post-deck">我们来详细拆解一个最经典、最基础的 AI 算法 ——线性回归 (Linear Regression)。它是理解几乎所有更复杂 AI 模型（如神经网络）的基石。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.312Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>10 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-5.html">人工智能</a>
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+            <a class="tag-chip" href="../tags/tag-16.html">AI</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>我们来详细拆解一个最经典、最基础的 AI 算法 ——<strong>线性回归 (Linear Regression)</strong>。它是理解几乎所有更复杂 AI 模型（如神经网络）的基石。</p>
+<p>我会按照以下结构为你讲解：</p>
+<ol>
+<li><strong>核心思想与生活案例</strong>：用一个具体的例子让你明白它在做什么。</li>
+<li><strong>数学原理与所有公式</strong>：清晰地列出并解释每个公式。</li>
+<li><strong>代码实现与用法</strong>：使用 Python 和<code>scikit-learn</code>库来演示如何应用。</li>
+<li><strong>算法总结</strong>：回顾线性回归的优缺点和适用场景。</li>
+</ol>
+<hr>
+<h4 id="1-核心思想与生活案例" class="prose-heading">1. 核心思想与生活案例</h4>
+<p><strong>核心思想</strong>：线性回归的目标是，在一堆看似杂乱的数据点中，找到一条<strong>最佳拟合直线</strong>（或高维空间中的超平面），使得这条线到所有数据点的总误差最小。</p>
+<p><strong>生活案例：预测房价</strong></p>
+<p>假设你想根据房子的面积来预测它的价格。你收集了一些数据：</p>
+<p>房子面积 (平方米)</p>
+<p>价格 (万元)</p>
+<p>50</p>
+<p>100</p>
+<p>70</p>
+<p>140</p>
+<p>80</p>
+<p>165</p>
+<p>100</p>
+<p>220</p>
+<p>120</p>
+<p>260</p>
+<p>如果我们把这些数据画在图上，横轴是面积 (X)，纵轴是价格 (Y)，会得到一些分散的点。</p>
+<p>线性回归要做的事，就是画一条直线 <code>y = mx + b</code>，让这条线尽可能地 “穿过” 这些点。其中：</p>
+<ul>
+<li><code>x</code> 是<strong>特征 (Feature)</strong>，在这里是房子面积。</li>
+<li><code>y</code> 是<strong>目标 (Target)</strong>，在这里是房子价格。</li>
+<li><code>m</code> 是直线的<strong>斜率 (Slope)</strong>，代表面积每增加 1 平方米，价格预计会上涨多少。</li>
+<li><code>b</code> 是直线的<strong>截距 (Intercept)</strong>，代表理论上面积为 0 时的房价（虽然在这个例子里没有实际意义）。</li>
+</ul>
+<p>我们的任务就是找到最优的 <code>m</code> 和 <code>b</code> 的值。</p>
+<hr>
+<h4 id="2-数学原理与所有公式" class="prose-heading">2. 数学原理与所有公式</h4>
+<p>我们用更通用的数学符号来表示：</p>
+<ul>
+<li><strong>输入特征</strong>：<code>x_i</code> (比如第 i 个房子的面积)</li>
+<li><strong>真实输出</strong>：<code>y_i</code> (比如第 i 个房子的真实价格)</li>
+<li><strong>预测输出</strong>：<code>ŷ_i</code> (读作 y-hat，是模型对第 i 个房子价格的预测值)</li>
+<li><strong>模型参数</strong>：<code>w</code> (权重 / 斜率) 和 <code>b</code> (偏置 / 截距)</li>
+</ul>
+<h5 id="公式-1-线性回归模型-the-model" class="prose-heading">公式 1: 线性回归模型 (The Model)</h5>
+<p>这就是我们要找的那条直线的方程。</p>
+<p><img src="../uploads/csdn/%E8%AF%A6%E7%BB%86%E6%A1%88%E4%BE%8B%E8%AF%B4%E6%98%8Eai%E6%89%80%E7%94%A8%E7%9A%84%E7%AE%97%E6%B3%95%E5%88%97%E5%87%BA%E5%85%AC%E5%BC%8F%E7%94%A8python%E4%BB%A3%E7%A0%81%E8%AF%B4%E6%98%8E%E7%94%A8%E6%B3%95/img-01.png" alt=""></p>
+<p>是特征向量。</p>
+<h5 id="公式-2-损失函数-loss-function" class="prose-heading">公式 2: 损失函数 (Loss Function)</h5>
+<p>我们需要一个标准来衡量一条直线的 “好坏”，这个标准就是<strong>损失函数</strong>（也叫成本函数）。它计算的是所有预测值与真实值之间的总误差。</p>
+<p>最常用的是<strong>均方误差 (Mean Squared Error, MSE)</strong>。</p>
+<p><img src="../uploads/csdn/%E8%AF%A6%E7%BB%86%E6%A1%88%E4%BE%8B%E8%AF%B4%E6%98%8Eai%E6%89%80%E7%94%A8%E7%9A%84%E7%AE%97%E6%B3%95%E5%88%97%E5%87%BA%E5%85%AC%E5%BC%8F%E7%94%A8python%E4%BB%A3%E7%A0%81%E8%AF%B4%E6%98%8E%E7%94%A8%E6%B3%95/img-02.png" alt=""></p>
+<h5 id="公式-3-优化算法-optimization-algorithm" class="prose-heading">公式 3: 优化算法 (Optimization Algorithm)</h5>
+<p>如何找到使损失函数最小的 <code>w</code> 和 <code>b</code>最常用的方法是<strong>梯度下降 (Gradient Descent)</strong>。</p>
+<p><strong>核心思想</strong>：想象一下，损失函数 \(J(w, b)\) 是一座山，我们站在山上的某个位置（代表当前的 <code>w</code> 和 <code>b</code> 值）。梯度下降就像我们一步步往下走，每次都朝着坡度最陡的方向（梯度的反方向）迈一小步，直到走到山谷最低点。</p>
+<p><strong>更新规则 (Update Rules):</strong></p>
+<p>我们通过计算损失函数对每个参数的<strong>偏导数</strong>（梯度）来找到这个 “最陡的方向”，然后更新参数。</p>
+<p><img src="../uploads/csdn/%E8%AF%A6%E7%BB%86%E6%A1%88%E4%BE%8B%E8%AF%B4%E6%98%8Eai%E6%89%80%E7%94%A8%E7%9A%84%E7%AE%97%E6%B3%95%E5%88%97%E5%87%BA%E5%85%AC%E5%BC%8F%E7%94%A8python%E4%BB%A3%E7%A0%81%E8%AF%B4%E6%98%8E%E7%94%A8%E6%B3%95/img-03.png" alt=""></p>
+<p><strong>计算偏导数 (Calculating the Partial Derivatives):</strong></p>
+<p><img src="../uploads/csdn/%E8%AF%A6%E7%BB%86%E6%A1%88%E4%BE%8B%E8%AF%B4%E6%98%8Eai%E6%89%80%E7%94%A8%E7%9A%84%E7%AE%97%E6%B3%95%E5%88%97%E5%87%BA%E5%85%AC%E5%BC%8F%E7%94%A8python%E4%BB%A3%E7%A0%81%E8%AF%B4%E6%98%8E%E7%94%A8%E6%B3%95/img-04.png" alt=""></p>
+<p>这个过程会不断重复，直到损失函数的值不再显著下降，或者达到预设的迭代次数。</p>
+<hr>
+<h4 id="3-代码实现与用法" class="prose-heading">3. 代码实现与用法</h4>
+<p>我们使用 Python 和强大的机器学习库 <code>scikit-learn</code> 来实现。<code>scikit-learn</code> 已经封装好了所有复杂的数学计算。</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> sklearn.linear_model <span class="hljs-keyword">import</span> LinearRegression
+
+<span class="hljs-comment"># 房子面积 (特征)</span>
+X = np.array([<span class="hljs-number">50</span>, <span class="hljs-number">70</span>, <span class="hljs-number">80</span>, <span class="hljs-number">100</span>, <span class="hljs-number">120</span>]).reshape(-<span class="hljs-number">1</span>, <span class="hljs-number">1</span>)
+<span class="hljs-comment"># reshape(-1, 1) 是为了把一维数组变成二维数组，因为scikit-learn的模型期望输入是2D的 (样本数, 特征数)</span>
+
+<span class="hljs-comment"># 房子价格 (目标)</span>
+y = np.array([<span class="hljs-number">100</span>, <span class="hljs-number">140</span>, <span class="hljs-number">165</span>, <span class="hljs-number">220</span>, <span class="hljs-number">260</span>])
+
+
+<span class="hljs-comment"># 1. 创建一个线性回归模型的实例</span>
+model = LinearRegression()
+
+<span class="hljs-comment"># 2. 使用训练数据来“拟合”模型 (fit the model)</span>
+<span class="hljs-comment"># 这个过程内部就是在执行梯度下降（或其他优化算法）来找到最优的w和b</span>
+model.fit(X, y)
+
+<span class="hljs-comment"># 查看斜率 (w)</span>
+<span class="hljs-comment"># coef_ 是 coefficient (系数) 的缩写</span>
+w = model.coef_[<span class="hljs-number">0</span>]
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;模型找到的斜率 (w): <span class="hljs-subst">{w}</span>&quot;</span>)
+
+<span class="hljs-comment"># 查看截距 (b)</span>
+<span class="hljs-comment"># intercept_ 是截距的意思</span>
+b = model.intercept_
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;模型找到的截距 (b): <span class="hljs-subst">{b}</span>&quot;</span>)
+
+<span class="hljs-comment"># 输出:</span>
+<span class="hljs-comment"># 模型找到的斜率 (w): 2.075</span>
+<span class="hljs-comment"># 模型找到的截距 (b): -3.75</span>
+
+<span class="hljs-comment"># 预测一个90平米的房子价格</span>
+new_area = np.array([[<span class="hljs-number">90</span>]]) <span class="hljs-comment"># 同样需要是2D数组</span>
+predicted_price = model.predict(new_area)
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;预测一个90平米的房子价格为: <span class="hljs-subst">{predicted_price[<span class="hljs-number">0</span>]}</span> 万元&quot;</span>)
+
+<span class="hljs-comment"># 预测多个房子的价格</span>
+areas_to_predict = np.array([[<span class="hljs-number">60</span>], [<span class="hljs-number">110</span>]])
+predicted_prices = model.predict(areas_to_predict)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;预测60平米和110平米的房子价格分别为: <span class="hljs-subst">{predicted_prices}</span> 万元&quot;</span>)
+
+<span class="hljs-comment"># 输出:</span>
+<span class="hljs-comment"># 预测一个90平米的房子价格为: 183.0 万元</span>
+<span class="hljs-comment"># 预测60平米和110平米的房子价格分别为: [120.75 224.5 ] 万元</span>
+
+<span class="hljs-comment"># 1. 绘制原始数据点</span>
+plt.scatter(X, y, color=<span class="hljs-string">&#x27;blue&#x27;</span>, label=<span class="hljs-string">&#x27;original data&#x27;</span>)
+
+<span class="hljs-comment"># 2. 绘制拟合出的直线</span>
+<span class="hljs-comment"># 使用模型的predict方法来生成直线上的点，这样最准确</span>
+y_pred = model.predict(X)
+plt.plot(X, y_pred, color=<span class="hljs-string">&#x27;red&#x27;</span>, linewidth=<span class="hljs-number">2</span>, label=<span class="hljs-string">&#x27;LinearRegression&#x27;</span>)
+
+<span class="hljs-comment"># 3. 添加图表元素</span>
+plt.title(<span class="hljs-string">&#x27;The relationship between house area and price&#x27;</span>)
+plt.xlabel(<span class="hljs-string">&#x27;area (square meters)&#x27;</span>)
+plt.ylabel(<span class="hljs-string">&#x27;Price (10,000 yuan)&#x27;</span>)
+plt.legend() <span class="hljs-comment"># 显示图例</span>
+plt.grid(<span class="hljs-literal">True</span>) <span class="hljs-comment"># 显示网格</span>
+plt.show()
+</code></pre>
+<p><img src="../uploads/csdn/%E8%AF%A6%E7%BB%86%E6%A1%88%E4%BE%8B%E8%AF%B4%E6%98%8Eai%E6%89%80%E7%94%A8%E7%9A%84%E7%AE%97%E6%B3%95%E5%88%97%E5%87%BA%E5%85%AC%E5%BC%8F%E7%94%A8python%E4%BB%A3%E7%A0%81%E8%AF%B4%E6%98%8E%E7%94%A8%E6%B3%95/img-05.png" alt=""></p>
+<p><img src="../uploads/csdn/%E8%AF%A6%E7%BB%86%E6%A1%88%E4%BE%8B%E8%AF%B4%E6%98%8Eai%E6%89%80%E7%94%A8%E7%9A%84%E7%AE%97%E6%B3%95%E5%88%97%E5%87%BA%E5%85%AC%E5%BC%8F%E7%94%A8python%E4%BB%A3%E7%A0%81%E8%AF%B4%E6%98%8E%E7%94%A8%E6%B3%95/img-06.png" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#1-核心思想与生活案例">1\. 核心思想与生活案例</a>
+          
+            <a class="toc-level-4" href="#2-数学原理与所有公式">2\. 数学原理与所有公式</a>
+          
+            <a class="toc-level-5" href="#公式-1-线性回归模型-the-model">公式 1: 线性回归模型 (The Model)</a>
+          
+            <a class="toc-level-5" href="#公式-2-损失函数-loss-function">公式 2: 损失函数 (Loss Function)</a>
+          
+            <a class="toc-level-5" href="#公式-3-优化算法-optimization-algorithm">公式 3: 优化算法 (Optimization Algorithm)</a>
+          
+            <a class="toc-level-4" href="#3-代码实现与用法">3\. 代码实现与用法</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/lvgl8制作大学生校园课程表课表成绩计时提醒功能界面.html">
+      <span>上一篇</span>
+      <strong>LVGL8制作大学生校园课程表课表成绩计时提醒功能界面</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/神经网络解决图论中最优路径的问题matlab代码.html">
+      <span>下一篇</span>
+      <strong>神经网络解决图论中最优路径的问题MATLAB代码</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/用ai训练数据预测房地产价格走势.html">用AI训练数据预测房地产价格走势</a></h3>
+        <p class="post-excerpt">房地产数据分析与预测系统开发报告</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.186Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/无人机表演点云路径规划python版.html">无人机表演点云路径规划Python版</a></h3>
+        <p class="post-excerpt">摘要：本文介绍了一个无人机表演路径规划系统，支持加载两个TXT格式的点云数据文件进行路径规划。系统采用PyQt5框架开发3D可视化界面，包含点云加载、路径优化、动画控制等功能模块。核心算法通过KD树实现点云匹配和路径优化，支持多种插值方式生成平滑动画。系统可调整无人机数量、大小、颜色等参数，提供3D可视化视图和轨迹显示功能，适用于大型无人机编队表演的路径规划需求。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.134Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/人工智能大模型是怎样喂数据的.html">人工智能大模型是怎样喂数据的</a></h3>
+        <p class="post-excerpt">人工智能大模型喂数据是一个系统且精细的过程，涵盖数据收集、预处理、划分、投喂等多个关键环节，每个环节都对模型训练效果有着重要影响：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.898Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

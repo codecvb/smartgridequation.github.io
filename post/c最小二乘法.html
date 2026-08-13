@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>c最小二乘法 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/数学.html">数学</a>
+        </nav>
+        <h1 class="post-title">c最小二乘法</h1>
+        <p class="post-deck">下面是一个使用 C++ 实现最小二乘法的示例代码，最小二乘法用于拟合线性回归模型 y = ax + b。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.889Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>4 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-6.html">数学</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>下面是一个使用 C++ 实现最小二乘法的示例代码，最小二乘法用于拟合线性回归模型 y = ax + b。</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
+
+<span class="hljs-comment">// 定义最小二乘法函数</span>
+<span class="hljs-function">std::pair&lt;<span class="hljs-type">double</span>, <span class="hljs-type">double</span>&gt; <span class="hljs-title">leastSquares</span><span class="hljs-params">(<span class="hljs-type">const</span> std::vector&lt;<span class="hljs-type">double</span>&gt;&amp; x, <span class="hljs-type">const</span> std::vector&lt;<span class="hljs-type">double</span>&gt;&amp; y)</span> </span>{
+    <span class="hljs-type">int</span> n = x.<span class="hljs-built_in">size</span>();
+    <span class="hljs-type">double</span> sumX = <span class="hljs-number">0.0</span>, sumY = <span class="hljs-number">0.0</span>, sumXY = <span class="hljs-number">0.0</span>, sumX2 = <span class="hljs-number">0.0</span>;
+
+    <span class="hljs-comment">// 计算所需的总和</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; n; ++i) {
+        sumX += x[i];
+        sumY += y[i];
+        sumXY += x[i] * y[i];
+        sumX2 += x[i] * x[i];
+    }
+
+    <span class="hljs-comment">// 计算斜率 a 和截距 b</span>
+    <span class="hljs-type">double</span> a = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    <span class="hljs-type">double</span> b = (sumY - a * sumX) / n;
+
+    <span class="hljs-keyword">return</span> std::<span class="hljs-built_in">make_pair</span>(a, b);
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-comment">// 示例数据</span>
+    std::vector&lt;<span class="hljs-type">double</span>&gt; x = {<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>};
+    std::vector&lt;<span class="hljs-type">double</span>&gt; y = {<span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">6</span>, <span class="hljs-number">8</span>, <span class="hljs-number">10</span>};
+
+    <span class="hljs-comment">// 调用最小二乘法函数</span>
+    std::pair&lt;<span class="hljs-type">double</span>, <span class="hljs-type">double</span>&gt; result = <span class="hljs-built_in">leastSquares</span>(x, y);
+    <span class="hljs-type">double</span> a = result.first;
+    <span class="hljs-type">double</span> b = result.second;
+
+    <span class="hljs-comment">// 输出结果</span>
+    std::cout &lt;&lt; <span class="hljs-string">&quot;拟合直线方程: y = &quot;</span> &lt;&lt; a &lt;&lt; <span class="hljs-string">&quot;x + &quot;</span> &lt;&lt; b &lt;&lt; std::endl;
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<h4 id="代码解释" class="prose-heading">代码解释</h4>
+<ol>
+<li><strong><code>leastSquares</code> 函数</strong>：该函数接受两个 <code>std::vector</code> 类型的参数 <code>x</code> 和 <code>y</code>，分别表示自变量和因变量的数据点。在函数内部，首先计算 x 的总和 <code>sumX</code>、y 的总和 <code>sumY</code>、x 与 y 乘积的总和 <code>sumXY</code> 以及 x 的平方和 <code>sumX2</code>。然后根据最小二乘法的公式计算斜率 a 和截距 b，并将它们作为 <code>std::pair</code> 类型的结果返回。</li>
+<li><strong><code>main</code> 函数</strong>：定义了示例数据 <code>x</code> 和 <code>y</code>，调用 <code>leastSquares</code> 函数进行最小二乘法拟合，得到斜率 a 和截距 b，并将拟合直线方程输出到控制台。</li>
+</ol>
+<p>你可以将示例数据替换为你自己的数据，以进行不同数据集的拟合。</p>
+<p><img src="../uploads/csdn/c%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/c%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/img-02.png" alt=""></p>
+<p><img src="../uploads/csdn/c%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/img-03.png" alt=""></p>
+<p><img src="../uploads/csdn/c%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/img-04.png" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#代码解释">代码解释</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/利用代码程序计算数学函数的泰勒展开式matlab推导函数泰勒展开式python推导函数泰勒展开式.html">
+      <span>上一篇</span>
+      <strong>利用代码程序计算数学函数的泰勒展开式MATLAB推导函数泰勒展开式Python推导函数泰勒展开式</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/模仿微信发送消息界面traecn版qt6.html">
+      <span>下一篇</span>
+      <strong>模仿微信发送消息界面traecn版QT6</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/由小到大的数列寻找是否存在一个数的耗时最小的算法.html">由小到大的数列寻找是否存在一个数的耗时最小的算法</a></h3>
+        <p class="post-excerpt">对于一个由小到大排列的数列，寻找其中是否存在一个特定数，耗时最小的算法是二分查找算法（Binary Search）。下面为你详细介绍该算法：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.599Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/凸包问题graham扫描算法matlab.html">凸包问题Graham扫描算法MATLAB</a></h3>
+        <p class="post-excerpt">算法要解决的问题</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.498Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/c动态规划的解释案例和完整代码斐波那契数列和背包问题需要用到动态规划算法的常见案例.html">C动态规划的解释案例和完整代码斐波那契数列和背包问题需要用到动态规划算法的常见案例</a></h3>
+        <p class="post-excerpt">动态规划的解释</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.302Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

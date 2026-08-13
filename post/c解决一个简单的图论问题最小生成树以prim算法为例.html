@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>C解决一个简单的图论问题最小生成树以Prim算法为例 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/算法与数据结构.html">算法与数据结构</a>
+        </nav>
+        <h1 class="post-title">C解决一个简单的图论问题最小生成树以Prim算法为例</h1>
+        <p class="post-deck">使用 C++ 解决一个简单的图论问题 —— 最小生成树（以 Prim 算法为例），并且使用 Graphviz 库来生成结果图。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.332Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>18 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-18.html">算法</a>
+          
+            <a class="tag-chip" href="../tags/tag-9.html">C</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>使用 C++ 解决一个简单的图论问题 —— 最小生成树（以 Prim 算法为例），并且使用 Graphviz 库来生成结果图。</p>
+<p>在图论中，<strong>“边权之和最小”</strong> 是最小生成树（MST）的核心目标，其含义和背景可以从以下几个方面解释：</p>
+<h4 id="一-基础定义-什么是-边权之和" class="prose-heading">一、基础定义：什么是 “边权之和”？</h4>
+<ul>
+<li><strong>边权</strong>：图中每条边的权重（Weight），可以代表实际问题中的成本、距离、时间、容量等量化指标。</li>
+<li><strong>边权之和</strong>：对于一个子图（如生成树），将其中所有边的权重相加得到的总和。</li>
+</ul>
+<h4 id="二-最小-的具体含义-为什么要让边权之和最小" class="prose-heading">二、“最小” 的具体含义：为什么要让边权之和最小？</h4>
+<p>在 <strong>无向连通图</strong> 中，生成树的定义是：</p>
+<ul>
+<li>包含图中 <strong>所有顶点</strong>（必须覆盖所有节点）。</li>
+<li>是一棵 <strong>树</strong>（即无环，且边数为 \(|V| - 1\)，V 为顶点数）。</li>
+</ul>
+<p><strong>最小生成树（MST）</strong> 是所有可能的生成树中，<strong>边权之和最小的那一棵</strong>。 例如，假设有一个包含 4 个顶点的图，可能有多种生成树（如下图示），其中边权和最小的即为 MST：</p>
+<pre class="hljs"><code>   顶点A ─(2)─ 顶点B       顶点A ─(1)─ 顶点C
+           │(3)             │(1)
+           顶点C ─(1)─ 顶点D   顶点B ─(3)─ 顶点D
+   边权和：2+3+1=6          边权和：1+1+3=5（MST）
+</code></pre>
+<h4 id="三-数学表达与约束条件" class="prose-heading">三、数学表达与约束条件</h4>
+<p>设图 \(G = (V, E)\)，其中顶点集合 \(V = \{v_1, v_2, \dots, v_n\}\)，边集合 \(E = \{e_1, e_2, \dots, e_m\}\)，每条边 \(e_i\) 的权重为 \(w(e_i)\)。 生成树 \(T = (V, E_T)\) 需满足：</p>
+<ol>
+<li>\(E_T \subseteq E\)，且 \(|E_T| = |V| - 1\)（无环，连通所有顶点）。</li>
+<li>目标是最小化 \(\sum_{e \in E_T} w(e)\)，即：\(\min \sum_{e \in E_T} w(e)\)</li>
+</ol>
+<h4 id="四-实际意义-为什么需要-边权之和最小" class="prose-heading">四、实际意义：为什么需要 “边权之和最小”？</h4>
+<p>“边权之和最小” 的应用场景通常与 <strong>优化问题</strong> 相关，例如：</p>
+<ol>
+<li><strong>网络建设</strong>：
+<ul>
+<li>若边权代表铺设电缆的成本，最小生成树表示用最小成本连接所有节点的方案。</li>
+</ul>
+</li>
+<li><strong>电路设计</strong>：
+<ul>
+<li>边权代表导线长度，MST 可最小化电路中导线的总长度。</li>
+</ul>
+</li>
+<li><strong>物流规划</strong>：
+<ul>
+<li>边权代表运输距离，MST 可找到连接所有地点的最短路径网络（无环，避免冗余）。</li>
+</ul>
+</li>
+</ol>
+<h4 id="五-与-生成树-的本质区别" class="prose-heading">五、与 “生成树” 的本质区别</h4>
+<ul>
+<li><strong>生成树</strong>：只要满足 “包含所有顶点且无环” 即可，不考虑边权和。</li>
+<li><strong>最小生成树</strong>：在所有生成树中，额外要求边权和 <strong>全局最小</strong>，是一种带优化目标的生成树。 （注：若图不连通，则不存在生成树；若边权可能为负，Prim 算法仍适用，但 Kruskal 算法需调整）</li>
+</ul>
+<h4 id="六-如何求解-边权之和最小" class="prose-heading">六、如何求解 “边权之和最小”？</h4>
+<p>通过 <strong>贪心算法</strong>（如 Prim 算法、Kruskal 算法）或 <strong>优先队列优化</strong> 来高效找到 MST，核心思想是：</p>
+<ul>
+<li><strong>Prim 算法</strong>：从一个顶点出发，每次选择当前生成树到未访问顶点的最小边（“加点法”）。</li>
+<li><strong>Kruskal 算法</strong>：按边权从小到大排序，每次选择不构成环的最小边（“加边法”）。</li>
+</ul>
+<h4 id="总结" class="prose-heading">总结</h4>
+<p>“边权之和最小” 是最小生成树的核心目标，它要求在连通所有顶点的无环子图中，选择边权总和最小的方案。这一概念在实际问题中对应 “最小成本连接所有节点”，通过经典算法可高效求解，是图论中优化问题的基础应用之一。</p>
+<h4 id="实现思路" class="prose-heading">实现思路</h4>
+<ol>
+<li><strong>Prim 算法</strong>：用于在加权连通图中找到最小生成树。</li>
+<li><strong>Graphviz</strong>：一个开源的图形可视化工具，通过生成 DOT 语言描述的图形文件，然后转换为图片格式（如 PNG）。</li>
+</ol>
+<p><img src="../uploads/csdn/c%E8%A7%A3%E5%86%B3%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E5%9B%BE%E8%AE%BA%E9%97%AE%E9%A2%98%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91%E4%BB%A5prim%E7%AE%97%E6%B3%95%E4%B8%BA%E4%BE%8B/img-01.png" alt=""></p>
+<h4 id="代码解释" class="prose-heading">代码解释</h4>
+<ol>
+<li><strong>Prim 算法</strong>：通过优先队列来选择当前最小权值的边，逐步构建最小生成树。</li>
+<li><strong>生成 DOT 文件</strong>：将图的信息和最小生成树的边信息写入 DOT 文件，方便后续使用 Graphviz 工具将其转换为图片。</li>
+</ol>
+<h4 id="使用方法" class="prose-heading">使用方法</h4>
+<ol>
+<li>编译并运行上述代码，会生成一个名为 <code>mst.dot</code> 的文件。</li>
+<li>安装 Graphviz 工具，然后在命令行中运行以下命令将 DOT 文件转换为 PNG 图片：</li>
+</ol>
+<pre class="hljs"><code>dot -Tpng mst.dot -o mst.png
+</code></pre>
+<p>这样就可以得到一个可视化的最小生成树图片。</p>
+<h4 id="prim-算法与最小生成树问题" class="prose-heading">Prim 算法与最小生成树问题</h4>
+<h5 id="1-什么是-prim-算法" class="prose-heading"><strong>1. 什么是 Prim 算法？</strong></h5>
+<p>Prim 算法是一种用于求解 ** 加权无向图中最小生成树（Minimum Spanning Tree, MST）** 的贪心算法。 <strong>最小生成树</strong>的定义：包含图中所有顶点，且边权之和最小的无环子图（树结构）。 Prim 算法的核心思想是：<strong>从任意一个顶点出发，逐步扩展生成树，每次选择当前生成树到其他顶点的最小边，直到所有顶点都被包含</strong>。</p>
+<h5 id="2-prim-算法的核心步骤-以邻接表-优先队列实现为例" class="prose-heading"><strong>2. Prim 算法的核心步骤（以邻接表 + 优先队列实现为例）</strong></h5>
+<p>假设图为 \(G = (V, E)\)，顶点集合 \(V = \{0, 1, 2, \dots, n-1\}\)，边权非负。</p>
+<h6 id="步骤-1-初始化" class="prose-heading"><strong>步骤 1：初始化</strong></h6>
+<ul>
+<li>选择一个起始顶点（如顶点 0），标记为 “已访问”，加入生成树。</li>
+<li>维护三个数组：
+<ul>
+<li><code>key[]</code>：记录每个顶点到当前生成树的最小边权，初始化为无穷大（起始顶点的<code>key</code>设为 0）。</li>
+<li><code>parent[]</code>：记录生成树中每个顶点的父节点，用于重构生成树。</li>
+<li><code>visited[]</code>：标记顶点是否已加入生成树。</li>
+</ul>
+</li>
+</ul>
+<h6 id="步骤-2-扩展生成树-贪心选择" class="prose-heading"><strong>步骤 2：扩展生成树（贪心选择）</strong></h6>
+<ul>
+<li>使用 ** 优先队列（最小堆）** 存储顶点，按<code>key</code>值排序，每次取出<code>key</code>最小的顶点 u。</li>
+<li>遍历 u 的所有邻接顶点 v：
+<ul>
+<li>如果 v 未被访问，且 u 到 v 的边权小于 v 的当前<code>key</code>值：
+<ul>
+<li>更新 v 的<code>key</code>值为该边权。</li>
+<li>记录 v 的父节点为 u。</li>
+<li>将 v 加入优先队列。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h6 id="步骤-3-重复直到所有顶点加入" class="prose-heading"><strong>步骤 3：重复直到所有顶点加入</strong></h6>
+<ul>
+<li>重复步骤 2，直到所有顶点被标记为 “已访问”。此时，<code>parent[]</code>数组存储了最小生成树的边关系。</li>
+</ul>
+<ol>
+<li><strong>初始化</strong>：起始顶点 0，<code>key[0]=0</code>，其他顶点<code>key</code>为无穷大。</li>
+<li><strong>第一次迭代</strong>：取出顶点 0，遍历邻接顶点 1（边权 2）、3（边权 6）。更新它们的<code>key</code>为 2 和 6，父节点为 0。</li>
+<li><strong>第二次迭代</strong>：优先队列中最小<code>key</code>是顶点 1（key=2），取出后遍历其邻接顶点 0（已访问）、2（边权 3）、3（边权 8）、4（边权 5）。更新顶点 2 的<code>key</code>为 3，顶点 4 的<code>key</code>为 5，父节点分别为 1。</li>
+<li><strong>第三次迭代</strong>：最小<code>key</code>是顶点 2（key=3），取出后遍历邻接顶点 1（已访问）、4（边权 7）。顶点 4 的当前<code>key</code>是 5，7 大于 5，不更新。</li>
+<li><strong>第四次迭代</strong>：最小<code>key</code>是顶点 4（key=5），取出后遍历邻接顶点 1（已访问）、2（已访问）、3（边权 9）。顶点 3 的当前<code>key</code>是 6，9 大于 6，不更新。</li>
+<li><strong>第五次迭代</strong>：最后取出顶点 3（key=6），所有顶点已访问，算法结束。</li>
+</ol>
+<p>最终生成树的边为： 0-1（2）、1-2（3）、1-4（5）、0-3（6），总权值 2+3+5+6=16。</p>
+<p><img src="../uploads/csdn/c%E8%A7%A3%E5%86%B3%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E5%9B%BE%E8%AE%BA%E9%97%AE%E9%A2%98%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91%E4%BB%A5prim%E7%AE%97%E6%B3%95%E4%B8%BA%E4%BE%8B/img-02.png" alt=""></p>
+<h5 id="4-算法复杂度" class="prose-heading"><strong>4. 算法复杂度</strong></h5>
+<ul>
+<li><strong>邻接矩阵 + 数组实现</strong>（适合稠密图）：时间复杂度 \(O(V^2)\)，无需优先队列，每次遍历所有未访问顶点找最小<code>key</code>。</li>
+<li><strong>邻接表 + 优先队列实现</strong>（适合稀疏图）：时间复杂度 \(O(E \log V)\)，每次更新优先队列的时间为 \(O(\log V)\)。</li>
+</ul>
+<h5 id="5-与-kruskal-算法的区别" class="prose-heading"><strong>5. 与 Kruskal 算法的区别</strong></h5>
+<ul>
+<li><strong>Prim 算法</strong>：<strong>加点法</strong>，从顶点出发，每次扩展生成树的顶点，适合<strong>边稠密或顶点少</strong>的图。</li>
+<li><strong>Kruskal 算法</strong>：<strong>加边法</strong>，按边权从小到大排序，每次选不构成环的最小边，适合<strong>边稀疏</strong>的图。</li>
+</ul>
+<h5 id="6-应用场景" class="prose-heading"><strong>6. 应用场景</strong></h5>
+<ul>
+<li>网络设计（如最小成本连接所有节点）。</li>
+<li>电路设计（最小化导线长度）。</li>
+<li>聚类问题（构建最小生成树后按边权切割）。</li>
+</ul>
+<h5 id="总结" class="prose-heading"><strong>总结</strong></h5>
+<p>Prim 算法通过贪心策略，每次选择当前生成树到未访问顶点的最小边，逐步构建最小生成树。其核心是<strong>局部最优选择（最小边权）推导出全局最优解</strong>，适用于边权非负的无向图，是解决最小生成树问题的经典算法之一。</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;queue&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;fstream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;limits&gt;</span></span>
+
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+
+<span class="hljs-comment">// 定义边的结构体</span>
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Edge</span> {
+    <span class="hljs-type">int</span> to;
+    <span class="hljs-type">int</span> weight;
+    <span class="hljs-built_in">Edge</span>(<span class="hljs-type">int</span> t, <span class="hljs-type">int</span> w) : <span class="hljs-built_in">to</span>(t), <span class="hljs-built_in">weight</span>(w) {}
+};
+
+<span class="hljs-comment">// 定义图的邻接表表示</span>
+<span class="hljs-keyword">using</span> Graph = vector&lt;vector&lt;Edge&gt;&gt;;
+
+<span class="hljs-comment">// Prim 算法求最小生成树</span>
+<span class="hljs-function">vector&lt;Edge&gt; <span class="hljs-title">prim</span><span class="hljs-params">(<span class="hljs-type">const</span> Graph&amp; graph)</span> </span>{
+    <span class="hljs-type">int</span> n = graph.<span class="hljs-built_in">size</span>();
+    <span class="hljs-function">vector&lt;<span class="hljs-type">bool</span>&gt; <span class="hljs-title">visited</span><span class="hljs-params">(n, <span class="hljs-literal">false</span>)</span></span>;
+    vector&lt;Edge&gt; mst;
+    priority_queue&lt;pair&lt;<span class="hljs-type">int</span>, pair&lt;<span class="hljs-type">int</span>, <span class="hljs-type">int</span>&gt;&gt;, vector&lt;pair&lt;<span class="hljs-type">int</span>, pair&lt;<span class="hljs-type">int</span>, <span class="hljs-type">int</span>&gt;&gt;&gt;, greater&lt;pair&lt;<span class="hljs-type">int</span>, pair&lt;<span class="hljs-type">int</span>, <span class="hljs-type">int</span>&gt;&gt;&gt;&gt; pq;
+
+    <span class="hljs-comment">// 从顶点 0 开始</span>
+    visited[<span class="hljs-number">0</span>] = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> Edge&amp; edge : graph[<span class="hljs-number">0</span>]) {
+        pq.<span class="hljs-built_in">push</span>({ edge.weight, {<span class="hljs-number">0</span>, edge.to} });
+    }
+
+    <span class="hljs-keyword">while</span> (!pq.<span class="hljs-built_in">empty</span>()) {
+        <span class="hljs-keyword">auto</span> [weight, nodes] = pq.<span class="hljs-built_in">top</span>();
+        pq.<span class="hljs-built_in">pop</span>();
+        <span class="hljs-type">int</span> u = nodes.first;
+        <span class="hljs-type">int</span> v = nodes.second;
+
+        <span class="hljs-keyword">if</span> (visited[v]) <span class="hljs-keyword">continue</span>;
+
+        visited[v] = <span class="hljs-literal">true</span>;
+        mst.<span class="hljs-built_in">emplace_back</span>(v, weight);
+
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> Edge&amp; edge : graph[v]) {
+            <span class="hljs-keyword">if</span> (!visited[edge.to]) {
+                pq.<span class="hljs-built_in">push</span>({ edge.weight, {v, edge.to} });
+            }
+        }
+    }
+
+    <span class="hljs-keyword">return</span> mst;
+}
+
+<span class="hljs-comment">// 生成 DOT 文件</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">generateDotFile</span><span class="hljs-params">(<span class="hljs-type">const</span> Graph&amp; graph, <span class="hljs-type">const</span> vector&lt;Edge&gt;&amp; mst, <span class="hljs-type">const</span> string&amp; filename)</span> </span>{
+    <span class="hljs-function">ofstream <span class="hljs-title">dotFile</span><span class="hljs-params">(filename)</span></span>;
+    <span class="hljs-keyword">if</span> (!dotFile.<span class="hljs-built_in">is_open</span>()) {
+        cerr &lt;&lt; <span class="hljs-string">&quot;无法打开文件: &quot;</span> &lt;&lt; filename &lt;&lt; endl;
+        <span class="hljs-keyword">return</span>;
+    }
+
+    dotFile &lt;&lt; <span class="hljs-string">&quot;graph G {&quot;</span> &lt;&lt; endl;
+
+    <span class="hljs-comment">// 绘制所有边</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> u = <span class="hljs-number">0</span>; u &lt; graph.<span class="hljs-built_in">size</span>(); ++u) {
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> Edge&amp; edge : graph[u]) {
+            <span class="hljs-keyword">if</span> (u &lt; edge.to) {
+                dotFile &lt;&lt; <span class="hljs-string">&quot;  &quot;</span> &lt;&lt; u &lt;&lt; <span class="hljs-string">&quot; -- &quot;</span> &lt;&lt; edge.to &lt;&lt; <span class="hljs-string">&quot; [label=\&quot;&quot;</span> &lt;&lt; edge.weight &lt;&lt; <span class="hljs-string">&quot;\&quot;];&quot;</span> &lt;&lt; endl;
+            }
+        }
+    }
+
+    <span class="hljs-comment">// 突出显示最小生成树的边</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> Edge&amp; edge : mst) {
+        <span class="hljs-type">int</span> u = <span class="hljs-number">-1</span>; <span class="hljs-comment">// 这里需要根据 mst 找到对应的 u，假设第一个节点是 0</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; graph.<span class="hljs-built_in">size</span>(); ++i) {
+            <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> Edge&amp; e : graph[i]) {
+                <span class="hljs-keyword">if</span> (e.to == edge.to &amp;&amp; e.weight == edge.weight) {
+                    u = i;
+                    <span class="hljs-keyword">break</span>;
+                }
+            }
+            <span class="hljs-keyword">if</span> (u != <span class="hljs-number">-1</span>) <span class="hljs-keyword">break</span>;
+        }
+        dotFile &lt;&lt; <span class="hljs-string">&quot;  &quot;</span> &lt;&lt; u &lt;&lt; <span class="hljs-string">&quot; -- &quot;</span> &lt;&lt; edge.to &lt;&lt; <span class="hljs-string">&quot; [color=red, penwidth=3];&quot;</span> &lt;&lt; endl;
+    }
+
+    dotFile &lt;&lt; <span class="hljs-string">&quot;}&quot;</span> &lt;&lt; endl;
+    dotFile.<span class="hljs-built_in">close</span>();
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-comment">// 示例图</span>
+    Graph graph = {
+        {&lt;!-- --&gt;{<span class="hljs-number">1</span>, <span class="hljs-number">2</span>}, {<span class="hljs-number">3</span>, <span class="hljs-number">6</span>}},
+        {&lt;!-- --&gt;{<span class="hljs-number">0</span>, <span class="hljs-number">2</span>}, {<span class="hljs-number">2</span>, <span class="hljs-number">3</span>}, {<span class="hljs-number">3</span>, <span class="hljs-number">8</span>}, {<span class="hljs-number">4</span>, <span class="hljs-number">5</span>}},
+        {&lt;!-- --&gt;{<span class="hljs-number">1</span>, <span class="hljs-number">3</span>}, {<span class="hljs-number">4</span>, <span class="hljs-number">7</span>}},
+        {&lt;!-- --&gt;{<span class="hljs-number">0</span>, <span class="hljs-number">6</span>}, {<span class="hljs-number">1</span>, <span class="hljs-number">8</span>}, {<span class="hljs-number">4</span>, <span class="hljs-number">9</span>}},
+        {&lt;!-- --&gt;{<span class="hljs-number">1</span>, <span class="hljs-number">5</span>}, {<span class="hljs-number">2</span>, <span class="hljs-number">7</span>}, {<span class="hljs-number">3</span>, <span class="hljs-number">9</span>}}
+    };
+
+    <span class="hljs-comment">// 计算最小生成树</span>
+    vector&lt;Edge&gt; mst = <span class="hljs-built_in">prim</span>(graph);
+
+    <span class="hljs-comment">// 生成 DOT 文件</span>
+    <span class="hljs-built_in">generateDotFile</span>(graph, mst, <span class="hljs-string">&quot;mst.dot&quot;</span>);
+
+    cout &lt;&lt; <span class="hljs-string">&quot;最小生成树的边已计算，DOT 文件已生成。&quot;</span> &lt;&lt; endl;
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#一-基础定义-什么是-边权之和">一、基础定义：什么是 “边权之和”？</a>
+          
+            <a class="toc-level-4" href="#二-最小-的具体含义-为什么要让边权之和最小">二、“最小” 的具体含义：为什么要让边权之和最小？</a>
+          
+            <a class="toc-level-4" href="#三-数学表达与约束条件">三、数学表达与约束条件</a>
+          
+            <a class="toc-level-4" href="#四-实际意义-为什么需要-边权之和最小">四、实际意义：为什么需要 “边权之和最小”？</a>
+          
+            <a class="toc-level-4" href="#五-与-生成树-的本质区别">五、与 “生成树” 的本质区别</a>
+          
+            <a class="toc-level-4" href="#六-如何求解-边权之和最小">六、如何求解 “边权之和最小”？</a>
+          
+            <a class="toc-level-4" href="#总结">总结</a>
+          
+            <a class="toc-level-4" href="#实现思路">实现思路</a>
+          
+            <a class="toc-level-4" href="#代码解释">代码解释</a>
+          
+            <a class="toc-level-4" href="#使用方法">使用方法</a>
+          
+            <a class="toc-level-4" href="#prim-算法与最小生成树问题">Prim 算法与最小生成树问题</a>
+          
+            <a class="toc-level-5" href="#1-什么是-prim-算法">**1\. 什么是 Prim 算法？**</a>
+          
+            <a class="toc-level-5" href="#2-prim-算法的核心步骤-以邻接表-优先队列实现为例">**2\. Prim 算法的核心步骤（以邻接表 + 优先队列实现为例）**</a>
+          
+            <a class="toc-level-6" href="#步骤-1-初始化">**步骤 1：初始化**</a>
+          
+            <a class="toc-level-6" href="#步骤-2-扩展生成树-贪心选择">**步骤 2：扩展生成树（贪心选择）**</a>
+          
+            <a class="toc-level-6" href="#步骤-3-重复直到所有顶点加入">**步骤 3：重复直到所有顶点加入**</a>
+          
+            <a class="toc-level-5" href="#4-算法复杂度">**4\. 算法复杂度**</a>
+          
+            <a class="toc-level-5" href="#5-与-kruskal-算法的区别">**5\. 与 Kruskal 算法的区别**</a>
+          
+            <a class="toc-level-5" href="#6-应用场景">**6\. 应用场景**</a>
+          
+            <a class="toc-level-5" href="#总结">**总结**</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/leetcode128-最长连续序列c解答.html">
+      <span>上一篇</span>
+      <strong>LeetCode128.最长连续序列C解答</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/c动态规划的解释案例和完整代码斐波那契数列和背包问题需要用到动态规划算法的常见案例.html">
+      <span>下一篇</span>
+      <strong>C动态规划的解释案例和完整代码斐波那契数列和背包问题需要用到动态规划算法的常见案例</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/leetcode49-字母异位组合c解法.html">LeetCode49.字母异位组合C解法</a></h3>
+        <p class="post-excerpt">给你一个字符串数组，请你将 字母异位词 组合在一起。可以按任意顺序返回结果列表。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.395Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/leetcode128-最长连续序列c解答.html">LeetCode128.最长连续序列C解答</a></h3>
+        <p class="post-excerpt">128\. 最长连续序列</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.364Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/蚁群算法是一种模拟蚂蚁觅食行为的优化算法适合用于解决旅行商问题tsp.html">蚁群算法是一种模拟蚂蚁觅食行为的优化算法适合用于解决旅行商问题TSP</a></h3>
+        <p class="post-excerpt">蚁群算法是一种模拟蚂蚁觅食行为的优化算法，适合用于解决旅行商问题（TSP）。以下是使用 MATLAB 实现蚁群算法解决 50 个城市 TSP 问题的代码：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.633Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

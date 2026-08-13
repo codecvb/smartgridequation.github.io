@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>MATLAB画艺术花朵有花堪折直须折莫待无花空折枝 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/matlab-仿真.html">MATLAB 仿真</a>
+        </nav>
+        <h1 class="post-title">MATLAB画艺术花朵有花堪折直须折莫待无花空折枝</h1>
+        <p class="post-deck">表白推荐 MATLAB 高级绘图\表白必备: 玫瑰花球、水晶爱心、绕线画、low\poly</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.065Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>10 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>表白推荐 <a href="https://gitee.com/slandarer/matlab-great-drawing" title="MATLAB 高级绘图_表白必备: 玫瑰花球、水晶爱心、绕线画、low_poly">MATLAB 高级绘图_表白必备: 玫瑰花球、水晶爱心、绕线画、low_poly</a></p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">roseBall</span><span class="hljs-params">(colorList)</span></span>
+<span class="hljs-comment">%曲面数据计算</span>
+<span class="hljs-comment">%==========================================================================</span>
+[x,t]=<span class="hljs-built_in">meshgrid</span>((<span class="hljs-number">0</span>:<span class="hljs-number">24</span>)./<span class="hljs-number">24</span>,(<span class="hljs-number">0</span>:<span class="hljs-number">0.5</span>:<span class="hljs-number">575</span>)./<span class="hljs-number">575.</span>*<span class="hljs-number">20.</span>*<span class="hljs-built_in">pi</span>+<span class="hljs-number">4</span>*<span class="hljs-built_in">pi</span>);
+p=(<span class="hljs-built_in">pi</span>/<span class="hljs-number">2</span>)*<span class="hljs-built_in">exp</span>(-t./(<span class="hljs-number">8</span>*<span class="hljs-built_in">pi</span>));
+change=<span class="hljs-built_in">sin</span>(<span class="hljs-number">15</span>*t)/<span class="hljs-number">150</span>;
+u=<span class="hljs-number">1</span>-(<span class="hljs-number">1</span>-<span class="hljs-built_in">mod</span>(<span class="hljs-number">3.6</span>*t,<span class="hljs-number">2</span>*<span class="hljs-built_in">pi</span>)./<span class="hljs-built_in">pi</span>).^<span class="hljs-number">4.</span>/<span class="hljs-number">2</span>+change;
+y=<span class="hljs-number">2</span>*(x.^<span class="hljs-number">2</span>-x).^<span class="hljs-number">2.</span>*<span class="hljs-built_in">sin</span>(p);
+
+r=u.*(x.*<span class="hljs-built_in">sin</span>(p)+y.*<span class="hljs-built_in">cos</span>(p));
+h=u.*(x.*<span class="hljs-built_in">cos</span>(p)-y.*<span class="hljs-built_in">sin</span>(p));
+
+<span class="hljs-comment">%颜色映射表</span>
+<span class="hljs-comment">%==========================================================================</span>
+hMap=(h-<span class="hljs-built_in">min</span>(<span class="hljs-built_in">min</span>(h)))./(<span class="hljs-built_in">max</span>(<span class="hljs-built_in">max</span>(h))-<span class="hljs-built_in">min</span>(<span class="hljs-built_in">min</span>(h)));
+col=<span class="hljs-built_in">size</span>(hMap,<span class="hljs-number">2</span>);
+<span class="hljs-keyword">if</span> nargin&lt;<span class="hljs-number">1</span>
+colorList=[<span class="hljs-number">0.1300</span>    <span class="hljs-number">0.1000</span>    <span class="hljs-number">0.1600</span>
+    <span class="hljs-number">0.2000</span>    <span class="hljs-number">0.0900</span>    <span class="hljs-number">0.2000</span>
+    <span class="hljs-number">0.2800</span>    <span class="hljs-number">0.0800</span>    <span class="hljs-number">0.2300</span>
+    <span class="hljs-number">0.4200</span>    <span class="hljs-number">0.0800</span>    <span class="hljs-number">0.3000</span>
+    <span class="hljs-number">0.5100</span>    <span class="hljs-number">0.0700</span>    <span class="hljs-number">0.3400</span>
+    <span class="hljs-number">0.6600</span>    <span class="hljs-number">0.1200</span>    <span class="hljs-number">0.3500</span>
+    <span class="hljs-number">0.7900</span>    <span class="hljs-number">0.2200</span>    <span class="hljs-number">0.4000</span>
+    <span class="hljs-number">0.8800</span>    <span class="hljs-number">0.3500</span>    <span class="hljs-number">0.4700</span>
+    <span class="hljs-number">0.9000</span>    <span class="hljs-number">0.4500</span>    <span class="hljs-number">0.5400</span>
+    <span class="hljs-number">0.8900</span>    <span class="hljs-number">0.7800</span>    <span class="hljs-number">0.7900</span>];
+<span class="hljs-keyword">end</span>
+
+
+colorFunc=colorFuncFactory(colorList);
+dataMap=colorFunc(hMap&#x27;);
+colorMap(:,:,<span class="hljs-number">1</span>)=dataMap(:,<span class="hljs-number">1</span>:col);
+colorMap(:,:,<span class="hljs-number">2</span>)=dataMap(:,col+<span class="hljs-number">1</span>:<span class="hljs-number">2</span>*col);
+colorMap(:,:,<span class="hljs-number">3</span>)=dataMap(:,<span class="hljs-number">2</span>*col+<span class="hljs-number">1</span>:<span class="hljs-number">3</span>*col);
+
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">colorFunc</span>=<span class="hljs-title">colorFuncFactory</span><span class="hljs-params">(colorList)</span></span>
+        xx=(<span class="hljs-number">0</span>:<span class="hljs-built_in">size</span>(colorList,<span class="hljs-number">1</span>)<span class="hljs-number">-1</span>)./(<span class="hljs-built_in">size</span>(colorList,<span class="hljs-number">1</span>)<span class="hljs-number">-1</span>);
+        y1=colorList(:,<span class="hljs-number">1</span>);y2=colorList(:,<span class="hljs-number">2</span>);y3=colorList(:,<span class="hljs-number">3</span>);
+        colorFunc=@(X)[interp1(xx,y1,X,<span class="hljs-string">&#x27;linear&#x27;</span>)&#x27;,interp1(xx,y2,X,<span class="hljs-string">&#x27;linear&#x27;</span>)&#x27;,interp1(xx,y3,X,<span class="hljs-string">&#x27;linear&#x27;</span>)&#x27;];
+    <span class="hljs-keyword">end</span>
+
+
+<span class="hljs-comment">%曲面旋转及绘制</span>
+<span class="hljs-comment">%==========================================================================</span>
+surface(r.*<span class="hljs-built_in">cos</span>(t),r.*<span class="hljs-built_in">sin</span>(t),h+<span class="hljs-number">0.35</span>,<span class="hljs-string">&#x27;EdgeAlpha&#x27;</span>,<span class="hljs-number">0.05</span>,...
+    <span class="hljs-string">&#x27;EdgeColor&#x27;</span>,[<span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>],<span class="hljs-string">&#x27;FaceColor&#x27;</span>,<span class="hljs-string">&#x27;interp&#x27;</span>,<span class="hljs-string">&#x27;CData&#x27;</span>,colorMap)
+
+<span class="hljs-built_in">hold</span> on
+
+surface(r.*<span class="hljs-built_in">cos</span>(t),r.*<span class="hljs-built_in">sin</span>(t),-h<span class="hljs-number">-0.35</span>,<span class="hljs-string">&#x27;EdgeAlpha&#x27;</span>,<span class="hljs-number">0.05</span>,...
+    <span class="hljs-string">&#x27;EdgeColor&#x27;</span>,[<span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>],<span class="hljs-string">&#x27;FaceColor&#x27;</span>,<span class="hljs-string">&#x27;interp&#x27;</span>,<span class="hljs-string">&#x27;CData&#x27;</span>,colorMap)
+Xset=r.*<span class="hljs-built_in">cos</span>(t);
+Yset=r.*<span class="hljs-built_in">sin</span>(t);
+Zset=h+<span class="hljs-number">0.35</span>;
+
+yaw_z=<span class="hljs-number">72</span>*<span class="hljs-built_in">pi</span>/<span class="hljs-number">180</span>;
+roll_x=<span class="hljs-built_in">pi</span>-<span class="hljs-built_in">acos</span>(<span class="hljs-number">-1</span>/<span class="hljs-built_in">sqrt</span>(<span class="hljs-number">5</span>));
+R_z_2=[<span class="hljs-built_in">cos</span>(yaw_z),-<span class="hljs-built_in">sin</span>(yaw_z),<span class="hljs-number">0</span>;
+    <span class="hljs-built_in">sin</span>(yaw_z),<span class="hljs-built_in">cos</span>(yaw_z),<span class="hljs-number">0</span>;
+    <span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">1</span>];
+R_z_1=[<span class="hljs-built_in">cos</span>(yaw_z/<span class="hljs-number">2</span>),-<span class="hljs-built_in">sin</span>(yaw_z/<span class="hljs-number">2</span>),<span class="hljs-number">0</span>;
+    <span class="hljs-built_in">sin</span>(yaw_z/<span class="hljs-number">2</span>),<span class="hljs-built_in">cos</span>(yaw_z/<span class="hljs-number">2</span>),<span class="hljs-number">0</span>;
+    <span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">1</span>];
+R_x_2=[<span class="hljs-number">1</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>;
+     <span class="hljs-number">0</span>,<span class="hljs-built_in">cos</span>(roll_x),-<span class="hljs-built_in">sin</span>(roll_x);
+     <span class="hljs-number">0</span>,<span class="hljs-built_in">sin</span>(roll_x),<span class="hljs-built_in">cos</span>(roll_x)];
+
+[nX,nY,nZ]=rotateXYZ(Xset,Yset,Zset,R_x_2);
+surface(nX,nY,nZ,<span class="hljs-string">&#x27;EdgeAlpha&#x27;</span>,<span class="hljs-number">0.05</span>,...
+<span class="hljs-string">&#x27;EdgeColor&#x27;</span>,[<span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>],<span class="hljs-string">&#x27;FaceColor&#x27;</span>,<span class="hljs-string">&#x27;interp&#x27;</span>,<span class="hljs-string">&#x27;CData&#x27;</span>,colorMap)
+
+
+<span class="hljs-keyword">for</span> k=<span class="hljs-number">1</span>:<span class="hljs-number">4</span>
+    [nX,nY,nZ]=rotateXYZ(nX,nY,nZ,R_z_2);
+    surface(nX,nY,nZ,<span class="hljs-string">&#x27;EdgeAlpha&#x27;</span>,<span class="hljs-number">0.05</span>,...
+    <span class="hljs-string">&#x27;EdgeColor&#x27;</span>,[<span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>],<span class="hljs-string">&#x27;FaceColor&#x27;</span>,<span class="hljs-string">&#x27;interp&#x27;</span>,<span class="hljs-string">&#x27;CData&#x27;</span>,colorMap)
+<span class="hljs-keyword">end</span>
+
+[nX,nY,nZ]=rotateXYZ(nX,nY,nZ,R_z_1);
+
+<span class="hljs-keyword">for</span> k=<span class="hljs-number">1</span>:<span class="hljs-number">5</span>
+    [nX,nY,nZ]=rotateXYZ(nX,nY,nZ,R_z_2);
+    surface(nX,nY,-nZ,<span class="hljs-string">&#x27;EdgeAlpha&#x27;</span>,<span class="hljs-number">0.05</span>,...
+    <span class="hljs-string">&#x27;EdgeColor&#x27;</span>,[<span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>],<span class="hljs-string">&#x27;FaceColor&#x27;</span>,<span class="hljs-string">&#x27;interp&#x27;</span>,<span class="hljs-string">&#x27;CData&#x27;</span>,colorMap)
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%--------------------------------------------------------------------------</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">[nX,nY,nZ]</span>=<span class="hljs-title">rotateXYZ</span><span class="hljs-params">(X,Y,Z,R)</span></span>
+        nX=<span class="hljs-built_in">zeros</span>(<span class="hljs-built_in">size</span>(X));
+        nY=<span class="hljs-built_in">zeros</span>(<span class="hljs-built_in">size</span>(Y));
+        nZ=<span class="hljs-built_in">zeros</span>(<span class="hljs-built_in">size</span>(Z));
+        <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span>=<span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(X,<span class="hljs-number">1</span>)
+            <span class="hljs-keyword">for</span> <span class="hljs-built_in">j</span>=<span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(X,<span class="hljs-number">2</span>)
+                v=[X(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>);Y(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>);Z(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>)];
+                nv=R*v;
+                nX(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>)=nv(<span class="hljs-number">1</span>);
+                nY(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>)=nv(<span class="hljs-number">2</span>);
+                nZ(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>)=nv(<span class="hljs-number">3</span>);
+            <span class="hljs-keyword">end</span>
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-comment">%axes属性调整</span>
+<span class="hljs-comment">%==========================================================================</span>
+ax=gca;
+grid on
+ax.GridLineStyle=<span class="hljs-string">&#x27;--&#x27;</span>;
+ax.LineWidth=<span class="hljs-number">1.2</span>;
+ax.XColor=[<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>].*<span class="hljs-number">0.4</span>;
+ax.YColor=[<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>].*<span class="hljs-number">0.4</span>;
+ax.ZColor=[<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>].*<span class="hljs-number">0.4</span>;
+ax.DataAspectRatio=[<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>];
+ax.DataAspectRatioMode=<span class="hljs-string">&#x27;manual&#x27;</span>;
+ax.CameraPosition=[<span class="hljs-number">-6.5914</span>  <span class="hljs-number">-24.1625</span>   <span class="hljs-number">-0.0384</span>];
+
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><img src="../uploads/csdn/matlab%E7%94%BB%E8%89%BA%E6%9C%AF%E8%8A%B1%E6%9C%B5%E6%9C%89%E8%8A%B1%E5%A0%AA%E6%8A%98%E7%9B%B4%E9%A1%BB%E6%8A%98%E8%8E%AB%E5%BE%85%E6%97%A0%E8%8A%B1%E7%A9%BA%E6%8A%98%E6%9E%9D/img-01.png" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/matlab画节点的平滑曲线.html">
+      <span>上一篇</span>
+      <strong>MATLAB画节点的平滑曲线</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/matlab画出湖面波纹相遇所形成的现象.html">
+      <span>下一篇</span>
+      <strong>MATLAB画出湖面波纹相遇所形成的现象</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/凸包问题graham扫描算法matlab.html">凸包问题Graham扫描算法MATLAB</a></h3>
+        <p class="post-excerpt">算法要解决的问题</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.498Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

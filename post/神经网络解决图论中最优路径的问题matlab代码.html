@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>神经网络解决图论中最优路径的问题MATLAB代码 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">神经网络解决图论中最优路径的问题MATLAB代码</h1>
+        <p class="post-deck">解决思路</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.288Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>21 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-5.html">人工智能</a>
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+            <a class="tag-chip" href="../tags/tag-21.html">神经网络</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p><img src="../uploads/csdn/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%A7%A3%E5%86%B3%E5%9B%BE%E8%AE%BA%E4%B8%AD%E6%9C%80%E4%BC%98%E8%B7%AF%E5%BE%84%E7%9A%84%E9%97%AE%E9%A2%98matlab%E4%BB%A3%E7%A0%81/img-01.png" alt=""></p>
+<h4 id="解决思路" class="prose-heading">解决思路</h4>
+<p>我们选择<strong>离散 Hopfield 神经网络</strong>来解决图的最短路径问题，核心思路是：</p>
+<ol>
+<li>将图的路径选择问题转化为神经网络的能量函数优化问题</li>
+<li>能量函数的最小值对应最优路径（最短路径）</li>
+<li>通过神经网络的迭代更新，让网络收敛到能量最小值</li>
+<li>从收敛后的网络状态中解码出最优路径</li>
+</ol>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% ==============================</span>
+<span class="hljs-comment">% 基于Hopfield神经网络的随机位置多节点全遍历求解</span>
+<span class="hljs-comment">% 功能：随机生成节点位置+多节点全遍历路径求解+可视化</span>
+<span class="hljs-comment">% ==============================</span>
+clear; clc; close all;
+rng(<span class="hljs-number">123</span>); <span class="hljs-comment">% 设置随机种子，保证结果可复现（可注释掉获取不同随机结果）</span>
+
+<span class="hljs-comment">%% 1. 自定义参数设置</span>
+node_num = <span class="hljs-number">20</span>;          <span class="hljs-comment">% 节点数量（可自行调整，建议10-20个）</span>
+start_node = <span class="hljs-number">1</span>;         <span class="hljs-comment">% 起点</span>
+connect_prob = <span class="hljs-number">0.4</span>;     <span class="hljs-comment">% 节点间连接概率（控制图的稀疏度，0.3-0.5为宜）</span>
+min_edge_length = <span class="hljs-number">1</span>;    <span class="hljs-comment">% 最小边长度</span>
+max_edge_length = <span class="hljs-number">10</span>;   <span class="hljs-comment">% 最大边长度</span>
+
+<span class="hljs-comment">% 神经网络参数（适配多节点）</span>
+T = <span class="hljs-number">5000</span>;               <span class="hljs-comment">% 最大迭代次数（节点越多需越大）</span>
+tau = <span class="hljs-number">0.005</span>;            <span class="hljs-comment">% 时间步长（更小的值提升收敛精度）</span>
+<span class="hljs-built_in">beta</span> = <span class="hljs-number">80</span>;              <span class="hljs-comment">% 增益系数（增强约束强度）</span>
+
+<span class="hljs-comment">%% 2. 随机生成节点位置和邻接矩阵</span>
+<span class="hljs-comment">% 2.1 随机生成节点坐标（x,y），范围[0,20]</span>
+node_pos = <span class="hljs-built_in">rand</span>(node_num, <span class="hljs-number">2</span>) * <span class="hljs-number">20</span>;
+
+<span class="hljs-comment">% 2.2 生成连通的邻接矩阵（保证图连通，避免无法遍历）</span>
+adj_matrix = <span class="hljs-built_in">zeros</span>(node_num);
+<span class="hljs-comment">% 先构建最小生成树保证连通性</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">2</span>:node_num
+    <span class="hljs-built_in">j</span> = randi(<span class="hljs-built_in">i</span><span class="hljs-number">-1</span>); <span class="hljs-comment">% 随机连接到前面的节点</span>
+    edge_len = min_edge_length + <span class="hljs-built_in">rand</span>()*(max_edge_length - min_edge_length);
+    adj_matrix(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>) = edge_len;
+    adj_matrix(<span class="hljs-built_in">j</span>,<span class="hljs-built_in">i</span>) = edge_len;
+<span class="hljs-keyword">end</span>
+<span class="hljs-comment">% 随机添加额外边</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:node_num
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">j</span> = <span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>:node_num
+        <span class="hljs-keyword">if</span> adj_matrix(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>) == <span class="hljs-number">0</span> &amp;&amp; <span class="hljs-built_in">rand</span>() &lt; connect_prob
+            edge_len = min_edge_length + <span class="hljs-built_in">rand</span>()*(max_edge_length - min_edge_length);
+            adj_matrix(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>) = edge_len;
+            adj_matrix(<span class="hljs-built_in">j</span>,<span class="hljs-built_in">i</span>) = edge_len;
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+n = node_num; <span class="hljs-comment">% 节点总数</span>
+<span class="hljs-keyword">if</span> n &lt; <span class="hljs-number">2</span>
+    error(<span class="hljs-string">&#x27;节点数需大于等于2&#x27;</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 3. Hopfield神经网络初始化</span>
+N = n * n;  <span class="hljs-comment">% 网络神经元总数</span>
+V = <span class="hljs-built_in">zeros</span>(n, n);  <span class="hljs-comment">% 状态矩阵 V(i,j)=1表示第j步到达节点i</span>
+V(start_node, <span class="hljs-number">1</span>) = <span class="hljs-number">1</span>; <span class="hljs-comment">% 起点初始化</span>
+
+<span class="hljs-comment">%% 4. 定义能量函数的权重矩阵和偏置（适配多节点）</span>
+W = <span class="hljs-built_in">zeros</span>(N);
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:n
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">j</span> = <span class="hljs-number">1</span>:n
+        <span class="hljs-keyword">for</span> k = <span class="hljs-number">1</span>:n
+            <span class="hljs-keyword">for</span> l = <span class="hljs-number">1</span>:n
+                idx1 = (<span class="hljs-built_in">j</span><span class="hljs-number">-1</span>)*n + <span class="hljs-built_in">i</span>;
+                idx2 = (l<span class="hljs-number">-1</span>)*n + k;
+
+                <span class="hljs-comment">% 约束1：路径连续性（仅允许邻接节点跳转）</span>
+                <span class="hljs-keyword">if</span> <span class="hljs-built_in">j</span> == l<span class="hljs-number">-1</span>  <span class="hljs-comment">% 前一步→当前步</span>
+                    <span class="hljs-keyword">if</span> adj_matrix(k,<span class="hljs-built_in">i</span>) == <span class="hljs-number">0</span> &amp;&amp; k~=<span class="hljs-built_in">i</span>  <span class="hljs-comment">% 无直接连接的节点惩罚</span>
+                        W(idx1, idx2) = W(idx1, idx2) + <span class="hljs-built_in">beta</span> * <span class="hljs-number">3</span>;
+                    <span class="hljs-keyword">else</span>  <span class="hljs-comment">% 邻接节点奖励（边越短奖励越大）</span>
+                        W(idx1, idx2) = W(idx1, idx2) - adj_matrix(k,<span class="hljs-built_in">i</span>)/<span class="hljs-number">2</span>;
+                    <span class="hljs-keyword">end</span>
+                <span class="hljs-keyword">end</span>
+
+                <span class="hljs-comment">% 约束2：单步长约束（每一步只能在一个节点）</span>
+                <span class="hljs-keyword">if</span> <span class="hljs-built_in">i</span> == k &amp;&amp; <span class="hljs-built_in">j</span> == l
+                    W(idx1, idx2) = W(idx1, idx2) - <span class="hljs-built_in">beta</span>;
+                <span class="hljs-keyword">end</span>
+
+                <span class="hljs-comment">% 约束3：单节点约束（每个节点仅出现一次）</span>
+                <span class="hljs-keyword">if</span> <span class="hljs-built_in">i</span> == k &amp;&amp; <span class="hljs-built_in">j</span> ~= l
+                    W(idx1, idx2) = W(idx1, idx2) - <span class="hljs-built_in">beta</span> * <span class="hljs-number">2</span>;
+                <span class="hljs-keyword">end</span>
+
+                <span class="hljs-comment">% 约束4：无效步长惩罚（避免非连续步长激活）</span>
+                <span class="hljs-keyword">if</span> <span class="hljs-built_in">abs</span>(<span class="hljs-built_in">j</span> - l) &gt; <span class="hljs-number">1</span> &amp;&amp; <span class="hljs-built_in">i</span> == k
+                    W(idx1, idx2) = W(idx1, idx2) + <span class="hljs-built_in">beta</span>;
+                <span class="hljs-keyword">end</span>
+            <span class="hljs-keyword">end</span>
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 偏置向量b（强化约束）</span>
+b = <span class="hljs-built_in">zeros</span>(N, <span class="hljs-number">1</span>);
+b((<span class="hljs-number">1</span><span class="hljs-number">-1</span>)*n + start_node) = <span class="hljs-built_in">beta</span> * n; <span class="hljs-comment">% 起点约束</span>
+<span class="hljs-comment">% 全节点覆盖约束</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:n
+    b((<span class="hljs-number">1</span>:n<span class="hljs-number">-1</span>)*n + <span class="hljs-built_in">i</span>) = b((<span class="hljs-number">1</span>:n<span class="hljs-number">-1</span>)*n + <span class="hljs-built_in">i</span>) + <span class="hljs-built_in">beta</span>/<span class="hljs-number">2</span>;
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 5. 神经网络迭代更新</span>
+energy_history = [];
+converge_flag = <span class="hljs-built_in">false</span>;
+<span class="hljs-keyword">for</span> t = <span class="hljs-number">1</span>:T
+    <span class="hljs-comment">% 计算神经元输入</span>
+    u = W * V(:) + b;
+
+    <span class="hljs-comment">% Sigmoid激活函数</span>
+    V_new = <span class="hljs-number">1</span> ./ (<span class="hljs-number">1</span> + <span class="hljs-built_in">exp</span>(-u/tau));
+
+    <span class="hljs-comment">% 二值化处理</span>
+    V_new(V_new &gt;= <span class="hljs-number">0.5</span>) = <span class="hljs-number">1</span>;
+    V_new(V_new &lt; <span class="hljs-number">0.5</span>) = <span class="hljs-number">0</span>;
+    V_new = <span class="hljs-built_in">reshape</span>(V_new, n, n);
+
+    <span class="hljs-comment">% 计算当前能量</span>
+    energy = <span class="hljs-number">-0.5</span> * V(:)&#x27; * W * V(:) - b&#x27; * V(:);
+    energy_history = [energy_history, energy];
+
+    <span class="hljs-comment">% 收敛判断</span>
+    <span class="hljs-keyword">if</span> sum(sum(<span class="hljs-built_in">abs</span>(V_new - V))) &lt; <span class="hljs-number">1e-6</span>
+        <span class="hljs-built_in">disp</span>([<span class="hljs-string">&#x27;迭代&#x27;</span>, num2str(t), <span class="hljs-string">&#x27;次后收敛&#x27;</span>]);
+        V = V_new;
+        converge_flag = <span class="hljs-built_in">true</span>;
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">end</span>
+
+    V = V_new;
+
+    <span class="hljs-comment">% 最大迭代次数提示</span>
+    <span class="hljs-keyword">if</span> t == T
+        <span class="hljs-built_in">disp</span>(<span class="hljs-string">&#x27;达到最大迭代次数，停止计算&#x27;</span>);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 6. 路径解码（容错增强）</span>
+path = [];
+current_node = start_node;
+path = [path, current_node];
+visited_nodes = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">1</span>, n);
+visited_nodes(start_node) = <span class="hljs-number">1</span>;
+
+<span class="hljs-comment">% 逐步解码路径</span>
+<span class="hljs-keyword">for</span> step = <span class="hljs-number">2</span>:n
+    next_node = <span class="hljs-number">0</span>;
+    <span class="hljs-comment">% 优先选择邻接且未访问的节点</span>
+    <span class="hljs-keyword">for</span> node = <span class="hljs-number">1</span>:n
+        <span class="hljs-keyword">if</span> V(node, step) == <span class="hljs-number">1</span> &amp;&amp; visited_nodes(node) == <span class="hljs-number">0</span> &amp;&amp; adj_matrix(current_node, node) &gt; <span class="hljs-number">0</span>
+            next_node = node;
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+    <span class="hljs-comment">% 容错1：放宽状态矩阵约束</span>
+    <span class="hljs-keyword">if</span> next_node == <span class="hljs-number">0</span>
+        <span class="hljs-keyword">for</span> node = <span class="hljs-number">1</span>:n
+            <span class="hljs-keyword">if</span> visited_nodes(node) == <span class="hljs-number">0</span> &amp;&amp; adj_matrix(current_node, node) &gt; <span class="hljs-number">0</span>
+                next_node = node;
+                <span class="hljs-keyword">break</span>;
+            <span class="hljs-keyword">end</span>
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+    <span class="hljs-comment">% 容错2：允许访问已访问节点（避免路径断裂）</span>
+    <span class="hljs-keyword">if</span> next_node == <span class="hljs-number">0</span>
+        <span class="hljs-keyword">for</span> node = <span class="hljs-number">1</span>:n
+            <span class="hljs-keyword">if</span> adj_matrix(current_node, node) &gt; <span class="hljs-number">0</span>
+                next_node = node;
+                <span class="hljs-built_in">disp</span>([<span class="hljs-string">&#x27;警告：节点&#x27;</span>, num2str(current_node), <span class="hljs-string">&#x27;无未访问邻接节点，复用节点&#x27;</span>, num2str(next_node)]);
+                <span class="hljs-keyword">break</span>;
+            <span class="hljs-keyword">end</span>
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-keyword">if</span> next_node == <span class="hljs-number">0</span>
+        <span class="hljs-built_in">disp</span>(<span class="hljs-string">&#x27;错误：无法找到有效后续节点，路径中断&#x27;</span>);
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">end</span>
+
+    path = [path, next_node];
+    <span class="hljs-keyword">if</span> visited_nodes(next_node) == <span class="hljs-number">0</span>
+        visited_nodes(next_node) = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">end</span>
+    current_node = next_node;
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 计算路径总长度</span>
+total_length = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:<span class="hljs-built_in">length</span>(path)<span class="hljs-number">-1</span>
+    total_length = total_length + adj_matrix(path(<span class="hljs-built_in">i</span>), path(<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>));
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 7. 结果展示</span>
+<span class="hljs-built_in">disp</span>(<span class="hljs-string">&#x27;=== 多节点全遍历求解结果 ===&#x27;</span>);
+<span class="hljs-built_in">disp</span>([<span class="hljs-string">&#x27;节点总数：&#x27;</span>, num2str(n)]);
+<span class="hljs-built_in">disp</span>([<span class="hljs-string">&#x27;起点：&#x27;</span>, num2str(start_node)]);
+<span class="hljs-built_in">disp</span>([<span class="hljs-string">&#x27;遍历路径：&#x27;</span>, num2str(path)]);
+<span class="hljs-built_in">disp</span>([<span class="hljs-string">&#x27;路径总长度：&#x27;</span>, num2str(<span class="hljs-built_in">round</span>(total_length, <span class="hljs-number">2</span>))]);
+<span class="hljs-built_in">disp</span>([<span class="hljs-string">&#x27;遍历节点数：&#x27;</span>, num2str(<span class="hljs-built_in">length</span>(path)), <span class="hljs-string">&#x27;/&#x27;</span>, num2str(n)]);
+<span class="hljs-built_in">disp</span>([<span class="hljs-string">&#x27;未访问节点：&#x27;</span>, num2str(<span class="hljs-built_in">find</span>(visited_nodes == <span class="hljs-number">0</span>))]);
+
+<span class="hljs-comment">%% 8. 可视化（适配随机位置）</span>
+<span class="hljs-comment">% 8.1 能量变化曲线</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;w&#x27;</span>,<span class="hljs-string">&#x27;Position&#x27;</span>,[<span class="hljs-number">100</span>,<span class="hljs-number">100</span>,<span class="hljs-number">800</span>,<span class="hljs-number">400</span>]);
+<span class="hljs-built_in">plot</span>(energy_history, <span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">1.5</span>,<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;#2E86AB&#x27;</span>);
+xlabel(<span class="hljs-string">&#x27;迭代次数&#x27;</span>,<span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">12</span>);
+ylabel(<span class="hljs-string">&#x27;能量值&#x27;</span>,<span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">12</span>);
+title([<span class="hljs-string">&#x27;能量变化曲线（节点数：&#x27;</span>, num2str(n), <span class="hljs-string">&#x27;）&#x27;</span>],<span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">14</span>);
+grid on; grid minor;
+
+<span class="hljs-comment">% 8.2 随机节点+遍历路径可视化</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;w&#x27;</span>,<span class="hljs-string">&#x27;Position&#x27;</span>,[<span class="hljs-number">200</span>,<span class="hljs-number">200</span>,<span class="hljs-number">800</span>,<span class="hljs-number">600</span>]);
+<span class="hljs-comment">% 绘制所有边</span>
+<span class="hljs-built_in">hold</span> on;
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:n
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">j</span> = <span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>:n
+        <span class="hljs-keyword">if</span> adj_matrix(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>) &gt; <span class="hljs-number">0</span>
+            <span class="hljs-built_in">plot</span>([node_pos(<span class="hljs-built_in">i</span>,<span class="hljs-number">1</span>), node_pos(<span class="hljs-built_in">j</span>,<span class="hljs-number">1</span>)], [node_pos(<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>), node_pos(<span class="hljs-built_in">j</span>,<span class="hljs-number">2</span>)], ...
+                 <span class="hljs-string">&#x27;k--&#x27;</span>,<span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">0.8</span>,<span class="hljs-string">&#x27;Color&#x27;</span>,[<span class="hljs-number">0.7</span>,<span class="hljs-number">0.7</span>,<span class="hljs-number">0.7</span>]);
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+<span class="hljs-comment">% 绘制节点</span>
+<span class="hljs-built_in">scatter</span>(node_pos(:,<span class="hljs-number">1</span>), node_pos(:,<span class="hljs-number">2</span>), <span class="hljs-number">100</span>, <span class="hljs-string">&#x27;ro&#x27;</span>, <span class="hljs-string">&#x27;filled&#x27;</span>,<span class="hljs-string">&#x27;MarkerEdgeColor&#x27;</span>,<span class="hljs-string">&#x27;k&#x27;</span>);
+<span class="hljs-comment">% 标注节点编号</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:n
+    text(node_pos(<span class="hljs-built_in">i</span>,<span class="hljs-number">1</span>)+<span class="hljs-number">0.2</span>, node_pos(<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>)+<span class="hljs-number">0.2</span>, num2str(<span class="hljs-built_in">i</span>), ...
+         <span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">11</span>,<span class="hljs-string">&#x27;FontWeight&#x27;</span>,<span class="hljs-string">&#x27;bold&#x27;</span>);
+<span class="hljs-keyword">end</span>
+<span class="hljs-comment">% 绘制遍历路径</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:<span class="hljs-built_in">length</span>(path)<span class="hljs-number">-1</span>
+    <span class="hljs-built_in">plot</span>([node_pos(path(<span class="hljs-built_in">i</span>),<span class="hljs-number">1</span>), node_pos(path(<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>),<span class="hljs-number">1</span>)], ...
+         [node_pos(path(<span class="hljs-built_in">i</span>),<span class="hljs-number">2</span>), node_pos(path(<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>),<span class="hljs-number">2</span>)], ...
+         <span class="hljs-string">&#x27;r-&#x27;</span>,<span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">2.5</span>,<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;#A23B72&#x27;</span>);
+    <span class="hljs-comment">% 标注步长</span>
+    mid_x = (node_pos(path(<span class="hljs-built_in">i</span>),<span class="hljs-number">1</span>) + node_pos(path(<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>),<span class="hljs-number">1</span>))/<span class="hljs-number">2</span>;
+    mid_y = (node_pos(path(<span class="hljs-built_in">i</span>),<span class="hljs-number">2</span>) + node_pos(path(<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>),<span class="hljs-number">2</span>))/<span class="hljs-number">2</span>;
+    text(mid_x, mid_y, num2str(<span class="hljs-built_in">i</span>), <span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">9</span>,<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;blue&#x27;</span>,<span class="hljs-string">&#x27;FontWeight&#x27;</span>,<span class="hljs-string">&#x27;bold&#x27;</span>);
+<span class="hljs-keyword">end</span>
+<span class="hljs-comment">% 标注起点</span>
+<span class="hljs-built_in">plot</span>(node_pos(start_node,<span class="hljs-number">1</span>), node_pos(start_node,<span class="hljs-number">2</span>), <span class="hljs-string">&#x27;gs&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>,<span class="hljs-number">12</span>,<span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">2</span>);
+text(node_pos(start_node,<span class="hljs-number">1</span>)<span class="hljs-number">-0.5</span>, node_pos(start_node,<span class="hljs-number">2</span>)<span class="hljs-number">-0.5</span>, <span class="hljs-string">&#x27;起点&#x27;</span>, ...
+     <span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">10</span>,<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;green&#x27;</span>,<span class="hljs-string">&#x27;FontWeight&#x27;</span>,<span class="hljs-string">&#x27;bold&#x27;</span>);
+axis equal;
+xlabel(<span class="hljs-string">&#x27;X坐标&#x27;</span>,<span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">12</span>);
+ylabel(<span class="hljs-string">&#x27;Y坐标&#x27;</span>,<span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">12</span>);
+title([<span class="hljs-string">&#x27;随机位置多节点遍历路径（节点数：&#x27;</span>, num2str(n), <span class="hljs-string">&#x27;）&#x27;</span>],<span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">14</span>);
+box on;
+<span class="hljs-built_in">hold</span> off;
+
+<span class="hljs-comment">% 8.3 输出节点位置信息</span>
+<span class="hljs-built_in">disp</span>(<span class="hljs-string">&#x27;=== 节点位置坐标 ===&#x27;</span>);
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:n
+    <span class="hljs-built_in">disp</span>([<span class="hljs-string">&#x27;节点&#x27;</span>, num2str(<span class="hljs-built_in">i</span>), <span class="hljs-string">&#x27;：(&#x27;</span>, num2str(<span class="hljs-built_in">round</span>(node_pos(<span class="hljs-built_in">i</span>,<span class="hljs-number">1</span>),<span class="hljs-number">2</span>)), <span class="hljs-string">&#x27;, &#x27;</span>, num2str(<span class="hljs-built_in">round</span>(node_pos(<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>),<span class="hljs-number">2</span>)), <span class="hljs-string">&#x27;)&#x27;</span>]);
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h4 id="代码关键说明" class="prose-heading">代码关键说明</h4>
+<ol>
+<li></li>
+</ol>
+<pre><code>**随机节点生成**：
+
+
+-   `node_pos = rand(node_num, 2) * 20` 生成 0-20 范围内的随机坐标；
+-   设置`rng(123)`固定随机种子，如需不同随机结果可注释该行；
+-   可调整`node_num`（节点数）、`connect_prob`（连接概率）等参数。
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>**邻接矩阵生成**：
+
+
+-   先构建最小生成树保证图的连通性，避免无法遍历；
+-   再随机添加额外边，控制图的稀疏度；
+-   边长度随机生成在`min_edge_length`和`max_edge_length`之间。
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>**多节点适配**：
+
+
+-   增大迭代次数`T=5000`、增益系数`beta=80`，适配更多节点的计算需求；
+-   优化能量函数惩罚 / 奖励权重，提升收敛稳定性；
+-   增强路径解码的容错机制，避免路径断裂。
+</code></pre>
+<ol start="4">
+<li></li>
+</ol>
+<pre><code>**可视化优化**：
+
+
+-   绘制随机坐标的节点和路径，标注起点、步长、节点编号；
+-   输出节点位置坐标，便于核对；
+-   能量曲线和路径图分开绘制，布局更清晰。
+</code></pre>
+<h4 id="使用建议" class="prose-heading">使用建议</h4>
+<ul>
+<li>节点数建议先从 10 个开始测试，再逐步增加到 20 个（节点过多会增加计算时间）；</li>
+<li>若收敛效果不佳，可调整<code>beta</code>（增益系数）或<code>tau</code>（时间步长）；</li>
+<li><code>connect_prob</code>建议设置 0.3-0.5，过小会导致图过稀疏，过大则计算量增加。</li>
+</ul>
+<h4 id="总结" class="prose-heading">总结</h4>
+<ol>
+<li>代码实现了<strong>随机位置多节点</strong>的全遍历路径求解，核心是通过随机数生成节点坐标和连通的邻接矩阵；</li>
+<li>适配多节点的神经网络参数调整（迭代次数、增益系数）是保证收敛的关键；</li>
+<li>增强的容错解码逻辑和可视化优化，提升了代码的实用性和可读性。</li>
+</ol>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#解决思路">解决思路</a>
+          
+            <a class="toc-level-4" href="#代码关键说明">代码关键说明</a>
+          
+            <a class="toc-level-4" href="#使用建议">使用建议</a>
+          
+            <a class="toc-level-4" href="#总结">总结</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/详细案例说明ai所用的算法列出公式用python代码说明用法.html">
+      <span>上一篇</span>
+      <strong>详细案例说明AI所用的算法列出公式用Python代码说明用法</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/神经网络的科普功能用途包含的数学知识.html">
+      <span>下一篇</span>
+      <strong>神经网络的科普功能用途包含的数学知识</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/一个完整的神经网络识别0-9手写数字的matlab神经网络.html">一个完整的神经网络识别0 9手写数字的MATLAB神经网络</a></h3>
+        <p class="post-excerpt">本文介绍了一个基于简单神经网络的手写数字识别系统MATLAB实现。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/matlab实现神经网络的ocr识别.html">MATLAB实现神经网络的OCR识别</a></h3>
+        <p class="post-excerpt">使用说明：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.694Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于改进标准映射的图像加密算法matlab代码版本.html">基于改进标准映射的图像加密算法MATLAB代码版本</a></h3>
+        <p class="post-excerpt">!在这里插入图片描述代码运行结果如上图</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.037Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

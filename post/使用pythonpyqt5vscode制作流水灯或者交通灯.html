@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>使用PythonPyQt5vscode制作流水灯或者交通灯 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">使用PythonPyQt5vscode制作流水灯或者交通灯</h1>
+        <p class="post-deck">需要用到 Python PyQt5 vscode，其他的各模块引用在代码里面有，自己找找就行</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.530Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>9 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>需要用到 Python PyQt5 vscode，其他的各模块引用在代码里面有，自己找找就行</p>
+<p>制作流水灯代码</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">from</span> PyQt5.QtCore <span class="hljs-keyword">import</span> (QEvent, QTimer, Qt,QPoint)
+<span class="hljs-keyword">from</span> PyQt5.QtWidgets <span class="hljs-keyword">import</span> (QApplication, QMenu,QMainWindow)
+<span class="hljs-keyword">from</span> PyQt5.QtGui <span class="hljs-keyword">import</span> QPainter,QPen,QColor
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Widget</span>(<span class="hljs-title class_ inherited__">QMainWindow</span>):
+  <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, parent=<span class="hljs-literal">None</span></span>):
+    <span class="hljs-built_in">super</span>(Widget, <span class="hljs-variable language_">self</span>).__init__(parent)
+    <span class="hljs-variable language_">self</span>.text =<span class="hljs-string">&#x27;hello worlds&#x27;</span>
+    <span class="hljs-variable language_">self</span>.resize(<span class="hljs-number">1200</span>, <span class="hljs-number">800</span>)
+    <span class="hljs-variable language_">self</span>.move(<span class="hljs-number">100</span>, <span class="hljs-number">100</span>)
+    <span class="hljs-variable language_">self</span>.i = <span class="hljs-number">0</span>
+    <span class="hljs-variable language_">self</span>.mytimer = QTimer(<span class="hljs-variable language_">self</span>)
+    <span class="hljs-variable language_">self</span>.mytimer.timeout.connect(<span class="hljs-variable language_">self</span>.update)
+    <span class="hljs-variable language_">self</span>.mytimer.start(<span class="hljs-number">1000</span>)
+
+  <span class="hljs-keyword">def</span> <span class="hljs-title function_">paintEvent</span>(<span class="hljs-params">self,event</span>):
+        painter = QPainter(<span class="hljs-variable language_">self</span>)
+
+        painter.drawEllipse(<span class="hljs-number">200</span>,<span class="hljs-number">200</span>,<span class="hljs-number">160</span>,<span class="hljs-number">160</span>)
+        painter.drawEllipse(<span class="hljs-number">400</span>,<span class="hljs-number">200</span>,<span class="hljs-number">160</span>,<span class="hljs-number">160</span>)
+        painter.drawEllipse(<span class="hljs-number">600</span>,<span class="hljs-number">200</span>,<span class="hljs-number">160</span>,<span class="hljs-number">160</span>)
+        painter.drawEllipse(<span class="hljs-number">800</span>,<span class="hljs-number">200</span>,<span class="hljs-number">160</span>,<span class="hljs-number">160</span>)
+        painter.drawEllipse(<span class="hljs-number">1000</span>,<span class="hljs-number">200</span>,<span class="hljs-number">160</span>,<span class="hljs-number">160</span>)
+
+        painter.setPen(QColor(<span class="hljs-number">255</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>))
+        painter.setBrush(QColor(<span class="hljs-number">255</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>))
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.i % <span class="hljs-number">5</span> == <span class="hljs-number">0</span>:
+            painter.drawEllipse(<span class="hljs-number">200</span>,<span class="hljs-number">200</span>,<span class="hljs-number">160</span>,<span class="hljs-number">160</span>)
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.i % <span class="hljs-number">5</span> == <span class="hljs-number">1</span>:
+            painter.drawEllipse(<span class="hljs-number">400</span>,<span class="hljs-number">200</span>,<span class="hljs-number">160</span>,<span class="hljs-number">160</span>)
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.i % <span class="hljs-number">5</span> == <span class="hljs-number">2</span>:
+            painter.drawEllipse(<span class="hljs-number">600</span>,<span class="hljs-number">200</span>,<span class="hljs-number">160</span>,<span class="hljs-number">160</span>)
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.i % <span class="hljs-number">5</span> == <span class="hljs-number">3</span>:
+            painter.drawEllipse(<span class="hljs-number">800</span>,<span class="hljs-number">200</span>,<span class="hljs-number">160</span>,<span class="hljs-number">160</span>)
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.i % <span class="hljs-number">5</span> == <span class="hljs-number">4</span>:
+            painter.drawEllipse(<span class="hljs-number">1000</span>,<span class="hljs-number">200</span>,<span class="hljs-number">160</span>,<span class="hljs-number">160</span>)
+
+        <span class="hljs-variable language_">self</span>.i = <span class="hljs-variable language_">self</span>.i + <span class="hljs-number">1</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.i &gt; <span class="hljs-number">1000</span>:
+           <span class="hljs-variable language_">self</span>.i = <span class="hljs-number">0</span>
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+  app = QApplication(sys.argv)
+  form = Widget()
+  form.show()
+  app.exec_()
+</code></pre>
+<p>效果如下</p>
+<p><img src="../uploads/csdn/%E4%BD%BF%E7%94%A8pythonpyqt5vscode%E5%88%B6%E4%BD%9C%E6%B5%81%E6%B0%B4%E7%81%AF%E6%88%96%E8%80%85%E4%BA%A4%E9%80%9A%E7%81%AF/img-01.gif" alt=""></p>
+<p>交通灯代码</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">from</span> PyQt5.QtCore <span class="hljs-keyword">import</span> (QEvent, QTimer, Qt,QPoint)
+<span class="hljs-keyword">from</span> PyQt5.QtWidgets <span class="hljs-keyword">import</span> (QApplication, QMenu,QMainWindow)
+<span class="hljs-keyword">from</span> PyQt5.QtGui <span class="hljs-keyword">import</span> QPainter,QPen,QColor
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Widget</span>(<span class="hljs-title class_ inherited__">QMainWindow</span>):
+  <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, parent=<span class="hljs-literal">None</span></span>):
+    <span class="hljs-built_in">super</span>(Widget, <span class="hljs-variable language_">self</span>).__init__(parent)
+    <span class="hljs-variable language_">self</span>.text =<span class="hljs-string">&#x27;hello worlds&#x27;</span>
+    <span class="hljs-variable language_">self</span>.resize(<span class="hljs-number">1200</span>, <span class="hljs-number">800</span>)
+    <span class="hljs-variable language_">self</span>.move(<span class="hljs-number">100</span>, <span class="hljs-number">100</span>)
+    <span class="hljs-variable language_">self</span>.i = <span class="hljs-number">0</span>
+    <span class="hljs-variable language_">self</span>.mytimer = QTimer(<span class="hljs-variable language_">self</span>)
+    <span class="hljs-variable language_">self</span>.mytimer.timeout.connect(<span class="hljs-variable language_">self</span>.update)
+    <span class="hljs-variable language_">self</span>.mytimer.start(<span class="hljs-number">1000</span>)
+
+  <span class="hljs-keyword">def</span> <span class="hljs-title function_">paintEvent</span>(<span class="hljs-params">self,event</span>):
+        painter = QPainter(<span class="hljs-variable language_">self</span>)
+        <span class="hljs-comment">#for i in range(0,11,1):</span>
+        <span class="hljs-comment">#    painter.drawEllipse(2,2,i,i)</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.i % <span class="hljs-number">3</span> == <span class="hljs-number">0</span>:
+            painter.setPen(QColor(<span class="hljs-number">0</span>,<span class="hljs-number">125</span>,<span class="hljs-number">0</span>))
+            painter.setBrush(QColor(<span class="hljs-number">0</span>,<span class="hljs-number">255</span>,<span class="hljs-number">0</span>))
+            <span class="hljs-comment">#painter.drawEllipse(200,200,160,160)</span>
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.i % <span class="hljs-number">3</span> == <span class="hljs-number">1</span>:
+            painter.setPen(QColor(<span class="hljs-number">255</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>))
+            painter.setBrush(QColor(<span class="hljs-number">255</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>))
+            <span class="hljs-comment">#painter.drawEllipse(200,200,160,160)</span>
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.i % <span class="hljs-number">3</span> == <span class="hljs-number">2</span>:
+            painter.setPen(QColor(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">255</span>))
+            painter.setBrush(QColor(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">255</span>))
+            <span class="hljs-comment">#painter.drawEllipse(200,200,160,160)</span>
+
+        painter.drawEllipse(<span class="hljs-number">200</span>,<span class="hljs-number">200</span>,<span class="hljs-number">160</span>,<span class="hljs-number">160</span>)
+        painter.drawEllipse(<span class="hljs-number">400</span>,<span class="hljs-number">200</span>,<span class="hljs-number">160</span>,<span class="hljs-number">160</span>)
+        painter.drawEllipse(<span class="hljs-number">600</span>,<span class="hljs-number">200</span>,<span class="hljs-number">160</span>,<span class="hljs-number">160</span>)
+
+        <span class="hljs-variable language_">self</span>.i = <span class="hljs-variable language_">self</span>.i + <span class="hljs-number">1</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.i &gt; <span class="hljs-number">1000</span>:
+           <span class="hljs-variable language_">self</span>.i = <span class="hljs-number">0</span>
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+  app = QApplication(sys.argv)
+  form = Widget()
+  form.show()
+  app.exec_()
+</code></pre>
+<p>效果入下</p>
+<p><img src="../uploads/csdn/%E4%BD%BF%E7%94%A8pythonpyqt5vscode%E5%88%B6%E4%BD%9C%E6%B5%81%E6%B0%B4%E7%81%AF%E6%88%96%E8%80%85%E4%BA%A4%E9%80%9A%E7%81%AF/img-02.gif" alt=""></p>
+<p>如有疑问，可评论，也可以私信我</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/利用pythonqt6制作会移动的字体动画.html">
+      <span>上一篇</span>
+      <strong>利用PythonQt6制作会移动的字体动画</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/任意多面体的最小外接球算法python实现.html">
+      <span>下一篇</span>
+      <strong>任意多面体的最小外接球算法Python实现</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

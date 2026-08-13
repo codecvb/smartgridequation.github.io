@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>物理竞赛书籍按层级堆叠求质心的问题附带MATLAB仿真代码和数学求导过程 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">物理竞赛书籍按层级堆叠求质心的问题附带MATLAB仿真代码和数学求导过程</h1>
+        <p class="post-deck">三、MATLAB 仿真：可视化堆叠与质心计算</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.661Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>13 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+            <a class="tag-chip" href="../tags/tag-20.html">物理仿真</a>
+          
+            <a class="tag-chip" href="../tags/tag-6.html">数学</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p><img src="../uploads/csdn/%E7%89%A9%E7%90%86%E7%AB%9E%E8%B5%9B%E4%B9%A6%E7%B1%8D%E6%8C%89%E5%B1%82%E7%BA%A7%E5%A0%86%E5%8F%A0%E6%B1%82%E8%B4%A8%E5%BF%83%E7%9A%84%E9%97%AE%E9%A2%98%E9%99%84%E5%B8%A6matlab%E4%BB%BF%E7%9C%9F%E4%BB%A3%E7%A0%81%E5%92%8C%E6%95%B0%E5%AD%A6%E6%B1%82%E5%AF%BC%E8%BF%87%E7%A8%8B/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/%E7%89%A9%E7%90%86%E7%AB%9E%E8%B5%9B%E4%B9%A6%E7%B1%8D%E6%8C%89%E5%B1%82%E7%BA%A7%E5%A0%86%E5%8F%A0%E6%B1%82%E8%B4%A8%E5%BF%83%E7%9A%84%E9%97%AE%E9%A2%98%E9%99%84%E5%B8%A6matlab%E4%BB%BF%E7%9C%9F%E4%BB%A3%E7%A0%81%E5%92%8C%E6%95%B0%E5%AD%A6%E6%B1%82%E5%AF%BC%E8%BF%87%E7%A8%8B/img-02.png" alt=""></p>
+<p><img src="../uploads/csdn/%E7%89%A9%E7%90%86%E7%AB%9E%E8%B5%9B%E4%B9%A6%E7%B1%8D%E6%8C%89%E5%B1%82%E7%BA%A7%E5%A0%86%E5%8F%A0%E6%B1%82%E8%B4%A8%E5%BF%83%E7%9A%84%E9%97%AE%E9%A2%98%E9%99%84%E5%B8%A6matlab%E4%BB%BF%E7%9C%9F%E4%BB%A3%E7%A0%81%E5%92%8C%E6%95%B0%E5%AD%A6%E6%B1%82%E5%AF%BC%E8%BF%87%E7%A8%8B/img-03.png" alt=""></p>
+<p><img src="../uploads/csdn/%E7%89%A9%E7%90%86%E7%AB%9E%E8%B5%9B%E4%B9%A6%E7%B1%8D%E6%8C%89%E5%B1%82%E7%BA%A7%E5%A0%86%E5%8F%A0%E6%B1%82%E8%B4%A8%E5%BF%83%E7%9A%84%E9%97%AE%E9%A2%98%E9%99%84%E5%B8%A6matlab%E4%BB%BF%E7%9C%9F%E4%BB%A3%E7%A0%81%E5%92%8C%E6%95%B0%E5%AD%A6%E6%B1%82%E5%AF%BC%E8%BF%87%E7%A8%8B/img-04.png" alt=""></p>
+<h4 id="三-matlab-仿真-可视化堆叠与质心计算" class="prose-heading">三、MATLAB 仿真：可视化堆叠与质心计算</h4>
+<p>以下代码实现<strong>3 层均匀长方体堆叠</strong>的质心计算与可视化，支持自定义每层的质量、长度和底部位置，输出每层质心及系统总质心的坐标，并绘制堆叠示意图。</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">%% 物理稳定的多层书籍堆叠仿真（确保不会翻倒）</span>
+clear; clc; close all;
+
+<span class="hljs-comment">% ===================== 1. 生成稳定的堆叠参数 =====================</span>
+<span class="hljs-comment">% 随机生成5-8层（层数不宜过多，否则难以保持稳定）</span>
+n = randi([<span class="hljs-number">5</span>, <span class="hljs-number">8</span>]);
+layers = <span class="hljs-built_in">zeros</span>(n, <span class="hljs-number">3</span>);  <span class="hljs-comment">% 堆叠参数矩阵（质量, 长度, 底部坐标）</span>
+
+<span class="hljs-comment">% 生成每层的参数（带稳定性约束）</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:n
+    layers(<span class="hljs-built_in">i</span>, <span class="hljs-number">1</span>) = <span class="hljs-number">0.8</span> + <span class="hljs-built_in">rand</span>*<span class="hljs-number">1.2</span>;  <span class="hljs-comment">% 质量：0.8-2.0之间（质量差异不宜过大）</span>
+    layers(<span class="hljs-built_in">i</span>, <span class="hljs-number">2</span>) = <span class="hljs-number">3</span> + <span class="hljs-built_in">rand</span>*<span class="hljs-number">2</span>;      <span class="hljs-comment">% 长度：3-5单位（统一尺度便于稳定堆叠）</span>
+
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">i</span> == <span class="hljs-number">1</span>
+        <span class="hljs-comment">% 第一层从0开始，作为基准</span>
+        layers(<span class="hljs-built_in">i</span>, <span class="hljs-number">3</span>) = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">else</span>
+        <span class="hljs-comment">% 前一层的支撑范围</span>
+        prev_start = layers(<span class="hljs-built_in">i</span><span class="hljs-number">-1</span>, <span class="hljs-number">3</span>);
+        prev_end = layers(<span class="hljs-built_in">i</span><span class="hljs-number">-1</span>, <span class="hljs-number">3</span>) + layers(<span class="hljs-built_in">i</span><span class="hljs-number">-1</span>, <span class="hljs-number">2</span>);
+        prev_mid = (prev_start + prev_end) / <span class="hljs-number">2</span>;  <span class="hljs-comment">% 前一层中点</span>
+
+        <span class="hljs-comment">% 当前层的长度</span>
+        current_length = layers(<span class="hljs-built_in">i</span>, <span class="hljs-number">2</span>);
+
+        <span class="hljs-comment">% 稳定性约束：当前层的质心必须位于前一层的支撑范围内</span>
+        <span class="hljs-comment">% 最大偏移量：不超过前一层长度的1/4（保证足够安全余量）</span>
+        max_offset = layers(<span class="hljs-built_in">i</span><span class="hljs-number">-1</span>, <span class="hljs-number">2</span>) / <span class="hljs-number">4</span>;
+
+        <span class="hljs-comment">% 在安全范围内随机偏移</span>
+        offset = (<span class="hljs-built_in">rand</span> - <span class="hljs-number">0.5</span>) * <span class="hljs-number">2</span> * max_offset;  <span class="hljs-comment">% [-max_offset, max_offset]</span>
+
+        <span class="hljs-comment">% 计算当前层的底部坐标</span>
+        current_start = prev_mid - current_length/<span class="hljs-number">2</span> + offset;
+
+        <span class="hljs-comment">% 确保不会完全超出前一层范围（额外约束）</span>
+        current_end = current_start + current_length;
+        <span class="hljs-keyword">if</span> current_start &lt; prev_start
+            current_start = prev_start;
+        <span class="hljs-keyword">elseif</span> current_end &gt; prev_end
+            current_start = prev_end - current_length;
+        <span class="hljs-keyword">end</span>
+
+        layers(<span class="hljs-built_in">i</span>, <span class="hljs-number">3</span>) = current_start;
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% ===================== 2. 计算质心 =====================</span>
+m = layers(:, <span class="hljs-number">1</span>);  <span class="hljs-comment">% 各层质量</span>
+L = layers(:, <span class="hljs-number">2</span>);  <span class="hljs-comment">% 各层长度</span>
+a = layers(:, <span class="hljs-number">3</span>);  <span class="hljs-comment">% 各层底部坐标</span>
+x_cm_layer = a + L/<span class="hljs-number">2</span>;  <span class="hljs-comment">% 每层质心坐标</span>
+
+<span class="hljs-comment">% 系统总质心</span>
+M_total = sum(m);
+X_cm_total = sum(m .* x_cm_layer) / M_total;
+
+<span class="hljs-comment">% 检查整体稳定性：总质心是否在最底层支撑范围内（修复兼容性问题）</span>
+base_start = a(<span class="hljs-number">1</span>);
+base_end = a(<span class="hljs-number">1</span>) + L(<span class="hljs-number">1</span>);
+<span class="hljs-keyword">if</span> X_cm_total &gt;= base_start &amp;&amp; X_cm_total &lt;= base_end
+    is_stable = <span class="hljs-built_in">true</span>;
+<span class="hljs-keyword">else</span>
+    is_stable = <span class="hljs-built_in">false</span>;
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% ===================== 3. 输出结果 =====================</span>
+fprintf(<span class="hljs-string">&#x27;=== 稳定堆叠书籍质心计算结果 ===\n&#x27;</span>);
+<span class="hljs-keyword">if</span>(is_stable)
+    fprintf(<span class="hljs-string">&#x27;总层数: %d, 整体稳定性: %s\n&#x27;</span>, n,<span class="hljs-string">&#x27;稳定&#x27;</span>);
+<span class="hljs-keyword">else</span>
+    fprintf(<span class="hljs-string">&#x27;总层数: %d, 整体稳定性: %s\n&#x27;</span>, n, <span class="hljs-string">&#x27;不稳定&#x27;</span>);
+<span class="hljs-keyword">end</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:n
+    <span class="hljs-comment">% 检查当前层相对于下一层的稳定性</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">i</span> &gt; <span class="hljs-number">1</span>
+        lower_start = a(<span class="hljs-built_in">i</span><span class="hljs-number">-1</span>);
+        lower_end = a(<span class="hljs-built_in">i</span><span class="hljs-number">-1</span>) + L(<span class="hljs-built_in">i</span><span class="hljs-number">-1</span>);
+        <span class="hljs-comment">% 修复兼容性问题：使用传统if判断</span>
+        <span class="hljs-keyword">if</span> x_cm_layer(<span class="hljs-built_in">i</span>) &gt;= lower_start &amp;&amp; x_cm_layer(<span class="hljs-built_in">i</span>) &lt;= lower_end
+            layer_stable = <span class="hljs-built_in">true</span>;
+        <span class="hljs-keyword">else</span>
+            layer_stable = <span class="hljs-built_in">false</span>;
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">else</span>
+        layer_stable = <span class="hljs-built_in">true</span>;  <span class="hljs-comment">% 最底层无需检查</span>
+    <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">if</span>(layer_stable)
+            fprintf(<span class="hljs-string">&#x27;第%d层：质量=%.2f, 长度=%.2f, 底部=%.2f, 质心=%.2f, 稳定性: %s\n&#x27;</span>, ...
+        <span class="hljs-built_in">i</span>, m(<span class="hljs-built_in">i</span>), L(<span class="hljs-built_in">i</span>), a(<span class="hljs-built_in">i</span>), x_cm_layer(<span class="hljs-built_in">i</span>), <span class="hljs-string">&#x27;稳定&#x27;</span>);
+    <span class="hljs-keyword">else</span>
+            fprintf(<span class="hljs-string">&#x27;第%d层：质量=%.2f, 长度=%.2f, 底部=%.2f, 质心=%.2f, 稳定性: %s\n&#x27;</span>, ...
+        <span class="hljs-built_in">i</span>, m(<span class="hljs-built_in">i</span>), L(<span class="hljs-built_in">i</span>), a(<span class="hljs-built_in">i</span>), x_cm_layer(<span class="hljs-built_in">i</span>), <span class="hljs-string">&#x27;不稳定&#x27;</span>);
+    <span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">end</span>
+fprintf(<span class="hljs-string">&#x27;系统总质量=%.2f, 总质心坐标=%.2f\n&#x27;</span>, M_total, X_cm_total);
+fprintf(<span class="hljs-string">&#x27;最底层支撑范围: [%.2f, %.2f]\n&#x27;</span>, base_start, base_end);
+
+<span class="hljs-comment">% ===================== 4. 可视化 =====================</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;w&#x27;</span>,<span class="hljs-string">&#x27;Position&#x27;</span>,[<span class="hljs-number">100</span>,<span class="hljs-number">100</span>,<span class="hljs-number">1000</span>,<span class="hljs-number">600</span>]);
+y_pos = <span class="hljs-number">1</span>:n;
+colors = hsv(n);
+
+<span class="hljs-comment">% 绘制每层书籍</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:n
+    x_rect = [a(<span class="hljs-built_in">i</span>), a(<span class="hljs-built_in">i</span>)+L(<span class="hljs-built_in">i</span>), a(<span class="hljs-built_in">i</span>)+L(<span class="hljs-built_in">i</span>), a(<span class="hljs-built_in">i</span>), a(<span class="hljs-built_in">i</span>)];
+    y_rect = [y_pos(<span class="hljs-built_in">i</span>)<span class="hljs-number">-0.4</span>, y_pos(<span class="hljs-built_in">i</span>)<span class="hljs-number">-0.4</span>, y_pos(<span class="hljs-built_in">i</span>)+<span class="hljs-number">0.4</span>, y_pos(<span class="hljs-built_in">i</span>)+<span class="hljs-number">0.4</span>, y_pos(<span class="hljs-built_in">i</span>)<span class="hljs-number">-0.4</span>];
+    fill(x_rect, y_rect, colors(<span class="hljs-built_in">i</span>,:), <span class="hljs-string">&#x27;EdgeColor&#x27;</span>,<span class="hljs-string">&#x27;k&#x27;</span>, <span class="hljs-string">&#x27;FaceAlpha&#x27;</span>,<span class="hljs-number">0.7</span>);
+    <span class="hljs-built_in">hold</span> on;
+    text(a(<span class="hljs-built_in">i</span>)+<span class="hljs-number">0.1</span>, y_pos(<span class="hljs-built_in">i</span>), sprintf(<span class="hljs-string">&#x27;第%d层&#x27;</span>, <span class="hljs-built_in">i</span>), ...
+         <span class="hljs-string">&#x27;VerticalAlignment&#x27;</span>, <span class="hljs-string">&#x27;middle&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">8</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 绘制每层质心</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:n
+    <span class="hljs-built_in">scatter</span>(x_cm_layer(<span class="hljs-built_in">i</span>), y_pos(<span class="hljs-built_in">i</span>), <span class="hljs-number">80</span>, colors(<span class="hljs-built_in">i</span>,:), <span class="hljs-string">&#x27;filled&#x27;</span>, ...
+            <span class="hljs-string">&#x27;MarkerEdgeColor&#x27;</span>,<span class="hljs-string">&#x27;k&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">1.5</span>);
+    text(x_cm_layer(<span class="hljs-built_in">i</span>)+<span class="hljs-number">0.1</span>, y_pos(<span class="hljs-built_in">i</span>)+<span class="hljs-number">0.5</span>, sprintf(<span class="hljs-string">&#x27;%.2f&#x27;</span>, x_cm_layer(<span class="hljs-built_in">i</span>)), ...
+         <span class="hljs-string">&#x27;Color&#x27;</span>, colors(<span class="hljs-built_in">i</span>,:), <span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">9</span>);
+    <span class="hljs-built_in">hold</span> on;
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 绘制总质心</span>
+y_total_cm = <span class="hljs-built_in">mean</span>(y_pos);
+<span class="hljs-built_in">scatter</span>(X_cm_total, y_total_cm, <span class="hljs-number">300</span>, <span class="hljs-string">&#x27;y&#x27;</span>, <span class="hljs-string">&#x27;p&#x27;</span>, <span class="hljs-string">&#x27;filled&#x27;</span>, ...
+        <span class="hljs-string">&#x27;MarkerEdgeColor&#x27;</span>,<span class="hljs-string">&#x27;k&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">2</span>);
+text(X_cm_total+<span class="hljs-number">0.1</span>, y_total_cm+<span class="hljs-number">0.8</span>, sprintf(<span class="hljs-string">&#x27;总质心: %.2f&#x27;</span>, X_cm_total), ...
+     <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;k&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">11</span>, <span class="hljs-string">&#x27;FontWeight&#x27;</span>,<span class="hljs-string">&#x27;bold&#x27;</span>, <span class="hljs-string">&#x27;BackgroundColor&#x27;</span>,<span class="hljs-string">&#x27;y&#x27;</span>);
+
+<span class="hljs-comment">% 标记最底层支撑范围（红色虚线）</span>
+<span class="hljs-built_in">plot</span>([base_start, base_start], [<span class="hljs-number">0.5</span>, n+<span class="hljs-number">0.5</span>], <span class="hljs-string">&#x27;r--&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">1.5</span>);
+<span class="hljs-built_in">plot</span>([base_end, base_end], [<span class="hljs-number">0.5</span>, n+<span class="hljs-number">0.5</span>], <span class="hljs-string">&#x27;r--&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">1.5</span>);
+text(base_start, <span class="hljs-number">0.3</span>, sprintf(<span class="hljs-string">&#x27;支撑边界: %.2f&#x27;</span>, base_start), ...
+     <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;r&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">9</span>, <span class="hljs-string">&#x27;HorizontalAlignment&#x27;</span>,<span class="hljs-string">&#x27;center&#x27;</span>);
+text(base_end, <span class="hljs-number">0.3</span>, sprintf(<span class="hljs-string">&#x27;支撑边界: %.2f&#x27;</span>, base_end), ...
+     <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;r&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">9</span>, <span class="hljs-string">&#x27;HorizontalAlignment&#x27;</span>,<span class="hljs-string">&#x27;center&#x27;</span>);
+
+<span class="hljs-comment">% 图表设置</span>
+xlabel(<span class="hljs-string">&#x27;水平坐标&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">12</span>);
+ylabel(<span class="hljs-string">&#x27;层级位置&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">12</span>);
+title(sprintf(<span class="hljs-string">&#x27;稳定堆叠书籍仿真（%d层）&#x27;</span>, n), <span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">14</span>, <span class="hljs-string">&#x27;FontWeight&#x27;</span>,<span class="hljs-string">&#x27;bold&#x27;</span>);
+<span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x27;书籍&#x27;</span>, <span class="hljs-string">&#x27;每层质心&#x27;</span>, <span class="hljs-string">&#x27;总质心&#x27;</span>, <span class="hljs-string">&#x27;支撑边界&#x27;</span>, <span class="hljs-string">&#x27;Location&#x27;</span>,<span class="hljs-string">&#x27;best&#x27;</span>);
+grid on;
+xlim([<span class="hljs-built_in">min</span>(a)<span class="hljs-number">-1</span> <span class="hljs-built_in">max</span>(a+L)+<span class="hljs-number">1</span>]);
+<span class="hljs-built_in">hold</span> off;
+</code></pre>
+<h4 id="四-每次书籍都向外延伸二分之一-书的质量大小相同-求出延伸的极限-用matlab进行仿真模拟该极限" class="prose-heading">四、每次书籍都向外延伸二分之一，书的质量大小相同，求出延伸的极限，用MATLAB进行仿真模拟该极限</h4>
+<p><img src="../uploads/csdn/%E7%89%A9%E7%90%86%E7%AB%9E%E8%B5%9B%E4%B9%A6%E7%B1%8D%E6%8C%89%E5%B1%82%E7%BA%A7%E5%A0%86%E5%8F%A0%E6%B1%82%E8%B4%A8%E5%BF%83%E7%9A%84%E9%97%AE%E9%A2%98%E9%99%84%E5%B8%A6matlab%E4%BB%BF%E7%9C%9F%E4%BB%A3%E7%A0%81%E5%92%8C%E6%95%B0%E5%AD%A6%E6%B1%82%E5%AF%BC%E8%BF%87%E7%A8%8B/img-05.png" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#三-matlab-仿真-可视化堆叠与质心计算">三、MATLAB 仿真：可视化堆叠与质心计算</a>
+          
+            <a class="toc-level-4" href="#四-每次书籍都向外延伸二分之一-书的质量大小相同-求出延伸的极限-用matlab进行仿真模拟该极限">四、每次书籍都向外延伸二分之一，书的质量大小相同，求出延伸的极限，用MATLAB进行仿真模拟该极限</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/用matlab实现的三体运动模拟代码包含实时轨迹显示和动态坐标系调整功能也可以是太阳系三体模拟.html">
+      <span>上一篇</span>
+      <strong>用MATLAB实现的三体运动模拟代码包含实时轨迹显示和动态坐标系调整功能也可以是太阳系三体模拟</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/怎么证明单摆周期公式关于大角度单摆周期近似公式的分析与探讨.html">
+      <span>下一篇</span>
+      <strong>怎么证明单摆周期公式关于大角度单摆周期近似公式的分析与探讨</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/小球在摆线上下落的物理过程matlab代码.html">小球在摆线上下落的物理过程MATLAB代码</a></h3>
+        <p class="post-excerpt">1.  ‌物理建模‌：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.543Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/卫星轨道matlab动力学仿真.html">卫星轨道MATLAB动力学仿真</a></h3>
+        <p class="post-excerpt">本文介绍了一个基于MATLAB的卫星轨道动力学仿真程序。该程序采用国际空间站(ISS)近似轨道参数(400km高度、51.6°倾角)，通过数值积分方法求解包含地球引力和J2摄动项的轨道运动方程。仿真结果包括3D轨道可视化、位置/速度分量变化、轨道高度和速度大小变化等图表，并进行了能量守恒验证和轨道参数分析。程序实现了从轨道要素到ECI坐标系状态的转换，采用ode45求解器进行积分，最终分析了半长轴…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.374Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

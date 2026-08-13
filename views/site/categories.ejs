@@ -1,0 +1,20 @@
+<section class="page-head">
+  <div class="wrap">
+    <p class="kicker">COLLECTIONS</p>
+    <h1>分类</h1>
+    <p class="page-desc">把读书笔记、数学物理、编程与硬件笔记分门别类地收好。</p>
+  </div>
+</section>
+
+<section class="wrap section categories-page">
+  <div class="category-grid">
+    <% categories.forEach(function(cat, i) { %>
+      <a class="category-card" href="/category/<%= cat.slug %>" style="--card-index: <%= i %>">
+        <span class="category-num"><%= String(i + 1).padStart(2, '0') %></span>
+        <span class="category-name"><%= cat.name %></span>
+        <span class="category-count"><%= cat.count %> 篇</span>
+        <span class="category-arrow" aria-hidden="true">→</span>
+      </a>
+    <% }) %>
+  </div>
+</section>

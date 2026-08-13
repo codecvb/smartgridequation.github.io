@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>卫星轨道MATLAB动力学仿真 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">卫星轨道MATLAB动力学仿真</h1>
+        <p class="post-deck">本文介绍了一个基于MATLAB的卫星轨道动力学仿真程序。该程序采用国际空间站(ISS)近似轨道参数(400km高度、51.6°倾角)，通过数值积分方法求解包含地球引力和J2摄动项的轨道运动方程。仿真结果包括3D轨道可视化、位置/速度分量变化、轨道高度和速度大小变化等图表，并进行了能量守恒验证和轨道参数分析。程序实现了从轨道要素到ECI坐标系状态的转换，采用ode45求解器进行积分，最终分析了半长轴…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.374Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>22 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+            <a class="tag-chip" href="../tags/tag-15.html">卫星</a>
+          
+            <a class="tag-chip" href="../tags/tag-20.html">物理仿真</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文介绍了一个基于MATLAB的卫星轨道动力学仿真程序。该程序采用国际空间站(ISS)近似轨道参数(400km高度、51.6°倾角)，通过数值积分方法求解包含地球引力和J2摄动项的轨道运动方程。仿真结果包括3D轨道可视化、位置/速度分量变化、轨道高度和速度大小变化等图表，并进行了能量守恒验证和轨道参数分析。程序实现了从轨道要素到ECI坐标系状态的转换，采用ode45求解器进行积分，最终分析了半长轴、偏心率等轨道参数的变化情况，完整模拟了卫星在1.5个轨道周期内的运动状态。</p>
+<p><img src="../uploads/csdn/%E5%8D%AB%E6%98%9F%E8%BD%A8%E9%81%93matlab%E5%8A%A8%E5%8A%9B%E5%AD%A6%E4%BB%BF%E7%9C%9F/img-01.png" alt=""></p>
+<p>MATLAB代码</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">%% 卫星轨道动力学仿真</span>
+<span class="hljs-comment">% 作者: MATLAB助手</span>
+<span class="hljs-comment">% 描述: 完整的卫星轨道动力学仿真程序</span>
+
+clear; clc; close all;
+
+<span class="hljs-comment">%% 2.2.1 初始化参数设置</span>
+fprintf(<span class="hljs-string">&#x27;初始化轨道参数...\n&#x27;</span>);
+
+<span class="hljs-comment">% 定义地球参数</span>
+earth_params = struct();
+earth_params.mass = <span class="hljs-number">5.972e24</span>;          <span class="hljs-comment">% 地球质量 (kg)</span>
+earth_params.radius = <span class="hljs-number">6378.137</span>;        <span class="hljs-comment">% 地球半径 (km)</span>
+earth_params.mu = <span class="hljs-number">3.986004418e5</span>;       <span class="hljs-comment">% 地球引力常数 (km^3/s^2)</span>
+earth_params.J2 = <span class="hljs-number">1.08262668e-3</span>;       <span class="hljs-comment">% 地球扁率J2项</span>
+
+<span class="hljs-comment">% 初始化卫星轨道参数 (ISS近似轨道)</span>
+satellite = struct();
+satellite.a = <span class="hljs-number">6778</span>;                    <span class="hljs-comment">% 半长轴 (km) - 约400km高度</span>
+satellite.e = <span class="hljs-number">0.001</span>;                   <span class="hljs-comment">% 偏心率 (近圆轨道)</span>
+satellite.<span class="hljs-built_in">i</span> = <span class="hljs-number">51.6</span>;                    <span class="hljs-comment">% 倾角 (度) - ISS轨道倾角</span>
+satellite.Omega = <span class="hljs-number">30</span>;                  <span class="hljs-comment">% 升交点赤经 (度)</span>
+satellite.w = <span class="hljs-number">60</span>;                      <span class="hljs-comment">% 近地点幅角 (度)</span>
+satellite.nu = <span class="hljs-number">0</span>;                      <span class="hljs-comment">% 真近点角 (度)</span>
+satellite.mass = <span class="hljs-number">500</span>;                  <span class="hljs-comment">% 卫星质量 (kg)</span>
+
+<span class="hljs-comment">% 将角度转换为弧度</span>
+satellite.i_rad = deg2rad(satellite.<span class="hljs-built_in">i</span>);
+satellite.Omega_rad = deg2rad(satellite.Omega);
+satellite.w_rad = deg2rad(satellite.w);
+satellite.nu_rad = deg2rad(satellite.nu);
+
+fprintf(<span class="hljs-string">&#x27;轨道参数初始化完成\n&#x27;</span>);
+
+<span class="hljs-comment">%% 计算初始位置和速度矢量</span>
+fprintf(<span class="hljs-string">&#x27;计算初始轨道状态...\n&#x27;</span>);
+
+<span class="hljs-comment">% 使用轨道要素计算初始位置和速度</span>
+[r_eci, v_eci] = orbitalElementsToState(satellite, earth_params.mu);
+
+<span class="hljs-comment">% 存储初始状态</span>
+initial_state = [r_eci; v_eci];
+satellite.position = r_eci;
+satellite.velocity = v_eci;
+
+fprintf(<span class="hljs-string">&#x27;初始位置: [%.2f, %.2f, %.2f] km\n&#x27;</span>, r_eci);
+fprintf(<span class="hljs-string">&#x27;初始速度: [%.2f, %.2f, %.2f] km/s\n&#x27;</span>, v_eci);
+
+<span class="hljs-comment">%% 3.2.2 牛顿万有引力定律应用</span>
+<span class="hljs-comment">% 计算初始引力</span>
+r_norm = norm(r_eci);
+F_gravity = -earth_params.mu * satellite.mass / r_norm^<span class="hljs-number">3</span> * r_eci;
+fprintf(<span class="hljs-string">&#x27;初始引力大小: %.2f N\n&#x27;</span>, norm(F_gravity));
+
+<span class="hljs-comment">%% 4.1.2 运动方程建立</span>
+fprintf(<span class="hljs-string">&#x27;建立运动方程...\n&#x27;</span>);
+
+<span class="hljs-comment">% 仿真参数</span>
+sim_params = struct();
+sim_params.duration = <span class="hljs-number">90</span> * <span class="hljs-number">60</span>;         <span class="hljs-comment">% 仿真时长 (秒) - 1.5个轨道周期</span>
+sim_params.dt = <span class="hljs-number">10</span>;                    <span class="hljs-comment">% 时间步长 (秒)</span>
+sim_params.method = <span class="hljs-string">&#x27;ode45&#x27;</span>;           <span class="hljs-comment">% 积分方法</span>
+
+<span class="hljs-comment">%% 4.3.2 数值积分求解轨道</span>
+fprintf(<span class="hljs-string">&#x27;开始数值积分...\n&#x27;</span>);
+
+<span class="hljs-comment">% 时间向量</span>
+t_span = [<span class="hljs-number">0</span>, sim_params.duration];
+
+<span class="hljs-comment">% 使用ode45求解轨道运动方程</span>
+options = odeset(<span class="hljs-string">&#x27;RelTol&#x27;</span>, <span class="hljs-number">1e-8</span>, <span class="hljs-string">&#x27;AbsTol&#x27;</span>, <span class="hljs-number">1e-8</span>);
+[t, state_history] = ode45(@(t, y) satelliteOrbitODE(t, y, earth_params), ...
+                          t_span, initial_state, options);
+
+<span class="hljs-comment">% 提取位置和速度历史</span>
+r_history = state_history(:, <span class="hljs-number">1</span>:<span class="hljs-number">3</span>);
+v_history = state_history(:, <span class="hljs-number">4</span>:<span class="hljs-number">6</span>);
+
+fprintf(<span class="hljs-string">&#x27;数值积分完成，共%d个数据点\n&#x27;</span>, <span class="hljs-built_in">length</span>(t));
+
+<span class="hljs-comment">%% 5.1.2 可视化技术实现</span>
+fprintf(<span class="hljs-string">&#x27;生成可视化结果...\n&#x27;</span>);
+
+<span class="hljs-comment">% 创建图形窗口</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">100</span>, <span class="hljs-number">100</span>, <span class="hljs-number">1200</span>, <span class="hljs-number">800</span>]);
+
+<span class="hljs-comment">%% 子图1: 3D轨道可视化</span>
+subplot(<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">1</span>);
+plotOrbit3D(r_history, earth_params);
+title(<span class="hljs-string">&#x27;卫星3D轨道&#x27;</span>);
+grid on;
+
+<span class="hljs-comment">%% 子图2: 位置分量随时间变化</span>
+subplot(<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">2</span>);
+<span class="hljs-built_in">plot</span>(t/<span class="hljs-number">60</span>, r_history(:,<span class="hljs-number">1</span>), <span class="hljs-string">&#x27;r-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>); <span class="hljs-built_in">hold</span> on;
+<span class="hljs-built_in">plot</span>(t/<span class="hljs-number">60</span>, r_history(:,<span class="hljs-number">2</span>), <span class="hljs-string">&#x27;g-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>);
+<span class="hljs-built_in">plot</span>(t/<span class="hljs-number">60</span>, r_history(:,<span class="hljs-number">3</span>), <span class="hljs-string">&#x27;b-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>);
+xlabel(<span class="hljs-string">&#x27;时间 (分钟)&#x27;</span>);
+ylabel(<span class="hljs-string">&#x27;位置 (km)&#x27;</span>);
+title(<span class="hljs-string">&#x27;卫星位置分量&#x27;</span>);
+<span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x27;X&#x27;</span>, <span class="hljs-string">&#x27;Y&#x27;</span>, <span class="hljs-string">&#x27;Z&#x27;</span>);
+grid on;
+
+<span class="hljs-comment">%% 子图3: 速度分量随时间变化</span>
+subplot(<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">3</span>);
+<span class="hljs-built_in">plot</span>(t/<span class="hljs-number">60</span>, v_history(:,<span class="hljs-number">1</span>), <span class="hljs-string">&#x27;r-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>); <span class="hljs-built_in">hold</span> on;
+<span class="hljs-built_in">plot</span>(t/<span class="hljs-number">60</span>, v_history(:,<span class="hljs-number">2</span>), <span class="hljs-string">&#x27;g-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>);
+<span class="hljs-built_in">plot</span>(t/<span class="hljs-number">60</span>, v_history(:,<span class="hljs-number">3</span>), <span class="hljs-string">&#x27;b-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>);
+xlabel(<span class="hljs-string">&#x27;时间 (分钟)&#x27;</span>);
+ylabel(<span class="hljs-string">&#x27;速度 (km/s)&#x27;</span>);
+title(<span class="hljs-string">&#x27;卫星速度分量&#x27;</span>);
+<span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x27;V_x&#x27;</span>, <span class="hljs-string">&#x27;V_y&#x27;</span>, <span class="hljs-string">&#x27;V_z&#x27;</span>);
+grid on;
+
+<span class="hljs-comment">%% 子图4: 轨道高度变化</span>
+subplot(<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">4</span>);
+altitude = vecnorm(r_history, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>) - earth_params.radius;
+<span class="hljs-built_in">plot</span>(t/<span class="hljs-number">60</span>, altitude, <span class="hljs-string">&#x27;k-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>);
+xlabel(<span class="hljs-string">&#x27;时间 (分钟)&#x27;</span>);
+ylabel(<span class="hljs-string">&#x27;高度 (km)&#x27;</span>);
+title(<span class="hljs-string">&#x27;卫星轨道高度&#x27;</span>);
+grid on;
+
+<span class="hljs-comment">%% 子图5: 速度大小变化</span>
+subplot(<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">5</span>);
+speed = vecnorm(v_history, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>);
+<span class="hljs-built_in">plot</span>(t/<span class="hljs-number">60</span>, speed, <span class="hljs-string">&#x27;m-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>);
+xlabel(<span class="hljs-string">&#x27;时间 (分钟)&#x27;</span>);
+ylabel(<span class="hljs-string">&#x27;速度 (km/s)&#x27;</span>);
+title(<span class="hljs-string">&#x27;卫星速度大小&#x27;</span>);
+grid on;
+
+<span class="hljs-comment">%% 子图6: 能量守恒验证</span>
+subplot(<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">6</span>);
+[energy, energy_error] = calculateOrbitalEnergy(r_history, v_history, earth_params.mu);
+<span class="hljs-built_in">plot</span>(t/<span class="hljs-number">60</span>, energy, <span class="hljs-string">&#x27;b-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>);
+xlabel(<span class="hljs-string">&#x27;时间 (分钟)&#x27;</span>);
+ylabel(<span class="hljs-string">&#x27;比机械能 (km^2/s^2)&#x27;</span>);
+title([<span class="hljs-string">&#x27;轨道能量守恒 - 最大误差: &#x27;</span>, num2str(energy_error, <span class="hljs-string">&#x27;%.2e&#x27;</span>)]);
+grid on;
+
+sgtitle(<span class="hljs-string">&#x27;卫星轨道动力学仿真结果&#x27;</span>);
+
+<span class="hljs-comment">%% 轨道参数分析</span>
+fprintf(<span class="hljs-string">&#x27;\n=== 轨道参数分析 ===\n&#x27;</span>);
+
+<span class="hljs-comment">% 计算轨道周期</span>
+T = <span class="hljs-number">2</span> * <span class="hljs-built_in">pi</span> * <span class="hljs-built_in">sqrt</span>(satellite.a^<span class="hljs-number">3</span> / earth_params.mu);
+fprintf(<span class="hljs-string">&#x27;理论轨道周期: %.2f 分钟\n&#x27;</span>, T/<span class="hljs-number">60</span>);
+
+<span class="hljs-comment">% 计算实际轨道参数变化</span>
+[final_a, final_e, final_i] = analyzeOrbitParameters(r_history, v_history, earth_params.mu);
+fprintf(<span class="hljs-string">&#x27;初始半长轴: %.2f km, 最终半长轴: %.2f km\n&#x27;</span>, satellite.a, final_a(<span class="hljs-keyword">end</span>));
+fprintf(<span class="hljs-string">&#x27;初始偏心率: %.6f, 最终偏心率: %.6f\n&#x27;</span>, satellite.e, final_e(<span class="hljs-keyword">end</span>));
+
+<span class="hljs-comment">%% 保存结果</span>
+save(<span class="hljs-string">&#x27;satellite_orbit_simulation.mat&#x27;</span>, <span class="hljs-string">&#x27;t&#x27;</span>, <span class="hljs-string">&#x27;r_history&#x27;</span>, <span class="hljs-string">&#x27;v_history&#x27;</span>, <span class="hljs-string">&#x27;satellite&#x27;</span>, <span class="hljs-string">&#x27;earth_params&#x27;</span>);
+
+fprintf(<span class="hljs-string">&#x27;\n仿真完成！结果已保存。\n&#x27;</span>);
+
+<span class="hljs-comment">%% ========================= 函数定义 =========================</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">[r_eci, v_eci]</span> = <span class="hljs-title">orbitalElementsToState</span><span class="hljs-params">(satellite, mu)</span></span>
+    <span class="hljs-comment">% 从轨道要素计算ECI坐标系下的位置和速度矢量</span>
+
+    <span class="hljs-comment">% 计算半正焦弦</span>
+    p = satellite.a * (<span class="hljs-number">1</span> - satellite.e^<span class="hljs-number">2</span>);
+
+    <span class="hljs-comment">% 在轨道平面内的位置和速度</span>
+    r_perifocal = (p / (<span class="hljs-number">1</span> + satellite.e * <span class="hljs-built_in">cos</span>(satellite.nu_rad))) * ...
+                  [<span class="hljs-built_in">cos</span>(satellite.nu_rad); <span class="hljs-built_in">sin</span>(satellite.nu_rad); <span class="hljs-number">0</span>];
+
+    v_perifocal = <span class="hljs-built_in">sqrt</span>(mu / p) * ...
+                  [-<span class="hljs-built_in">sin</span>(satellite.nu_rad); satellite.e + <span class="hljs-built_in">cos</span>(satellite.nu_rad); <span class="hljs-number">0</span>];
+
+    <span class="hljs-comment">% 旋转矩阵 (从轨道坐标系到ECI坐标系)</span>
+    R3_Omega = [<span class="hljs-built_in">cos</span>(satellite.Omega_rad), -<span class="hljs-built_in">sin</span>(satellite.Omega_rad), <span class="hljs-number">0</span>;
+                <span class="hljs-built_in">sin</span>(satellite.Omega_rad), <span class="hljs-built_in">cos</span>(satellite.Omega_rad), <span class="hljs-number">0</span>;
+                <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>];
+
+    R1_i = [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>;
+            <span class="hljs-number">0</span>, <span class="hljs-built_in">cos</span>(satellite.i_rad), -<span class="hljs-built_in">sin</span>(satellite.i_rad);
+            <span class="hljs-number">0</span>, <span class="hljs-built_in">sin</span>(satellite.i_rad), <span class="hljs-built_in">cos</span>(satellite.i_rad)];
+
+    R3_w = [<span class="hljs-built_in">cos</span>(satellite.w_rad), -<span class="hljs-built_in">sin</span>(satellite.w_rad), <span class="hljs-number">0</span>;
+            <span class="hljs-built_in">sin</span>(satellite.w_rad), <span class="hljs-built_in">cos</span>(satellite.w_rad), <span class="hljs-number">0</span>;
+            <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>];
+
+    R = R3_Omega * R1_i * R3_w;
+
+    <span class="hljs-comment">% 转换到ECI坐标系</span>
+    r_eci = R * r_perifocal;
+    v_eci = R * v_perifocal;
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dydt</span> = <span class="hljs-title">satelliteOrbitODE</span><span class="hljs-params">(t, y, earth_params)</span></span>
+    <span class="hljs-comment">% 卫星轨道运动方程 - 考虑中心引力和J2摄动</span>
+
+    r = y(<span class="hljs-number">1</span>:<span class="hljs-number">3</span>);     <span class="hljs-comment">% 位置矢量</span>
+    v = y(<span class="hljs-number">4</span>:<span class="hljs-number">6</span>);     <span class="hljs-comment">% 速度矢量</span>
+
+    r_norm = norm(r);
+
+    <span class="hljs-comment">% 中心引力加速度</span>
+    a_gravity = -earth_params.mu / r_norm^<span class="hljs-number">3</span> * r;
+
+    <span class="hljs-comment">% J2摄动加速度 (地球扁率影响)</span>
+    <span class="hljs-keyword">if</span> earth_params.J2 &gt; <span class="hljs-number">0</span>
+        x = r(<span class="hljs-number">1</span>); y = r(<span class="hljs-number">2</span>); z = r(<span class="hljs-number">3</span>);
+        r2 = r_norm^<span class="hljs-number">2</span>;
+        r5 = r_norm^<span class="hljs-number">5</span>;
+
+        k = <span class="hljs-number">1.5</span> * earth_params.J2 * earth_params.mu * earth_params.radius^<span class="hljs-number">2</span> / r5;
+
+        a_J2 = [k * x * (<span class="hljs-number">5</span>*z^<span class="hljs-number">2</span>/r2 - <span class="hljs-number">1</span>);
+                k * y * (<span class="hljs-number">5</span>*z^<span class="hljs-number">2</span>/r2 - <span class="hljs-number">1</span>);
+                k * z * (<span class="hljs-number">5</span>*z^<span class="hljs-number">2</span>/r2 - <span class="hljs-number">3</span>)];
+    <span class="hljs-keyword">else</span>
+        a_J2 = [<span class="hljs-number">0</span>; <span class="hljs-number">0</span>; <span class="hljs-number">0</span>];
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 总加速度</span>
+    a_total = a_gravity + a_J2;
+
+    <span class="hljs-comment">% 状态导数 [速度; 加速度]</span>
+    dydt = [v; a_total];
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">plotOrbit3D</span><span class="hljs-params">(r_history, earth_params)</span></span>
+    <span class="hljs-comment">% 绘制3D轨道图</span>
+
+    <span class="hljs-comment">% 绘制地球</span>
+    [X, Y, Z] = sphere(<span class="hljs-number">50</span>);
+    X = X * earth_params.radius;
+    Y = Y * earth_params.radius;
+    Z = Z * earth_params.radius;
+
+    surf(X, Y, Z, <span class="hljs-string">&#x27;FaceAlpha&#x27;</span>, <span class="hljs-number">0.3</span>, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+    colormap(winter);
+    <span class="hljs-built_in">hold</span> on;
+
+    <span class="hljs-comment">% 绘制轨道</span>
+    <span class="hljs-built_in">plot3</span>(r_history(:,<span class="hljs-number">1</span>), r_history(:,<span class="hljs-number">2</span>), r_history(:,<span class="hljs-number">3</span>), ...
+          <span class="hljs-string">&#x27;r-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>);
+
+    <span class="hljs-comment">% 标记起始点</span>
+    <span class="hljs-built_in">plot3</span>(r_history(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>), r_history(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>), r_history(<span class="hljs-number">1</span>,<span class="hljs-number">3</span>), ...
+          <span class="hljs-string">&#x27;go&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">8</span>, <span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>, <span class="hljs-string">&#x27;g&#x27;</span>);
+
+    <span class="hljs-comment">% 标记结束点</span>
+    <span class="hljs-built_in">plot3</span>(r_history(<span class="hljs-keyword">end</span>,<span class="hljs-number">1</span>), r_history(<span class="hljs-keyword">end</span>,<span class="hljs-number">2</span>), r_history(<span class="hljs-keyword">end</span>,<span class="hljs-number">3</span>), ...
+          <span class="hljs-string">&#x27;ro&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">8</span>, <span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>, <span class="hljs-string">&#x27;r&#x27;</span>);
+
+    axis equal;
+    xlabel(<span class="hljs-string">&#x27;X (km)&#x27;</span>);
+    ylabel(<span class="hljs-string">&#x27;Y (km)&#x27;</span>);
+    zlabel(<span class="hljs-string">&#x27;Z (km)&#x27;</span>);
+    grid on;
+    <span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x27;地球&#x27;</span>, <span class="hljs-string">&#x27;卫星轨道&#x27;</span>, <span class="hljs-string">&#x27;起始点&#x27;</span>, <span class="hljs-string">&#x27;结束点&#x27;</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">[energy, energy_error]</span> = <span class="hljs-title">calculateOrbitalEnergy</span><span class="hljs-params">(r_history, v_history, mu)</span></span>
+    <span class="hljs-comment">% 计算轨道能量并验证守恒</span>
+
+    n = <span class="hljs-built_in">size</span>(r_history, <span class="hljs-number">1</span>);
+    energy = <span class="hljs-built_in">zeros</span>(n, <span class="hljs-number">1</span>);
+
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:n
+        r_norm = norm(r_history(<span class="hljs-built_in">i</span>,:));
+        v_norm = norm(v_history(<span class="hljs-built_in">i</span>,:));
+        <span class="hljs-comment">% 比机械能: E = v^2/2 - mu/r</span>
+        energy(<span class="hljs-built_in">i</span>) = v_norm^<span class="hljs-number">2</span>/<span class="hljs-number">2</span> - mu/r_norm;
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 计算能量守恒误差</span>
+    energy_error = <span class="hljs-built_in">max</span>(energy) - <span class="hljs-built_in">min</span>(energy);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">[a_history, e_history, i_history]</span> = <span class="hljs-title">analyzeOrbitParameters</span><span class="hljs-params">(r_history, v_history, mu)</span></span>
+    <span class="hljs-comment">% 分析轨道参数随时间的变化</span>
+
+    n = <span class="hljs-built_in">size</span>(r_history, <span class="hljs-number">1</span>);
+    a_history = <span class="hljs-built_in">zeros</span>(n, <span class="hljs-number">1</span>);
+    e_history = <span class="hljs-built_in">zeros</span>(n, <span class="hljs-number">1</span>);
+    i_history = <span class="hljs-built_in">zeros</span>(n, <span class="hljs-number">1</span>);
+
+    <span class="hljs-keyword">for</span> k = <span class="hljs-number">1</span>:n
+        r = r_history(k,:)&#x27;;
+        v = v_history(k,:)&#x27;;
+
+        <span class="hljs-comment">% 角动量矢量</span>
+        h = <span class="hljs-built_in">cross</span>(r, v);
+        h_norm = norm(h);
+
+        <span class="hljs-comment">% 偏心率矢量</span>
+        e_vec = <span class="hljs-built_in">cross</span>(v, h)/mu - r/norm(r);
+        e_history(k) = norm(e_vec);
+
+        <span class="hljs-comment">% 半长轴</span>
+        energy = norm(v)^<span class="hljs-number">2</span>/<span class="hljs-number">2</span> - mu/norm(r);
+        a_history(k) = -mu/(<span class="hljs-number">2</span>*energy);
+
+        <span class="hljs-comment">% 倾角</span>
+        i_history(k) = <span class="hljs-built_in">acos</span>(h(<span class="hljs-number">3</span>)/h_norm);
+    <span class="hljs-keyword">end</span>
+
+    i_history = rad2deg(i_history);
+<span class="hljs-keyword">end</span>
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/受限三体问题中围绕三角形点的运动具有辐射性异质主天体及环绕带状结构.html">
+      <span>上一篇</span>
+      <strong>受限三体问题中围绕三角形点的运动具有辐射性异质主天体及环绕带状结构</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/卫星变轨轨迹和推力模拟单一引力源matlab.html">
+      <span>下一篇</span>
+      <strong>卫星变轨轨迹和推力模拟单一引力源MATLAB</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/计算卫星与地面时差用广义相对论给出计算公式与matlab代码.html">计算卫星与地面时差用广义相对论给出计算公式与MATLAB代码</a></h3>
+        <p class="post-excerpt">一、相对论时差的主要来源</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.817Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

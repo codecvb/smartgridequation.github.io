@@ -37,6 +37,7 @@
         '  <span class="list-main">',
         '    <span class="list-title">' + escapeHtml(post.title) + '</span>',
         '    <span class="list-summary">' + escapeHtml(post.summary || '……') + '</span>',
+        '    <span class="list-category">' + escapeHtml(post.category || '随笔') + '</span>',
         '  </span>',
         '  <span class="list-meta">',
         '    <span class="list-tags">' + escapeHtml(tags) + '</span>',
@@ -52,7 +53,7 @@
     var matches = posts;
     if (query) {
       matches = posts.filter(function (post) {
-        return [post.title, post.summary, post.content, (post.tags || []).join(' ')]
+        return [post.title, post.summary, post.content, post.category, (post.tags || []).join(' ')]
           .join('\n')
           .toLowerCase()
           .indexOf(query) !== -1;

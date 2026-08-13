@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>基于二维小波变换的图像增强MATLAB代码 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">基于二维小波变换的图像增强MATLAB代码</h1>
+        <p class="post-deck">Matlab</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.991Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>32 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-5.html">人工智能</a>
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+            <a class="tag-chip" href="../tags/tag-14.html">图像处理</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">%% 二维小波变换的图像增强（彩色图像）- 修复版</span>
+clear all; close all; clc;
+
+<span class="hljs-comment">%% 1. 读取彩色图像</span>
+img_original = imread(<span class="hljs-string">&#x27;test1.jpeg&#x27;</span>); <span class="hljs-comment">% 使用内置彩色图像</span>
+<span class="hljs-keyword">if</span> <span class="hljs-built_in">size</span>(img_original, <span class="hljs-number">3</span>) ~= <span class="hljs-number">3</span>
+    error(<span class="hljs-string">&#x27;请使用彩色图像！&#x27;</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Name&#x27;</span>, <span class="hljs-string">&#x27;原始图像&#x27;</span>);
+imshow(img_original); title(<span class="hljs-string">&#x27;原始彩色图像&#x27;</span>);
+
+<span class="hljs-comment">%% 2. 将图像转换到适合处理的空间</span>
+<span class="hljs-comment">% 方法1：YCbCr空间（推荐，保持色彩最自然）</span>
+img_ycbcr = rgb2ycbcr(img_original);
+Y = im2double(img_ycbcr(:,:,<span class="hljs-number">1</span>));  <span class="hljs-comment">% 亮度分量</span>
+Cb = img_ycbcr(:,:,<span class="hljs-number">2</span>);            <span class="hljs-comment">% 色度分量</span>
+Cr = img_ycbcr(:,:,<span class="hljs-number">3</span>);            <span class="hljs-comment">% 色度分量</span>
+
+<span class="hljs-comment">%% 3. 对亮度分量进行小波阈值增强</span>
+wavelet_name = <span class="hljs-string">&#x27;sym4&#x27;</span>;
+level = <span class="hljs-number">2</span>;
+
+<span class="hljs-comment">% 小波分解</span>
+[C, S] = wavedec2(Y, level, wavelet_name);
+
+<span class="hljs-comment">% 设置阈值参数</span>
+threshold_type = <span class="hljs-string">&#x27;s&#x27;</span>;  <span class="hljs-comment">% 可选 &#x27;s&#x27; (soft) 或 &#x27;h&#x27; (hard)</span>
+threshold_factor = <span class="hljs-number">0.3</span>;   <span class="hljs-comment">% 阈值因子，可调整</span>
+
+<span class="hljs-comment">% 计算全局阈值</span>
+T = threshold_factor * <span class="hljs-built_in">max</span>(<span class="hljs-built_in">abs</span>(C));
+
+<span class="hljs-comment">% 应用阈值</span>
+C_thresh = wthresh(C, threshold_type, T);
+
+<span class="hljs-comment">% 小波重构</span>
+Y_enhanced = waverec2(C_thresh, S, wavelet_name);
+
+<span class="hljs-comment">% 确保值在[0,1]范围内</span>
+Y_enhanced = <span class="hljs-built_in">min</span>(<span class="hljs-built_in">max</span>(Y_enhanced, <span class="hljs-number">0</span>), <span class="hljs-number">1</span>);
+
+<span class="hljs-comment">%% 4. 恢复色彩并转换回RGB</span>
+<span class="hljs-comment">% 使用YCbCr空间</span>
+img_ycbcr_enhanced = img_ycbcr;
+img_ycbcr_enhanced(:,:,<span class="hljs-number">1</span>) = im2uint8(Y_enhanced); <span class="hljs-comment">% 更新亮度分量</span>
+
+<span class="hljs-comment">% 转换回RGB</span>
+img_enhanced = ycbcr2rgb(img_ycbcr_enhanced);
+
+<span class="hljs-comment">%% 5. 显示结果</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Name&#x27;</span>, <span class="hljs-string">&#x27;阈值增强后恢复原色&#x27;</span>, <span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">100</span>, <span class="hljs-number">100</span>, <span class="hljs-number">1200</span>, <span class="hljs-number">400</span>]);
+
+subplot(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>);
+imshow(img_original);
+title(<span class="hljs-string">&#x27;原始彩色图像&#x27;</span>);
+colorbar(<span class="hljs-string">&#x27;southoutside&#x27;</span>);
+
+subplot(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, <span class="hljs-number">2</span>);
+imshow(img_enhanced);
+title([<span class="hljs-string">&#x27;阈值增强图像 (因子=&#x27;</span>, num2str(threshold_factor), <span class="hljs-string">&#x27;)&#x27;</span>]);
+colorbar(<span class="hljs-string">&#x27;southoutside&#x27;</span>);
+
+subplot(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, <span class="hljs-number">3</span>);
+<span class="hljs-comment">% 显示亮度分量增强对比</span>
+montage({Y, Y_enhanced}, <span class="hljs-string">&#x27;Size&#x27;</span>, [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>]);
+title(<span class="hljs-string">&#x27;亮度分量增强对比 (左:原始, 右:增强)&#x27;</span>);
+colorbar(<span class="hljs-string">&#x27;southoutside&#x27;</span>);
+
+<span class="hljs-comment">%% 6. 对比不同颜色空间的增强效果</span>
+<span class="hljs-keyword">methods</span> = {<span class="hljs-string">&#x27;ycbcr&#x27;</span>, <span class="hljs-string">&#x27;hsv&#x27;</span>, <span class="hljs-string">&#x27;lab&#x27;</span>};
+titles = {<span class="hljs-string">&#x27;YCbCr空间增强&#x27;</span>, <span class="hljs-string">&#x27;HSV空间增强&#x27;</span>, <span class="hljs-string">&#x27;CIELAB空间增强&#x27;</span>};
+
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Name&#x27;</span>, <span class="hljs-string">&#x27;不同颜色空间增强对比&#x27;</span>, <span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">100</span>, <span class="hljs-number">100</span>, <span class="hljs-number">1400</span>, <span class="hljs-number">400</span>]);
+
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:<span class="hljs-built_in">length</span>(<span class="hljs-keyword">methods</span>)
+    <span class="hljs-keyword">try</span>
+        img_method = wavelet_color_enhance(img_original, <span class="hljs-keyword">methods</span>{<span class="hljs-built_in">i</span>}, <span class="hljs-string">&#x27;sym4&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">0.3</span>);
+        subplot(<span class="hljs-number">1</span>, <span class="hljs-built_in">length</span>(<span class="hljs-keyword">methods</span>)+<span class="hljs-number">1</span>, <span class="hljs-built_in">i</span>);
+        imshow(img_method);
+        title(titles{<span class="hljs-built_in">i</span>});
+    <span class="hljs-keyword">catch</span>
+        subplot(<span class="hljs-number">1</span>, <span class="hljs-built_in">length</span>(<span class="hljs-keyword">methods</span>)+<span class="hljs-number">1</span>, <span class="hljs-built_in">i</span>);
+        imshow(img_original);
+        title([<span class="hljs-keyword">methods</span>{<span class="hljs-built_in">i</span>}, <span class="hljs-string">&#x27;方法不可用&#x27;</span>]);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 显示原始图像</span>
+subplot(<span class="hljs-number">1</span>, <span class="hljs-built_in">length</span>(<span class="hljs-keyword">methods</span>)+<span class="hljs-number">1</span>, <span class="hljs-built_in">length</span>(<span class="hljs-keyword">methods</span>)+<span class="hljs-number">1</span>);
+imshow(img_original);
+title(<span class="hljs-string">&#x27;原始图像&#x27;</span>);
+
+<span class="hljs-comment">%% 7. 调用自适应增强</span>
+img_adaptive = adaptive_wavelet_enhance(img_original);
+
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Name&#x27;</span>, <span class="hljs-string">&#x27;自适应阈值增强&#x27;</span>);
+subplot(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>);
+imshow(img_original);
+title(<span class="hljs-string">&#x27;原始图像&#x27;</span>);
+
+subplot(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>);
+imshow(img_adaptive);
+title(<span class="hljs-string">&#x27;自适应阈值增强&#x27;</span>);
+
+<span class="hljs-comment">%% 8. 评估各种方法的色彩保持度</span>
+<span class="hljs-comment">% 生成不同方法的增强结果</span>
+methods_to_eval = {<span class="hljs-string">&#x27;ycbcr&#x27;</span>, <span class="hljs-string">&#x27;hsv&#x27;</span>};
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:<span class="hljs-built_in">length</span>(methods_to_eval)
+    <span class="hljs-keyword">try</span>
+        img_eval = wavelet_color_enhance(...
+            img_original, methods_to_eval{<span class="hljs-built_in">i</span>}, <span class="hljs-string">&#x27;sym4&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">0.3</span>);
+        color_preservation_eval(img_original, img_eval, ...
+            upper(methods_to_eval{<span class="hljs-built_in">i</span>}));
+    <span class="hljs-keyword">catch</span>
+        fprintf(<span class="hljs-string">&#x27;\n无法评估 %s 方法\n&#x27;</span>, methods_to_eval{<span class="hljs-built_in">i</span>});
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 9. 调用交互式界面</span>
+interactive_threshold_adjustment(img_original);
+
+<span class="hljs-comment">%% 10. 批量处理多张图像（示例代码，取消注释使用）</span>
+<span class="hljs-comment">% process_image_collection(&#x27;输入文件夹路径&#x27;, &#x27;输出文件夹路径&#x27;);</span>
+
+<span class="hljs-comment">%% ==================== 函数定义部分 ====================</span>
+<span class="hljs-comment">% 注意：所有函数定义必须放在脚本代码之后</span>
+
+<span class="hljs-comment">%% 函数1：使用不同颜色空间的小波增强</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">img_enhanced</span> = <span class="hljs-title">wavelet_color_enhance</span><span class="hljs-params">(img_rgb, method, wavelet_name, level, threshold_factor)</span></span>
+    <span class="hljs-comment">% 参数说明：</span>
+    <span class="hljs-comment">% img_rgb: 输入RGB图像</span>
+    <span class="hljs-comment">% method: 颜色空间方法 (&#x27;ycbcr&#x27;, &#x27;hsv&#x27;, &#x27;lab&#x27;)</span>
+    <span class="hljs-comment">% wavelet_name: 小波基名称</span>
+    <span class="hljs-comment">% level: 分解层数</span>
+    <span class="hljs-comment">% threshold_factor: 阈值因子</span>
+
+    <span class="hljs-keyword">switch</span> lower(method)
+        <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;ycbcr&#x27;</span>
+            <span class="hljs-comment">% YCbCr空间</span>
+            img_ycbcr = rgb2ycbcr(img_rgb);
+            Y = im2double(img_ycbcr(:,:,<span class="hljs-number">1</span>));
+            Cb = img_ycbcr(:,:,<span class="hljs-number">2</span>);
+            Cr = img_ycbcr(:,:,<span class="hljs-number">3</span>);
+
+            <span class="hljs-comment">% 对Y分量进行小波增强</span>
+            [C, S] = wavedec2(Y, level, wavelet_name);
+            T = threshold_factor * <span class="hljs-built_in">max</span>(<span class="hljs-built_in">abs</span>(C));
+            C_thresh = wthresh(C, <span class="hljs-string">&#x27;s&#x27;</span>, T);
+            Y_enhanced = waverec2(C_thresh, S, wavelet_name);
+            Y_enhanced = <span class="hljs-built_in">min</span>(<span class="hljs-built_in">max</span>(Y_enhanced, <span class="hljs-number">0</span>), <span class="hljs-number">1</span>);
+
+            <span class="hljs-comment">% 恢复色彩</span>
+            img_ycbcr_enhanced = img_ycbcr;
+            img_ycbcr_enhanced(:,:,<span class="hljs-number">1</span>) = im2uint8(Y_enhanced);
+            img_enhanced = ycbcr2rgb(img_ycbcr_enhanced);
+
+        <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;hsv&#x27;</span>
+            <span class="hljs-comment">% HSV空间</span>
+            img_hsv = <span class="hljs-built_in">rgb2hsv</span>(img_rgb);
+            V = im2double(img_hsv(:,:,<span class="hljs-number">3</span>));
+            H = img_hsv(:,:,<span class="hljs-number">1</span>);
+            S = img_hsv(:,:,<span class="hljs-number">2</span>);
+
+            <span class="hljs-comment">% 对V分量进行小波增强</span>
+            [C, S_wavelet] = wavedec2(V, level, wavelet_name);
+            T = threshold_factor * <span class="hljs-built_in">max</span>(<span class="hljs-built_in">abs</span>(C));
+            C_thresh = wthresh(C, <span class="hljs-string">&#x27;s&#x27;</span>, T);
+            V_enhanced = waverec2(C_thresh, S_wavelet, wavelet_name);
+            V_enhanced = <span class="hljs-built_in">min</span>(<span class="hljs-built_in">max</span>(V_enhanced, <span class="hljs-number">0</span>), <span class="hljs-number">1</span>);
+
+            <span class="hljs-comment">% 恢复色彩</span>
+            img_hsv_enhanced = img_hsv;
+            img_hsv_enhanced(:,:,<span class="hljs-number">3</span>) = V_enhanced;
+            img_enhanced = <span class="hljs-built_in">hsv2rgb</span>(img_hsv_enhanced);
+
+        <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;lab&#x27;</span>
+            <span class="hljs-comment">% CIELAB空间</span>
+            img_lab = rgb2lab(img_rgb);
+            L = im2double(img_lab(:,:,<span class="hljs-number">1</span>)) / <span class="hljs-number">100</span>; <span class="hljs-comment">% 归一化到[0,1]</span>
+            a = img_lab(:,:,<span class="hljs-number">2</span>);
+            b = img_lab(:,:,<span class="hljs-number">3</span>);
+
+            <span class="hljs-comment">% 对L分量进行小波增强</span>
+            [C, S] = wavedec2(L, level, wavelet_name);
+            T = threshold_factor * <span class="hljs-built_in">max</span>(<span class="hljs-built_in">abs</span>(C));
+            C_thresh = wthresh(C, <span class="hljs-string">&#x27;s&#x27;</span>, T);
+            L_enhanced = waverec2(C_thresh, S, wavelet_name);
+            L_enhanced = <span class="hljs-built_in">min</span>(<span class="hljs-built_in">max</span>(L_enhanced, <span class="hljs-number">0</span>), <span class="hljs-number">1</span>) * <span class="hljs-number">100</span>; <span class="hljs-comment">% 还原到[0,100]</span>
+
+            <span class="hljs-comment">% 恢复色彩</span>
+            img_lab_enhanced = img_lab;
+            img_lab_enhanced(:,:,<span class="hljs-number">1</span>) = L_enhanced;
+            img_enhanced = lab2rgb(img_lab_enhanced);
+
+        <span class="hljs-keyword">otherwise</span>
+            error(<span class="hljs-string">&#x27;不支持的色彩空间方法&#x27;</span>);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 函数2：自适应阈值增强</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">img_enhanced</span> = <span class="hljs-title">adaptive_wavelet_enhance</span><span class="hljs-params">(img_rgb)</span></span>
+    <span class="hljs-comment">% 自适应阈值增强，自动调整参数</span>
+
+    <span class="hljs-comment">% 转换到YCbCr空间</span>
+    img_ycbcr = rgb2ycbcr(img_rgb);
+    Y = im2double(img_ycbcr(:,:,<span class="hljs-number">1</span>));
+
+    <span class="hljs-comment">% 计算图像统计特性</span>
+    mean_intensity = mean2(Y);
+    std_intensity = std2(Y);
+
+    <span class="hljs-comment">% 根据图像特性自适应选择参数</span>
+    <span class="hljs-keyword">if</span> mean_intensity &lt; <span class="hljs-number">0.3</span>
+        <span class="hljs-comment">% 暗图像：使用较小阈值，强调增强</span>
+        threshold_factor = <span class="hljs-number">0.2</span>;
+        wavelet_name = <span class="hljs-string">&#x27;haar&#x27;</span>;
+        level = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">elseif</span> std_intensity &lt; <span class="hljs-number">0.1</span>
+        <span class="hljs-comment">% 低对比度图像：使用中等阈值</span>
+        threshold_factor = <span class="hljs-number">0.25</span>;
+        wavelet_name = <span class="hljs-string">&#x27;sym4&#x27;</span>;
+        level = <span class="hljs-number">2</span>;
+    <span class="hljs-keyword">else</span>
+        <span class="hljs-comment">% 正常图像：使用标准参数</span>
+        threshold_factor = <span class="hljs-number">0.3</span>;
+        wavelet_name = <span class="hljs-string">&#x27;sym4&#x27;</span>;
+        level = <span class="hljs-number">2</span>;
+    <span class="hljs-keyword">end</span>
+
+    fprintf(<span class="hljs-string">&#x27;自适应参数选择:\n&#x27;</span>);
+    fprintf(<span class="hljs-string">&#x27;  平均亮度: %.2f\n&#x27;</span>, mean_intensity);
+    fprintf(<span class="hljs-string">&#x27;  亮度标准差: %.2f\n&#x27;</span>, std_intensity);
+    fprintf(<span class="hljs-string">&#x27;  阈值因子: %.2f\n&#x27;</span>, threshold_factor);
+    fprintf(<span class="hljs-string">&#x27;  小波基: %s\n&#x27;</span>, wavelet_name);
+    fprintf(<span class="hljs-string">&#x27;  分解层数: %d\n&#x27;</span>, level);
+
+    <span class="hljs-comment">% 执行小波增强</span>
+    [C, S] = wavedec2(Y, level, wavelet_name);
+    T = threshold_factor * <span class="hljs-built_in">max</span>(<span class="hljs-built_in">abs</span>(C));
+    C_thresh = wthresh(C, <span class="hljs-string">&#x27;s&#x27;</span>, T);
+    Y_enhanced = waverec2(C_thresh, S, wavelet_name);
+    Y_enhanced = <span class="hljs-built_in">min</span>(<span class="hljs-built_in">max</span>(Y_enhanced, <span class="hljs-number">0</span>), <span class="hljs-number">1</span>);
+
+    <span class="hljs-comment">% 恢复色彩</span>
+    img_ycbcr_enhanced = img_ycbcr;
+    img_ycbcr_enhanced(:,:,<span class="hljs-number">1</span>) = im2uint8(Y_enhanced);
+    img_enhanced = ycbcr2rgb(img_ycbcr_enhanced);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 函数3：色彩保持度评估</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">color_preservation_eval</span><span class="hljs-params">(original, enhanced, method_name)</span></span>
+    <span class="hljs-comment">% 评估色彩保持度</span>
+
+    <span class="hljs-comment">% 转换到LAB色彩空间（更适合色彩差异评估）</span>
+    original_lab = rgb2lab(original);
+    enhanced_lab = rgb2lab(enhanced);
+
+    <span class="hljs-comment">% 计算ΔE（色彩差异）</span>
+    delta_E = <span class="hljs-built_in">sqrt</span>(...
+        (original_lab(:,:,<span class="hljs-number">1</span>) - enhanced_lab(:,:,<span class="hljs-number">1</span>)).^<span class="hljs-number">2</span> + ...
+        (original_lab(:,:,<span class="hljs-number">2</span>) - enhanced_lab(:,:,<span class="hljs-number">2</span>)).^<span class="hljs-number">2</span> + ...
+        (original_lab(:,:,<span class="hljs-number">3</span>) - enhanced_lab(:,:,<span class="hljs-number">3</span>)).^<span class="hljs-number">2</span>);
+
+    mean_deltaE = <span class="hljs-built_in">mean</span>(delta_E(:));
+    max_deltaE = <span class="hljs-built_in">max</span>(delta_E(:));
+
+    <span class="hljs-comment">% 计算结构相似性（SSIM）和峰值信噪比（PSNR）</span>
+    ssim_val = ssim(rgb2gray(enhanced), rgb2gray(original));
+    psnr_val = psnr(enhanced, original);
+
+    fprintf(<span class="hljs-string">&#x27;\n%s 方法色彩保持度评估:\n&#x27;</span>, method_name);
+    fprintf(<span class="hljs-string">&#x27;  平均色彩差异 (ΔE): %.2f\n&#x27;</span>, mean_deltaE);
+    fprintf(<span class="hljs-string">&#x27;  最大色彩差异 (ΔE): %.2f\n&#x27;</span>, max_deltaE);
+    fprintf(<span class="hljs-string">&#x27;  结构相似性 (SSIM): %.4f\n&#x27;</span>, ssim_val);
+    fprintf(<span class="hljs-string">&#x27;  峰值信噪比 (PSNR): %.2f dB\n&#x27;</span>, psnr_val);
+
+    <span class="hljs-comment">% 显示色彩差异图</span>
+    <span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Name&#x27;</span>, [<span class="hljs-string">&#x27;色彩差异分析 - &#x27;</span>, method_name]);
+    subplot(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>);
+    imshow(original);
+    title(<span class="hljs-string">&#x27;原始图像&#x27;</span>);
+
+    subplot(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, <span class="hljs-number">2</span>);
+    imshow(enhanced);
+    title(<span class="hljs-string">&#x27;增强图像&#x27;</span>);
+
+    subplot(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, <span class="hljs-number">3</span>);
+    imshow(delta_E, []);
+    colormap(<span class="hljs-string">&#x27;jet&#x27;</span>);
+    colorbar;
+    title(sprintf(<span class="hljs-string">&#x27;色彩差异图 (ΔE)\n平均: %.2f&#x27;</span>, mean_deltaE));
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 函数4：批量处理多张图像</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">process_image_collection</span><span class="hljs-params">(image_folder, output_folder)</span></span>
+    <span class="hljs-comment">% 批量处理文件夹中的所有图像</span>
+
+    <span class="hljs-keyword">if</span> ~exist(output_folder, <span class="hljs-string">&#x27;dir&#x27;</span>)
+        mkdir(output_folder);
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 获取所有图像文件</span>
+    image_files = dir(fullfile(image_folder, <span class="hljs-string">&#x27;*.jpg&#x27;</span>));
+    image_files = [image_files; dir(fullfile(image_folder, <span class="hljs-string">&#x27;*.png&#x27;</span>))];
+    image_files = [image_files; dir(fullfile(image_folder, <span class="hljs-string">&#x27;*.bmp&#x27;</span>))];
+
+    fprintf(<span class="hljs-string">&#x27;开始批量处理 %d 张图像...\n&#x27;</span>, <span class="hljs-built_in">length</span>(image_files));
+
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:<span class="hljs-built_in">length</span>(image_files)
+        <span class="hljs-comment">% 读取图像</span>
+        img_path = fullfile(image_folder, image_files(<span class="hljs-built_in">i</span>).name);
+        img = imread(img_path);
+
+        <span class="hljs-comment">% 仅处理彩色图像</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">size</span>(img, <span class="hljs-number">3</span>) == <span class="hljs-number">3</span>
+            <span class="hljs-comment">% 使用自适应增强</span>
+            img_enhanced = adaptive_wavelet_enhance(img);
+
+            <span class="hljs-comment">% 保存结果</span>
+            [~, name, ext] = fileparts(image_files(<span class="hljs-built_in">i</span>).name);
+            output_path = fullfile(output_folder, [name, <span class="hljs-string">&#x27;_enhanced&#x27;</span>, ext]);
+            imwrite(img_enhanced, output_path);
+
+            fprintf(<span class="hljs-string">&#x27;  已处理: %s\n&#x27;</span>, image_files(<span class="hljs-built_in">i</span>).name);
+        <span class="hljs-keyword">else</span>
+            fprintf(<span class="hljs-string">&#x27;  跳过灰度图像: %s\n&#x27;</span>, image_files(<span class="hljs-built_in">i</span>).name);
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+
+    fprintf(<span class="hljs-string">&#x27;批量处理完成！\n&#x27;</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 函数5：交互式阈值调整界面</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">interactive_threshold_adjustment</span><span class="hljs-params">(img_rgb)</span></span>
+    <span class="hljs-comment">% 创建交互式界面</span>
+
+    fig = <span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Name&#x27;</span>, <span class="hljs-string">&#x27;交互式阈值调整&#x27;</span>, ...
+                 <span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">200</span>, <span class="hljs-number">200</span>, <span class="hljs-number">1000</span>, <span class="hljs-number">400</span>]);
+
+    <span class="hljs-comment">% 添加控制面板</span>
+    uicontrol(<span class="hljs-string">&#x27;Style&#x27;</span>, <span class="hljs-string">&#x27;text&#x27;</span>, ...
+              <span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">20</span>, <span class="hljs-number">350</span>, <span class="hljs-number">120</span>, <span class="hljs-number">20</span>], ...
+              <span class="hljs-string">&#x27;String&#x27;</span>, <span class="hljs-string">&#x27;阈值因子:&#x27;</span>);
+
+    threshold_slider = uicontrol(<span class="hljs-string">&#x27;Style&#x27;</span>, <span class="hljs-string">&#x27;slider&#x27;</span>, ...
+                                 <span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">20</span>, <span class="hljs-number">320</span>, <span class="hljs-number">120</span>, <span class="hljs-number">20</span>], ...
+                                 <span class="hljs-string">&#x27;Min&#x27;</span>, <span class="hljs-number">0.05</span>, <span class="hljs-string">&#x27;Max&#x27;</span>, <span class="hljs-number">0.8</span>, ...
+                                 <span class="hljs-string">&#x27;Value&#x27;</span>, <span class="hljs-number">0.3</span>, ...
+                                 <span class="hljs-string">&#x27;SliderStep&#x27;</span>, [<span class="hljs-number">0.01</span>, <span class="hljs-number">0.1</span>]);
+
+    threshold_text = uicontrol(<span class="hljs-string">&#x27;Style&#x27;</span>, <span class="hljs-string">&#x27;text&#x27;</span>, ...
+                               <span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">20</span>, <span class="hljs-number">290</span>, <span class="hljs-number">120</span>, <span class="hljs-number">20</span>], ...
+                               <span class="hljs-string">&#x27;String&#x27;</span>, <span class="hljs-string">&#x27;0.30&#x27;</span>);
+
+    <span class="hljs-comment">% 添加颜色空间选择</span>
+    uicontrol(<span class="hljs-string">&#x27;Style&#x27;</span>, <span class="hljs-string">&#x27;text&#x27;</span>, ...
+              <span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">160</span>, <span class="hljs-number">350</span>, <span class="hljs-number">120</span>, <span class="hljs-number">20</span>], ...
+              <span class="hljs-string">&#x27;String&#x27;</span>, <span class="hljs-string">&#x27;颜色空间:&#x27;</span>);
+
+    colorspace_popup = uicontrol(<span class="hljs-string">&#x27;Style&#x27;</span>, <span class="hljs-string">&#x27;popupmenu&#x27;</span>, ...
+                                 <span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">160</span>, <span class="hljs-number">320</span>, <span class="hljs-number">120</span>, <span class="hljs-number">30</span>], ...
+                                 <span class="hljs-string">&#x27;String&#x27;</span>, {<span class="hljs-string">&#x27;YCbCr&#x27;</span>, <span class="hljs-string">&#x27;HSV&#x27;</span>}, ...
+                                 <span class="hljs-string">&#x27;Value&#x27;</span>, <span class="hljs-number">1</span>);
+
+    <span class="hljs-comment">% 显示区域</span>
+    ax_original = subplot(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>);
+    imshow(img_rgb);
+    title(<span class="hljs-string">&#x27;原始图像&#x27;</span>);
+
+    ax_enhanced = subplot(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, <span class="hljs-number">2</span>);
+
+    ax_difference = subplot(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, <span class="hljs-number">3</span>);
+
+    <span class="hljs-comment">% 回调函数</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">update_display</span><span class="hljs-params">(~, ~)</span></span>
+        <span class="hljs-comment">% 获取当前参数</span>
+        threshold_val = threshold_slider.Value;
+        colorspace_idx = colorspace_popup.Value;
+
+        <span class="hljs-comment">% 更新显示值</span>
+        threshold_text.String = sprintf(<span class="hljs-string">&#x27;%.2f&#x27;</span>, threshold_val);
+
+        <span class="hljs-comment">% 选择颜色空间</span>
+        <span class="hljs-keyword">if</span> colorspace_idx == <span class="hljs-number">1</span>
+            colorspace = <span class="hljs-string">&#x27;ycbcr&#x27;</span>;
+        <span class="hljs-keyword">else</span>
+            colorspace = <span class="hljs-string">&#x27;hsv&#x27;</span>;
+        <span class="hljs-keyword">end</span>
+
+        <span class="hljs-comment">% 执行增强</span>
+        img_enhanced = wavelet_color_enhance(...
+            img_rgb, colorspace, <span class="hljs-string">&#x27;sym4&#x27;</span>, <span class="hljs-number">2</span>, threshold_val);
+
+        <span class="hljs-comment">% 显示增强图像</span>
+        axes(ax_enhanced);
+        imshow(img_enhanced);
+        title([<span class="hljs-string">&#x27;增强图像\n&#x27;</span>, ...
+               <span class="hljs-string">&#x27;阈值=&#x27;</span>, sprintf(<span class="hljs-string">&#x27;%.2f&#x27;</span>, threshold_val), ...
+               <span class="hljs-string">&#x27;, 空间=&#x27;</span>, colorspace]);
+
+        <span class="hljs-comment">% 显示差异图</span>
+        axes(ax_difference);
+        diff_img = imabsdiff(img_rgb, img_enhanced);
+        imshow(diff_img * <span class="hljs-number">5</span>); <span class="hljs-comment">% 放大差异以便观察</span>
+        title(<span class="hljs-string">&#x27;增强差异（×5）&#x27;</span>);
+        colorbar;
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 设置回调</span>
+    threshold_slider.Callback = @update_display;
+    colorspace_popup.Callback = @update_display;
+
+    <span class="hljs-comment">% 初始更新</span>
+    update_display();
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8E%E4%BA%8C%E7%BB%B4%E5%B0%8F%E6%B3%A2%E5%8F%98%E6%8D%A2%E7%9A%84%E5%9B%BE%E5%83%8F%E5%A2%9E%E5%BC%BAmatlab%E4%BB%A3%E7%A0%81/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8E%E4%BA%8C%E7%BB%B4%E5%B0%8F%E6%B3%A2%E5%8F%98%E6%8D%A2%E7%9A%84%E5%9B%BE%E5%83%8F%E5%A2%9E%E5%BC%BAmatlab%E4%BB%A3%E7%A0%81/img-02.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8E%E4%BA%8C%E7%BB%B4%E5%B0%8F%E6%B3%A2%E5%8F%98%E6%8D%A2%E7%9A%84%E5%9B%BE%E5%83%8F%E5%A2%9E%E5%BC%BAmatlab%E4%BB%A3%E7%A0%81/img-03.png" alt=""></p>
+<h3 id="代码说明" class="prose-heading">代码说明：</h3>
+<h4 id="主要功能" class="prose-heading">主要功能：</h4>
+<ol>
+<li></li>
+</ol>
+<pre><code>**三种增强方法**：
+
+
+-
+
+    **细节增强**：通过放大高频小波系数来增强图像细节
+
+
+-
+
+    **对比度增强**：通过调整低频小波系数来改善对比度
+
+
+-
+
+    **阈值增强**：使用软阈值处理去除噪声同时保留细节
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>**小波参数可调**：
+
+
+-
+
+    可选择不同小波基函数（'haar', 'db2', 'sym4'等）
+
+
+-
+
+    可调整分解层数
+
+
+-
+
+    可调节增强因子
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>**可视化**：
+
+
+-
+
+    显示原始图像和三种增强结果
+
+
+-
+
+    显示小波分解的各子带系数
+
+
+-
+
+    交互式界面调整参数（可选）
+</code></pre>
+<h4 id="使用方法" class="prose-heading">使用方法：</h4>
+<ol>
+<li></li>
+</ol>
+<pre><code>将图像文件路径替换为你的图像
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>调整小波基函数和分解层数
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>调整增强因子以获得最佳效果
+</code></pre>
+<ol start="4">
+<li></li>
+</ol>
+<pre><code>可取消注释第11部分使用交互式界面
+</code></pre>
+<h4 id="注意事项" class="prose-heading">注意事项：</h4>
+<ul>
+<li></li>
+</ul>
+<pre><code>增强因子需要根据具体图像调整，过大可能导致噪声放大
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>对于彩色图像，建议转换到其他颜色空间（如HSV/YCbCr）后再对亮度分量处理
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>小波基函数选择会影响增强效果，可以尝试不同的小波
+</code></pre>
+<p>这个代码提供了灵活的框架，你可以根据具体需求调整参数或增加其他小波增强算法。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-3" href="#代码说明">代码说明：</a>
+          
+            <a class="toc-level-4" href="#主要功能">主要功能：</a>
+          
+            <a class="toc-level-4" href="#使用方法">使用方法：</a>
+          
+            <a class="toc-level-4" href="#注意事项">注意事项：</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/基于互相关transformer双层特征融合的目标跟踪算法关键词目标跟踪transformer法互相.html">
+      <span>上一篇</span>
+      <strong>基于互相关Transformer双层特征融合的目标跟踪算法关键词目标跟踪Transformer法互相</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/基于mfs的图像分割边界优化策略.html">
+      <span>下一篇</span>
+      <strong>基于MFS的图像分割边界优化策略</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/基于改进标准映射的图像加密算法matlab代码版本.html">基于改进标准映射的图像加密算法MATLAB代码版本</a></h3>
+        <p class="post-excerpt">!在这里插入图片描述代码运行结果如上图</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.037Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/matlab实现神经网络的ocr识别.html">MATLAB实现神经网络的OCR识别</a></h3>
+        <p class="post-excerpt">使用说明：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.694Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/神经网络解决图论中最优路径的问题matlab代码.html">神经网络解决图论中最优路径的问题MATLAB代码</a></h3>
+        <p class="post-excerpt">解决思路</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.288Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

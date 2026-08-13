@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Python实现视频目标检测与轨迹跟踪流程详解转载 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">Python实现视频目标检测与轨迹跟踪流程详解转载</h1>
+        <p class="post-deck">更新时间：2023年01月28日 09:38:00   作者：倾城一少</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.788Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>75 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-5.html">人工智能</a>
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <h2 id="更新时间-2023年01月28日-09-38-00-作者-倾城一少" class="prose-heading">更新时间：2023年01月28日 09:38:00   作者：倾城一少</h2>
+<p>通过阅读相关文献及测试，找到了一种基于多模板匹配的改进方法，可以对遥感视频卫星中的移动目标进行探测，并绘制其轨迹。根据实验结果发现，可以比较有效的对运动目标进行跟踪</p>
+<p>目录</p>
+<ul>
+<li><a href="https://www.jb51.net/article/273473.htm#_label0" title="一、原理">一、原理</a></li>
+<li><a href="https://www.jb51.net/article/273473.htm#_label1" title="二、代码实现">二、代码实现</a>
+<ul>
+<li><a href="https://www.jb51.net/article/273473.htm#_lab2_1_0" title="1.增加多模板匹配机制">1.增加多模板匹配机制</a></li>
+<li><a href="https://www.jb51.net/article/273473.htm#_lab2_1_1" title="2.增加轨迹平滑">2.增加轨迹平滑</a></li>
+</ul>
+</li>
+<li><a href="https://www.jb51.net/article/273473.htm#_label2" title="三、测试对比">三、测试对比</a></li>
+</ul>
+<h3 id="一-原理" class="prose-heading">一、原理</h3>
+<p>核心思想比较简单。即通过不同旋转角度的模板同时匹配，在多个结果中，找到相似度最大的结果，即认为匹配成功。 在视频的某一帧将这些模板分别进行匹配，即可获得较为准确的结果。</p>
+<p><img src="../uploads/csdn/python%E5%AE%9E%E7%8E%B0%E8%A7%86%E9%A2%91%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E4%B8%8E%E8%BD%A8%E8%BF%B9%E8%B7%9F%E8%B8%AA%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3%E8%BD%AC%E8%BD%BD/img-01.png" alt=""></p>
+<p>某一帧的物体搜索窗口如上图所示。0°表示提取的原始模板，将原始模板以8个方向进行旋转，可得到8个不同旋转角度的模板。 依次与窗口进行模板匹配，可以得到相似度。取相似度最大的模板对应的坐标结果作为轨迹。</p>
+<p>同时根据不同的精度需求，可以有4模板、8模板和16模板，对应方向如下。模板数目越多，其对旋转的检测性就越好、越精确。但同时计算量也会成倍增加。</p>
+<p><img src="../uploads/csdn/python%E5%AE%9E%E7%8E%B0%E8%A7%86%E9%A2%91%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E4%B8%8E%E8%BD%A8%E8%BF%B9%E8%B7%9F%E8%B8%AA%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3%E8%BD%AC%E8%BD%BD/img-02.png" alt=""></p>
+<h3 id="二-代码实现" class="prose-heading">二、代码实现</h3>
+<pre class="hljs"><code class="language-python"><span class="hljs-comment"># coding=utf-8</span>
+
+<span class="hljs-keyword">import</span> cv2
+
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-keyword">import</span> math
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">calcVelocity</span>(<span class="hljs-params">x1, x2, y1, y2, res, wT</span>):
+
+    dist = <span class="hljs-built_in">pow</span>(<span class="hljs-built_in">pow</span>(y1 - y2, <span class="hljs-number">2</span>) + <span class="hljs-built_in">pow</span>(x1 - x2, <span class="hljs-number">2</span>), <span class="hljs-number">0.5</span>) * res
+
+    v = dist / (wT / <span class="hljs-number">1000.0</span>) * <span class="hljs-number">3.6</span>
+
+    <span class="hljs-keyword">return</span> v
+
+<span class="hljs-comment"># ---------------必要参数---------------</span>
+
+<span class="hljs-comment"># 待识别视频路径</span>
+
+video_path = <span class="hljs-string">&#x27;E:\\object\\test_real.mp4&#x27;</span>
+
+<span class="hljs-comment"># 卫星视频地表分辨率</span>
+
+resolution = <span class="hljs-number">2</span>
+
+<span class="hljs-comment"># 估计最快运动速度</span>
+
+velocity = <span class="hljs-number">850</span>
+
+<span class="hljs-comment"># ---------------必要参数---------------</span>
+
+<span class="hljs-comment"># ---------------可选参数---------------</span>
+
+<span class="hljs-comment"># 提取的模板是否为正方形</span>
+
+isSquare = <span class="hljs-literal">True</span>
+
+<span class="hljs-comment"># 是否自动根据速度信息计算阈值</span>
+
+isAutoDisThresh = <span class="hljs-literal">True</span>
+
+<span class="hljs-comment"># 是否为多模板</span>
+
+isMultiTemplate = <span class="hljs-literal">True</span>
+
+<span class="hljs-comment"># 是否采用均值对轨迹进行平滑</span>
+
+isSmooth = <span class="hljs-literal">True</span>
+
+<span class="hljs-comment"># 相邻轨迹点之间的距离阈值</span>
+
+dis_thresh = <span class="hljs-number">10</span>
+
+<span class="hljs-comment"># 多模板个数</span>
+
+templateNum = <span class="hljs-number">8</span>
+
+<span class="hljs-comment"># 初始待选窗口大小半径</span>
+
+range_d = <span class="hljs-number">30</span>
+
+<span class="hljs-comment"># 灰度阈值敏感度，越大灰度阈值越低</span>
+
+gray_factor = <span class="hljs-number">0.2</span>
+
+<span class="hljs-comment"># 识别框缩放因子，越大绘制的识别框越大</span>
+
+scale_factor = <span class="hljs-number">1.5</span>
+
+<span class="hljs-comment"># 模板缩放因子，越大模板图像越大</span>
+
+template_factor = <span class="hljs-number">0.6</span>
+
+<span class="hljs-comment"># 识别框颜色</span>
+
+color = (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>)
+
+<span class="hljs-comment"># 输出路径</span>
+
+parent_path = video_path.replace(video_path.split(<span class="hljs-string">&quot;\\&quot;</span>)[-<span class="hljs-number">1</span>], <span class="hljs-string">&#x27;&#x27;</span>)
+
+out_path = parent_path + <span class="hljs-string">&quot;object.avi&quot;</span>
+
+out_path2 = parent_path + <span class="hljs-string">&quot;track.avi&quot;</span>
+
+out_path3 = parent_path + <span class="hljs-string">&quot;points.txt&quot;</span>
+
+out_path4 = parent_path + <span class="hljs-string">&quot;velocity.txt&quot;</span>
+
+out_path5 = parent_path + <span class="hljs-string">&quot;template.jpg&quot;</span>
+
+<span class="hljs-comment"># ---------------可选参数---------------</span>
+
+<span class="hljs-comment"># 循环变量</span>
+
+count = <span class="hljs-number">0</span>
+
+<span class="hljs-comment"># 打开视频</span>
+
+cap = cv2.VideoCapture(video_path)
+
+cap2 = cv2.VideoCapture(video_path)
+
+<span class="hljs-comment"># 获取视频图像大小</span>
+
+<span class="hljs-comment"># video_h对应竖直方向，video_w对应水平方向</span>
+
+video_h = <span class="hljs-built_in">int</span>(cap.get(<span class="hljs-number">4</span>))
+
+video_w = <span class="hljs-built_in">int</span>(cap.get(<span class="hljs-number">3</span>))
+
+total = <span class="hljs-built_in">int</span>(cap.get(<span class="hljs-number">7</span>))
+
+<span class="hljs-comment"># 新建一张与视频等大的影像用于绘制轨迹</span>
+
+track = np.zeros((video_h, video_w, <span class="hljs-number">3</span>), np.uint8)
+
+<span class="hljs-comment"># tlp用于存放待选窗口的左上角点</span>
+
+tlp = []
+
+<span class="hljs-comment"># rbp用于存放待选窗口的右下角点</span>
+
+rbp = []
+
+<span class="hljs-comment"># bottom_right_points用于存放目标区域的右下角点</span>
+
+bottom_right_points = []
+
+<span class="hljs-comment"># center_points用于存放目标区域的中心点</span>
+
+center_points = []
+
+<span class="hljs-comment"># trackPoints用于存放目标区域的左上角点</span>
+
+trackPoints = []
+
+<span class="hljs-comment"># Vs用于存放目标各帧速度</span>
+
+Vs = []
+
+<span class="hljs-comment"># 根据视频信息计算每一帧的等待时间</span>
+
+<span class="hljs-keyword">if</span> cap.get(<span class="hljs-number">5</span>) != <span class="hljs-number">0</span>:
+
+    waitTime = <span class="hljs-built_in">int</span>(<span class="hljs-number">1000.0</span> / cap.get(<span class="hljs-number">5</span>))
+
+    fps = cap.get(<span class="hljs-number">5</span>)
+
+<span class="hljs-comment"># 如果为真，则自动确定距离阈值</span>
+
+<span class="hljs-keyword">if</span> isAutoDisThresh:
+
+    <span class="hljs-comment"># 计算物体帧间最大运动范围(像素)</span>
+
+    max_range = math.ceil((<span class="hljs-number">5.0</span> * velocity) / (<span class="hljs-number">18.0</span> * resolution * (fps - <span class="hljs-number">1</span>)))
+
+    <span class="hljs-comment"># 计算最大移动距离，作为阈值</span>
+
+    dis_thresh = math.ceil(<span class="hljs-built_in">pow</span>(<span class="hljs-built_in">pow</span>(max_range, <span class="hljs-number">2</span>) + <span class="hljs-built_in">pow</span>(max_range, <span class="hljs-number">2</span>), <span class="hljs-number">0.5</span>))
+
+fourcc = cv2.VideoWriter_fourcc(*<span class="hljs-string">&#x27;XVID&#x27;</span>)
+
+out = cv2.VideoWriter(out_path, fourcc, fps, (video_w, video_h))
+
+out2 = cv2.VideoWriter(out_path2, fourcc, fps, (video_w, video_h))
+
+<span class="hljs-comment"># 首先提取模板图像</span>
+
+<span class="hljs-keyword">if</span> cap2.isOpened():
+
+    <span class="hljs-comment"># 读取前两帧</span>
+
+    ret, frame1 = cap2.read()
+
+    ret, frame2 = cap2.read()
+
+    <span class="hljs-comment"># 相减做差</span>
+
+    sub = cv2.subtract(frame1, frame2)
+
+    <span class="hljs-comment"># 得到的结果灰度化</span>
+
+    gray = cv2.cvtColor(sub, cv2.COLOR_BGR2GRAY)
+
+    <span class="hljs-comment"># 判断作差后的结果是否全为0</span>
+
+    <span class="hljs-keyword">if</span> gray.<span class="hljs-built_in">max</span>() != <span class="hljs-number">0</span>:
+
+        <span class="hljs-comment"># 找到最大值位置</span>
+
+        loc = np.where(gray == gray.<span class="hljs-built_in">max</span>())
+
+        loc_x = loc[<span class="hljs-number">1</span>][<span class="hljs-number">0</span>]
+
+        loc_y = loc[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>]
+
+        <span class="hljs-comment"># 以loc为中心，range_d为距离向外拓展得到window</span>
+
+        win_tl_x = loc_x - range_d
+
+        win_tl_y = loc_y - range_d
+
+        win_rb_x = loc_x + range_d
+
+        win_rb_y = loc_y + range_d
+
+        <span class="hljs-comment"># 一些越界的判断</span>
+
+        <span class="hljs-keyword">if</span> win_tl_x &lt; <span class="hljs-number">0</span>:
+
+            win_tl_x = <span class="hljs-number">0</span>
+
+        <span class="hljs-keyword">if</span> win_tl_y &lt; <span class="hljs-number">0</span>:
+
+            win_tl_y = <span class="hljs-number">0</span>
+
+        <span class="hljs-keyword">if</span> win_rb_x &gt; video_w:
+
+            win_rb_x = video_w
+
+        <span class="hljs-keyword">if</span> win_rb_y &gt; video_h:
+
+            win_rb_y = video_h
+
+        <span class="hljs-comment"># 根据窗口坐标提取窗口内容</span>
+
+        win_ini = cv2.cvtColor(frame1[win_tl_y:win_rb_y, win_tl_x:win_rb_x, :], cv2.COLOR_BGR2GRAY)
+
+        <span class="hljs-comment"># 获取最大值位置对应的灰度值</span>
+
+        tem_img = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
+
+        <span class="hljs-comment"># 由最大值对应灰度值计算合适的灰度阈值</span>
+
+        gray_thresh = tem_img[loc_y, loc_x] - gray_factor * tem_img[loc_y, loc_x]
+
+        <span class="hljs-comment"># 初始窗口二值化处理</span>
+
+        ret, thresh = cv2.threshold(win_ini, gray_thresh, <span class="hljs-number">255</span>, cv2.THRESH_BINARY)
+
+        <span class="hljs-comment"># 在初始窗口中寻找轮廓</span>
+
+        img2, contours, hi = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        <span class="hljs-comment"># 有可能找到多个轮廓，但认为包含点数最多的那个轮廓是要找的轮廓</span>
+
+        length = []
+
+        <span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> contours:
+
+            length.append(item.shape[<span class="hljs-number">0</span>])
+
+        target_contour = contours[length.index(<span class="hljs-built_in">max</span>(length))]
+
+        <span class="hljs-comment"># 获取目标轮廓的坐标信息</span>
+
+        x, y, w, h = cv2.boundingRect(target_contour)
+
+        <span class="hljs-keyword">if</span> isSquare:
+
+            <span class="hljs-comment"># 保证提取的模板为正方形</span>
+
+            tem_tl_x = win_tl_x + x
+
+            tem_tl_y = win_tl_y + y
+
+            tem_rb_x = win_tl_x + x + w
+
+            tem_rb_y = win_tl_y + y + h
+
+            center_x = (tem_tl_x + tem_rb_x) / <span class="hljs-number">2</span>
+
+            center_y = (tem_tl_y + tem_rb_y) / <span class="hljs-number">2</span>
+
+            delta = <span class="hljs-built_in">int</span>(template_factor * <span class="hljs-built_in">max</span>(w, h))
+
+            real_tl_x = center_x - delta
+
+            real_rb_x = center_x + delta
+
+            real_tl_y = center_y - delta
+
+            real_rb_y = center_y + delta
+
+        <span class="hljs-keyword">else</span>:
+
+            <span class="hljs-comment"># 不保证模板为正方形</span>
+
+            real_tl_x = win_tl_x + x
+
+            real_tl_y = win_tl_y + y
+
+            real_rb_x = win_tl_x + x + w
+
+            real_rb_y = win_tl_y + y + h
+
+        <span class="hljs-comment"># 一些越界判断</span>
+
+        <span class="hljs-keyword">if</span> real_tl_x &lt; <span class="hljs-number">0</span>:
+
+            real_tl_x = <span class="hljs-number">0</span>
+
+        <span class="hljs-keyword">if</span> real_tl_y &lt; <span class="hljs-number">0</span>:
+
+            real_tl_y = <span class="hljs-number">0</span>
+
+        <span class="hljs-keyword">if</span> real_rb_x &gt; video_w:
+
+            real_rb_x = video_w
+
+        <span class="hljs-keyword">if</span> real_rb_y &gt; video_h:
+
+            real_rb_y = video_h
+
+        <span class="hljs-comment"># 提取模板内容</span>
+
+        template = frame1[real_tl_y:real_rb_y, real_tl_x:real_rb_x, :]
+
+        <span class="hljs-comment"># 获取模板的宽高，h竖直方向，w水平方向</span>
+
+        h = template.shape[<span class="hljs-number">0</span>]
+
+        w = template.shape[<span class="hljs-number">1</span>]
+
+        d = <span class="hljs-built_in">max</span>(w, h)
+
+        <span class="hljs-comment"># 是否是多模板匹配</span>
+
+        <span class="hljs-keyword">if</span> isMultiTemplate:
+
+            <span class="hljs-keyword">if</span> templateNum == <span class="hljs-number">16</span>:
+
+                M22_5 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">22.5</span>, <span class="hljs-number">1</span>)
+
+                M45 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">45</span>, <span class="hljs-number">1</span>)
+
+                M67_5 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">67.5</span>, <span class="hljs-number">1</span>)
+
+                M90 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">90</span>, <span class="hljs-number">1</span>)
+
+                M112_5 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">112.5</span>, <span class="hljs-number">1</span>)
+
+                M135 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">135</span>, <span class="hljs-number">1</span>)
+
+                M157_5 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">157.5</span>, <span class="hljs-number">1</span>)
+
+                M180 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">180</span>, <span class="hljs-number">1</span>)
+
+                M202_5 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">202.5</span>, <span class="hljs-number">1</span>)
+
+                M225 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">225</span>, <span class="hljs-number">1</span>)
+
+                M247_5 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">247.5</span>, <span class="hljs-number">1</span>)
+
+                M270 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">270</span>, <span class="hljs-number">1</span>)
+
+                M292_5 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">292.5</span>, <span class="hljs-number">1</span>)
+
+                M315 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">315</span>, <span class="hljs-number">1</span>)
+
+                M337_5 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">337.5</span>, <span class="hljs-number">1</span>)
+
+                template22_5 = cv2.warpAffine(template, M22_5, (d, d))
+
+                template45 = cv2.warpAffine(template, M45, (d, d))
+
+                template67_5 = cv2.warpAffine(template, M67_5, (d, d))
+
+                template90 = cv2.warpAffine(template, M90, (d, d))
+
+                template112_5 = cv2.warpAffine(template, M112_5, (d, d))
+
+                template135 = cv2.warpAffine(template, M135, (d, d))
+
+                template157_5 = cv2.warpAffine(template, M157_5, (d, d))
+
+                template180 = cv2.warpAffine(template, M180, (d, d))
+
+                template202_5 = cv2.warpAffine(template, M202_5, (d, d))
+
+                template225 = cv2.warpAffine(template, M225, (d, d))
+
+                template247_5 = cv2.warpAffine(template, M247_5, (d, d))
+
+                template270 = cv2.warpAffine(template, M270, (d, d))
+
+                template292_5 = cv2.warpAffine(template, M292_5, (d, d))
+
+                template315 = cv2.warpAffine(template, M315, (d, d))
+
+                template337_5 = cv2.warpAffine(template, M337_5, (d, d))
+
+            <span class="hljs-keyword">elif</span> templateNum == <span class="hljs-number">8</span>:
+
+                M45 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">45</span>, <span class="hljs-number">1</span>)
+
+                M90 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">90</span>, <span class="hljs-number">1</span>)
+
+                M135 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">135</span>, <span class="hljs-number">1</span>)
+
+                M180 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">180</span>, <span class="hljs-number">1</span>)
+
+                M225 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">225</span>, <span class="hljs-number">1</span>)
+
+                M270 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">270</span>, <span class="hljs-number">1</span>)
+
+                M315 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">315</span>, <span class="hljs-number">1</span>)
+
+                template45 = cv2.warpAffine(template, M45, (d, d))
+
+                template90 = cv2.warpAffine(template, M90, (d, d))
+
+                template135 = cv2.warpAffine(template, M135, (d, d))
+
+                template180 = cv2.warpAffine(template, M180, (d, d))
+
+                template225 = cv2.warpAffine(template, M225, (d, d))
+
+                template270 = cv2.warpAffine(template, M270, (d, d))
+
+                template315 = cv2.warpAffine(template, M315, (d, d))
+
+            <span class="hljs-keyword">elif</span> templateNum == <span class="hljs-number">4</span>:
+
+                M90 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">90</span>, <span class="hljs-number">1</span>)
+
+                M180 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">180</span>, <span class="hljs-number">1</span>)
+
+                M270 = cv2.getRotationMatrix2D((d / <span class="hljs-number">2</span>, d / <span class="hljs-number">2</span>), -<span class="hljs-number">270</span>, <span class="hljs-number">1</span>)
+
+                template90 = cv2.warpAffine(template, M90, (d, d))
+
+                template180 = cv2.warpAffine(template, M180, (d, d))
+
+                template270 = cv2.warpAffine(template, M270, (d, d))
+
+        cv2.imshow(<span class="hljs-string">&quot;Template&quot;</span>, template)
+
+        cv2.imwrite(out_path5, template)
+
+        offset = <span class="hljs-built_in">int</span>(scale_factor * d)
+
+        <span class="hljs-comment"># 计算待选窗口左上角点坐标</span>
+
+        tlx = loc_x - d
+
+        tly = loc_y - d
+
+        <span class="hljs-comment"># 判断是否越界，越界则设置为0</span>
+
+        <span class="hljs-keyword">if</span> tlx &lt; <span class="hljs-number">0</span>:
+
+            tlx = <span class="hljs-number">0</span>
+
+        <span class="hljs-keyword">if</span> tly &lt; <span class="hljs-number">0</span>:
+
+            tly = <span class="hljs-number">0</span>
+
+        range_tl = (tlx, tly)
+
+        <span class="hljs-comment"># 计算待选窗口右下角点坐标</span>
+
+        rbx = loc_x + w + d
+
+        rby = loc_y + h + d
+
+        <span class="hljs-comment"># 判断是否越界，越界设置为视频长宽最大值</span>
+
+        <span class="hljs-keyword">if</span> rbx &gt; video_w:
+
+            rbx = video_w
+
+        <span class="hljs-keyword">if</span> rby &gt; video_h:
+
+            rby = video_h
+
+        range_rb = (rbx, rby)
+
+        <span class="hljs-comment"># 放入角点坐标列表</span>
+
+        tlp.append(range_tl)
+
+        rbp.append(range_rb)
+
+        cap2.release()
+
+<span class="hljs-comment"># 然后进行模板匹配</span>
+
+<span class="hljs-keyword">while</span> cap.isOpened():
+
+    <span class="hljs-comment"># 读取每帧内容</span>
+
+    ret, frame = cap.read()
+
+    <span class="hljs-comment"># 判断帧内容是否为空，不为空继续</span>
+
+    <span class="hljs-keyword">if</span> frame <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+
+        <span class="hljs-keyword">break</span>
+
+    <span class="hljs-keyword">else</span>:
+
+        <span class="hljs-comment"># 是否为多模板匹配模式</span>
+
+        <span class="hljs-keyword">if</span> isMultiTemplate:
+
+            <span class="hljs-keyword">if</span> templateNum == <span class="hljs-number">16</span>:
+
+                <span class="hljs-comment"># 逐个模板进行匹配</span>
+
+                res = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :], template,
+
+                                        cv2.TM_CCOEFF_NORMED)
+
+                res22_5 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                            template22_5,
+
+                                            cv2.TM_CCOEFF_NORMED)
+
+                res67_5 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                            template67_5,
+
+                                            cv2.TM_CCOEFF_NORMED)
+
+                res112_5 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                             template112_5,
+
+                                             cv2.TM_CCOEFF_NORMED)
+
+                res157_5 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                             template157_5,
+
+                                             cv2.TM_CCOEFF_NORMED)
+
+                res202_5 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                             template202_5,
+
+                                             cv2.TM_CCOEFF_NORMED)
+
+                res247_5 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                             template247_5,
+
+                                             cv2.TM_CCOEFF_NORMED)
+
+                res292_5 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                             template292_5,
+
+                                             cv2.TM_CCOEFF_NORMED)
+
+                res337_5 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                             template337_5,
+
+                                             cv2.TM_CCOEFF_NORMED)
+
+                res90 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                          template90,
+
+                                          cv2.TM_CCOEFF_NORMED)
+
+                res180 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                           template180,
+
+                                           cv2.TM_CCOEFF_NORMED)
+
+                res270 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                           template270,
+
+                                           cv2.TM_CCOEFF_NORMED)
+
+                res45 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                          template45,
+
+                                          cv2.TM_CCOEFF_NORMED)
+
+                res135 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                           template135,
+
+                                           cv2.TM_CCOEFF_NORMED)
+
+                res225 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                           template225,
+
+                                           cv2.TM_CCOEFF_NORMED)
+
+                res315 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                           template315,
+
+                                           cv2.TM_CCOEFF_NORMED)
+
+                <span class="hljs-comment"># 获取各模板对应的最大值</span>
+
+                m22_5 = np.<span class="hljs-built_in">max</span>(res22_5)
+
+                m67_5 = np.<span class="hljs-built_in">max</span>(res67_5)
+
+                m112_5 = np.<span class="hljs-built_in">max</span>(res112_5)
+
+                m157_5 = np.<span class="hljs-built_in">max</span>(res157_5)
+
+                m202_5 = np.<span class="hljs-built_in">max</span>(res202_5)
+
+                m247_5 = np.<span class="hljs-built_in">max</span>(res247_5)
+
+                m292_5 = np.<span class="hljs-built_in">max</span>(res292_5)
+
+                m337_5 = np.<span class="hljs-built_in">max</span>(res337_5)
+
+                m45 = np.<span class="hljs-built_in">max</span>(res45)
+
+                m135 = np.<span class="hljs-built_in">max</span>(res135)
+
+                m225 = np.<span class="hljs-built_in">max</span>(res225)
+
+                m315 = np.<span class="hljs-built_in">max</span>(res315)
+
+                m0 = np.<span class="hljs-built_in">max</span>(res)
+
+                m90 = np.<span class="hljs-built_in">max</span>(res90)
+
+                m180 = np.<span class="hljs-built_in">max</span>(res180)
+
+                m270 = np.<span class="hljs-built_in">max</span>(res270)
+
+                <span class="hljs-comment"># 寻找最佳匹配结果</span>
+
+                m = <span class="hljs-built_in">max</span>(m0, m22_5, m45, m67_5, m90,
+
+                        m112_5, m135, m157_5, m180,
+
+                        m202_5, m225, m247_5, m270,
+
+                        m292_5, m315, m337_5)
+
+                <span class="hljs-comment"># 获取最佳匹配结果对应的坐标信息</span>
+
+                <span class="hljs-keyword">if</span> m == m0:
+
+                    mIndex = <span class="hljs-number">0</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+
+                <span class="hljs-keyword">elif</span> m == m90:
+
+                    mIndex = <span class="hljs-number">90</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res90)
+
+                <span class="hljs-keyword">elif</span> m == m180:
+
+                    mIndex = <span class="hljs-number">180</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res180)
+
+                <span class="hljs-keyword">elif</span> m == m270:
+
+                    mIndex = <span class="hljs-number">270</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res270)
+
+                <span class="hljs-keyword">elif</span> m == m45:
+
+                    mIndex = <span class="hljs-number">45</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res45)
+
+                <span class="hljs-keyword">elif</span> m == m135:
+
+                    mIndex = <span class="hljs-number">135</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res135)
+
+                <span class="hljs-keyword">elif</span> m == m225:
+
+                    mIndex = <span class="hljs-number">225</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res225)
+
+                <span class="hljs-keyword">elif</span> m == m315:
+
+                    mIndex = <span class="hljs-number">315</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res315)
+
+                <span class="hljs-keyword">elif</span> m == m22_5:
+
+                    mIndex = <span class="hljs-number">22.5</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res22_5)
+
+                <span class="hljs-keyword">elif</span> m == m67_5:
+
+                    mIndex = <span class="hljs-number">67.5</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res67_5)
+
+                <span class="hljs-keyword">elif</span> m == m112_5:
+
+                    mIndex = <span class="hljs-number">112.5</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res112_5)
+
+                <span class="hljs-keyword">elif</span> m == m157_5:
+
+                    mIndex = <span class="hljs-number">157.5</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res157_5)
+
+                <span class="hljs-keyword">elif</span> m == m202_5:
+
+                    mIndex = <span class="hljs-number">202.5</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res202_5)
+
+                <span class="hljs-keyword">elif</span> m == m247_5:
+
+                    mIndex = <span class="hljs-number">247.5</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res247_5)
+
+                <span class="hljs-keyword">elif</span> m == m292_5:
+
+                    mIndex = <span class="hljs-number">292.5</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res292_5)
+
+                <span class="hljs-keyword">elif</span> m == m337_5:
+
+                    mIndex = <span class="hljs-number">337.5</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res337_5)
+
+            <span class="hljs-keyword">elif</span> templateNum == <span class="hljs-number">8</span>:
+
+                res = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :], template,
+
+                                        cv2.TM_CCOEFF_NORMED)
+
+                res90 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                          template90,
+
+                                          cv2.TM_CCOEFF_NORMED)
+
+                res180 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                           template180,
+
+                                           cv2.TM_CCOEFF_NORMED)
+
+                res270 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                           template270,
+
+                                           cv2.TM_CCOEFF_NORMED)
+
+                res45 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                          template45,
+
+                                          cv2.TM_CCOEFF_NORMED)
+
+                res135 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                           template135,
+
+                                           cv2.TM_CCOEFF_NORMED)
+
+                res225 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                           template225,
+
+                                           cv2.TM_CCOEFF_NORMED)
+
+                res315 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                           template315,
+
+                                           cv2.TM_CCOEFF_NORMED)
+
+                m45 = np.<span class="hljs-built_in">max</span>(res45)
+
+                m135 = np.<span class="hljs-built_in">max</span>(res135)
+
+                m225 = np.<span class="hljs-built_in">max</span>(res225)
+
+                m315 = np.<span class="hljs-built_in">max</span>(res315)
+
+                m0 = np.<span class="hljs-built_in">max</span>(res)
+
+                m90 = np.<span class="hljs-built_in">max</span>(res90)
+
+                m180 = np.<span class="hljs-built_in">max</span>(res180)
+
+                m270 = np.<span class="hljs-built_in">max</span>(res270)
+
+                m = <span class="hljs-built_in">max</span>(m0, m45, m90, m135, m180, m225, m270, m315)
+
+                <span class="hljs-keyword">if</span> m == m0:
+
+                    mIndex = <span class="hljs-number">0</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+
+                <span class="hljs-keyword">elif</span> m == m90:
+
+                    mIndex = <span class="hljs-number">90</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res90)
+
+                <span class="hljs-keyword">elif</span> m == m180:
+
+                    mIndex = <span class="hljs-number">180</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res180)
+
+                <span class="hljs-keyword">elif</span> m == m270:
+
+                    mIndex = <span class="hljs-number">270</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res270)
+
+                <span class="hljs-keyword">elif</span> m == m45:
+
+                    mIndex = <span class="hljs-number">45</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res45)
+
+                <span class="hljs-keyword">elif</span> m == m135:
+
+                    mIndex = <span class="hljs-number">135</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res135)
+
+                <span class="hljs-keyword">elif</span> m == m225:
+
+                    mIndex = <span class="hljs-number">225</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res225)
+
+                <span class="hljs-keyword">elif</span> m == m315:
+
+                    mIndex = <span class="hljs-number">315</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res315)
+
+            <span class="hljs-keyword">elif</span> templateNum == <span class="hljs-number">4</span>:
+
+                res = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :], template,
+
+                                        cv2.TM_CCOEFF_NORMED)
+
+                res90 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                          template90,
+
+                                          cv2.TM_CCOEFF_NORMED)
+
+                res180 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                           template180,
+
+                                           cv2.TM_CCOEFF_NORMED)
+
+                res270 = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :],
+
+                                           template270,
+
+                                           cv2.TM_CCOEFF_NORMED)
+
+                m0 = np.<span class="hljs-built_in">max</span>(res)
+
+                m90 = np.<span class="hljs-built_in">max</span>(res90)
+
+                m180 = np.<span class="hljs-built_in">max</span>(res180)
+
+                m270 = np.<span class="hljs-built_in">max</span>(res270)
+
+                m = <span class="hljs-built_in">max</span>(m0, m90, m180, m270)
+
+                <span class="hljs-keyword">if</span> m == m0:
+
+                    mIndex = <span class="hljs-number">0</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+
+                <span class="hljs-keyword">elif</span> m == m90:
+
+                    mIndex = <span class="hljs-number">90</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res90)
+
+                <span class="hljs-keyword">elif</span> m == m180:
+
+                    mIndex = <span class="hljs-number">180</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res180)
+
+                <span class="hljs-keyword">elif</span> m == m270:
+
+                    mIndex = <span class="hljs-number">270</span>
+
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res270)
+
+        <span class="hljs-keyword">else</span>:
+
+            res = cv2.matchTemplate(frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :], template,
+
+                                    cv2.TM_CCOEFF_NORMED)
+
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+
+        window = frame[tlp[count][<span class="hljs-number">1</span>]:rbp[count][<span class="hljs-number">1</span>], tlp[count][<span class="hljs-number">0</span>]:rbp[count][<span class="hljs-number">0</span>], :]
+
+        cv2.imshow(<span class="hljs-string">&quot;Window&quot;</span>, window)
+
+        <span class="hljs-comment"># top_left坐标顺序(水平，竖直)(→，↓)</span>
+
+        top_left = (max_loc[<span class="hljs-number">0</span>] + tlp[count][<span class="hljs-number">0</span>], max_loc[<span class="hljs-number">1</span>] + tlp[count][<span class="hljs-number">1</span>])
+
+        bottom_right = (top_left[<span class="hljs-number">0</span>] + w, top_left[<span class="hljs-number">1</span>] + h)
+
+        center_point = ((top_left[<span class="hljs-number">0</span>] + bottom_right[<span class="hljs-number">0</span>]) / <span class="hljs-number">2</span>, (top_left[<span class="hljs-number">1</span>] + bottom_right[<span class="hljs-number">1</span>]) / <span class="hljs-number">2</span>)
+
+        <span class="hljs-keyword">if</span> trackPoints.__len__() == <span class="hljs-number">0</span>:
+
+            <span class="hljs-comment"># 计算待选窗口左上角点坐标</span>
+
+            tlx = top_left[<span class="hljs-number">0</span>] - d
+
+            tly = top_left[<span class="hljs-number">1</span>] - d
+
+            <span class="hljs-comment"># 判断是否越界，越界则设置为0</span>
+
+            <span class="hljs-keyword">if</span> tlx &lt; <span class="hljs-number">0</span>:
+
+                tlx = <span class="hljs-number">0</span>
+
+            <span class="hljs-keyword">if</span> tly &lt; <span class="hljs-number">0</span>:
+
+                tly = <span class="hljs-number">0</span>
+
+            range_tl = (tlx, tly)
+
+            <span class="hljs-comment"># 计算待选窗口右下角点坐标</span>
+
+            rbx = top_left[<span class="hljs-number">0</span>] + w + d
+
+            rby = top_left[<span class="hljs-number">1</span>] + h + d
+
+            <span class="hljs-comment"># 判断是否越界，越界设置为视频长宽最大值</span>
+
+            <span class="hljs-keyword">if</span> rbx &gt; video_w:
+
+                rbx = video_w
+
+            <span class="hljs-keyword">if</span> rby &gt; video_h:
+
+                rby = video_h
+
+            range_rb = (rbx, rby)
+
+            <span class="hljs-comment"># 将待选窗口左上角点坐标和右下角点坐标依次添加到列表中</span>
+
+            tlp.append(range_tl)
+
+            rbp.append(range_rb)
+
+            <span class="hljs-comment"># 将目标区域的左上角点、中心点、右下角点坐标依次加入列表</span>
+
+            trackPoints.append(top_left)
+
+            bottom_right_points.append(bottom_right)
+
+            center_points.append(center_point)
+
+            cv2.circle(track, center_point, <span class="hljs-number">2</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>), -<span class="hljs-number">1</span>)
+
+        <span class="hljs-keyword">else</span>:
+
+            <span class="hljs-comment"># 加入运动连续性约束，若相邻轨迹点距离相差大于阈值，则认为错误</span>
+
+            distance = <span class="hljs-built_in">abs</span>(trackPoints[-<span class="hljs-number">1</span>][<span class="hljs-number">0</span>] - top_left[<span class="hljs-number">0</span>]) + <span class="hljs-built_in">abs</span>(trackPoints[-<span class="hljs-number">1</span>][<span class="hljs-number">1</span>] - top_left[<span class="hljs-number">1</span>])
+
+            <span class="hljs-keyword">if</span> distance &gt; dis_thresh:
+
+                <span class="hljs-built_in">print</span> <span class="hljs-string">&#x27;100%&#x27;</span>
+
+                <span class="hljs-keyword">break</span>
+
+            <span class="hljs-keyword">else</span>:
+
+                <span class="hljs-comment"># 计算待选窗口左上角点坐标</span>
+
+                tlx = top_left[<span class="hljs-number">0</span>] - d
+
+                tly = top_left[<span class="hljs-number">1</span>] - d
+
+                <span class="hljs-comment"># 判断是否越界，越界则设置为0</span>
+
+                <span class="hljs-keyword">if</span> tlx &lt; <span class="hljs-number">0</span>:
+
+                    tlx = <span class="hljs-number">0</span>
+
+                <span class="hljs-keyword">if</span> tly &lt; <span class="hljs-number">0</span>:
+
+                    tly = <span class="hljs-number">0</span>
+
+                range_tl = (tlx, tly)
+
+                <span class="hljs-comment"># 计算待选窗口右下角点坐标</span>
+
+                rbx = top_left[<span class="hljs-number">0</span>] + w + d
+
+                rby = top_left[<span class="hljs-number">1</span>] + h + d
+
+                <span class="hljs-comment"># 判断是否越界，越界设置为视频长宽最大值</span>
+
+                <span class="hljs-keyword">if</span> rbx &gt; video_w:
+
+                    rbx = video_w
+
+                <span class="hljs-keyword">if</span> rby &gt; video_h:
+
+                    rby = video_h
+
+                range_rb = (rbx, rby)
+
+                <span class="hljs-comment"># 将待选窗口左上角点坐标和右下角点坐标依次添加到列表中</span>
+
+                tlp.append(range_tl)
+
+                rbp.append(range_rb)
+
+                <span class="hljs-comment"># 将目标区域的左上角点、中心点、右下角点坐标依次加入列表</span>
+
+                trackPoints.append(top_left)
+
+                bottom_right_points.append(bottom_right)
+
+                <span class="hljs-comment"># 判断是否采用均值平滑</span>
+
+                <span class="hljs-keyword">if</span> isSmooth:
+
+                    <span class="hljs-comment"># 采用均值平滑，平滑轨迹</span>
+
+                    center_point = ((center_point[<span class="hljs-number">0</span>] + center_points[-<span class="hljs-number">1</span>][<span class="hljs-number">0</span>]) / <span class="hljs-number">2</span>,
+
+                                    (center_point[<span class="hljs-number">1</span>] + center_points[-<span class="hljs-number">1</span>][<span class="hljs-number">1</span>]) / <span class="hljs-number">2</span>)
+
+                center_points.append(center_point)
+
+                <span class="hljs-comment"># 绘制目标识别框</span>
+
+                cv2.rectangle(frame,
+
+                              (center_point[<span class="hljs-number">0</span>] - offset, center_point[<span class="hljs-number">1</span>] - offset),
+
+                              (center_point[<span class="hljs-number">0</span>] + offset, center_point[<span class="hljs-number">1</span>] + offset),
+
+                              color, <span class="hljs-number">2</span>)
+
+                <span class="hljs-comment"># 绘制运动轨迹</span>
+
+                cv2.line(track, center_points[-<span class="hljs-number">2</span>], center_points[-<span class="hljs-number">1</span>], (<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>), <span class="hljs-number">1</span>)
+
+                <span class="hljs-comment"># 计算速度</span>
+
+                Vs.append(calcVelocity(center_points[-<span class="hljs-number">2</span>][<span class="hljs-number">0</span>],
+
+                                       center_points[-<span class="hljs-number">1</span>][<span class="hljs-number">0</span>],
+
+                                       center_points[-<span class="hljs-number">2</span>][<span class="hljs-number">1</span>],
+
+                                       center_points[-<span class="hljs-number">1</span>][<span class="hljs-number">1</span>],
+
+                                       resolution,
+
+                                       waitTime))
+
+        <span class="hljs-comment"># 输出目标、轨迹视频</span>
+
+        out.write(frame)
+
+        out2.write(track)
+
+        count += <span class="hljs-number">1</span>
+
+        <span class="hljs-built_in">print</span> <span class="hljs-built_in">round</span>((count * <span class="hljs-number">1.0</span> / total) * <span class="hljs-number">100</span>, <span class="hljs-number">2</span>), <span class="hljs-string">&#x27;%&#x27;</span>
+
+        <span class="hljs-comment"># 显示结果</span>
+
+        cv2.imshow(<span class="hljs-string">&quot;Tr&quot;</span>, track)
+
+        cv2.imshow(<span class="hljs-string">&quot;Fr&quot;</span>, frame)
+
+        <span class="hljs-comment"># 退出控制</span>
+
+        k = cv2.waitKey(waitTime) &amp; <span class="hljs-number">0xFF</span>
+
+        <span class="hljs-keyword">if</span> k == <span class="hljs-number">27</span>:
+
+            <span class="hljs-keyword">break</span>
+
+<span class="hljs-comment"># 打印轨迹坐标</span>
+
+<span class="hljs-built_in">print</span> trackPoints
+
+<span class="hljs-built_in">print</span> <span class="hljs-string">&#x27;相邻帧距离阈值:&#x27;</span>, dis_thresh
+
+<span class="hljs-built_in">print</span> <span class="hljs-string">&#x27;灰度阈值:&#x27;</span>, gray_thresh
+
+<span class="hljs-built_in">print</span> <span class="hljs-string">&#x27;模板缩放因子:&#x27;</span>, template_factor
+
+<span class="hljs-built_in">print</span> <span class="hljs-string">&#x27;识别框缩放因子:&#x27;</span>, scale_factor
+
+<span class="hljs-comment"># 输出中心点轨迹</span>
+
+output = <span class="hljs-built_in">open</span>(out_path3, <span class="hljs-string">&#x27;w&#x27;</span>)
+
+<span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> center_points:
+
+    output.write(item.__str__() + <span class="hljs-string">&quot;\n&quot;</span>)
+
+<span class="hljs-comment"># 输出各帧速度</span>
+
+output2 = <span class="hljs-built_in">open</span>(out_path4, <span class="hljs-string">&#x27;w&#x27;</span>)
+
+<span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> Vs:
+
+    output2.write(item.__str__() + <span class="hljs-string">&quot;\n&quot;</span>)
+
+<span class="hljs-comment"># 释放对象</span>
+
+cap.release()
+
+out.release()
+
+out2.release()
+
+output.close()
+
+output2.close()
+</code></pre>
+<p>在代码中主要做了如下改进：</p>
+<h4 id="1-增加多模板匹配机制" class="prose-heading">1.增加多模板匹配机制</h4>
+<p>为了能精确地检测物体的旋转，引入多模板匹配。在代码中有4、8、16不同数量的模式可选。模板越多，对于旋转的识别越精确。 下图匹配模板数分别是1、4、8、16。</p>
+<p><img src="../uploads/csdn/python%E5%AE%9E%E7%8E%B0%E8%A7%86%E9%A2%91%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E4%B8%8E%E8%BD%A8%E8%BF%B9%E8%B7%9F%E8%B8%AA%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3%E8%BD%AC%E8%BD%BD/img-03.png" alt=""></p>
+<p><img src="../uploads/csdn/python%E5%AE%9E%E7%8E%B0%E8%A7%86%E9%A2%91%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E4%B8%8E%E8%BD%A8%E8%BF%B9%E8%B7%9F%E8%B8%AA%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3%E8%BD%AC%E8%BD%BD/img-04.png" alt=""></p>
+<p><img src="../uploads/csdn/python%E5%AE%9E%E7%8E%B0%E8%A7%86%E9%A2%91%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E4%B8%8E%E8%BD%A8%E8%BF%B9%E8%B7%9F%E8%B8%AA%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3%E8%BD%AC%E8%BD%BD/img-05.png" alt=""></p>
+<p>可以看到，单模版匹配已经无法正常识别跟踪了。模板数为4时，会有少量跟踪错误。当模板数为8和16时，跟踪的轨迹就相对精确了。 下图是采用8模板和单模板匹配的轨迹比较，可以看到，利用多模板匹配，可以较好识别旋转物体。 白色为单模版匹配轨迹，红色为多模板匹配轨迹。</p>
+<p><img src="../uploads/csdn/python%E5%AE%9E%E7%8E%B0%E8%A7%86%E9%A2%91%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E4%B8%8E%E8%BD%A8%E8%BF%B9%E8%B7%9F%E8%B8%AA%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3%E8%BD%AC%E8%BD%BD/img-06.gif" alt=""></p>
+<p>同时考虑到卫星视频动目标一般运动形式是平移和旋转，没有缩放。所以经过优化的算法可以满足大部分需求。</p>
+<h4 id="2-增加轨迹平滑" class="prose-heading">2.增加轨迹平滑</h4>
+<p>通过对轨迹列表中最后两个点求均值作为最终的轨迹点，可以对提取的轨迹进行一定程度的平滑。</p>
+<h3 id="三-测试对比" class="prose-heading">三、测试对比</h3>
+<p>下图是模拟飞机曲线飞行的视频。对其进行目标识别和轨迹提取后如下。</p>
+<p><img src="../uploads/csdn/python%E5%AE%9E%E7%8E%B0%E8%A7%86%E9%A2%91%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E4%B8%8E%E8%BD%A8%E8%BF%B9%E8%B7%9F%E8%B8%AA%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3%E8%BD%AC%E8%BD%BD/img-07.gif" alt=""></p>
+<p>对应的飞行轨迹如下。</p>
+<p><img src="../uploads/csdn/python%E5%AE%9E%E7%8E%B0%E8%A7%86%E9%A2%91%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E4%B8%8E%E8%BD%A8%E8%BF%B9%E8%B7%9F%E8%B8%AA%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3%E8%BD%AC%E8%BD%BD/img-08.gif" alt=""></p>
+<p>可以看到，相较于单模版匹配，能较好地提取运动目标和轨迹。而采用之前的单模版匹配算法，经过测试在刚转弯时就跟丢了，如下。</p>
+<p><img src="../uploads/csdn/python%E5%AE%9E%E7%8E%B0%E8%A7%86%E9%A2%91%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E4%B8%8E%E8%BD%A8%E8%BF%B9%E8%B7%9F%E8%B8%AA%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3%E8%BD%AC%E8%BD%BD/img-09.png" alt=""></p>
+<p>到此这篇关于Python实现视频目标检测与轨迹跟踪流程详解的文章就介绍到这了，感谢原作者倾城一少</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-2" href="#更新时间-2023年01月28日-09-38-00-作者-倾城一少">更新时间：2023年01月28日 09:38:00   作者：倾城一少</a>
+          
+            <a class="toc-level-3" href="#一-原理">一、原理</a>
+          
+            <a class="toc-level-3" href="#二-代码实现">二、代码实现</a>
+          
+            <a class="toc-level-4" href="#1-增加多模板匹配机制">1.增加多模板匹配机制</a>
+          
+            <a class="toc-level-4" href="#2-增加轨迹平滑">2.增加轨迹平滑</a>
+          
+            <a class="toc-level-3" href="#三-测试对比">三、测试对比</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/qt6androidctensorflowlite人脸识别程序.html">
+      <span>上一篇</span>
+      <strong>QT6AndroidCTensorFlowlite人脸识别程序</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/python基于dlib和opencv实现人脸融合算法代码.html">
+      <span>下一篇</span>
+      <strong>Python基于Dlib和OpenCV实现人脸融合算法代码</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/详细案例说明ai所用的算法列出公式用python代码说明用法.html">详细案例说明AI所用的算法列出公式用Python代码说明用法</a></h3>
+        <p class="post-excerpt">我们来详细拆解一个最经典、最基础的 AI 算法 ——线性回归 (Linear Regression)。它是理解几乎所有更复杂 AI 模型（如神经网络）的基石。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.312Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/无人机表演点云路径规划python版.html">无人机表演点云路径规划Python版</a></h3>
+        <p class="post-excerpt">摘要：本文介绍了一个无人机表演路径规划系统，支持加载两个TXT格式的点云数据文件进行路径规划。系统采用PyQt5框架开发3D可视化界面，包含点云加载、路径优化、动画控制等功能模块。核心算法通过KD树实现点云匹配和路径优化，支持多种插值方式生成平滑动画。系统可调整无人机数量、大小、颜色等参数，提供3D可视化视图和轨迹显示功能，适用于大型无人机编队表演的路径规划需求。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.134Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/yolopython实现多种物体识别时钟水杯小熊路人车辆.html">YOLOpython实现多种物体识别时钟水杯小熊路人车辆</a></h3>
+        <p class="post-excerpt">本文介绍了一个基于YOLO的目标检测类ObjectDetector，支持YOLOv8标准模型和YOLO-World自定义模型。该类提供了两种模型加载方式：标准YOLOv8模型（80类）和可自定义检测类别的YOLO-World模型。主要功能包括模型自动加载和单张图片检测，能够输出检测目标的类别、数量和平均置信度，并保存检测结果图像。使用示例展示了如何初始化检测器并进行图片检测。该实现具有自动回退机制…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.835Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

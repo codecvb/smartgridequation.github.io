@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>MATLAB直接推导函数的导函数和积分形式具体方法和用例 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/matlab-仿真.html">MATLAB 仿真</a>
+        </nav>
+        <h1 class="post-title">MATLAB直接推导函数的导函数和积分形式具体方法和用例</h1>
+        <p class="post-deck">在 MATLAB 中，可以利用符号计算功能方便地推导函数的导函数和积分形式，以下为详细介绍具体的操作方法及示例：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.085Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>6 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>在 MATLAB 中，可以利用符号计算功能方便地推导函数的导函数和积分形式，以下为详细介绍具体的操作方法及示例：</p>
+<h4 id="一-求导函数-导数" class="prose-heading">一、求导函数（导数）</h4>
+<h5 id="1-基本语法" class="prose-heading">1. 基本语法</h5>
+<p>使用 <code>diff</code> 函数来求函数的导数，语法格式如下：<br>
+<code>diff(f,x,n)</code><br>
+其中：</p>
+<ul>
+<li><code>f</code> 是需要求导的符号函数表达式，可以通过先定义符号变量，再基于这些变量构建函数来得到。</li>
+<li><code>x</code> 是指定的求导变量，即对哪个变量求导。</li>
+<li><code>n</code> 是可选参数，表示求导的阶数，默认值为 <code>1</code>，也就是求一阶导数，如果想求高阶导数则需要指定相应的阶数。</li>
+</ul>
+<h5 id="2-示例代码" class="prose-heading">2. 示例代码</h5>
+<p>以下示例展示如何求函数 <code>y = x^2 + 3*x + 1</code> 关于 <code>x</code> 的一阶导数和二阶导数：</p>
+<p>matlab</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% 定义符号变量</span>
+syms x;
+<span class="hljs-comment">% 定义函数</span>
+y = x^<span class="hljs-number">2</span> + <span class="hljs-number">3</span>*x + <span class="hljs-number">1</span>;
+<span class="hljs-comment">% 求一阶导数</span>
+dy_dx = diff(y,x);
+<span class="hljs-built_in">disp</span>(dy_dx);
+<span class="hljs-comment">% 求二阶导数</span>
+d2y_dx2 = diff(y,x,<span class="hljs-number">2</span>);
+<span class="hljs-built_in">disp</span>(d2y_dx2);
+</code></pre>
+<p>在上述代码中：</p>
+<ul>
+<li>首先通过 <code>syms x</code> 定义了符号变量 <code>x</code>，这为后续构建和操作符号函数做准备。</li>
+<li>接着定义了函数 <code>y</code> 的表达式为 <code>x^2 + 3*x + 1</code>。</li>
+<li>然后使用 <code>diff(y,x)</code> 求出了函数 <code>y</code> 关于 <code>x</code> 的一阶导数，并将结果存储在 <code>dy_dx</code> 变量中进行显示输出。</li>
+<li>再使用 <code>diff(y,x,2)</code> 求出了函数 <code>y</code> 关于 <code>x</code> 的二阶导数，将结果存储在 <code>d2y_dx2</code> 变量中并输出，这里的 <code>2</code> 就表示求二阶导数这一参数设置。</li>
+</ul>
+<p>如果函数中有多个变量，例如函数 <code>z = x^2*y + sin(y)</code>，想分别对 <code>x</code> 和 <code>y</code> 求导，示例代码如下：</p>
+<p>matlab</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% 定义符号变量</span>
+syms x y;
+<span class="hljs-comment">% 定义函数</span>
+z = x^<span class="hljs-number">2</span>*y + <span class="hljs-built_in">sin</span>(y);
+<span class="hljs-comment">% 对x求一阶导数</span>
+dz_dx = diff(z,x);
+<span class="hljs-built_in">disp</span>(dz_dx);
+<span class="hljs-comment">% 对y求一阶导数</span>
+dz_dy = diff(z,y);
+<span class="hljs-built_in">disp</span>(dz_dy);
+</code></pre>
+<p>这里先定义了两个符号变量 <code>x</code> 和 <code>y</code>，构建函数 <code>z</code> 后，分别通过指定不同的求导变量，利用 <code>diff</code> 函数求出相应的偏导数。</p>
+<h4 id="二-求积分形式" class="prose-heading">二、求积分形式</h4>
+<h5 id="1-基本语法" class="prose-heading">1. 基本语法</h5>
+<p>使用 <code>int</code> 函数来求函数的不定积分和定积分，语法格式如下：</p>
+<ul>
+<li>求不定积分：<code>int(f,x)</code>，表示求函数 <code>f</code> 关于变量 <code>x</code> 的不定积分。</li>
+<li>求定积分：<code>int(f,x,a,b)</code>，表示求函数 <code>f</code> 关于变量 <code>x</code> 在区间 <code>[a,b]</code> 上的定积分，其中 <code>a</code> 为积分下限，<code>b</code> 为积分上限。</li>
+</ul>
+<h5 id="2-示例代码" class="prose-heading">2. 示例代码</h5>
+<p>以下示例展示如何求函数 <code>y = 2*x + 1</code> 的不定积分以及在区间 <code>[0, 1]</code> 上的定积分：</p>
+<p>matlab</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% 定义符号变量</span>
+syms x;
+<span class="hljs-comment">% 定义函数</span>
+y = <span class="hljs-number">2</span>*x + <span class="hljs-number">1</span>;
+<span class="hljs-comment">% 求不定积分</span>
+int_y = int(y,x);
+<span class="hljs-built_in">disp</span>(int_y);
+<span class="hljs-comment">% 求定积分</span>
+definite_int_y = int(y,x,<span class="hljs-number">0</span>,<span class="hljs-number">1</span>);
+<span class="hljs-built_in">disp</span>(definite_int_y);
+</code></pre>
+<p>在上述代码中：</p>
+<ul>
+<li>同样先通过 <code>syms x</code> 定义符号变量，然后定义函数 <code>y</code> 的表达式为 <code>2*x + 1</code>。</li>
+<li>使用 <code>int(y,x)</code> 求出函数 <code>y</code> 关于 <code>x</code> 的不定积分，并输出结果。</li>
+<li>使用 <code>int(y,x,0,1)</code> 求出函数 <code>y</code> 在区间 <code>[0, 1]</code> 上的定积分，也就是计算  的值，并输出结果。</li>
+</ul>
+<p>如果是多元函数求积分，例如函数 <code>z = x*y^2</code>，想先对 <code>x</code> 求不定积分，示例如下：</p>
+<p>matlab</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% 定义符号变量</span>
+syms x y;
+<span class="hljs-comment">% 定义函数</span>
+z = x*y^<span class="hljs-number">2</span>;
+<span class="hljs-comment">% 对x求不定积分</span>
+int_z_x = int(z,x);
+<span class="hljs-built_in">disp</span>(int_z_x);
+</code></pre>
+<p>这里先定义两个符号变量 <code>x</code> 和 <code>y</code>，构建函数 <code>z</code> 后，通过 <code>int(z,x)</code> 实现对变量 <code>x</code> 的不定积分操作。</p>
+<p>总之，通过 <code>diff</code> 和 <code>int</code> 这两个函数，在 MATLAB 中可以很便捷地对各种函数进行求导以及求积分相关的运算推导。</p>
+<h4 id="三-案例如下" class="prose-heading">三、案例如下</h4>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% 定义符号变量</span>
+syms x;
+<span class="hljs-comment">% 定义函数</span>
+y = <span class="hljs-number">2</span>*x^(<span class="hljs-number">-8</span>) + <span class="hljs-built_in">exp</span>(x^<span class="hljs-number">2</span>) + <span class="hljs-number">1</span>;
+<span class="hljs-comment">% 求不定积分</span>
+int_y = int(y,x);
+<span class="hljs-built_in">disp</span>(int_y);
+<span class="hljs-comment">% 求定积分</span>
+definite_int_y = int(y,x,<span class="hljs-number">0.5</span>,<span class="hljs-number">1</span>);
+<span class="hljs-built_in">disp</span>(definite_int_y);
+</code></pre>
+<p>结果如下</p>
+<p><img src="../uploads/csdn/matlab%E7%9B%B4%E6%8E%A5%E6%8E%A8%E5%AF%BC%E5%87%BD%E6%95%B0%E7%9A%84%E5%AF%BC%E5%87%BD%E6%95%B0%E5%92%8C%E7%A7%AF%E5%88%86%E5%BD%A2%E5%BC%8F%E5%85%B7%E4%BD%93%E6%96%B9%E6%B3%95%E5%92%8C%E7%94%A8%E4%BE%8B/img-01.png" alt=""></p>
+<hr>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#一-求导函数-导数">一、求导函数（导数）</a>
+          
+            <a class="toc-level-5" href="#1-基本语法">1\. 基本语法</a>
+          
+            <a class="toc-level-5" href="#2-示例代码">2\. 示例代码</a>
+          
+            <a class="toc-level-4" href="#二-求积分形式">二、求积分形式</a>
+          
+            <a class="toc-level-5" href="#1-基本语法">1\. 基本语法</a>
+          
+            <a class="toc-level-5" href="#2-示例代码">2\. 示例代码</a>
+          
+            <a class="toc-level-4" href="#三-案例如下">三、案例如下</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/matlab退火算法和遗传算法解决旅行商问题.html">
+      <span>上一篇</span>
+      <strong>MATLAB退火算法和遗传算法解决旅行商问题</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/matlab画节点的平滑曲线.html">
+      <span>下一篇</span>
+      <strong>MATLAB画节点的平滑曲线</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/凸包问题graham扫描算法matlab.html">凸包问题Graham扫描算法MATLAB</a></h3>
+        <p class="post-excerpt">算法要解决的问题</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.498Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

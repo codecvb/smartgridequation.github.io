@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>VS2022PYTHON3.10C调用Python文件并执行函数 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">VS2022PYTHON3.10C调用Python文件并执行函数</h1>
+        <p class="post-deck">日常工作和学习中，有一些现成的Python代码已经写好，自己想在C++程序中调用，如果Python代码量很大，改写困难，就可以直接使用调用的方式。但是这里面会存在C++库环境和Python第三方库不匹配的情况，这里解决起来比较麻烦，后续有解决方案我在写一篇。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.446Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>6 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>日常工作和学习中，有一些现成的Python代码已经写好，自己想在C++程序中调用，如果Python代码量很大，改写困难，就可以直接使用调用的方式。但是这里面会存在C++库环境和Python第三方库不匹配的情况，这里解决起来比较麻烦，后续有解决方案我在写一篇。</p>
+<p>首先写一个Python文件，<a href="http://xn--add-c88d89xgta.py">命名为add.py</a>，写上代码如下</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> sys
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">add</span>():
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;add running!\r\n&quot;</span>)
+    <span class="hljs-built_in">print</span>(sys.path)
+</code></pre>
+<p>VS2022 新建一个工程，添加一个CPP文件，代码如下</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-comment">#include &lt;iostream&gt;</span>
+<span class="hljs-comment">#include &lt;Python.h&gt;</span>
+<span class="hljs-comment">#include &lt;windows.h&gt;</span>
+
+using namespace std;
+
+<span class="hljs-built_in">int</span> main()
+{
+
+    Py_Initialize();
+
+    PyObject* pModule = PyImport_ImportModule(<span class="hljs-string">&quot;add&quot;</span>);
+    //这里是要调用的文件名face_detect.py;
+
+    <span class="hljs-keyword">if</span> (pModule == NULL)//如果函数执行失败，则返回NULL
+    {
+        cout &lt;&lt; <span class="hljs-string">&quot;没找到该Python文件&quot;</span> &lt;&lt; endl;
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    }
+    <span class="hljs-keyword">else</span> {
+        // 检查模块导入是否成功
+        <span class="hljs-keyword">if</span> (pModule != NULL) {
+            // 获取模块中的函数
+            PyObject* pFunction = PyObject_GetAttrString(pModule, <span class="hljs-string">&quot;add&quot;</span>);
+            // 检查函数获取是否成功;
+            <span class="hljs-keyword">if</span> (pFunction != NULL) {
+                // 准备函数参数
+                PyObject* pArgs = NULL;//PyTuple_Pack(<span class="hljs-number">2</span>, PyLong_FromLong(<span class="hljs-number">2</span>), PyLong_FromLong(<span class="hljs-number">3</span>));
+
+                    // 调用Python函数
+                    PyObject* pResult = PyObject_CallObject(pFunction, pArgs);
+
+                    /*
+                    // 打印结果
+                    <span class="hljs-keyword">if</span> (pResult != NULL) {
+                        printf(<span class="hljs-string">&quot;Result of Python function: %ld\n&quot;</span>, PyLong_AsLong(pResult));
+                        Py_DECREF(pResult);
+                    }
+                    <span class="hljs-keyword">else</span> {
+                        PyErr_Print();
+                    }
+                    // 释放函数参数
+                    Py_DECREF(pArgs);
+                    */
+
+                // 释放函数对象
+                Py_DECREF(pFunction);
+            }
+            <span class="hljs-keyword">else</span> {
+                PyErr_Print();
+            }
+                // 释放模块对象
+                Py_DECREF(pModule);
+        }
+        <span class="hljs-keyword">else</span> {
+            PyErr_Print();
+        }
+    }
+
+    Py_Finalize();
+
+}
+</code></pre>
+<p>VS2022添加Python.h的库头文件,在Python环境路径下的include文件夹，Python环境下的Lib和Libs，不会添加请自行百度，教程很多</p>
+<p>Python环境路径就是你的安装路径</p>
+<p>长这样，<strong>最重要的一步是把add.py放到这个文件下</strong></p>
+<p><img src="../uploads/csdn/vs2022python3-10c%E8%B0%83%E7%94%A8python%E6%96%87%E4%BB%B6%E5%B9%B6%E6%89%A7%E8%A1%8C%E5%87%BD%E6%95%B0/img-01.png" alt=""></p>
+<p>没有什么问题就可以直接运行程序，运行结果如下</p>
+<p><img src="../uploads/csdn/vs2022python3-10c%E8%B0%83%E7%94%A8python%E6%96%87%E4%BB%B6%E5%B9%B6%E6%89%A7%E8%A1%8C%E5%87%BD%E6%95%B0/img-02.png" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/windows选择特定窗口录屏-单窗口录屏python代码.html">
+      <span>上一篇</span>
+      <strong>Windows选择特定窗口录屏 单窗口录屏Python代码</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/python自制英语单词学习背诵软件有cet4或者托福雅思词表即可.html">
+      <span>下一篇</span>
+      <strong>Python自制英语单词学习背诵软件有CET4或者托福雅思词表即可</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

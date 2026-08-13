@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Python模拟单楼层双电梯运行仿真 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">Python模拟单楼层双电梯运行仿真</h1>
+        <p class="post-deck">《双电梯楼层模拟系统》摘要</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.342Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>36 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>《双电梯楼层模拟系统》摘要</p>
+<p>本文介绍了一个基于Pygame的双电梯楼层模拟系统，包含以下核心功能：</p>
+<ol>
+<li>系统采用面向对象设计，包含电梯类、按钮类等组件；</li>
+<li>支持10层楼的双电梯运行模拟，具有真实的电梯移动、开关门动画效果；</li>
+<li>实现智能调度算法，根据电梯当前状态、方向和距离自动分配最优电梯；</li>
+<li>提供完整的用户交互界面，包括楼层呼叫按钮和电梯内部选层按钮；</li>
+<li>可视化显示电梯运行状态、当前楼层、负载人数等信息。</li>
+</ol>
+<p>该系统通过Pygame实现图形界面，模拟真实电梯的运行逻辑和调度策略，可作为电梯控制算法的教学演示工具。</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> pygame
+<span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">from</span> pygame.<span class="hljs-built_in">locals</span> <span class="hljs-keyword">import</span> *
+
+<span class="hljs-comment"># 初始化pygame</span>
+pygame.init()
+
+<span class="hljs-comment"># 确保中文显示正常</span>
+pygame.font.init()
+font_options = [<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-string">&quot;WenQuanYi Micro Hei&quot;</span>, <span class="hljs-string">&quot;Heiti TC&quot;</span>, pygame.font.get_default_font()]
+system_fonts = pygame.font.get_fonts()
+selected_font = <span class="hljs-literal">None</span>
+
+<span class="hljs-keyword">for</span> font <span class="hljs-keyword">in</span> font_options:
+    <span class="hljs-keyword">if</span> font.lower() <span class="hljs-keyword">in</span> system_fonts:
+        selected_font = font
+        <span class="hljs-keyword">break</span>
+
+<span class="hljs-comment"># 颜色定义</span>
+WHITE = (<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>)
+BLACK = (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+GRAY = (<span class="hljs-number">200</span>, <span class="hljs-number">200</span>, <span class="hljs-number">200</span>)
+RED = (<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+GREEN = (<span class="hljs-number">0</span>, <span class="hljs-number">200</span>, <span class="hljs-number">0</span>)
+BLUE = (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">200</span>)
+YELLOW = (<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>)
+LIGHT_BLUE = (<span class="hljs-number">173</span>, <span class="hljs-number">216</span>, <span class="hljs-number">230</span>)
+LIGHT_GREEN = (<span class="hljs-number">144</span>, <span class="hljs-number">238</span>, <span class="hljs-number">144</span>)
+
+<span class="hljs-comment"># 屏幕设置</span>
+WIDTH, HEIGHT = <span class="hljs-number">900</span>, <span class="hljs-number">700</span>
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(<span class="hljs-string">&quot;双电梯楼层模拟系统&quot;</span>)
+
+<span class="hljs-comment"># 楼层设置</span>
+FLOORS = <span class="hljs-number">10</span>  <span class="hljs-comment"># 总楼层数</span>
+FLOOR_HEIGHT = (HEIGHT - <span class="hljs-number">100</span>) // FLOORS  <span class="hljs-comment"># 每层高度，预留底部空间</span>
+ELEVATOR_WIDTH = <span class="hljs-number">120</span>  <span class="hljs-comment"># 电梯宽度</span>
+ELEVATOR_HEIGHT = FLOOR_HEIGHT - <span class="hljs-number">10</span>  <span class="hljs-comment"># 电梯高度</span>
+
+<span class="hljs-comment"># 字体设置</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">get_font</span>(<span class="hljs-params">size</span>):
+    <span class="hljs-keyword">return</span> pygame.font.SysFont(selected_font, size)
+
+<span class="hljs-comment"># 电梯类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Elevator</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x_pos, name, color</span>):
+        <span class="hljs-variable language_">self</span>.x = x_pos
+        <span class="hljs-variable language_">self</span>.y = HEIGHT - <span class="hljs-number">100</span> - FLOOR_HEIGHT  <span class="hljs-comment"># 初始在1楼</span>
+        <span class="hljs-variable language_">self</span>.current_floor = <span class="hljs-number">1</span>
+        <span class="hljs-variable language_">self</span>.target_floors = <span class="hljs-built_in">set</span>()  <span class="hljs-comment"># 目标楼层集合</span>
+        <span class="hljs-variable language_">self</span>.direction = <span class="hljs-number">0</span>  <span class="hljs-comment"># 0: 静止, 1: 上, -1: 下</span>
+        <span class="hljs-variable language_">self</span>.moving = <span class="hljs-literal">False</span>  <span class="hljs-comment"># 是否正在移动</span>
+        <span class="hljs-variable language_">self</span>.name = name  <span class="hljs-comment"># 电梯名称（如&quot;A&quot;、&quot;B&quot;）</span>
+        <span class="hljs-variable language_">self</span>.load = <span class="hljs-number">0</span>  <span class="hljs-comment"># 负载人数</span>
+        <span class="hljs-variable language_">self</span>.max_load = <span class="hljs-number">8</span>  <span class="hljs-comment"># 最大负载</span>
+        <span class="hljs-variable language_">self</span>.color = color  <span class="hljs-comment"># 电梯颜色</span>
+        <span class="hljs-variable language_">self</span>.door_open = <span class="hljs-literal">False</span>  <span class="hljs-comment"># 门是否打开</span>
+        <span class="hljs-variable language_">self</span>.door_timer = <span class="hljs-number">0</span>  <span class="hljs-comment"># 门打开计时器</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 处理门的状态</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.door_open:
+            <span class="hljs-variable language_">self</span>.door_timer += <span class="hljs-number">1</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.door_timer &gt; <span class="hljs-number">60</span>:  <span class="hljs-comment"># 门打开1秒后关闭</span>
+                <span class="hljs-variable language_">self</span>.door_open = <span class="hljs-literal">False</span>
+                <span class="hljs-variable language_">self</span>.door_timer = <span class="hljs-number">0</span>
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-comment"># 更新电梯位置</span>
+        target_y = HEIGHT - <span class="hljs-number">100</span> - (<span class="hljs-variable language_">self</span>.current_floor * FLOOR_HEIGHT)
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.y &lt; target_y:
+            <span class="hljs-comment"># 向上移动</span>
+            <span class="hljs-variable language_">self</span>.y += <span class="hljs-number">2</span>
+            <span class="hljs-variable language_">self</span>.direction = <span class="hljs-number">1</span>
+            <span class="hljs-variable language_">self</span>.moving = <span class="hljs-literal">True</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.y &gt;= target_y:
+                <span class="hljs-variable language_">self</span>.y = target_y
+                <span class="hljs-variable language_">self</span>.moving = <span class="hljs-literal">False</span>
+                <span class="hljs-variable language_">self</span>.arrived()
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.y &gt; target_y:
+            <span class="hljs-comment"># 向下移动</span>
+            <span class="hljs-variable language_">self</span>.y -= <span class="hljs-number">2</span>
+            <span class="hljs-variable language_">self</span>.direction = -<span class="hljs-number">1</span>
+            <span class="hljs-variable language_">self</span>.moving = <span class="hljs-literal">True</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.y &lt;= target_y:
+                <span class="hljs-variable language_">self</span>.y = target_y
+                <span class="hljs-variable language_">self</span>.moving = <span class="hljs-literal">False</span>
+                <span class="hljs-variable language_">self</span>.arrived()
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 静止状态，检查是否有目标楼层</span>
+            <span class="hljs-variable language_">self</span>.direction = <span class="hljs-number">0</span>
+            <span class="hljs-variable language_">self</span>.moving = <span class="hljs-literal">False</span>
+            <span class="hljs-variable language_">self</span>.check_next_target()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">arrived</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 到达目标楼层，开门</span>
+        <span class="hljs-variable language_">self</span>.door_open = <span class="hljs-literal">True</span>
+        <span class="hljs-comment"># 移除当前楼层的目标</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.current_floor <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.target_floors:
+            <span class="hljs-variable language_">self</span>.target_floors.remove(<span class="hljs-variable language_">self</span>.current_floor)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">check_next_target</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 检查下一个目标楼层</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.target_floors:
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-comment"># 调度算法：先处理当前方向的目标，再处理反方向的</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.direction == <span class="hljs-number">1</span> <span class="hljs-keyword">or</span> <span class="hljs-variable language_">self</span>.direction == <span class="hljs-number">0</span>:  <span class="hljs-comment"># 向上或静止</span>
+            <span class="hljs-comment"># 查找当前楼层以上的目标</span>
+            higher_floors = [f <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.target_floors <span class="hljs-keyword">if</span> f &gt; <span class="hljs-variable language_">self</span>.current_floor]
+            <span class="hljs-keyword">if</span> higher_floors:
+                <span class="hljs-variable language_">self</span>.current_floor = <span class="hljs-built_in">min</span>(higher_floors)
+                <span class="hljs-keyword">return</span>
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.direction == -<span class="hljs-number">1</span> <span class="hljs-keyword">or</span> <span class="hljs-variable language_">self</span>.direction == <span class="hljs-number">0</span>:  <span class="hljs-comment"># 向下或静止</span>
+            <span class="hljs-comment"># 查找当前楼层以下的目标</span>
+            lower_floors = [f <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.target_floors <span class="hljs-keyword">if</span> f &lt; <span class="hljs-variable language_">self</span>.current_floor]
+            <span class="hljs-keyword">if</span> lower_floors:
+                <span class="hljs-variable language_">self</span>.current_floor = <span class="hljs-built_in">max</span>(lower_floors)
+                <span class="hljs-keyword">return</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">add_target</span>(<span class="hljs-params">self, floor</span>):
+        <span class="hljs-comment"># 添加目标楼层</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-number">1</span> &lt;= floor &lt;= FLOORS:
+            <span class="hljs-variable language_">self</span>.target_floors.add(floor)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">draw</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 绘制电梯</span>
+        color = <span class="hljs-variable language_">self</span>.color
+        <span class="hljs-comment"># 绘制电梯主体</span>
+        pygame.draw.rect(screen, color, (<span class="hljs-variable language_">self</span>.x, <span class="hljs-variable language_">self</span>.y, ELEVATOR_WIDTH, ELEVATOR_HEIGHT))
+
+        <span class="hljs-comment"># 绘制门</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.door_open:
+            <span class="hljs-comment"># 双开门效果</span>
+            door_width = ELEVATOR_WIDTH // <span class="hljs-number">2</span> - <span class="hljs-number">5</span>
+            pygame.draw.rect(screen, WHITE, (<span class="hljs-variable language_">self</span>.x, <span class="hljs-variable language_">self</span>.y, door_width, ELEVATOR_HEIGHT))
+            pygame.draw.rect(screen, WHITE, (<span class="hljs-variable language_">self</span>.x + ELEVATOR_WIDTH - door_width, <span class="hljs-variable language_">self</span>.y, door_width, ELEVATOR_HEIGHT))
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 门把手</span>
+            pygame.draw.circle(screen, BLACK, (<span class="hljs-variable language_">self</span>.x + ELEVATOR_WIDTH // <span class="hljs-number">2</span>, <span class="hljs-variable language_">self</span>.y + ELEVATOR_HEIGHT // <span class="hljs-number">2</span>), <span class="hljs-number">5</span>)
+
+        <span class="hljs-comment"># 绘制电梯名称</span>
+        font = get_font(<span class="hljs-number">24</span>)
+        text = font.render(<span class="hljs-variable language_">self</span>.name, <span class="hljs-literal">True</span>, WHITE)
+        screen.blit(text, (<span class="hljs-variable language_">self</span>.x + <span class="hljs-number">10</span>, <span class="hljs-variable language_">self</span>.y + <span class="hljs-number">10</span>))
+
+        <span class="hljs-comment"># 显示当前楼层</span>
+        floor_text = font.render(<span class="hljs-string">f&quot;<span class="hljs-subst">{self.current_floor}</span>&quot;</span>, <span class="hljs-literal">True</span>, WHITE)
+        screen.blit(floor_text, (<span class="hljs-variable language_">self</span>.x + ELEVATOR_WIDTH - <span class="hljs-number">30</span>, <span class="hljs-variable language_">self</span>.y + <span class="hljs-number">10</span>))
+
+        <span class="hljs-comment"># 显示方向</span>
+        dir_text = <span class="hljs-string">&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.direction == <span class="hljs-number">1</span>:
+            dir_text = <span class="hljs-string">&quot;↑&quot;</span>
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.direction == -<span class="hljs-number">1</span>:
+            dir_text = <span class="hljs-string">&quot;↓&quot;</span>
+
+        dir_display = font.render(dir_text, <span class="hljs-literal">True</span>, WHITE)
+        screen.blit(dir_display, (<span class="hljs-variable language_">self</span>.x + ELEVATOR_WIDTH // <span class="hljs-number">2</span> - <span class="hljs-number">10</span>, <span class="hljs-variable language_">self</span>.y + <span class="hljs-number">10</span>))
+
+        <span class="hljs-comment"># 显示负载</span>
+        load_text = <span class="hljs-string">f&quot;<span class="hljs-subst">{self.load}</span>/<span class="hljs-subst">{self.max_load}</span>&quot;</span>
+        load_display = get_font(<span class="hljs-number">16</span>).render(load_text, <span class="hljs-literal">True</span>, WHITE)
+        screen.blit(load_display, (<span class="hljs-variable language_">self</span>.x + <span class="hljs-number">10</span>, <span class="hljs-variable language_">self</span>.y + ELEVATOR_HEIGHT - <span class="hljs-number">30</span>))
+
+<span class="hljs-comment"># 楼层按钮类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">FloorButton</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x, y, floor, direction</span>):
+        <span class="hljs-variable language_">self</span>.rect = pygame.Rect(x, y, <span class="hljs-number">40</span>, <span class="hljs-number">40</span>)
+        <span class="hljs-variable language_">self</span>.floor = floor
+        <span class="hljs-variable language_">self</span>.direction = direction  <span class="hljs-comment"># 1: 上, -1: 下</span>
+        <span class="hljs-variable language_">self</span>.pressed = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.color = GRAY
+        <span class="hljs-variable language_">self</span>.pressed_color = RED
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">draw</span>(<span class="hljs-params">self</span>):
+        color = <span class="hljs-variable language_">self</span>.pressed_color <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.pressed <span class="hljs-keyword">else</span> <span class="hljs-variable language_">self</span>.color
+        pygame.draw.rect(screen, color, <span class="hljs-variable language_">self</span>.rect, border_radius=<span class="hljs-number">5</span>)
+        pygame.draw.rect(screen, BLACK, <span class="hljs-variable language_">self</span>.rect, <span class="hljs-number">2</span>, border_radius=<span class="hljs-number">5</span>)  <span class="hljs-comment"># 边框</span>
+
+        font = get_font(<span class="hljs-number">20</span>)
+        text = <span class="hljs-string">&quot;↑&quot;</span> <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.direction == <span class="hljs-number">1</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;↓&quot;</span>
+        text_surface = font.render(text, <span class="hljs-literal">True</span>, BLACK)
+        screen.blit(text_surface, (<span class="hljs-variable language_">self</span>.rect.centerx - <span class="hljs-number">8</span>, <span class="hljs-variable language_">self</span>.rect.centery - <span class="hljs-number">10</span>))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">is_clicked</span>(<span class="hljs-params">self, pos</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.rect.collidepoint(pos)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">toggle</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.pressed = <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.pressed
+
+<span class="hljs-comment"># 电梯内部按钮类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ElevatorButton</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x, y, floor</span>):
+        <span class="hljs-variable language_">self</span>.rect = pygame.Rect(x, y, <span class="hljs-number">40</span>, <span class="hljs-number">40</span>)
+        <span class="hljs-variable language_">self</span>.floor = floor
+        <span class="hljs-variable language_">self</span>.pressed = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.color = GRAY
+        <span class="hljs-variable language_">self</span>.pressed_color = YELLOW
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">draw</span>(<span class="hljs-params">self</span>):
+        color = <span class="hljs-variable language_">self</span>.pressed_color <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.pressed <span class="hljs-keyword">else</span> <span class="hljs-variable language_">self</span>.color
+        pygame.draw.rect(screen, color, <span class="hljs-variable language_">self</span>.rect, border_radius=<span class="hljs-number">5</span>)
+        pygame.draw.rect(screen, BLACK, <span class="hljs-variable language_">self</span>.rect, <span class="hljs-number">2</span>, border_radius=<span class="hljs-number">5</span>)  <span class="hljs-comment"># 边框</span>
+
+        font = get_font(<span class="hljs-number">20</span>)
+        text_surface = font.render(<span class="hljs-built_in">str</span>(<span class="hljs-variable language_">self</span>.floor), <span class="hljs-literal">True</span>, BLACK)
+        screen.blit(text_surface, (<span class="hljs-variable language_">self</span>.rect.centerx - <span class="hljs-number">8</span>, <span class="hljs-variable language_">self</span>.rect.centery - <span class="hljs-number">10</span>))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">is_clicked</span>(<span class="hljs-params">self, pos</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.rect.collidepoint(pos)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">toggle</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.pressed = <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.pressed
+
+<span class="hljs-comment"># 模拟系统类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ElevatorSimulation</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.elevator_a = Elevator(WIDTH // <span class="hljs-number">3</span> - ELEVATOR_WIDTH // <span class="hljs-number">2</span>, <span class="hljs-string">&quot;A&quot;</span>, BLUE)
+        <span class="hljs-variable language_">self</span>.elevator_b = Elevator(<span class="hljs-number">2</span> * WIDTH // <span class="hljs-number">3</span> - ELEVATOR_WIDTH // <span class="hljs-number">2</span>, <span class="hljs-string">&quot;B&quot;</span>, GREEN)
+        <span class="hljs-variable language_">self</span>.elevators = [<span class="hljs-variable language_">self</span>.elevator_a, <span class="hljs-variable language_">self</span>.elevator_b]
+
+        <span class="hljs-comment"># 创建楼层按钮</span>
+        <span class="hljs-variable language_">self</span>.floor_buttons = []
+        button_x = WIDTH - <span class="hljs-number">100</span>
+
+        <span class="hljs-keyword">for</span> floor <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, FLOORS + <span class="hljs-number">1</span>):
+            y_pos = HEIGHT - <span class="hljs-number">100</span> - (floor * FLOOR_HEIGHT) + (FLOOR_HEIGHT - <span class="hljs-number">40</span>) // <span class="hljs-number">2</span>
+
+            <span class="hljs-comment"># 除了最高层外，都有向上按钮</span>
+            <span class="hljs-keyword">if</span> floor &lt; FLOORS:
+                up_button = FloorButton(button_x, y_pos, floor, <span class="hljs-number">1</span>)
+                <span class="hljs-variable language_">self</span>.floor_buttons.append(up_button)
+
+            <span class="hljs-comment"># 除了最底层外，都有向下按钮</span>
+            <span class="hljs-keyword">if</span> floor &gt; <span class="hljs-number">1</span>:
+                down_button = FloorButton(button_x + <span class="hljs-number">50</span>, y_pos, floor, -<span class="hljs-number">1</span>)
+                <span class="hljs-variable language_">self</span>.floor_buttons.append(down_button)
+
+        <span class="hljs-comment"># 创建电梯内部按钮</span>
+        <span class="hljs-variable language_">self</span>.elevator_buttons_a = []
+        <span class="hljs-variable language_">self</span>.elevator_buttons_b = []
+
+        btn_a_x = <span class="hljs-variable language_">self</span>.elevator_a.x + <span class="hljs-number">10</span>
+        btn_b_x = <span class="hljs-variable language_">self</span>.elevator_b.x + <span class="hljs-number">10</span>
+        start_y = HEIGHT - <span class="hljs-number">100</span> - <span class="hljs-number">60</span>  <span class="hljs-comment"># 底部按钮区域</span>
+
+        <span class="hljs-comment"># 为每个电梯创建楼层按钮（分两列）</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(FLOORS):
+            floor = i + <span class="hljs-number">1</span>
+            col = i % <span class="hljs-number">5</span>  <span class="hljs-comment"># 5个按钮一列</span>
+            row = i // <span class="hljs-number">5</span>
+
+            <span class="hljs-comment"># 电梯A的按钮</span>
+            btn_a = ElevatorButton(btn_a_x + col * <span class="hljs-number">50</span>, start_y - row * <span class="hljs-number">50</span>, floor)
+            <span class="hljs-variable language_">self</span>.elevator_buttons_a.append(btn_a)
+
+            <span class="hljs-comment"># 电梯B的按钮</span>
+            btn_b = ElevatorButton(btn_b_x + col * <span class="hljs-number">50</span>, start_y - row * <span class="hljs-number">50</span>, floor)
+            <span class="hljs-variable language_">self</span>.elevator_buttons_b.append(btn_b)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">handle_events</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">for</span> event <span class="hljs-keyword">in</span> pygame.event.get():
+            <span class="hljs-keyword">if</span> event.<span class="hljs-built_in">type</span> == QUIT:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+            <span class="hljs-keyword">elif</span> event.<span class="hljs-built_in">type</span> == MOUSEBUTTONDOWN:
+                <span class="hljs-variable language_">self</span>.handle_click(event.pos)
+            <span class="hljs-keyword">elif</span> event.<span class="hljs-built_in">type</span> == KEYDOWN:
+                <span class="hljs-keyword">if</span> event.key == K_ESCAPE:
+                    <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">handle_click</span>(<span class="hljs-params">self, pos</span>):
+        <span class="hljs-comment"># 处理楼层按钮点击</span>
+        <span class="hljs-keyword">for</span> button <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.floor_buttons:
+            <span class="hljs-keyword">if</span> button.is_clicked(pos):
+                button.toggle()
+                <span class="hljs-variable language_">self</span>.assign_elevator(button.floor, button.direction)
+
+        <span class="hljs-comment"># 处理电梯A内部按钮点击</span>
+        <span class="hljs-keyword">for</span> button <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.elevator_buttons_a:
+            <span class="hljs-keyword">if</span> button.is_clicked(pos):
+                button.toggle()
+                <span class="hljs-variable language_">self</span>.elevator_a.add_target(button.floor)
+
+        <span class="hljs-comment"># 处理电梯B内部按钮点击</span>
+        <span class="hljs-keyword">for</span> button <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.elevator_buttons_b:
+            <span class="hljs-keyword">if</span> button.is_clicked(pos):
+                button.toggle()
+                <span class="hljs-variable language_">self</span>.elevator_b.add_target(button.floor)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">assign_elevator</span>(<span class="hljs-params">self, floor, direction</span>):
+        <span class="hljs-comment"># 电梯分配算法</span>
+        <span class="hljs-comment"># 计算每个电梯到目标楼层的距离和方向因素</span>
+        score_a = <span class="hljs-variable language_">self</span>.calculate_score(<span class="hljs-variable language_">self</span>.elevator_a, floor, direction)
+        score_b = <span class="hljs-variable language_">self</span>.calculate_score(<span class="hljs-variable language_">self</span>.elevator_b, floor, direction)
+
+        <span class="hljs-comment"># 选择分数较低（更适合）的电梯</span>
+        <span class="hljs-keyword">if</span> score_a &lt;= score_b:
+            <span class="hljs-variable language_">self</span>.elevator_a.add_target(floor)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-variable language_">self</span>.elevator_b.add_target(floor)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">calculate_score</span>(<span class="hljs-params">self, elevator, floor, direction</span>):
+        <span class="hljs-comment"># 计算电梯适合度分数（越低越好）</span>
+        distance = <span class="hljs-built_in">abs</span>(elevator.current_floor - floor)
+
+        <span class="hljs-comment"># 方向因素：同方向加分，反方向减分</span>
+        <span class="hljs-keyword">if</span> elevator.direction == direction:
+            <span class="hljs-comment"># 同方向且能顺道接应</span>
+            <span class="hljs-keyword">if</span> (direction == <span class="hljs-number">1</span> <span class="hljs-keyword">and</span> elevator.current_floor &lt; floor) <span class="hljs-keyword">or</span> \
+               (direction == -<span class="hljs-number">1</span> <span class="hljs-keyword">and</span> elevator.current_floor &gt; floor):
+                distance *= <span class="hljs-number">0.5</span>  <span class="hljs-comment"># 同方向优势</span>
+        <span class="hljs-keyword">elif</span> elevator.direction != <span class="hljs-number">0</span>:
+            <span class="hljs-comment"># 反方向，需要额外成本</span>
+            distance *= <span class="hljs-number">1.5</span>
+
+        <span class="hljs-comment"># 静止的电梯有优势</span>
+        <span class="hljs-keyword">if</span> elevator.direction == <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> elevator.moving:
+            distance *= <span class="hljs-number">0.8</span>
+
+        <span class="hljs-keyword">return</span> distance
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 更新电梯状态</span>
+        <span class="hljs-keyword">for</span> elevator <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.elevators:
+            elevator.update()
+
+        <span class="hljs-comment"># 检查楼层按钮状态（如果电梯到达，重置按钮）</span>
+        <span class="hljs-keyword">for</span> button <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.floor_buttons:
+            <span class="hljs-keyword">if</span> button.pressed:
+                <span class="hljs-keyword">for</span> elevator <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.elevators:
+                    <span class="hljs-keyword">if</span> elevator.current_floor == button.floor <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> elevator.moving:
+                        <span class="hljs-comment"># 检查电梯是否朝着按钮的方向移动或静止</span>
+                        <span class="hljs-keyword">if</span> (button.direction == <span class="hljs-number">1</span> <span class="hljs-keyword">and</span> elevator.direction <span class="hljs-keyword">in</span> [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>]) <span class="hljs-keyword">or</span> \
+                           (button.direction == -<span class="hljs-number">1</span> <span class="hljs-keyword">and</span> elevator.direction <span class="hljs-keyword">in</span> [<span class="hljs-number">0</span>, -<span class="hljs-number">1</span>]):
+                            button.pressed = <span class="hljs-literal">False</span>
+                            <span class="hljs-keyword">break</span>
+
+        <span class="hljs-comment"># 检查电梯内部按钮状态</span>
+        <span class="hljs-keyword">for</span> btn <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.elevator_buttons_a:
+            <span class="hljs-keyword">if</span> btn.pressed <span class="hljs-keyword">and</span> btn.floor == <span class="hljs-variable language_">self</span>.elevator_a.current_floor <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.elevator_a.moving:
+                btn.pressed = <span class="hljs-literal">False</span>
+
+        <span class="hljs-keyword">for</span> btn <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.elevator_buttons_b:
+            <span class="hljs-keyword">if</span> btn.pressed <span class="hljs-keyword">and</span> btn.floor == <span class="hljs-variable language_">self</span>.elevator_b.current_floor <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.elevator_b.moving:
+                btn.pressed = <span class="hljs-literal">False</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">draw</span>(<span class="hljs-params">self</span>):
+        screen.fill(WHITE)
+
+        <span class="hljs-comment"># 绘制背景</span>
+        pygame.draw.rect(screen, LIGHT_BLUE, (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, WIDTH, HEIGHT - <span class="hljs-number">100</span>))
+        pygame.draw.rect(screen, LIGHT_GREEN, (<span class="hljs-number">0</span>, HEIGHT - <span class="hljs-number">100</span>, WIDTH, <span class="hljs-number">100</span>))
+
+        <span class="hljs-comment"># 绘制楼层</span>
+        font = get_font(<span class="hljs-number">24</span>)
+        <span class="hljs-keyword">for</span> floor <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, FLOORS + <span class="hljs-number">1</span>):
+            y_pos = HEIGHT - <span class="hljs-number">100</span> - (floor * FLOOR_HEIGHT)
+            <span class="hljs-comment"># 绘制楼层线</span>
+            pygame.draw.line(screen, BLACK, (<span class="hljs-number">0</span>, y_pos), (WIDTH, y_pos), <span class="hljs-number">2</span>)
+            <span class="hljs-comment"># 绘制楼层号</span>
+            floor_text = font.render(<span class="hljs-string">f&quot;<span class="hljs-subst">{floor}</span>楼&quot;</span>, <span class="hljs-literal">True</span>, BLACK)
+            screen.blit(floor_text, (<span class="hljs-number">20</span>, y_pos - FLOOR_HEIGHT // <span class="hljs-number">2</span> - <span class="hljs-number">12</span>))
+
+        <span class="hljs-comment"># 绘制电梯</span>
+        <span class="hljs-keyword">for</span> elevator <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.elevators:
+            elevator.draw()
+
+        <span class="hljs-comment"># 绘制楼层按钮</span>
+        <span class="hljs-keyword">for</span> button <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.floor_buttons:
+            button.draw()
+
+        <span class="hljs-comment"># 绘制电梯内部按钮</span>
+        <span class="hljs-keyword">for</span> btn <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.elevator_buttons_a + <span class="hljs-variable language_">self</span>.elevator_buttons_b:
+            btn.draw()
+
+        <span class="hljs-comment"># 绘制电梯区域标题</span>
+        font = get_font(<span class="hljs-number">20</span>)
+        a_text = font.render(<span class="hljs-string">&quot;电梯 A&quot;</span>, <span class="hljs-literal">True</span>, BLACK)
+        b_text = font.render(<span class="hljs-string">&quot;电梯 B&quot;</span>, <span class="hljs-literal">True</span>, BLACK)
+        screen.blit(a_text, (<span class="hljs-variable language_">self</span>.elevator_a.x + ELEVATOR_WIDTH // <span class="hljs-number">2</span> - <span class="hljs-number">30</span>, HEIGHT - <span class="hljs-number">90</span>))
+        screen.blit(b_text, (<span class="hljs-variable language_">self</span>.elevator_b.x + ELEVATOR_WIDTH // <span class="hljs-number">2</span> - <span class="hljs-number">30</span>, HEIGHT - <span class="hljs-number">90</span>))
+
+        <span class="hljs-comment"># 绘制说明文字</span>
+        info_font = get_font(<span class="hljs-number">16</span>)
+        info_text = info_font.render(<span class="hljs-string">&quot;操作: 点击右侧楼层按钮呼叫电梯，点击电梯内按钮选择目标楼层&quot;</span>, <span class="hljs-literal">True</span>, BLACK)
+        screen.blit(info_text, (<span class="hljs-number">20</span>, HEIGHT - <span class="hljs-number">40</span>))
+
+        pygame.display.flip()
+
+<span class="hljs-comment"># 主函数</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    clock = pygame.time.Clock()
+    simulation = ElevatorSimulation()
+
+    running = <span class="hljs-literal">True</span>
+    <span class="hljs-keyword">while</span> running:
+        running = simulation.handle_events()
+        simulation.update()
+        simulation.draw()
+        clock.tick(<span class="hljs-number">60</span>)
+
+    pygame.quit()
+    sys.exit()
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    main()
+</code></pre>
+<p>效果如下</p>
+<p><img src="../uploads/csdn/python%E6%A8%A1%E6%8B%9F%E5%8D%95%E6%A5%BC%E5%B1%82%E5%8F%8C%E7%94%B5%E6%A2%AF%E8%BF%90%E8%A1%8C%E4%BB%BF%E7%9C%9F/img-01.gif" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/python正则表达式的一些介绍和使用方法说明数字字母和数字电子邮件地址网址电话号码简单ipv4.html">
+      <span>上一篇</span>
+      <strong>Python正则表达式的一些介绍和使用方法说明数字字母和数字电子邮件地址网址电话号码简单IPv4</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/python模仿微信程序功能pyqt5.html">
+      <span>下一篇</span>
+      <strong>Python模仿微信程序功能PyQt5</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

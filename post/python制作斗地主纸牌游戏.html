@@ -1,0 +1,2436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Python制作斗地主纸牌游戏 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">Python制作斗地主纸牌游戏</h1>
+        <p class="post-deck">这是一个完整的斗地主纸牌游戏实现，使用 Python 开发，提供命令行和图形界面两种版本。游戏包含完整的规则实现、AI 对手和友好的用户界面。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.259Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>172 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>这是一个完整的斗地主纸牌游戏实现，使用 Python 开发，提供命令行和图形界面两种版本。游戏包含完整的规则实现、AI 对手和友好的用户界面。</p>
+<p>## 核心模块说明</p>
+<p>### 1. <a href="http://card.py">card.py</a> - 卡牌系统</p>
+<p>**主要类：**</p>
+<p>- **CardSuit**: 卡牌花色定义</p>
+<p>- **CardRank**: 卡牌点数枚举（3-2，大小王）</p>
+<p>- **Card**: 扑克牌类</p>
+<ul>
+<li>
+<p>包含花色、点数属性</p>
+</li>
+<li>
+<p>支持比较和排序</p>
+</li>
+<li>
+<p>提供字符串显示</p>
+</li>
+</ul>
+<p>- **CardPattern**: 牌型枚举</p>
+<ul>
+<li>
+<p>单张、对子、三张</p>
+</li>
+<li>
+<p>三带一、三带二</p>
+</li>
+<li>
+<p>顺子、连对、飞机</p>
+</li>
+<li>
+<p>四带二、四带两对</p>
+</li>
+<li>
+<p>炸弹、王炸</p>
+</li>
+</ul>
+<p>- **PlayHand**: 出牌手类</p>
+<ul>
+<li>
+<p>识别牌型</p>
+</li>
+<li>
+<p>验证牌型有效性</p>
+</li>
+<li>
+<p>比较牌型大小</p>
+</li>
+</ul>
+<p>**功能特性：**</p>
+<p>- 完整的 54 张扑克牌</p>
+<p>- 支持所有标准斗地主牌型</p>
+<p>- 智能牌型识别和比较</p>
+<p>### 2. <a href="http://player.py">player.py</a> - 玩家系统</p>
+<p>**主要类：**</p>
+<p>- **Player**: 基础玩家类</p>
+<ul>
+<li>
+<p>手牌管理（添加、移除、排序）</p>
+</li>
+<li>
+<p>牌数查询</p>
+</li>
+<li>
+<p>角色标识（地主/农民）</p>
+</li>
+</ul>
+<p>- **AIPlayer**: AI 玩家类（继承自 Player）</p>
+<ul>
+<li>
+<p>智能叫地主决策</p>
+</li>
+<li>
+<p>手牌强度评估</p>
+</li>
+<li>
+<p>自动出牌策略</p>
+</li>
+<li>
+<p>压牌判断</p>
+</li>
+</ul>
+<p>**AI 策略：**</p>
+<p>- 根据手牌强度决定叫分</p>
+<p>- 优先出组合牌型（顺子、连对、飞机）</p>
+<p>- 保留大牌用于压牌</p>
+<p>- 智能选择压牌方案</p>
+<p>### 3. <a href="http://game.py">game.py</a> - 游戏逻辑</p>
+<p>**主要类：**</p>
+<p>- **DouDiZhuGame**: 游戏主控类</p>
+<ul>
+<li>
+<p>游戏初始化</p>
+</li>
+<li>
+<p>发牌流程</p>
+</li>
+<li>
+<p>叫地主流程</p>
+</li>
+<li>
+<p>出牌回合管理</p>
+</li>
+<li>
+<p>胜负判定</p>
+</li>
+</ul>
+<p>**核心功能：**</p>
+<p>- 自动洗牌和发牌</p>
+<p>- 叫地主竞价机制</p>
+<p>- 出牌规则验证</p>
+<p>- 回合轮转控制</p>
+<p>- 游戏状态管理</p>
+<p>### 4. <a href="http://main.py">main.py</a> - 命令行界面</p>
+<p>**功能：**</p>
+<p>- 清晰的命令行交互</p>
+<p>- 游戏规则说明</p>
+<p>- 实时状态显示</p>
+<p>- 玩家输入处理</p>
+<p>- 游戏结果展示</p>
+<p>**操作方式：**</p>
+<p>- 输入牌索引选择出牌（如：0,2,4）</p>
+<p>- 直接回车表示不出</p>
+<p>- 支持重新开局</p>
+<p>### 5. <a href="http://gui.py">gui.py</a> - 图形界面（推荐）</p>
+<p>**主要组件：**</p>
+<p>- **CardButton**: 卡牌按钮组件</p>
+<ul>
+<li>
+<p>可视化卡牌显示</p>
+</li>
+<li>
+<p>点击选中/取消</p>
+</li>
+<li>
+<p>鼠标悬停效果</p>
+</li>
+<li>
+<p>选中状态高亮</p>
+</li>
+</ul>
+<p>- **PlayerPanel**: 玩家信息面板</p>
+<ul>
+<li>
+<p>显示玩家名称</p>
+</li>
+<li>
+<p>显示角色（地主/农民）</p>
+</li>
+<li>
+<p>显示剩余牌数</p>
+</li>
+</ul>
+<p>- **GameTable**: 游戏桌面</p>
+<ul>
+<li>
+<p>显示当前出牌</p>
+</li>
+<li>
+<p>显示玩家名和牌型</p>
+</li>
+<li>
+<p>重叠显示多张牌</p>
+</li>
+</ul>
+<p>- **HistoryPanel**: 出牌历史记录</p>
+<ul>
+<li>
+<p>记录所有出牌</p>
+</li>
+<li>
+<p>区分地主/农民颜色</p>
+</li>
+<li>
+<p>回合分隔线</p>
+</li>
+<li>
+<p>支持滚动查看</p>
+</li>
+</ul>
+<p>- **DouDiZhuGUI**: 主界面类</p>
+<ul>
+<li>
+<p>完整的游戏流程控制</p>
+</li>
+<li>
+<p>响应式布局</p>
+</li>
+<li>
+<p>按钮交互</p>
+</li>
+<li>
+<p>状态提示</p>
+</li>
+</ul>
+<p>**界面特性：**</p>
+<p>- 1400x900 大窗口</p>
+<p>- 三栏布局（玩家-游戏区-历史）</p>
+<p>- 手牌水平滚动</p>
+<p>- 实时状态更新</p>
+<p>- 美观的配色方案</p>
+<p>## 游戏规则</p>
+<p>### 基本规则</p>
+<p>1. 游戏共 3 人，1 个地主，2 个农民</p>
+<p>2. 每人初始 17 张牌，地主额外获得 3 张底牌</p>
+<p>3. 地主先出牌，按顺时针轮流出牌</p>
+<p>4. 后出的牌必须比前一家大，或选择不出</p>
+<p>5. 先出完牌的一方获胜</p>
+<p>### 牌型大小</p>
+<p>**基本牌型：**</p>
+<p>- 单张、对子、三张：按点数比较</p>
+<p>- 三带一、三带二：三张部分比较</p>
+<p>**组合牌型：**</p>
+<p>- 顺子：5 张及以上连续点数（不能含 2 和王）</p>
+<p>- 连对：3 对及以上连续对子（不能含 2 和王）</p>
+<p>- 飞机：2 组及以上连续三张</p>
+<p>- 飞机带单/带对</p>
+<p>**特殊牌型：**</p>
+<p>- 炸弹：4 张相同点数，可压任何非炸弹牌</p>
+<p>- 王炸：大王 + 小王，最大</p>
+<p>### 点数大小</p>
+<p>3 &lt; 4 &lt; 5 &lt; 6 &lt; 7 &lt; 8 &lt; 9 &lt; 10 &lt; J &lt; Q &lt; K &lt; A &lt; 2 &lt; 小王 &lt; 大王</p>
+<p>## 运行方式</p>
+<p>### 图形界面版本（推荐）</p>
+<p>```bash</p>
+<p>python <a href="http://gui.py">gui.py</a></p>
+<p>```</p>
+<p>### 命令行版本</p>
+<p>```bash</p>
+<p>python <a href="http://main.py">main.py</a></p>
+<p>```</p>
+<p>## 技术特点</p>
+<p>### 代码质量</p>
+<p>- 模块化设计，职责清晰</p>
+<p>- 类型注解完善</p>
+<p>- 面向对象编程</p>
+<p>- 代码结构清晰</p>
+<p>### 功能完整性</p>
+<p>- 支持所有标准牌型</p>
+<p>- AI 对手具备基本策略</p>
+<p>- 双界面支持</p>
+<p>- 完整的游戏流程</p>
+<p>### 用户体验</p>
+<p>- 图形界面美观易用</p>
+<p>- 命令行界面清晰直观</p>
+<p>- 历史记录方便查看</p>
+<p>- 实时状态反馈</p>
+<p>## 依赖库</p>
+<p>- **tkinter**: 图形界面（Python 标准库）</p>
+<p>- 无其他第三方依赖</p>
+<p>## 代码统计</p>
+<p>- **总文件数**: 5 个 Python 文件</p>
+<p>- **总类数**: 13 个类</p>
+<p>- **总函数/方法数**: 约 60 个</p>
+<p>- **代码行数**: 约 2000+ 行</p>
+<p>## 扩展建议</p>
+<p>1. **AI 增强**: 改进 AI 策略，增加难度等级</p>
+<p>2. **网络对战**: 实现多人在线对战</p>
+<p>3. **音效动画**: 添加出牌音效和动画</p>
+<p>4. **记分系统**: 添加积分和排行榜</p>
+<p>5. **牌型提示**: 智能提示可出的牌型组合</p>
+<p>6. **回放功能**: 游戏过程回放</p>
+<p>## 作者说明</p>
+<p>本项目为学习和演示目的开发，展示了完整的游戏开发流程，包括数据结构设计、算法实现、AI 策略和用户界面开发。</p>
+<p>-–</p>
+<p>**最后更新**: 2026-03-01</p>
+<p>**版本**: 1.0</p>
+<p><img src="../uploads/csdn/python%E5%88%B6%E4%BD%9C%E6%96%97%E5%9C%B0%E4%B8%BB%E7%BA%B8%E7%89%8C%E6%B8%B8%E6%88%8F/img-01.png" alt=""></p>
+<p><a href="http://card.py">card.py</a></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-string">&quot;&quot;&quot;
+斗地主游戏 - 卡牌模块
+&quot;&quot;&quot;</span>
+<span class="hljs-keyword">from</span> enum <span class="hljs-keyword">import</span> IntEnum
+<span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> <span class="hljs-type">List</span>, <span class="hljs-type">Tuple</span>, <span class="hljs-type">Optional</span>
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">CardSuit</span>:
+    <span class="hljs-string">&quot;&quot;&quot;卡牌花色&quot;&quot;&quot;</span>
+    NONE = <span class="hljs-string">&quot;&quot;</span>
+    JOKER = <span class="hljs-string">&quot;JOKER&quot;</span>
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">CardRank</span>(<span class="hljs-title class_ inherited__">IntEnum</span>):
+    <span class="hljs-string">&quot;&quot;&quot;卡牌点数&quot;&quot;&quot;</span>
+    THREE = <span class="hljs-number">3</span>
+    FOUR = <span class="hljs-number">4</span>
+    FIVE = <span class="hljs-number">5</span>
+    SIX = <span class="hljs-number">6</span>
+    SEVEN = <span class="hljs-number">7</span>
+    EIGHT = <span class="hljs-number">8</span>
+    NINE = <span class="hljs-number">9</span>
+    TEN = <span class="hljs-number">10</span>
+    JACK = <span class="hljs-number">11</span>
+    QUEEN = <span class="hljs-number">12</span>
+    KING = <span class="hljs-number">13</span>
+    ACE = <span class="hljs-number">14</span>
+    TWO = <span class="hljs-number">15</span>
+    BLACK_JOKER = <span class="hljs-number">16</span>
+    RED_JOKER = <span class="hljs-number">17</span>
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Card</span>:
+    <span class="hljs-string">&quot;&quot;&quot;扑克牌类&quot;&quot;&quot;</span>
+
+    RANK_NAMES = {
+        CardRank.THREE: <span class="hljs-string">&quot;3&quot;</span>,
+        CardRank.FOUR: <span class="hljs-string">&quot;4&quot;</span>,
+        CardRank.FIVE: <span class="hljs-string">&quot;5&quot;</span>,
+        CardRank.SIX: <span class="hljs-string">&quot;6&quot;</span>,
+        CardRank.SEVEN: <span class="hljs-string">&quot;7&quot;</span>,
+        CardRank.EIGHT: <span class="hljs-string">&quot;8&quot;</span>,
+        CardRank.NINE: <span class="hljs-string">&quot;9&quot;</span>,
+        CardRank.TEN: <span class="hljs-string">&quot;10&quot;</span>,
+        CardRank.JACK: <span class="hljs-string">&quot;J&quot;</span>,
+        CardRank.QUEEN: <span class="hljs-string">&quot;Q&quot;</span>,
+        CardRank.KING: <span class="hljs-string">&quot;K&quot;</span>,
+        CardRank.ACE: <span class="hljs-string">&quot;A&quot;</span>,
+        CardRank.TWO: <span class="hljs-string">&quot;2&quot;</span>,
+        CardRank.BLACK_JOKER: <span class="hljs-string">&quot;小王&quot;</span>,
+        CardRank.RED_JOKER: <span class="hljs-string">&quot;大王&quot;</span>,
+    }
+
+    SUIT_SYMBOLS = {
+        <span class="hljs-string">&quot;♠&quot;</span>: <span class="hljs-string">&quot;黑桃&quot;</span>,
+        <span class="hljs-string">&quot;♥&quot;</span>: <span class="hljs-string">&quot;红桃&quot;</span>,
+        <span class="hljs-string">&quot;♣&quot;</span>: <span class="hljs-string">&quot;梅花&quot;</span>,
+        <span class="hljs-string">&quot;♦&quot;</span>: <span class="hljs-string">&quot;方块&quot;</span>,
+    }
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, rank: CardRank, suit: <span class="hljs-built_in">str</span> = <span class="hljs-string">&quot;&quot;</span></span>):
+        <span class="hljs-variable language_">self</span>.rank = rank
+        <span class="hljs-variable language_">self</span>.suit = suit
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__repr__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.rank <span class="hljs-keyword">in</span> (CardRank.BLACK_JOKER, CardRank.RED_JOKER):
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.RANK_NAMES[<span class="hljs-variable language_">self</span>.rank]
+        <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;<span class="hljs-subst">{self.SUIT_SYMBOLS.get(self.suit, self.suit)}</span><span class="hljs-subst">{self.RANK_NAMES[self.rank]}</span>&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__str__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.__repr__()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__eq__</span>(<span class="hljs-params">self, other</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-built_in">isinstance</span>(other, Card):
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.rank == other.rank <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.suit == other.suit
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__hash__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">hash</span>((<span class="hljs-variable language_">self</span>.rank, <span class="hljs-variable language_">self</span>.suit))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__lt__</span>(<span class="hljs-params">self, other</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-built_in">isinstance</span>(other, Card):
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">NotImplemented</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.rank &lt; other.rank
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__gt__</span>(<span class="hljs-params">self, other</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-built_in">isinstance</span>(other, Card):
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">NotImplemented</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.rank &gt; other.rank
+
+<span class="hljs-meta">    @property</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">value</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">int</span>:
+        <span class="hljs-string">&quot;&quot;&quot;返回卡牌的数值，用于比较大小&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.rank)
+
+<span class="hljs-meta">    @classmethod</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">create_deck</span>(<span class="hljs-params">cls</span>) -&gt; <span class="hljs-type">List</span>[<span class="hljs-string">&#x27;Card&#x27;</span>]:
+        <span class="hljs-string">&quot;&quot;&quot;创建一副完整的扑克牌（54张）&quot;&quot;&quot;</span>
+        deck = []
+        suits = [<span class="hljs-string">&quot;♠&quot;</span>, <span class="hljs-string">&quot;♥&quot;</span>, <span class="hljs-string">&quot;♣&quot;</span>, <span class="hljs-string">&quot;♦&quot;</span>]
+
+        <span class="hljs-comment"># 添加普通牌（3到2）</span>
+        <span class="hljs-keyword">for</span> rank <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(CardRank.THREE, CardRank.TWO + <span class="hljs-number">1</span>):
+            <span class="hljs-keyword">for</span> suit <span class="hljs-keyword">in</span> suits:
+                deck.append(cls(CardRank(rank), suit))
+
+        <span class="hljs-comment"># 添加大小王</span>
+        deck.append(cls(CardRank.BLACK_JOKER))
+        deck.append(cls(CardRank.RED_JOKER))
+
+        <span class="hljs-keyword">return</span> deck
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">CardPattern</span>(<span class="hljs-title class_ inherited__">IntEnum</span>):
+    <span class="hljs-string">&quot;&quot;&quot;出牌类型&quot;&quot;&quot;</span>
+    INVALID = <span class="hljs-number">0</span>           <span class="hljs-comment"># 无效</span>
+    SINGLE = <span class="hljs-number">1</span>            <span class="hljs-comment"># 单张</span>
+    PAIR = <span class="hljs-number">2</span>              <span class="hljs-comment"># 对子</span>
+    TRIPLE = <span class="hljs-number">3</span>            <span class="hljs-comment"># 三张</span>
+    TRIPLE_WITH_SINGLE = <span class="hljs-number">4</span>    <span class="hljs-comment"># 三带一</span>
+    TRIPLE_WITH_PAIR = <span class="hljs-number">5</span>      <span class="hljs-comment"># 三带二</span>
+    STRAIGHT = <span class="hljs-number">6</span>          <span class="hljs-comment"># 顺子</span>
+    DOUBLE_STRAIGHT = <span class="hljs-number">7</span>   <span class="hljs-comment"># 连对</span>
+    TRIPLE_STRAIGHT = <span class="hljs-number">8</span>   <span class="hljs-comment"># 飞机（三连张）</span>
+    TRIPLE_STRAIGHT_WITH_SINGLES = <span class="hljs-number">9</span>   <span class="hljs-comment"># 飞机带单</span>
+    TRIPLE_STRAIGHT_WITH_PAIRS = <span class="hljs-number">10</span>    <span class="hljs-comment"># 飞机带对</span>
+    FOUR_WITH_TWO_SINGLES = <span class="hljs-number">11</span>         <span class="hljs-comment"># 四带二</span>
+    FOUR_WITH_TWO_PAIRS = <span class="hljs-number">12</span>           <span class="hljs-comment"># 四带两对</span>
+    BOMB = <span class="hljs-number">13</span>             <span class="hljs-comment"># 炸弹</span>
+    ROCKET = <span class="hljs-number">14</span>           <span class="hljs-comment"># 王炸</span>
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">PlayHand</span>:
+    <span class="hljs-string">&quot;&quot;&quot;出牌手&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, cards: <span class="hljs-type">List</span>[Card]</span>):
+        <span class="hljs-variable language_">self</span>.cards = <span class="hljs-built_in">sorted</span>(cards, key=<span class="hljs-keyword">lambda</span> c: c.value)
+        <span class="hljs-variable language_">self</span>.pattern = <span class="hljs-variable language_">self</span>._identify_pattern()
+        <span class="hljs-variable language_">self</span>.main_value = <span class="hljs-variable language_">self</span>._get_main_value()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_identify_pattern</span>(<span class="hljs-params">self</span>) -&gt; CardPattern:
+        <span class="hljs-string">&quot;&quot;&quot;识别出牌类型&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.cards:
+            <span class="hljs-keyword">return</span> CardPattern.INVALID
+
+        n = <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.cards)
+
+        <span class="hljs-comment"># 王炸</span>
+        <span class="hljs-keyword">if</span> n == <span class="hljs-number">2</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>._is_rocket():
+            <span class="hljs-keyword">return</span> CardPattern.ROCKET
+
+        <span class="hljs-comment"># 单张</span>
+        <span class="hljs-keyword">if</span> n == <span class="hljs-number">1</span>:
+            <span class="hljs-keyword">return</span> CardPattern.SINGLE
+
+        <span class="hljs-comment"># 对子</span>
+        <span class="hljs-keyword">if</span> n == <span class="hljs-number">2</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>._is_pair(<span class="hljs-variable language_">self</span>.cards):
+            <span class="hljs-keyword">return</span> CardPattern.PAIR
+
+        <span class="hljs-comment"># 三张</span>
+        <span class="hljs-keyword">if</span> n == <span class="hljs-number">3</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>._is_triple(<span class="hljs-variable language_">self</span>.cards):
+            <span class="hljs-keyword">return</span> CardPattern.TRIPLE
+
+        <span class="hljs-comment"># 三带一</span>
+        <span class="hljs-keyword">if</span> n == <span class="hljs-number">4</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>._is_triple_with_single():
+            <span class="hljs-keyword">return</span> CardPattern.TRIPLE_WITH_SINGLE
+
+        <span class="hljs-comment"># 炸弹</span>
+        <span class="hljs-keyword">if</span> n == <span class="hljs-number">4</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>._is_bomb():
+            <span class="hljs-keyword">return</span> CardPattern.BOMB
+
+        <span class="hljs-comment"># 三带二</span>
+        <span class="hljs-keyword">if</span> n == <span class="hljs-number">5</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>._is_triple_with_pair():
+            <span class="hljs-keyword">return</span> CardPattern.TRIPLE_WITH_PAIR
+
+        <span class="hljs-comment"># 四带二</span>
+        <span class="hljs-keyword">if</span> n == <span class="hljs-number">6</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>._is_four_with_two_singles():
+            <span class="hljs-keyword">return</span> CardPattern.FOUR_WITH_TWO_SINGLES
+
+        <span class="hljs-comment"># 四带两对</span>
+        <span class="hljs-keyword">if</span> n == <span class="hljs-number">8</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>._is_four_with_two_pairs():
+            <span class="hljs-keyword">return</span> CardPattern.FOUR_WITH_TWO_PAIRS
+
+        <span class="hljs-comment"># 顺子</span>
+        <span class="hljs-keyword">if</span> n &gt;= <span class="hljs-number">5</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>._is_straight():
+            <span class="hljs-keyword">return</span> CardPattern.STRAIGHT
+
+        <span class="hljs-comment"># 连对</span>
+        <span class="hljs-keyword">if</span> n &gt;= <span class="hljs-number">6</span> <span class="hljs-keyword">and</span> n % <span class="hljs-number">2</span> == <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>._is_double_straight():
+            <span class="hljs-keyword">return</span> CardPattern.DOUBLE_STRAIGHT
+
+        <span class="hljs-comment"># 飞机（三连张）</span>
+        <span class="hljs-keyword">if</span> n &gt;= <span class="hljs-number">6</span> <span class="hljs-keyword">and</span> n % <span class="hljs-number">3</span> == <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>._is_triple_straight():
+            <span class="hljs-keyword">return</span> CardPattern.TRIPLE_STRAIGHT
+
+        <span class="hljs-comment"># 飞机带单</span>
+        <span class="hljs-keyword">if</span> n &gt;= <span class="hljs-number">8</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>._is_triple_straight_with_singles():
+            <span class="hljs-keyword">return</span> CardPattern.TRIPLE_STRAIGHT_WITH_SINGLES
+
+        <span class="hljs-comment"># 飞机带对</span>
+        <span class="hljs-keyword">if</span> n &gt;= <span class="hljs-number">10</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>._is_triple_straight_with_pairs():
+            <span class="hljs-keyword">return</span> CardPattern.TRIPLE_STRAIGHT_WITH_PAIRS
+
+        <span class="hljs-keyword">return</span> CardPattern.INVALID
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_is_rocket</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;检查是否是王炸&quot;&quot;&quot;</span>
+        ranks = <span class="hljs-built_in">sorted</span>([c.rank <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards])
+        <span class="hljs-keyword">return</span> ranks == [CardRank.BLACK_JOKER, CardRank.RED_JOKER]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_is_pair</span>(<span class="hljs-params">self, cards: <span class="hljs-type">List</span>[Card]</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;检查是否是对子&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">len</span>(cards) == <span class="hljs-number">2</span> <span class="hljs-keyword">and</span> cards[<span class="hljs-number">0</span>].rank == cards[<span class="hljs-number">1</span>].rank
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_is_triple</span>(<span class="hljs-params">self, cards: <span class="hljs-type">List</span>[Card]</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;检查是否是三张&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">len</span>(cards) == <span class="hljs-number">3</span> <span class="hljs-keyword">and</span> <span class="hljs-built_in">len</span>(<span class="hljs-built_in">set</span>(c.rank <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> cards)) == <span class="hljs-number">1</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_is_bomb</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;检查是否是炸弹&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.cards) == <span class="hljs-number">4</span> <span class="hljs-keyword">and</span> <span class="hljs-built_in">len</span>(<span class="hljs-built_in">set</span>(c.rank <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards)) == <span class="hljs-number">1</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_is_triple_with_single</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;检查是否是三带一&quot;&quot;&quot;</span>
+        ranks = [c.rank <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards]
+        rank_counts = {}
+        <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> ranks:
+            rank_counts[r] = rank_counts.get(r, <span class="hljs-number">0</span>) + <span class="hljs-number">1</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">sorted</span>(rank_counts.values()) == [<span class="hljs-number">1</span>, <span class="hljs-number">3</span>]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_is_triple_with_pair</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;检查是否是三带二&quot;&quot;&quot;</span>
+        ranks = [c.rank <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards]
+        rank_counts = {}
+        <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> ranks:
+            rank_counts[r] = rank_counts.get(r, <span class="hljs-number">0</span>) + <span class="hljs-number">1</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">sorted</span>(rank_counts.values()) == [<span class="hljs-number">2</span>, <span class="hljs-number">3</span>]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_is_four_with_two_singles</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;检查是否是四带二&quot;&quot;&quot;</span>
+        ranks = [c.rank <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards]
+        rank_counts = {}
+        <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> ranks:
+            rank_counts[r] = rank_counts.get(r, <span class="hljs-number">0</span>) + <span class="hljs-number">1</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">sorted</span>(rank_counts.values()) == [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">4</span>]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_is_four_with_two_pairs</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;检查是否是四带两对&quot;&quot;&quot;</span>
+        ranks = [c.rank <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards]
+        rank_counts = {}
+        <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> ranks:
+            rank_counts[r] = rank_counts.get(r, <span class="hljs-number">0</span>) + <span class="hljs-number">1</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">sorted</span>(rank_counts.values()) == [<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_is_straight</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;检查是否是顺子&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.cards) &lt; <span class="hljs-number">5</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        ranks = <span class="hljs-built_in">sorted</span>([c.rank <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards])
+        <span class="hljs-comment"># 顺子不能包含2和王</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">any</span>(r &gt;= CardRank.TWO <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> ranks):
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-comment"># 检查是否连续</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(ranks) - <span class="hljs-number">1</span>):
+            <span class="hljs-keyword">if</span> ranks[i + <span class="hljs-number">1</span>] - ranks[i] != <span class="hljs-number">1</span>:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_is_double_straight</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;检查是否是连对&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.cards) &lt; <span class="hljs-number">6</span> <span class="hljs-keyword">or</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.cards) % <span class="hljs-number">2</span> != <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        ranks = <span class="hljs-built_in">sorted</span>([c.rank <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards])
+        <span class="hljs-comment"># 连对不能包含2和王</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">any</span>(r &gt;= CardRank.TWO <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> ranks):
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-comment"># 检查是否成对且连续</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(ranks), <span class="hljs-number">2</span>):
+            <span class="hljs-keyword">if</span> ranks[i] != ranks[i + <span class="hljs-number">1</span>]:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        unique_ranks = <span class="hljs-built_in">list</span>(<span class="hljs-built_in">dict</span>.fromkeys(ranks))  <span class="hljs-comment"># 保持顺序去重</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(unique_ranks) - <span class="hljs-number">1</span>):
+            <span class="hljs-keyword">if</span> unique_ranks[i + <span class="hljs-number">1</span>] - unique_ranks[i] != <span class="hljs-number">1</span>:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_is_triple_straight</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;检查是否是飞机（三连张）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.cards) &lt; <span class="hljs-number">6</span> <span class="hljs-keyword">or</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.cards) % <span class="hljs-number">3</span> != <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        ranks = <span class="hljs-built_in">sorted</span>([c.rank <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards])
+        <span class="hljs-comment"># 飞机不能包含2和王</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">any</span>(r &gt;= CardRank.TWO <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> ranks):
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-comment"># 检查是否三张且连续</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(ranks), <span class="hljs-number">3</span>):
+            <span class="hljs-keyword">if</span> ranks[i] != ranks[i + <span class="hljs-number">1</span>] <span class="hljs-keyword">or</span> ranks[i] != ranks[i + <span class="hljs-number">2</span>]:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        unique_ranks = <span class="hljs-built_in">list</span>(<span class="hljs-built_in">dict</span>.fromkeys(ranks))
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(unique_ranks) - <span class="hljs-number">1</span>):
+            <span class="hljs-keyword">if</span> unique_ranks[i + <span class="hljs-number">1</span>] - unique_ranks[i] != <span class="hljs-number">1</span>:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_is_triple_straight_with_singles</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;检查是否是飞机带单&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 简化处理：检查是否可以分成飞机和单张</span>
+        rank_counts = {}
+        <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards:
+            rank_counts[c.rank] = rank_counts.get(c.rank, <span class="hljs-number">0</span>) + <span class="hljs-number">1</span>
+
+        <span class="hljs-comment"># 找出三张的部分</span>
+        triple_ranks = [r <span class="hljs-keyword">for</span> r, count <span class="hljs-keyword">in</span> rank_counts.items() <span class="hljs-keyword">if</span> count == <span class="hljs-number">3</span>]
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(triple_ranks) &lt; <span class="hljs-number">2</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+
+        <span class="hljs-comment"># 检查三张是否连续</span>
+        triple_ranks.sort()
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">any</span>(r &gt;= CardRank.TWO <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> triple_ranks):
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(triple_ranks) - <span class="hljs-number">1</span>):
+            <span class="hljs-keyword">if</span> triple_ranks[i + <span class="hljs-number">1</span>] - triple_ranks[i] != <span class="hljs-number">1</span>:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+
+        <span class="hljs-comment"># 检查剩余牌数是否等于飞机长度</span>
+        single_count = <span class="hljs-built_in">sum</span>(<span class="hljs-number">1</span> <span class="hljs-keyword">for</span> r, count <span class="hljs-keyword">in</span> rank_counts.items() <span class="hljs-keyword">if</span> count == <span class="hljs-number">1</span>)
+        pair_count = <span class="hljs-built_in">sum</span>(<span class="hljs-number">1</span> <span class="hljs-keyword">for</span> r, count <span class="hljs-keyword">in</span> rank_counts.items() <span class="hljs-keyword">if</span> count == <span class="hljs-number">2</span>)
+        <span class="hljs-keyword">return</span> single_count + pair_count * <span class="hljs-number">2</span> == <span class="hljs-built_in">len</span>(triple_ranks)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_is_triple_straight_with_pairs</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;检查是否是飞机带对&quot;&quot;&quot;</span>
+        rank_counts = {}
+        <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards:
+            rank_counts[c.rank] = rank_counts.get(c.rank, <span class="hljs-number">0</span>) + <span class="hljs-number">1</span>
+
+        <span class="hljs-comment"># 找出三张的部分</span>
+        triple_ranks = [r <span class="hljs-keyword">for</span> r, count <span class="hljs-keyword">in</span> rank_counts.items() <span class="hljs-keyword">if</span> count == <span class="hljs-number">3</span>]
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(triple_ranks) &lt; <span class="hljs-number">2</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+
+        <span class="hljs-comment"># 检查三张是否连续</span>
+        triple_ranks.sort()
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">any</span>(r &gt;= CardRank.TWO <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> triple_ranks):
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(triple_ranks) - <span class="hljs-number">1</span>):
+            <span class="hljs-keyword">if</span> triple_ranks[i + <span class="hljs-number">1</span>] - triple_ranks[i] != <span class="hljs-number">1</span>:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+
+        <span class="hljs-comment"># 检查对子数量是否等于飞机长度</span>
+        pair_count = <span class="hljs-built_in">sum</span>(<span class="hljs-number">1</span> <span class="hljs-keyword">for</span> r, count <span class="hljs-keyword">in</span> rank_counts.items() <span class="hljs-keyword">if</span> count == <span class="hljs-number">2</span>)
+        <span class="hljs-keyword">return</span> pair_count == <span class="hljs-built_in">len</span>(triple_ranks)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_get_main_value</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">int</span>:
+        <span class="hljs-string">&quot;&quot;&quot;获取主牌值（用于比较大小）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.pattern == CardPattern.INVALID:
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.pattern == CardPattern.ROCKET:
+            <span class="hljs-keyword">return</span> <span class="hljs-number">100</span>
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.pattern == CardPattern.BOMB:
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.cards[<span class="hljs-number">0</span>].value
+
+        rank_counts = {}
+        <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards:
+            rank_counts[c.rank] = rank_counts.get(c.rank, <span class="hljs-number">0</span>) + <span class="hljs-number">1</span>
+
+        <span class="hljs-comment"># 对于带牌的类型，找出主牌（数量最多的）</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.pattern <span class="hljs-keyword">in</span> (CardPattern.TRIPLE_WITH_SINGLE, CardPattern.TRIPLE_WITH_PAIR,
+                           CardPattern.TRIPLE_STRAIGHT, CardPattern.TRIPLE_STRAIGHT_WITH_SINGLES,
+                           CardPattern.TRIPLE_STRAIGHT_WITH_PAIRS):
+            <span class="hljs-comment"># 找出三张的牌</span>
+            triple_ranks = [r <span class="hljs-keyword">for</span> r, count <span class="hljs-keyword">in</span> rank_counts.items() <span class="hljs-keyword">if</span> count &gt;= <span class="hljs-number">3</span>]
+            <span class="hljs-keyword">return</span> <span class="hljs-built_in">max</span>(triple_ranks)
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.pattern <span class="hljs-keyword">in</span> (CardPattern.FOUR_WITH_TWO_SINGLES, CardPattern.FOUR_WITH_TWO_PAIRS):
+            <span class="hljs-keyword">for</span> r, count <span class="hljs-keyword">in</span> rank_counts.items():
+                <span class="hljs-keyword">if</span> count == <span class="hljs-number">4</span>:
+                    <span class="hljs-keyword">return</span> r
+
+        <span class="hljs-comment"># 默认返回最小值</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">min</span>(c.value <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">can_beat</span>(<span class="hljs-params">self, other: <span class="hljs-string">&#x27;PlayHand&#x27;</span></span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;判断是否能压过对方的牌&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.pattern == CardPattern.INVALID:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+
+        <span class="hljs-comment"># 王炸最大</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.pattern == CardPattern.ROCKET:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+
+        <span class="hljs-comment"># 炸弹可以压非炸弹</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.pattern == CardPattern.BOMB:
+            <span class="hljs-keyword">if</span> other.pattern != CardPattern.BOMB:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.main_value &gt; other.main_value
+
+        <span class="hljs-comment"># 非炸弹不能压炸弹</span>
+        <span class="hljs-keyword">if</span> other.pattern == CardPattern.BOMB <span class="hljs-keyword">or</span> other.pattern == CardPattern.ROCKET:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+
+        <span class="hljs-comment"># 类型必须相同</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.pattern != other.pattern:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+
+        <span class="hljs-comment"># 张数必须相同</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.cards) != <span class="hljs-built_in">len</span>(other.cards):
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+
+        <span class="hljs-comment"># 比较主牌值</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.main_value &gt; other.main_value
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__repr__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;<span class="hljs-subst">{self.cards}</span> (<span class="hljs-subst">{self.pattern.name}</span>)&quot;</span>
+</code></pre>
+<p><a href="http://game.py">game.py</a></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-string">&quot;&quot;&quot;
+斗地主游戏 - 游戏主逻辑
+&quot;&quot;&quot;</span>
+<span class="hljs-keyword">import</span> random
+<span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> <span class="hljs-type">List</span>, <span class="hljs-type">Optional</span>, <span class="hljs-type">Tuple</span>
+<span class="hljs-keyword">from</span> card <span class="hljs-keyword">import</span> Card, PlayHand, CardPattern, CardRank
+<span class="hljs-keyword">from</span> player <span class="hljs-keyword">import</span> Player, AIPlayer
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">DouDiZhuGame</span>:
+    <span class="hljs-string">&quot;&quot;&quot;斗地主游戏类&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.players: <span class="hljs-type">List</span>[Player] = []
+        <span class="hljs-variable language_">self</span>.landlord: <span class="hljs-type">Optional</span>[Player] = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.current_player_idx = <span class="hljs-number">0</span>
+        <span class="hljs-variable language_">self</span>.last_play: <span class="hljs-type">Optional</span>[PlayHand] = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.last_player: <span class="hljs-type">Optional</span>[Player] = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.bottom_cards: <span class="hljs-type">List</span>[Card] = []
+        <span class="hljs-variable language_">self</span>.deck: <span class="hljs-type">List</span>[Card] = []
+        <span class="hljs-variable language_">self</span>.game_over = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.winner: <span class="hljs-type">Optional</span>[Player] = <span class="hljs-literal">None</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">init_game</span>(<span class="hljs-params">self, player_name: <span class="hljs-built_in">str</span> = <span class="hljs-string">&quot;玩家&quot;</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;初始化游戏&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 创建玩家</span>
+        <span class="hljs-variable language_">self</span>.players = [
+            Player(player_name, is_ai=<span class="hljs-literal">False</span>),
+            AIPlayer(<span class="hljs-string">&quot;AI-1&quot;</span>),
+            AIPlayer(<span class="hljs-string">&quot;AI-2&quot;</span>)
+        ]
+
+        <span class="hljs-comment"># 创建牌组并洗牌</span>
+        <span class="hljs-variable language_">self</span>.deck = Card.create_deck()
+        random.shuffle(<span class="hljs-variable language_">self</span>.deck)
+
+        <span class="hljs-comment"># 发牌</span>
+        <span class="hljs-variable language_">self</span>._deal_cards()
+
+        <span class="hljs-comment"># 叫地主</span>
+        <span class="hljs-variable language_">self</span>._call_landlord()
+
+        <span class="hljs-comment"># 设置从地主开始</span>
+        <span class="hljs-keyword">for</span> i, player <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(<span class="hljs-variable language_">self</span>.players):
+            <span class="hljs-keyword">if</span> player.is_landlord:
+                <span class="hljs-variable language_">self</span>.current_player_idx = i
+                <span class="hljs-keyword">break</span>
+
+        <span class="hljs-variable language_">self</span>.last_play = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.last_player = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.game_over = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.winner = <span class="hljs-literal">None</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_deal_cards</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;发牌&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 每人17张</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">51</span>):
+            <span class="hljs-variable language_">self</span>.players[i % <span class="hljs-number">3</span>].add_cards([<span class="hljs-variable language_">self</span>.deck[i]])
+
+        <span class="hljs-comment"># 剩余3张作为底牌</span>
+        <span class="hljs-variable language_">self</span>.bottom_cards = <span class="hljs-variable language_">self</span>.deck[<span class="hljs-number">51</span>:]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_call_landlord</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;叫地主流程&quot;&quot;&quot;</span>
+        scores = []
+        current_score = <span class="hljs-number">0</span>
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n=== 叫地主阶段 ===&quot;</span>)
+
+        <span class="hljs-keyword">for</span> i, player <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(<span class="hljs-variable language_">self</span>.players):
+            <span class="hljs-keyword">if</span> player.is_ai:
+                score = player.decide_call_landlord(current_score)
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{player.name}</span> 叫分: <span class="hljs-subst">{score}</span>&quot;</span>)
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-comment"># 人类玩家</span>
+                <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+                    <span class="hljs-keyword">try</span>:
+                        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n你的手牌: <span class="hljs-subst">{player.display_cards()}</span>&quot;</span>)
+                        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;当前最高叫分: <span class="hljs-subst">{current_score}</span>&quot;</span>)
+                        score = <span class="hljs-built_in">int</span>(<span class="hljs-built_in">input</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{player.name}</span>, 请输入叫分 (0-<span class="hljs-subst">{<span class="hljs-number">3</span>}</span>, 必须&gt;<span class="hljs-subst">{current_score}</span>): &quot;</span>))
+                        <span class="hljs-keyword">if</span> <span class="hljs-number">0</span> &lt;= score &lt;= <span class="hljs-number">3</span> <span class="hljs-keyword">and</span> (score &gt; current_score <span class="hljs-keyword">or</span> score == <span class="hljs-number">0</span>):
+                            <span class="hljs-keyword">break</span>
+                        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;输入无效，请重新输入&quot;</span>)
+                    <span class="hljs-keyword">except</span> ValueError:
+                        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;请输入数字&quot;</span>)
+
+            scores.append((i, score))
+            <span class="hljs-keyword">if</span> score &gt; current_score:
+                current_score = score
+
+        <span class="hljs-comment"># 确定地主</span>
+        <span class="hljs-keyword">if</span> current_score == <span class="hljs-number">0</span>:
+            <span class="hljs-comment"># 没人叫地主，重新发牌</span>
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;无人叫地主，重新发牌...&quot;</span>)
+            <span class="hljs-variable language_">self</span>.deck = Card.create_deck()
+            random.shuffle(<span class="hljs-variable language_">self</span>.deck)
+            <span class="hljs-keyword">for</span> player <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.players:
+                player.cards = []
+            <span class="hljs-variable language_">self</span>._deal_cards()
+            <span class="hljs-variable language_">self</span>._call_landlord()
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-comment"># 找出叫分最高的玩家作为地主</span>
+        max_score = <span class="hljs-built_in">max</span>(scores, key=<span class="hljs-keyword">lambda</span> x: x[<span class="hljs-number">1</span>])
+        landlord_idx = max_score[<span class="hljs-number">0</span>]
+        <span class="hljs-variable language_">self</span>.landlord = <span class="hljs-variable language_">self</span>.players[landlord_idx]
+        <span class="hljs-variable language_">self</span>.landlord.is_landlord = <span class="hljs-literal">True</span>
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n<span class="hljs-subst">{self.landlord.name}</span> 成为地主！&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;底牌: <span class="hljs-subst">{<span class="hljs-string">&#x27; &#x27;</span>.join(<span class="hljs-built_in">str</span>(c) <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> self.bottom_cards)}</span>&quot;</span>)
+
+        <span class="hljs-comment"># 地主拿底牌</span>
+        <span class="hljs-variable language_">self</span>.landlord.add_cards(<span class="hljs-variable language_">self</span>.bottom_cards)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{self.landlord.name}</span> 获得底牌后的手牌: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(self.landlord.cards)}</span>张&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">play_turn</span>(<span class="hljs-params">self, selected_indices: <span class="hljs-type">Optional</span>[<span class="hljs-type">List</span>[<span class="hljs-built_in">int</span>]] = <span class="hljs-literal">None</span></span>) -&gt; <span class="hljs-type">Tuple</span>[<span class="hljs-built_in">bool</span>, <span class="hljs-built_in">str</span>]:
+        <span class="hljs-string">&quot;&quot;&quot;
+        执行当前玩家的回合
+        返回: (是否成功, 消息)
+        &quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.game_over:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;游戏已结束&quot;</span>
+
+        player = <span class="hljs-variable language_">self</span>.players[<span class="hljs-variable language_">self</span>.current_player_idx]
+        is_first_play = <span class="hljs-variable language_">self</span>.last_play <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> <span class="hljs-variable language_">self</span>.last_player == player
+
+        <span class="hljs-keyword">if</span> player.is_ai:
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>._ai_play(player, is_first_play)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>._human_play(player, selected_indices, is_first_play)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_ai_play</span>(<span class="hljs-params">self, player: AIPlayer, is_first_play: <span class="hljs-built_in">bool</span></span>) -&gt; <span class="hljs-type">Tuple</span>[<span class="hljs-built_in">bool</span>, <span class="hljs-built_in">str</span>]:
+        <span class="hljs-string">&quot;&quot;&quot;AI玩家出牌&quot;&quot;&quot;</span>
+        cards_to_play = player.play_turn(<span class="hljs-variable language_">self</span>.last_play, is_first_play)
+
+        <span class="hljs-keyword">if</span> cards_to_play <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-comment"># AI选择不出</span>
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{player.name}</span>: 不出&quot;</span>)
+            <span class="hljs-variable language_">self</span>._next_player()
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>, <span class="hljs-string">f&quot;<span class="hljs-subst">{player.name}</span> 不出&quot;</span>
+
+        <span class="hljs-comment"># 验证出牌</span>
+        play_hand = PlayHand(cards_to_play)
+
+        <span class="hljs-keyword">if</span> play_hand.pattern == CardPattern.INVALID:
+            <span class="hljs-comment"># AI不应该出无效牌，重新选择</span>
+            cards_to_play = [player.cards[<span class="hljs-number">0</span>]]
+            play_hand = PlayHand(cards_to_play)
+
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> is_first_play <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.last_play <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> play_hand.can_beat(<span class="hljs-variable language_">self</span>.last_play):
+            <span class="hljs-comment"># AI不应该压不过，选择不出</span>
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{player.name}</span>: 不出&quot;</span>)
+            <span class="hljs-variable language_">self</span>._next_player()
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>, <span class="hljs-string">f&quot;<span class="hljs-subst">{player.name}</span> 不出&quot;</span>
+
+        <span class="hljs-comment"># 执行出牌</span>
+        player.remove_cards(cards_to_play)
+        <span class="hljs-variable language_">self</span>.last_play = play_hand
+        <span class="hljs-variable language_">self</span>.last_player = player
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{player.name}</span>: <span class="hljs-subst">{<span class="hljs-string">&#x27; &#x27;</span>.join(<span class="hljs-built_in">str</span>(c) <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> cards_to_play)}</span> (<span class="hljs-subst">{play_hand.pattern.name}</span>)&quot;</span>)
+
+        <span class="hljs-comment"># 检查是否获胜</span>
+        <span class="hljs-keyword">if</span> player.is_empty():
+            <span class="hljs-variable language_">self</span>.game_over = <span class="hljs-literal">True</span>
+            <span class="hljs-variable language_">self</span>.winner = player
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>, <span class="hljs-string">f&quot;<span class="hljs-subst">{player.name}</span> 获胜！&quot;</span>
+
+        <span class="hljs-variable language_">self</span>._next_player()
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>, <span class="hljs-string">f&quot;<span class="hljs-subst">{player.name}</span> 出了 <span class="hljs-subst">{play_hand.pattern.name}</span>&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_human_play</span>(<span class="hljs-params">self, player: Player, selected_indices: <span class="hljs-type">Optional</span>[<span class="hljs-type">List</span>[<span class="hljs-built_in">int</span>]], is_first_play: <span class="hljs-built_in">bool</span></span>) -&gt; <span class="hljs-type">Tuple</span>[<span class="hljs-built_in">bool</span>, <span class="hljs-built_in">str</span>]:
+        <span class="hljs-string">&quot;&quot;&quot;人类玩家出牌&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> selected_indices <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> <span class="hljs-built_in">len</span>(selected_indices) == <span class="hljs-number">0</span>:
+            <span class="hljs-comment"># 不出</span>
+            <span class="hljs-keyword">if</span> is_first_play:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;第一手必须出牌&quot;</span>
+
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{player.name}</span>: 不出&quot;</span>)
+            <span class="hljs-variable language_">self</span>._next_player()
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>, <span class="hljs-string">f&quot;<span class="hljs-subst">{player.name}</span> 不出&quot;</span>
+
+        <span class="hljs-comment"># 获取选中的牌</span>
+        <span class="hljs-keyword">try</span>:
+            selected_cards = [player.cards[i] <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> selected_indices]
+        <span class="hljs-keyword">except</span> IndexError:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;选择的牌索引无效&quot;</span>
+
+        <span class="hljs-comment"># 验证是否拥有这些牌</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> player.has_cards(selected_cards):
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;你没有这些牌&quot;</span>
+
+        <span class="hljs-comment"># 验证出牌类型</span>
+        play_hand = PlayHand(selected_cards)
+
+        <span class="hljs-keyword">if</span> play_hand.pattern == CardPattern.INVALID:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;无效的牌型&quot;</span>
+
+        <span class="hljs-comment"># 验证是否能压过上家</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> is_first_play <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.last_play:
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> play_hand.can_beat(<span class="hljs-variable language_">self</span>.last_play):
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;无法压过上家的牌&quot;</span>
+
+        <span class="hljs-comment"># 执行出牌</span>
+        player.remove_cards(selected_cards)
+        <span class="hljs-variable language_">self</span>.last_play = play_hand
+        <span class="hljs-variable language_">self</span>.last_player = player
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{player.name}</span>: <span class="hljs-subst">{<span class="hljs-string">&#x27; &#x27;</span>.join(<span class="hljs-built_in">str</span>(c) <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> selected_cards)}</span> (<span class="hljs-subst">{play_hand.pattern.name}</span>)&quot;</span>)
+
+        <span class="hljs-comment"># 检查是否获胜</span>
+        <span class="hljs-keyword">if</span> player.is_empty():
+            <span class="hljs-variable language_">self</span>.game_over = <span class="hljs-literal">True</span>
+            <span class="hljs-variable language_">self</span>.winner = player
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>, <span class="hljs-string">f&quot;<span class="hljs-subst">{player.name}</span> 获胜！&quot;</span>
+
+        <span class="hljs-variable language_">self</span>._next_player()
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>, <span class="hljs-string">f&quot;<span class="hljs-subst">{player.name}</span> 出了 <span class="hljs-subst">{play_hand.pattern.name}</span>&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_next_player</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;切换到下一个玩家&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.current_player_idx = (<span class="hljs-variable language_">self</span>.current_player_idx + <span class="hljs-number">1</span>) % <span class="hljs-number">3</span>
+
+        <span class="hljs-comment"># 如果回到最后出牌的玩家，清空场上牌</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.last_player <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.players[<span class="hljs-variable language_">self</span>.current_player_idx] == <span class="hljs-variable language_">self</span>.last_player:
+            <span class="hljs-variable language_">self</span>.last_play = <span class="hljs-literal">None</span>
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n=== 新一轮开始 ===&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_current_player</span>(<span class="hljs-params">self</span>) -&gt; Player:
+        <span class="hljs-string">&quot;&quot;&quot;获取当前玩家&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.players[<span class="hljs-variable language_">self</span>.current_player_idx]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_game_state</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">dict</span>:
+        <span class="hljs-string">&quot;&quot;&quot;获取游戏状态&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">return</span> {
+            <span class="hljs-string">&#x27;current_player&#x27;</span>: <span class="hljs-variable language_">self</span>.get_current_player(),
+            <span class="hljs-string">&#x27;last_play&#x27;</span>: <span class="hljs-variable language_">self</span>.last_play,
+            <span class="hljs-string">&#x27;last_player&#x27;</span>: <span class="hljs-variable language_">self</span>.last_player,
+            <span class="hljs-string">&#x27;game_over&#x27;</span>: <span class="hljs-variable language_">self</span>.game_over,
+            <span class="hljs-string">&#x27;winner&#x27;</span>: <span class="hljs-variable language_">self</span>.winner,
+            <span class="hljs-string">&#x27;players&#x27;</span>: <span class="hljs-variable language_">self</span>.players,
+            <span class="hljs-string">&#x27;landlord&#x27;</span>: <span class="hljs-variable language_">self</span>.landlord
+        }
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">check_winner</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-type">Optional</span>[Player]:
+        <span class="hljs-string">&quot;&quot;&quot;检查是否有获胜者&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">for</span> player <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.players:
+            <span class="hljs-keyword">if</span> player.is_empty():
+                <span class="hljs-keyword">return</span> player
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">parse_card_indices</span>(<span class="hljs-params">input_str: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-type">List</span>[<span class="hljs-built_in">int</span>]:
+    <span class="hljs-string">&quot;&quot;&quot;解析用户输入的牌索引&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> input_str.strip():
+        <span class="hljs-keyword">return</span> []
+
+    <span class="hljs-keyword">try</span>:
+        indices = [<span class="hljs-built_in">int</span>(x.strip()) <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> input_str.split(<span class="hljs-string">&#x27;,&#x27;</span>)]
+        <span class="hljs-keyword">return</span> indices
+    <span class="hljs-keyword">except</span> ValueError:
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    game = DouDiZhuGame()
+    game.init_game()
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n=== 游戏开始 ===&quot;</span>)
+
+    <span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> game.game_over:
+        current = game.get_current_player()
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n<span class="hljs-subst">{<span class="hljs-string">&#x27;=&#x27;</span>*<span class="hljs-number">30</span>}</span>&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;当前玩家: <span class="hljs-subst">{current}</span>&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;你的手牌: <span class="hljs-subst">{current.display_cards()}</span>&quot;</span>)
+
+        <span class="hljs-keyword">if</span> game.last_play:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;场上牌: <span class="hljs-subst">{<span class="hljs-string">&#x27; &#x27;</span>.join(<span class="hljs-built_in">str</span>(c) <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> game.last_play.cards)}</span> (<span class="hljs-subst">{game.last_play.pattern.name}</span>)&quot;</span>)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;场上牌: 无&quot;</span>)
+
+        <span class="hljs-keyword">if</span> current.is_ai:
+            game.play_turn()
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+                user_input = <span class="hljs-built_in">input</span>(<span class="hljs-string">&quot;请输入要出的牌索引（逗号分隔，直接回车表示不出）: &quot;</span>)
+                indices = parse_card_indices(user_input)
+
+                <span class="hljs-keyword">if</span> indices <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+                    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;输入格式错误，请重新输入&quot;</span>)
+                    <span class="hljs-keyword">continue</span>
+
+                success, msg = game.play_turn(indices)
+                <span class="hljs-built_in">print</span>(msg)
+
+                <span class="hljs-keyword">if</span> success:
+                    <span class="hljs-keyword">break</span>
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n=== 游戏结束 ===&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;获胜者: <span class="hljs-subst">{game.winner}</span>&quot;</span>)
+
+    <span class="hljs-keyword">if</span> game.winner.is_landlord:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;地主获胜！&quot;</span>)
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;农民获胜！&quot;</span>)
+</code></pre>
+<p><a href="http://gui.py">gui.py</a></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-string">&quot;&quot;&quot;
+斗地主游戏 - 图形界面（改进版）
+&quot;&quot;&quot;</span>
+<span class="hljs-keyword">import</span> tkinter <span class="hljs-keyword">as</span> tk
+<span class="hljs-keyword">from</span> tkinter <span class="hljs-keyword">import</span> messagebox, ttk
+<span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> <span class="hljs-type">List</span>, <span class="hljs-type">Optional</span>, <span class="hljs-type">Callable</span>
+<span class="hljs-keyword">import</span> random
+
+<span class="hljs-keyword">from</span> card <span class="hljs-keyword">import</span> Card, PlayHand, CardPattern, CardRank
+<span class="hljs-keyword">from</span> player <span class="hljs-keyword">import</span> Player, AIPlayer
+<span class="hljs-keyword">from</span> game <span class="hljs-keyword">import</span> DouDiZhuGame
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">CardButton</span>(tk.Canvas):
+    <span class="hljs-string">&quot;&quot;&quot;卡牌按钮组件 - 缩小版&quot;&quot;&quot;</span>
+
+    SUIT_COLORS = {
+        <span class="hljs-string">&quot;♠&quot;</span>: <span class="hljs-string">&quot;black&quot;</span>,
+        <span class="hljs-string">&quot;♥&quot;</span>: <span class="hljs-string">&quot;red&quot;</span>,
+        <span class="hljs-string">&quot;♣&quot;</span>: <span class="hljs-string">&quot;black&quot;</span>,
+        <span class="hljs-string">&quot;♦&quot;</span>: <span class="hljs-string">&quot;red&quot;</span>,
+    }
+
+    BG_NORMAL = <span class="hljs-string">&quot;white&quot;</span>
+    BG_SELECTED = <span class="hljs-string">&quot;#FFE4B5&quot;</span>
+    BG_HOVER = <span class="hljs-string">&quot;#E8E8E8&quot;</span>
+
+    CARD_WIDTH = <span class="hljs-number">60</span>
+    CARD_HEIGHT = <span class="hljs-number">90</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, parent, card: Card, index: <span class="hljs-built_in">int</span>, click_callback: <span class="hljs-type">Callable</span>, **kwargs</span>):
+        <span class="hljs-built_in">super</span>().__init__(parent, width=<span class="hljs-variable language_">self</span>.CARD_WIDTH, height=<span class="hljs-variable language_">self</span>.CARD_HEIGHT,
+                        bg=<span class="hljs-variable language_">self</span>.BG_NORMAL, highlightthickness=<span class="hljs-number">1</span>,
+                        highlightbackground=<span class="hljs-string">&quot;#333&quot;</span>, cursor=<span class="hljs-string">&quot;hand2&quot;</span>, **kwargs)
+
+        <span class="hljs-variable language_">self</span>.card = card
+        <span class="hljs-variable language_">self</span>.index = index
+        <span class="hljs-variable language_">self</span>.click_callback = click_callback
+        <span class="hljs-variable language_">self</span>.selected = <span class="hljs-literal">False</span>
+
+        <span class="hljs-variable language_">self</span>._draw_card()
+
+        <span class="hljs-variable language_">self</span>.bind(<span class="hljs-string">&quot;&lt;Button-1&gt;&quot;</span>, <span class="hljs-variable language_">self</span>._on_click)
+        <span class="hljs-variable language_">self</span>.bind(<span class="hljs-string">&quot;&lt;Enter&gt;&quot;</span>, <span class="hljs-variable language_">self</span>._on_enter)
+        <span class="hljs-variable language_">self</span>.bind(<span class="hljs-string">&quot;&lt;Leave&gt;&quot;</span>, <span class="hljs-variable language_">self</span>._on_leave)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_draw_card</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;绘制卡牌&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.delete(<span class="hljs-string">&quot;all&quot;</span>)
+
+        <span class="hljs-comment"># 背景</span>
+        bg_color = <span class="hljs-variable language_">self</span>.BG_SELECTED <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.selected <span class="hljs-keyword">else</span> <span class="hljs-variable language_">self</span>.BG_NORMAL
+        <span class="hljs-variable language_">self</span>.create_rectangle(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-variable language_">self</span>.CARD_WIDTH-<span class="hljs-number">2</span>, <span class="hljs-variable language_">self</span>.CARD_HEIGHT-<span class="hljs-number">2</span>,
+                             fill=bg_color, outline=<span class="hljs-string">&quot;#333&quot;</span>, width=<span class="hljs-number">2</span>)
+
+        is_joker = <span class="hljs-variable language_">self</span>.card.rank <span class="hljs-keyword">in</span> (CardRank.BLACK_JOKER, CardRank.RED_JOKER)
+
+        <span class="hljs-keyword">if</span> is_joker:
+            color = <span class="hljs-string">&quot;red&quot;</span> <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.card.rank == CardRank.RED_JOKER <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;black&quot;</span>
+            text = <span class="hljs-string">&quot;大王&quot;</span> <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.card.rank == CardRank.RED_JOKER <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;小王&quot;</span>
+            <span class="hljs-variable language_">self</span>.create_text(<span class="hljs-variable language_">self</span>.CARD_WIDTH/<span class="hljs-number">2</span>, <span class="hljs-variable language_">self</span>.CARD_HEIGHT/<span class="hljs-number">2</span>-<span class="hljs-number">10</span>,
+                           text=text, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">10</span>, <span class="hljs-string">&quot;bold&quot;</span>), fill=color)
+            <span class="hljs-variable language_">self</span>.create_text(<span class="hljs-variable language_">self</span>.CARD_WIDTH/<span class="hljs-number">2</span>, <span class="hljs-variable language_">self</span>.CARD_HEIGHT/<span class="hljs-number">2</span>+<span class="hljs-number">15</span>,
+                           text=<span class="hljs-string">&quot;🃏&quot;</span>, font=(<span class="hljs-string">&quot;Arial&quot;</span>, <span class="hljs-number">18</span>))
+        <span class="hljs-keyword">else</span>:
+            color = <span class="hljs-variable language_">self</span>.SUIT_COLORS.get(<span class="hljs-variable language_">self</span>.card.suit, <span class="hljs-string">&quot;black&quot;</span>)
+            rank_text = Card.RANK_NAMES[<span class="hljs-variable language_">self</span>.card.rank]
+            suit_text = <span class="hljs-variable language_">self</span>.card.suit
+
+            <span class="hljs-comment"># 左上角</span>
+            <span class="hljs-variable language_">self</span>.create_text(<span class="hljs-number">10</span>, <span class="hljs-number">12</span>, text=rank_text, font=(<span class="hljs-string">&quot;Arial&quot;</span>, <span class="hljs-number">11</span>, <span class="hljs-string">&quot;bold&quot;</span>), fill=color)
+            <span class="hljs-variable language_">self</span>.create_text(<span class="hljs-number">10</span>, <span class="hljs-number">26</span>, text=suit_text, font=(<span class="hljs-string">&quot;Arial&quot;</span>, <span class="hljs-number">10</span>), fill=color)
+
+            <span class="hljs-comment"># 中央</span>
+            <span class="hljs-variable language_">self</span>.create_text(<span class="hljs-variable language_">self</span>.CARD_WIDTH/<span class="hljs-number">2</span>, <span class="hljs-variable language_">self</span>.CARD_HEIGHT/<span class="hljs-number">2</span>+<span class="hljs-number">5</span>,
+                           text=suit_text, font=(<span class="hljs-string">&quot;Arial&quot;</span>, <span class="hljs-number">28</span>), fill=color)
+
+            <span class="hljs-comment"># 右下角</span>
+            <span class="hljs-variable language_">self</span>.create_text(<span class="hljs-variable language_">self</span>.CARD_WIDTH-<span class="hljs-number">10</span>, <span class="hljs-variable language_">self</span>.CARD_HEIGHT-<span class="hljs-number">26</span>,
+                           text=rank_text, font=(<span class="hljs-string">&quot;Arial&quot;</span>, <span class="hljs-number">11</span>, <span class="hljs-string">&quot;bold&quot;</span>), fill=color)
+            <span class="hljs-variable language_">self</span>.create_text(<span class="hljs-variable language_">self</span>.CARD_WIDTH-<span class="hljs-number">10</span>, <span class="hljs-variable language_">self</span>.CARD_HEIGHT-<span class="hljs-number">12</span>,
+                           text=suit_text, font=(<span class="hljs-string">&quot;Arial&quot;</span>, <span class="hljs-number">10</span>), fill=color)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_on_click</span>(<span class="hljs-params">self, event</span>):
+        <span class="hljs-variable language_">self</span>.selected = <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.selected
+        <span class="hljs-variable language_">self</span>._draw_card()
+        <span class="hljs-variable language_">self</span>.click_callback(<span class="hljs-variable language_">self</span>.index, <span class="hljs-variable language_">self</span>.selected)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_on_enter</span>(<span class="hljs-params">self, event</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.selected:
+            <span class="hljs-variable language_">self</span>.config(bg=<span class="hljs-variable language_">self</span>.BG_HOVER)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_on_leave</span>(<span class="hljs-params">self, event</span>):
+        <span class="hljs-variable language_">self</span>.config(bg=<span class="hljs-variable language_">self</span>.BG_NORMAL)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">set_selected</span>(<span class="hljs-params">self, selected: <span class="hljs-built_in">bool</span></span>):
+        <span class="hljs-variable language_">self</span>.selected = selected
+        <span class="hljs-variable language_">self</span>._draw_card()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">deselect</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.selected = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>._draw_card()
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">PlayerPanel</span>(tk.Frame):
+    <span class="hljs-string">&quot;&quot;&quot;玩家面板&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, parent, player: Player, **kwargs</span>):
+        <span class="hljs-built_in">super</span>().__init__(parent, **kwargs)
+        <span class="hljs-variable language_">self</span>.player = player
+        <span class="hljs-variable language_">self</span>._setup_ui()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_setup_ui</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.info_label = tk.Label(<span class="hljs-variable language_">self</span>, text=<span class="hljs-string">&quot;&quot;</span>, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">11</span>),
+                                  bg=<span class="hljs-string">&quot;#34495E&quot;</span>, fg=<span class="hljs-string">&quot;white&quot;</span>,
+                                  justify=<span class="hljs-string">&quot;center&quot;</span>, padx=<span class="hljs-number">15</span>, pady=<span class="hljs-number">10</span>,
+                                  relief=<span class="hljs-string">&quot;ridge&quot;</span>, bd=<span class="hljs-number">2</span>)
+        <span class="hljs-variable language_">self</span>.info_label.pack()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update_info</span>(<span class="hljs-params">self</span>):
+        role_text = <span class="hljs-string">&quot;👑 地主&quot;</span> <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.player.is_landlord <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;🧑‍🌾 农民&quot;</span>
+        count = <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.player.cards)
+        status = <span class="hljs-string">&quot;✓ 出完&quot;</span> <span class="hljs-keyword">if</span> count == <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> <span class="hljs-string">f&quot;<span class="hljs-subst">{count}</span> 张&quot;</span>
+        <span class="hljs-variable language_">self</span>.info_label.config(text=<span class="hljs-string">f&quot;<span class="hljs-subst">{self.player.name}</span>\n<span class="hljs-subst">{role_text}</span>\n<span class="hljs-subst">{status}</span>&quot;</span>)
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">GameTable</span>(tk.Canvas):
+    <span class="hljs-string">&quot;&quot;&quot;游戏桌面 - 显示当前出牌&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, parent, **kwargs</span>):
+        <span class="hljs-built_in">super</span>().__init__(parent, width=<span class="hljs-number">500</span>, height=<span class="hljs-number">200</span>, bg=<span class="hljs-string">&quot;#1E8449&quot;</span>,
+                        highlightthickness=<span class="hljs-number">2</span>, highlightbackground=<span class="hljs-string">&quot;#145A32&quot;</span>, **kwargs)
+
+        <span class="hljs-variable language_">self</span>.current_cards: <span class="hljs-type">List</span>[Card] = []
+        <span class="hljs-variable language_">self</span>.current_player = <span class="hljs-string">&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>._draw_table()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_draw_table</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.delete(<span class="hljs-string">&quot;all&quot;</span>)
+        <span class="hljs-comment"># 桌面背景</span>
+        <span class="hljs-variable language_">self</span>.create_oval(<span class="hljs-number">100</span>, <span class="hljs-number">30</span>, <span class="hljs-number">400</span>, <span class="hljs-number">170</span>, fill=<span class="hljs-string">&quot;#27AE60&quot;</span>, outline=<span class="hljs-string">&quot;#1E8449&quot;</span>, width=<span class="hljs-number">2</span>)
+        <span class="hljs-variable language_">self</span>.create_text(<span class="hljs-number">250</span>, <span class="hljs-number">15</span>, text=<span class="hljs-string">&quot;当前出牌&quot;</span>, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">12</span>, <span class="hljs-string">&quot;bold&quot;</span>), fill=<span class="hljs-string">&quot;white&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">show_play</span>(<span class="hljs-params">self, cards: <span class="hljs-type">List</span>[Card], player_name: <span class="hljs-built_in">str</span>, pattern_name: <span class="hljs-built_in">str</span> = <span class="hljs-string">&quot;&quot;</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;显示出的牌&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.current_cards = cards
+        <span class="hljs-variable language_">self</span>.current_player = player_name
+
+        <span class="hljs-variable language_">self</span>._draw_table()
+
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> cards:
+            <span class="hljs-variable language_">self</span>.create_text(<span class="hljs-number">250</span>, <span class="hljs-number">100</span>, text=<span class="hljs-string">&quot;等待出牌...&quot;</span>,
+                           font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">14</span>), fill=<span class="hljs-string">&quot;#CCCCCC&quot;</span>, tags=<span class="hljs-string">&quot;cards&quot;</span>)
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-comment"># 显示玩家名和牌型</span>
+        pattern_text = <span class="hljs-string">f&quot; (<span class="hljs-subst">{pattern_name}</span>)&quot;</span> <span class="hljs-keyword">if</span> pattern_name <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.create_text(<span class="hljs-number">250</span>, <span class="hljs-number">50</span>, text=<span class="hljs-string">f&quot;<span class="hljs-subst">{player_name}</span><span class="hljs-subst">{pattern_text}</span>&quot;</span>,
+                        font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">11</span>), fill=<span class="hljs-string">&quot;white&quot;</span>, tags=<span class="hljs-string">&quot;cards&quot;</span>)
+
+        <span class="hljs-comment"># 显示卡牌</span>
+        card_width = <span class="hljs-number">40</span>
+        card_height = <span class="hljs-number">56</span>
+        overlap = <span class="hljs-number">25</span>  <span class="hljs-comment"># 重叠显示</span>
+        total_width = <span class="hljs-built_in">len</span>(cards) * overlap + (card_width - overlap)
+        start_x = <span class="hljs-number">250</span> - total_width / <span class="hljs-number">2</span>
+        y = <span class="hljs-number">115</span>
+
+        <span class="hljs-keyword">for</span> i, card <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(cards):
+            x = start_x + i * overlap
+            <span class="hljs-variable language_">self</span>._draw_mini_card(x, y, card)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_draw_mini_card</span>(<span class="hljs-params">self, x: <span class="hljs-built_in">float</span>, y: <span class="hljs-built_in">float</span>, card: Card</span>):
+        card_width = <span class="hljs-number">40</span>
+        card_height = <span class="hljs-number">56</span>
+
+        is_joker = card.rank <span class="hljs-keyword">in</span> (CardRank.BLACK_JOKER, CardRank.RED_JOKER)
+        color = <span class="hljs-string">&quot;red&quot;</span> <span class="hljs-keyword">if</span> is_joker <span class="hljs-keyword">or</span> card.suit <span class="hljs-keyword">in</span> (<span class="hljs-string">&quot;♥&quot;</span>, <span class="hljs-string">&quot;♦&quot;</span>) <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;black&quot;</span>
+
+        <span class="hljs-comment"># 阴影</span>
+        <span class="hljs-variable language_">self</span>.create_rectangle(x+<span class="hljs-number">2</span>, y+<span class="hljs-number">2</span>, x+card_width+<span class="hljs-number">2</span>, y+card_height+<span class="hljs-number">2</span>,
+                             fill=<span class="hljs-string">&quot;#000000&quot;</span>, stipple=<span class="hljs-string">&quot;gray50&quot;</span>, tags=<span class="hljs-string">&quot;cards&quot;</span>)
+
+        <span class="hljs-comment"># 卡牌背景</span>
+        <span class="hljs-variable language_">self</span>.create_rectangle(x, y, x+card_width, y+card_height,
+                             fill=<span class="hljs-string">&quot;white&quot;</span>, outline=<span class="hljs-string">&quot;#333&quot;</span>, tags=<span class="hljs-string">&quot;cards&quot;</span>)
+
+        <span class="hljs-keyword">if</span> is_joker:
+            text = <span class="hljs-string">&quot;大王&quot;</span> <span class="hljs-keyword">if</span> card.rank == CardRank.RED_JOKER <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;小王&quot;</span>
+            <span class="hljs-variable language_">self</span>.create_text(x+card_width/<span class="hljs-number">2</span>, y+card_height/<span class="hljs-number">2</span>, text=text,
+                           font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">8</span>), fill=color, tags=<span class="hljs-string">&quot;cards&quot;</span>)
+        <span class="hljs-keyword">else</span>:
+            rank_text = Card.RANK_NAMES[card.rank]
+            suit_text = card.suit
+            <span class="hljs-variable language_">self</span>.create_text(x+<span class="hljs-number">8</span>, y+<span class="hljs-number">12</span>, text=rank_text,
+                           font=(<span class="hljs-string">&quot;Arial&quot;</span>, <span class="hljs-number">9</span>, <span class="hljs-string">&quot;bold&quot;</span>), fill=color, tags=<span class="hljs-string">&quot;cards&quot;</span>)
+            <span class="hljs-variable language_">self</span>.create_text(x+<span class="hljs-number">8</span>, y+<span class="hljs-number">24</span>, text=suit_text,
+                           font=(<span class="hljs-string">&quot;Arial&quot;</span>, <span class="hljs-number">8</span>), fill=color, tags=<span class="hljs-string">&quot;cards&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">clear</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.show_play([], <span class="hljs-string">&quot;&quot;</span>)
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">HistoryPanel</span>(tk.Frame):
+    <span class="hljs-string">&quot;&quot;&quot;出牌历史记录面板&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, parent, **kwargs</span>):
+        <span class="hljs-built_in">super</span>().__init__(parent, **kwargs)
+
+        <span class="hljs-comment"># 标题</span>
+        tk.Label(<span class="hljs-variable language_">self</span>, text=<span class="hljs-string">&quot;📜 出牌记录&quot;</span>, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">12</span>, <span class="hljs-string">&quot;bold&quot;</span>),
+                bg=<span class="hljs-string">&quot;#2C3E50&quot;</span>, fg=<span class="hljs-string">&quot;white&quot;</span>).pack(fill=tk.X, pady=<span class="hljs-number">5</span>)
+
+        <span class="hljs-comment"># 滚动文本框</span>
+        <span class="hljs-variable language_">self</span>.text_widget = tk.Text(<span class="hljs-variable language_">self</span>, width=<span class="hljs-number">25</span>, height=<span class="hljs-number">20</span>, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">10</span>),
+                                   bg=<span class="hljs-string">&quot;#ECF0F1&quot;</span>, fg=<span class="hljs-string">&quot;#2C3E50&quot;</span>,
+                                   relief=<span class="hljs-string">&quot;sunken&quot;</span>, bd=<span class="hljs-number">2</span>,
+                                   wrap=tk.WORD)
+        <span class="hljs-variable language_">self</span>.text_widget.pack(fill=tk.BOTH, expand=<span class="hljs-literal">True</span>, padx=<span class="hljs-number">5</span>, pady=<span class="hljs-number">5</span>)
+
+        <span class="hljs-comment"># 滚动条</span>
+        scrollbar = ttk.Scrollbar(<span class="hljs-variable language_">self</span>, command=<span class="hljs-variable language_">self</span>.text_widget.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        <span class="hljs-variable language_">self</span>.text_widget.config(yscrollcommand=scrollbar.<span class="hljs-built_in">set</span>)
+
+        <span class="hljs-comment"># 标签样式</span>
+        <span class="hljs-variable language_">self</span>.text_widget.tag_config(<span class="hljs-string">&quot;landlord&quot;</span>, foreground=<span class="hljs-string">&quot;#E74C3C&quot;</span>, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">10</span>, <span class="hljs-string">&quot;bold&quot;</span>))
+        <span class="hljs-variable language_">self</span>.text_widget.tag_config(<span class="hljs-string">&quot;farmer&quot;</span>, foreground=<span class="hljs-string">&quot;#3498DB&quot;</span>, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">10</span>, <span class="hljs-string">&quot;bold&quot;</span>))
+        <span class="hljs-variable language_">self</span>.text_widget.tag_config(<span class="hljs-string">&quot;pass&quot;</span>, foreground=<span class="hljs-string">&quot;#7F8C8D&quot;</span>, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">10</span>, <span class="hljs-string">&quot;italic&quot;</span>))
+        <span class="hljs-variable language_">self</span>.text_widget.tag_config(<span class="hljs-string">&quot;round&quot;</span>, foreground=<span class="hljs-string">&quot;#27AE60&quot;</span>, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">10</span>, <span class="hljs-string">&quot;bold&quot;</span>))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">add_record</span>(<span class="hljs-params">self, player_name: <span class="hljs-built_in">str</span>, is_landlord: <span class="hljs-built_in">bool</span>,
+                   cards: <span class="hljs-type">List</span>[Card], pattern_name: <span class="hljs-built_in">str</span> = <span class="hljs-string">&quot;&quot;</span>, is_pass: <span class="hljs-built_in">bool</span> = <span class="hljs-literal">False</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;添加记录&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> is_pass:
+            tag = <span class="hljs-string">&quot;pass&quot;</span>
+            text = <span class="hljs-string">f&quot;<span class="hljs-subst">{player_name}</span>: 不出\n&quot;</span>
+        <span class="hljs-keyword">else</span>:
+            tag = <span class="hljs-string">&quot;landlord&quot;</span> <span class="hljs-keyword">if</span> is_landlord <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;farmer&quot;</span>
+            cards_str = <span class="hljs-string">&quot; &quot;</span>.join(<span class="hljs-built_in">str</span>(c) <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> cards)
+            pattern_text = <span class="hljs-string">f&quot; [<span class="hljs-subst">{pattern_name}</span>]&quot;</span> <span class="hljs-keyword">if</span> pattern_name <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;&quot;</span>
+            text = <span class="hljs-string">f&quot;<span class="hljs-subst">{player_name}</span><span class="hljs-subst">{pattern_text}</span>:\n<span class="hljs-subst">{cards_str}</span>\n&quot;</span>
+
+        <span class="hljs-variable language_">self</span>.text_widget.insert(tk.END, text, tag)
+        <span class="hljs-variable language_">self</span>.text_widget.see(tk.END)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">add_round_separator</span>(<span class="hljs-params">self, round_num: <span class="hljs-built_in">int</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;添加回合分隔线&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.text_widget.insert(tk.END, <span class="hljs-string">f&quot;\n=== 第<span class="hljs-subst">{round_num}</span>轮 ===\n&quot;</span>, <span class="hljs-string">&quot;round&quot;</span>)
+        <span class="hljs-variable language_">self</span>.text_widget.see(tk.END)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">clear</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;清空记录&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.text_widget.delete(<span class="hljs-number">1.0</span>, tk.END)
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">DouDiZhuGUI</span>:
+    <span class="hljs-string">&quot;&quot;&quot;斗地主图形界面主类&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.root = tk.Tk()
+        <span class="hljs-variable language_">self</span>.root.title(<span class="hljs-string">&quot;斗地主 - 图形版&quot;</span>)
+        <span class="hljs-variable language_">self</span>.root.geometry(<span class="hljs-string">&quot;1400x900&quot;</span>)
+        <span class="hljs-variable language_">self</span>.root.config(bg=<span class="hljs-string">&quot;#1A252F&quot;</span>)
+        <span class="hljs-variable language_">self</span>.root.minsize(<span class="hljs-number">1200</span>, <span class="hljs-number">800</span>)
+
+        <span class="hljs-variable language_">self</span>.game: <span class="hljs-type">Optional</span>[DouDiZhuGame] = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.selected_indices: <span class="hljs-built_in">set</span> = <span class="hljs-built_in">set</span>()
+        <span class="hljs-variable language_">self</span>.card_buttons: <span class="hljs-type">List</span>[CardButton] = []
+        <span class="hljs-variable language_">self</span>.player_panels: <span class="hljs-built_in">dict</span> = {}
+        <span class="hljs-variable language_">self</span>.is_player_turn = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.round_count = <span class="hljs-number">1</span>
+
+        <span class="hljs-variable language_">self</span>._create_widgets()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_create_widgets</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;创建界面组件&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 主框架</span>
+        <span class="hljs-variable language_">self</span>.main_frame = tk.Frame(<span class="hljs-variable language_">self</span>.root, bg=<span class="hljs-string">&quot;#1A252F&quot;</span>)
+        <span class="hljs-variable language_">self</span>.main_frame.pack(fill=tk.BOTH, expand=<span class="hljs-literal">True</span>, padx=<span class="hljs-number">10</span>, pady=<span class="hljs-number">10</span>)
+
+        <span class="hljs-comment"># 顶部信息栏</span>
+        <span class="hljs-variable language_">self</span>._create_top_bar()
+
+        <span class="hljs-comment"># 中间区域（左中右布局）</span>
+        <span class="hljs-variable language_">self</span>.center_area = tk.Frame(<span class="hljs-variable language_">self</span>.main_frame, bg=<span class="hljs-string">&quot;#1A252F&quot;</span>)
+        <span class="hljs-variable language_">self</span>.center_area.pack(fill=tk.BOTH, expand=<span class="hljs-literal">True</span>, pady=<span class="hljs-number">10</span>)
+
+        <span class="hljs-comment"># 左侧玩家面板</span>
+        <span class="hljs-variable language_">self</span>.left_frame = tk.Frame(<span class="hljs-variable language_">self</span>.center_area, bg=<span class="hljs-string">&quot;#1A252F&quot;</span>, width=<span class="hljs-number">120</span>)
+        <span class="hljs-variable language_">self</span>.left_frame.pack(side=tk.LEFT, fill=tk.Y, padx=<span class="hljs-number">5</span>)
+        <span class="hljs-variable language_">self</span>.left_frame.pack_propagate(<span class="hljs-literal">False</span>)
+
+        <span class="hljs-comment"># 中间游戏区域</span>
+        <span class="hljs-variable language_">self</span>.middle_frame = tk.Frame(<span class="hljs-variable language_">self</span>.center_area, bg=<span class="hljs-string">&quot;#1A252F&quot;</span>)
+        <span class="hljs-variable language_">self</span>.middle_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=<span class="hljs-literal">True</span>, padx=<span class="hljs-number">10</span>)
+
+        <span class="hljs-comment"># 右侧历史记录</span>
+        <span class="hljs-variable language_">self</span>.right_frame = tk.Frame(<span class="hljs-variable language_">self</span>.center_area, bg=<span class="hljs-string">&quot;#2C3E50&quot;</span>, width=<span class="hljs-number">250</span>)
+        <span class="hljs-variable language_">self</span>.right_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=<span class="hljs-number">5</span>)
+        <span class="hljs-variable language_">self</span>.right_frame.pack_propagate(<span class="hljs-literal">False</span>)
+
+        <span class="hljs-variable language_">self</span>.history_panel = HistoryPanel(<span class="hljs-variable language_">self</span>.right_frame, bg=<span class="hljs-string">&quot;#2C3E50&quot;</span>)
+        <span class="hljs-variable language_">self</span>.history_panel.pack(fill=tk.BOTH, expand=<span class="hljs-literal">True</span>, padx=<span class="hljs-number">5</span>, pady=<span class="hljs-number">5</span>)
+
+        <span class="hljs-comment"># 游戏桌面</span>
+        <span class="hljs-variable language_">self</span>.table = GameTable(<span class="hljs-variable language_">self</span>.middle_frame)
+        <span class="hljs-variable language_">self</span>.table.pack(pady=<span class="hljs-number">10</span>)
+
+        <span class="hljs-comment"># 手牌区域（带滚动条）</span>
+        <span class="hljs-variable language_">self</span>._create_hand_area()
+
+        <span class="hljs-comment"># 底部控制栏</span>
+        <span class="hljs-variable language_">self</span>._create_control_bar()
+
+        <span class="hljs-comment"># 显示开始界面</span>
+        <span class="hljs-variable language_">self</span>.show_start_screen()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_create_top_bar</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;创建顶部信息栏&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.top_bar = tk.Frame(<span class="hljs-variable language_">self</span>.main_frame, bg=<span class="hljs-string">&quot;#2C3E50&quot;</span>, height=<span class="hljs-number">50</span>)
+        <span class="hljs-variable language_">self</span>.top_bar.pack(fill=tk.X, pady=(<span class="hljs-number">0</span>, <span class="hljs-number">5</span>))
+
+        <span class="hljs-variable language_">self</span>.status_label = tk.Label(<span class="hljs-variable language_">self</span>.top_bar, text=<span class="hljs-string">&quot;🎴 欢迎来到斗地主！&quot;</span>,
+                                    font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">14</span>, <span class="hljs-string">&quot;bold&quot;</span>),
+                                    bg=<span class="hljs-string">&quot;#2C3E50&quot;</span>, fg=<span class="hljs-string">&quot;#F39C12&quot;</span>)
+        <span class="hljs-variable language_">self</span>.status_label.pack(side=tk.LEFT, padx=<span class="hljs-number">20</span>, pady=<span class="hljs-number">10</span>)
+
+        <span class="hljs-variable language_">self</span>.round_label = tk.Label(<span class="hljs-variable language_">self</span>.top_bar, text=<span class="hljs-string">&quot;&quot;</span>,
+                                   font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">12</span>),
+                                   bg=<span class="hljs-string">&quot;#2C3E50&quot;</span>, fg=<span class="hljs-string">&quot;white&quot;</span>)
+        <span class="hljs-variable language_">self</span>.round_label.pack(side=tk.RIGHT, padx=<span class="hljs-number">20</span>, pady=<span class="hljs-number">10</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_create_hand_area</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;创建手牌区域 - 带滚动&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 手牌框架</span>
+        <span class="hljs-variable language_">self</span>.hand_frame_outer = tk.Frame(<span class="hljs-variable language_">self</span>.middle_frame, bg=<span class="hljs-string">&quot;#1A252F&quot;</span>)
+        <span class="hljs-variable language_">self</span>.hand_frame_outer.pack(fill=tk.X, side=tk.BOTTOM, pady=<span class="hljs-number">10</span>)
+
+        <span class="hljs-comment"># 标签</span>
+        tk.Label(<span class="hljs-variable language_">self</span>.hand_frame_outer, text=<span class="hljs-string">&quot;你的手牌&quot;</span>,
+                font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">11</span>), bg=<span class="hljs-string">&quot;#1A252F&quot;</span>, fg=<span class="hljs-string">&quot;white&quot;</span>).pack(anchor=tk.W, padx=<span class="hljs-number">5</span>)
+
+        <span class="hljs-comment"># Canvas + 滚动条</span>
+        <span class="hljs-variable language_">self</span>.hand_canvas = tk.Canvas(<span class="hljs-variable language_">self</span>.hand_frame_outer, bg=<span class="hljs-string">&quot;#2C3E50&quot;</span>,
+                                     height=<span class="hljs-number">110</span>, highlightthickness=<span class="hljs-number">0</span>)
+        <span class="hljs-variable language_">self</span>.hand_canvas.pack(fill=tk.X, expand=<span class="hljs-literal">True</span>)
+
+        <span class="hljs-variable language_">self</span>.hand_scrollbar = ttk.Scrollbar(<span class="hljs-variable language_">self</span>.hand_frame_outer,
+                                            orient=tk.HORIZONTAL,
+                                            command=<span class="hljs-variable language_">self</span>.hand_canvas.xview)
+        <span class="hljs-variable language_">self</span>.hand_scrollbar.pack(fill=tk.X)
+
+        <span class="hljs-variable language_">self</span>.hand_canvas.configure(xscrollcommand=<span class="hljs-variable language_">self</span>.hand_scrollbar.<span class="hljs-built_in">set</span>)
+
+        <span class="hljs-comment"># 内部框架放卡牌</span>
+        <span class="hljs-variable language_">self</span>.cards_inner_frame = tk.Frame(<span class="hljs-variable language_">self</span>.hand_canvas, bg=<span class="hljs-string">&quot;#2C3E50&quot;</span>)
+        <span class="hljs-variable language_">self</span>.canvas_window = <span class="hljs-variable language_">self</span>.hand_canvas.create_window((<span class="hljs-number">0</span>, <span class="hljs-number">0</span>),
+                                                           window=<span class="hljs-variable language_">self</span>.cards_inner_frame,
+                                                           anchor=tk.NW)
+
+        <span class="hljs-comment"># 绑定事件更新滚动区域</span>
+        <span class="hljs-variable language_">self</span>.cards_inner_frame.bind(<span class="hljs-string">&quot;&lt;Configure&gt;&quot;</span>, <span class="hljs-variable language_">self</span>._on_cards_configure)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_on_cards_configure</span>(<span class="hljs-params">self, event</span>):
+        <span class="hljs-string">&quot;&quot;&quot;卡牌框架大小改变时更新滚动区域&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.hand_canvas.configure(scrollregion=<span class="hljs-variable language_">self</span>.hand_canvas.bbox(<span class="hljs-string">&quot;all&quot;</span>))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_create_control_bar</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;创建控制栏&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.control_bar = tk.Frame(<span class="hljs-variable language_">self</span>.main_frame, bg=<span class="hljs-string">&quot;#2C3E50&quot;</span>, height=<span class="hljs-number">70</span>)
+        <span class="hljs-variable language_">self</span>.control_bar.pack(fill=tk.X, pady=(<span class="hljs-number">5</span>, <span class="hljs-number">0</span>))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">clear_control_bar</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">for</span> widget <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.control_bar.winfo_children():
+            widget.destroy()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">show_start_screen</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;显示开始界面&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.clear_control_bar()
+
+        btn_frame = tk.Frame(<span class="hljs-variable language_">self</span>.control_bar, bg=<span class="hljs-string">&quot;#2C3E50&quot;</span>)
+        btn_frame.pack(expand=<span class="hljs-literal">True</span>)
+
+        tk.Button(btn_frame, text=<span class="hljs-string">&quot;🎮 开始游戏&quot;</span>, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">14</span>, <span class="hljs-string">&quot;bold&quot;</span>),
+                 bg=<span class="hljs-string">&quot;#27AE60&quot;</span>, fg=<span class="hljs-string">&quot;white&quot;</span>, padx=<span class="hljs-number">30</span>, pady=<span class="hljs-number">8</span>,
+                 command=<span class="hljs-variable language_">self</span>.start_game).pack(side=tk.LEFT, padx=<span class="hljs-number">10</span>)
+
+        tk.Button(btn_frame, text=<span class="hljs-string">&quot;📖 游戏规则&quot;</span>, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">12</span>),
+                 bg=<span class="hljs-string">&quot;#3498DB&quot;</span>, fg=<span class="hljs-string">&quot;white&quot;</span>, padx=<span class="hljs-number">20</span>, pady=<span class="hljs-number">8</span>,
+                 command=<span class="hljs-variable language_">self</span>.show_rules).pack(side=tk.LEFT, padx=<span class="hljs-number">10</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">show_rules</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;显示游戏规则&quot;&quot;&quot;</span>
+        rules = <span class="hljs-string">&quot;&quot;&quot;
+斗地主规则：
+
+1. 游戏共3人，1个地主，2个农民
+2. 每人17张牌，地主额外获得3张底牌
+3. 地主先出牌，按顺时针轮流出牌
+4. 后出的牌必须比前一家大，或选择不出
+5. 先出完牌的一方获胜
+
+牌型大小：
+• 单张、对子、三张：按点数比较
+• 顺子：5张及以上连续点数
+• 连对：3对及以上连续对子
+• 飞机：2组及以上连续三张
+• 炸弹：4张相同点数，可压任何非炸弹
+• 王炸：大王+小王，最大
+
+操作说明：
+• 点击卡牌选中/取消选中
+• 点击&quot;出牌&quot;按钮出选中的牌
+• 点击&quot;不出&quot;跳过回合
+• 点击&quot;提示&quot;获取建议
+        &quot;&quot;&quot;</span>
+        messagebox.showinfo(<span class="hljs-string">&quot;游戏规则&quot;</span>, rules)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">start_game</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;开始游戏&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.game = DouDiZhuGame()
+        <span class="hljs-variable language_">self</span>.round_count = <span class="hljs-number">1</span>
+
+        <span class="hljs-comment"># 创建玩家</span>
+        <span class="hljs-variable language_">self</span>.game.players = [
+            Player(<span class="hljs-string">&quot;玩家&quot;</span>, is_ai=<span class="hljs-literal">False</span>),
+            AIPlayer(<span class="hljs-string">&quot;AI-1&quot;</span>),
+            AIPlayer(<span class="hljs-string">&quot;AI-2&quot;</span>)
+        ]
+
+        <span class="hljs-comment"># 发牌</span>
+        <span class="hljs-variable language_">self</span>.game.deck = Card.create_deck()
+        random.shuffle(<span class="hljs-variable language_">self</span>.game.deck)
+
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">51</span>):
+            <span class="hljs-variable language_">self</span>.game.players[i % <span class="hljs-number">3</span>].add_cards([<span class="hljs-variable language_">self</span>.game.deck[i]])
+
+        <span class="hljs-variable language_">self</span>.game.bottom_cards = <span class="hljs-variable language_">self</span>.game.deck[<span class="hljs-number">51</span>:]
+
+        <span class="hljs-comment"># 清空历史记录</span>
+        <span class="hljs-variable language_">self</span>.history_panel.clear()
+        <span class="hljs-variable language_">self</span>.history_panel.add_round_separator(<span class="hljs-variable language_">self</span>.round_count)
+
+        <span class="hljs-comment"># 创建玩家面板</span>
+        <span class="hljs-variable language_">self</span>._create_player_panels()
+
+        <span class="hljs-comment"># 进入叫地主阶段</span>
+        <span class="hljs-variable language_">self</span>.show_call_landlord_screen()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_create_player_panels</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">for</span> widget <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.left_frame.winfo_children():
+            widget.destroy()
+
+        <span class="hljs-variable language_">self</span>.player_panels = {}
+
+        <span class="hljs-comment"># 左侧玩家（AI-1）</span>
+        panel1 = PlayerPanel(<span class="hljs-variable language_">self</span>.left_frame, <span class="hljs-variable language_">self</span>.game.players[<span class="hljs-number">1</span>], bg=<span class="hljs-string">&quot;#1A252F&quot;</span>)
+        panel1.pack(fill=tk.X, pady=<span class="hljs-number">10</span>)
+        <span class="hljs-variable language_">self</span>.player_panels[<span class="hljs-number">1</span>] = panel1
+
+        <span class="hljs-comment"># 右侧玩家（AI-2）- 放在历史面板上方</span>
+        panel2 = PlayerPanel(<span class="hljs-variable language_">self</span>.right_frame, <span class="hljs-variable language_">self</span>.game.players[<span class="hljs-number">2</span>], bg=<span class="hljs-string">&quot;#2C3E50&quot;</span>)
+        panel2.pack(fill=tk.X, pady=<span class="hljs-number">5</span>, before=<span class="hljs-variable language_">self</span>.history_panel)
+        <span class="hljs-variable language_">self</span>.player_panels[<span class="hljs-number">2</span>] = panel2
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">show_call_landlord_screen</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;显示叫地主界面&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.clear_control_bar()
+        <span class="hljs-variable language_">self</span>.status_label.config(text=<span class="hljs-string">&quot;叫地主阶段 - 请选择叫分&quot;</span>)
+        <span class="hljs-variable language_">self</span>.round_label.config(text=<span class="hljs-string">&quot;底牌: ??? ??? ???&quot;</span>)
+
+        <span class="hljs-variable language_">self</span>.update_hand_display()
+        <span class="hljs-variable language_">self</span>.table.clear()
+
+        btn_frame = tk.Frame(<span class="hljs-variable language_">self</span>.control_bar, bg=<span class="hljs-string">&quot;#2C3E50&quot;</span>)
+        btn_frame.pack(expand=<span class="hljs-literal">True</span>)
+
+        tk.Label(btn_frame, text=<span class="hljs-string">&quot;请叫分:&quot;</span>, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">12</span>),
+                bg=<span class="hljs-string">&quot;#2C3E50&quot;</span>, fg=<span class="hljs-string">&quot;white&quot;</span>).pack(side=tk.LEFT, padx=<span class="hljs-number">10</span>)
+
+        <span class="hljs-keyword">for</span> score <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">4</span>):
+            color = <span class="hljs-string">&quot;#E74C3C&quot;</span> <span class="hljs-keyword">if</span> score == <span class="hljs-number">3</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;#F39C12&quot;</span> <span class="hljs-keyword">if</span> score == <span class="hljs-number">2</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;#3498DB&quot;</span> <span class="hljs-keyword">if</span> score == <span class="hljs-number">1</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;#95A5A6&quot;</span>
+            btn = tk.Button(btn_frame, text=<span class="hljs-string">f&quot;<span class="hljs-subst">{score}</span>分&quot;</span> <span class="hljs-keyword">if</span> score &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;不叫&quot;</span>,
+                          font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">12</span>, <span class="hljs-string">&quot;bold&quot;</span>),
+                          bg=color, fg=<span class="hljs-string">&quot;white&quot;</span>, width=<span class="hljs-number">8</span>,
+                          command=<span class="hljs-keyword">lambda</span> s=score: <span class="hljs-variable language_">self</span>.call_landlord(s))
+            btn.pack(side=tk.LEFT, padx=<span class="hljs-number">5</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update_hand_display</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;更新手牌显示&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">for</span> widget <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards_inner_frame.winfo_children():
+            widget.destroy()
+        <span class="hljs-variable language_">self</span>.card_buttons = []
+        <span class="hljs-variable language_">self</span>.selected_indices.clear()
+
+        player = <span class="hljs-variable language_">self</span>.game.players[<span class="hljs-number">0</span>]
+
+        <span class="hljs-keyword">for</span> i, card <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(player.cards):
+            btn = CardButton(<span class="hljs-variable language_">self</span>.cards_inner_frame, card, i, <span class="hljs-variable language_">self</span>.on_card_click)
+            btn.pack(side=tk.LEFT, padx=<span class="hljs-number">2</span>, pady=<span class="hljs-number">5</span>)
+            <span class="hljs-variable language_">self</span>.card_buttons.append(btn)
+
+        <span class="hljs-comment"># 更新滚动区域</span>
+        <span class="hljs-variable language_">self</span>.cards_inner_frame.update_idletasks()
+        <span class="hljs-variable language_">self</span>.hand_canvas.configure(scrollregion=<span class="hljs-variable language_">self</span>.hand_canvas.bbox(<span class="hljs-string">&quot;all&quot;</span>))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_card_click</span>(<span class="hljs-params">self, index: <span class="hljs-built_in">int</span>, selected: <span class="hljs-built_in">bool</span></span>):
+        <span class="hljs-keyword">if</span> selected:
+            <span class="hljs-variable language_">self</span>.selected_indices.add(index)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-variable language_">self</span>.selected_indices.discard(index)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">call_landlord</span>(<span class="hljs-params">self, score: <span class="hljs-built_in">int</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;玩家叫地主&quot;&quot;&quot;</span>
+        scores = [score]
+        current_max = score
+
+        <span class="hljs-comment"># AI-1 叫分</span>
+        ai1_score = <span class="hljs-variable language_">self</span>.game.players[<span class="hljs-number">1</span>].decide_call_landlord(current_max)
+        scores.append(ai1_score)
+        <span class="hljs-keyword">if</span> ai1_score &gt; current_max:
+            current_max = ai1_score
+
+        <span class="hljs-comment"># AI-2 叫分</span>
+        ai2_score = <span class="hljs-variable language_">self</span>.game.players[<span class="hljs-number">2</span>].decide_call_landlord(current_max)
+        scores.append(ai2_score)
+        <span class="hljs-keyword">if</span> ai2_score &gt; current_max:
+            current_max = ai2_score
+
+        <span class="hljs-comment"># 确定地主</span>
+        <span class="hljs-keyword">if</span> current_max == <span class="hljs-number">0</span>:
+            messagebox.showinfo(<span class="hljs-string">&quot;叫地主&quot;</span>, <span class="hljs-string">&quot;无人叫地主，重新发牌！&quot;</span>)
+            <span class="hljs-variable language_">self</span>.start_game()
+            <span class="hljs-keyword">return</span>
+
+        max_idx = scores.index(<span class="hljs-built_in">max</span>(scores))
+        landlord = <span class="hljs-variable language_">self</span>.game.players[max_idx]
+        landlord.is_landlord = <span class="hljs-literal">True</span>
+        <span class="hljs-variable language_">self</span>.game.landlord = landlord
+
+        <span class="hljs-comment"># 地主拿底牌</span>
+        landlord.add_cards(<span class="hljs-variable language_">self</span>.game.bottom_cards)
+
+        <span class="hljs-comment"># 显示结果</span>
+        bottom_str = <span class="hljs-string">&quot; &quot;</span>.join(<span class="hljs-built_in">str</span>(c) <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.game.bottom_cards)
+        <span class="hljs-variable language_">self</span>.round_label.config(text=<span class="hljs-string">f&quot;地主: <span class="hljs-subst">{landlord.name}</span> | 底牌: <span class="hljs-subst">{bottom_str}</span>&quot;</span>)
+        messagebox.showinfo(<span class="hljs-string">&quot;叫地主结果&quot;</span>, <span class="hljs-string">f&quot;<span class="hljs-subst">{landlord.name}</span> 成为地主！\n底牌: <span class="hljs-subst">{bottom_str}</span>&quot;</span>)
+
+        <span class="hljs-comment"># 更新面板</span>
+        <span class="hljs-keyword">for</span> i, panel <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.player_panels.items():
+            panel.player = <span class="hljs-variable language_">self</span>.game.players[i]
+            panel.update_info()
+
+        <span class="hljs-keyword">if</span> max_idx == <span class="hljs-number">0</span>:
+            <span class="hljs-variable language_">self</span>.update_hand_display()
+
+        <span class="hljs-comment"># 开始游戏</span>
+        <span class="hljs-variable language_">self</span>.game.current_player_idx = max_idx
+        <span class="hljs-variable language_">self</span>.start_play_phase()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">start_play_phase</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;开始出牌阶段&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.clear_control_bar()
+
+        btn_frame = tk.Frame(<span class="hljs-variable language_">self</span>.control_bar, bg=<span class="hljs-string">&quot;#2C3E50&quot;</span>)
+        btn_frame.pack(expand=<span class="hljs-literal">True</span>)
+
+        <span class="hljs-variable language_">self</span>.play_btn = tk.Button(btn_frame, text=<span class="hljs-string">&quot;✓ 出牌&quot;</span>,
+                                 font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">12</span>, <span class="hljs-string">&quot;bold&quot;</span>),
+                                 bg=<span class="hljs-string">&quot;#27AE60&quot;</span>, fg=<span class="hljs-string">&quot;white&quot;</span>,
+                                 padx=<span class="hljs-number">25</span>, pady=<span class="hljs-number">6</span>,
+                                 command=<span class="hljs-variable language_">self</span>.play_cards)
+        <span class="hljs-variable language_">self</span>.play_btn.pack(side=tk.LEFT, padx=<span class="hljs-number">8</span>)
+
+        <span class="hljs-variable language_">self</span>.pass_btn = tk.Button(btn_frame, text=<span class="hljs-string">&quot;✗ 不出&quot;</span>,
+                                 font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">12</span>),
+                                 bg=<span class="hljs-string">&quot;#95A5A6&quot;</span>, fg=<span class="hljs-string">&quot;white&quot;</span>,
+                                 padx=<span class="hljs-number">25</span>, pady=<span class="hljs-number">6</span>,
+                                 command=<span class="hljs-variable language_">self</span>.pass_turn)
+        <span class="hljs-variable language_">self</span>.pass_btn.pack(side=tk.LEFT, padx=<span class="hljs-number">8</span>)
+
+        <span class="hljs-variable language_">self</span>.hint_btn = tk.Button(btn_frame, text=<span class="hljs-string">&quot;💡 提示&quot;</span>,
+                                 font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">12</span>),
+                                 bg=<span class="hljs-string">&quot;#3498DB&quot;</span>, fg=<span class="hljs-string">&quot;white&quot;</span>,
+                                 padx=<span class="hljs-number">25</span>, pady=<span class="hljs-number">6</span>,
+                                 command=<span class="hljs-variable language_">self</span>.show_hint)
+        <span class="hljs-variable language_">self</span>.hint_btn.pack(side=tk.LEFT, padx=<span class="hljs-number">8</span>)
+
+        <span class="hljs-variable language_">self</span>.reset_btn = tk.Button(btn_frame, text=<span class="hljs-string">&quot;↺ 重置选择&quot;</span>,
+                                  font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">11</span>),
+                                  bg=<span class="hljs-string">&quot;#E67E22&quot;</span>, fg=<span class="hljs-string">&quot;white&quot;</span>,
+                                  padx=<span class="hljs-number">20</span>, pady=<span class="hljs-number">6</span>,
+                                  command=<span class="hljs-variable language_">self</span>.deselect_all_cards)
+        <span class="hljs-variable language_">self</span>.reset_btn.pack(side=tk.LEFT, padx=<span class="hljs-number">8</span>)
+
+        <span class="hljs-variable language_">self</span>.game_loop()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">game_loop</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;游戏主循环&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.game.game_over:
+            <span class="hljs-variable language_">self</span>.show_game_over()
+            <span class="hljs-keyword">return</span>
+
+        current = <span class="hljs-variable language_">self</span>.game.get_current_player()
+        is_first = <span class="hljs-variable language_">self</span>.game.last_play <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> <span class="hljs-variable language_">self</span>.game.last_player == current
+
+        <span class="hljs-keyword">if</span> current.is_ai:
+            <span class="hljs-variable language_">self</span>.is_player_turn = <span class="hljs-literal">False</span>
+            <span class="hljs-variable language_">self</span>.status_label.config(text=<span class="hljs-string">f&quot;⏳ <span class="hljs-subst">{current.name}</span> 正在思考...&quot;</span>)
+            <span class="hljs-variable language_">self</span>.play_btn.config(state=tk.DISABLED)
+            <span class="hljs-variable language_">self</span>.pass_btn.config(state=tk.DISABLED <span class="hljs-keyword">if</span> is_first <span class="hljs-keyword">else</span> tk.NORMAL)
+            <span class="hljs-variable language_">self</span>.hint_btn.config(state=tk.DISABLED)
+            <span class="hljs-variable language_">self</span>.reset_btn.config(state=tk.DISABLED)
+
+            <span class="hljs-variable language_">self</span>.root.after(<span class="hljs-number">1500</span>, <span class="hljs-variable language_">self</span>.ai_play)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-variable language_">self</span>.is_player_turn = <span class="hljs-literal">True</span>
+            turn_text = <span class="hljs-string">&quot;新的一轮，请出牌！&quot;</span> <span class="hljs-keyword">if</span> is_first <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;请出牌压过上家！&quot;</span>
+            <span class="hljs-variable language_">self</span>.status_label.config(text=<span class="hljs-string">f&quot;🎯 <span class="hljs-subst">{turn_text}</span>&quot;</span>)
+            <span class="hljs-variable language_">self</span>.play_btn.config(state=tk.NORMAL)
+            <span class="hljs-variable language_">self</span>.pass_btn.config(state=tk.DISABLED <span class="hljs-keyword">if</span> is_first <span class="hljs-keyword">else</span> tk.NORMAL)
+            <span class="hljs-variable language_">self</span>.hint_btn.config(state=tk.NORMAL)
+            <span class="hljs-variable language_">self</span>.reset_btn.config(state=tk.NORMAL)
+
+            <span class="hljs-variable language_">self</span>.deselect_all_cards()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">ai_play</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;AI出牌&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.game <span class="hljs-keyword">or</span> <span class="hljs-variable language_">self</span>.game.game_over:
+            <span class="hljs-keyword">return</span>
+
+        current = <span class="hljs-variable language_">self</span>.game.get_current_player()
+        is_first = <span class="hljs-variable language_">self</span>.game.last_play <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> <span class="hljs-variable language_">self</span>.game.last_player == current
+
+        cards_to_play = current.play_turn(<span class="hljs-variable language_">self</span>.game.last_play, is_first)
+
+        <span class="hljs-keyword">if</span> cards_to_play <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-variable language_">self</span>.status_label.config(text=<span class="hljs-string">f&quot;<span class="hljs-subst">{current.name}</span> 选择不出&quot;</span>)
+            <span class="hljs-variable language_">self</span>.history_panel.add_record(current.name, current.is_landlord, [], is_pass=<span class="hljs-literal">True</span>)
+            <span class="hljs-variable language_">self</span>.game._next_player()
+        <span class="hljs-keyword">else</span>:
+            play_hand = PlayHand(cards_to_play)
+            current.remove_cards(cards_to_play)
+            <span class="hljs-variable language_">self</span>.game.last_play = play_hand
+            <span class="hljs-variable language_">self</span>.game.last_player = current
+
+            <span class="hljs-comment"># 显示在桌面</span>
+            <span class="hljs-variable language_">self</span>.table.show_play(cards_to_play, current.name, play_hand.pattern.name)
+
+            <span class="hljs-comment"># 添加到历史</span>
+            <span class="hljs-variable language_">self</span>.history_panel.add_record(current.name, current.is_landlord,
+                                         cards_to_play, play_hand.pattern.name)
+
+            <span class="hljs-variable language_">self</span>.status_label.config(text=<span class="hljs-string">f&quot;<span class="hljs-subst">{current.name}</span> 出了 <span class="hljs-subst">{play_hand.pattern.name}</span>&quot;</span>)
+
+            <span class="hljs-comment"># 更新面板</span>
+            <span class="hljs-keyword">for</span> i, panel <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.player_panels.items():
+                <span class="hljs-keyword">if</span> panel.player == current:
+                    panel.update_info()
+                    <span class="hljs-keyword">break</span>
+
+            <span class="hljs-keyword">if</span> current.is_empty():
+                <span class="hljs-variable language_">self</span>.game.game_over = <span class="hljs-literal">True</span>
+                <span class="hljs-variable language_">self</span>.game.winner = current
+                <span class="hljs-variable language_">self</span>.show_game_over()
+                <span class="hljs-keyword">return</span>
+
+            <span class="hljs-variable language_">self</span>.game._next_player()
+
+        <span class="hljs-comment"># 检查是否新一轮</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.game.last_player == <span class="hljs-variable language_">self</span>.game.get_current_player():
+            <span class="hljs-variable language_">self</span>.round_count += <span class="hljs-number">1</span>
+            <span class="hljs-variable language_">self</span>.history_panel.add_round_separator(<span class="hljs-variable language_">self</span>.round_count)
+            <span class="hljs-variable language_">self</span>.table.clear()
+
+        <span class="hljs-variable language_">self</span>.root.after(<span class="hljs-number">500</span>, <span class="hljs-variable language_">self</span>.game_loop)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">play_cards</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;玩家出牌&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.is_player_turn:
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.selected_indices:
+            messagebox.showwarning(<span class="hljs-string">&quot;提示&quot;</span>, <span class="hljs-string">&quot;请先选择要出的牌！&quot;</span>)
+            <span class="hljs-keyword">return</span>
+
+        player = <span class="hljs-variable language_">self</span>.game.players[<span class="hljs-number">0</span>]
+        selected_cards = [player.cards[i] <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">sorted</span>(<span class="hljs-variable language_">self</span>.selected_indices)]
+
+        play_hand = PlayHand(selected_cards)
+
+        <span class="hljs-keyword">if</span> play_hand.pattern == CardPattern.INVALID:
+            messagebox.showerror(<span class="hljs-string">&quot;错误&quot;</span>, <span class="hljs-string">&quot;无效的牌型！&quot;</span>)
+            <span class="hljs-keyword">return</span>
+
+        is_first = <span class="hljs-variable language_">self</span>.game.last_play <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> <span class="hljs-variable language_">self</span>.game.last_player == player
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> is_first <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.game.last_play:
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> play_hand.can_beat(<span class="hljs-variable language_">self</span>.game.last_play):
+                messagebox.showerror(<span class="hljs-string">&quot;错误&quot;</span>, <span class="hljs-string">&quot;无法压过上家的牌！&quot;</span>)
+                <span class="hljs-keyword">return</span>
+
+        <span class="hljs-comment"># 执行出牌</span>
+        player.remove_cards(selected_cards)
+        <span class="hljs-variable language_">self</span>.game.last_play = play_hand
+        <span class="hljs-variable language_">self</span>.game.last_player = player
+
+        <span class="hljs-comment"># 显示</span>
+        <span class="hljs-variable language_">self</span>.table.show_play(selected_cards, player.name, play_hand.pattern.name)
+        <span class="hljs-variable language_">self</span>.history_panel.add_record(player.name, player.is_landlord,
+                                     selected_cards, play_hand.pattern.name)
+        <span class="hljs-variable language_">self</span>.update_hand_display()
+
+        <span class="hljs-keyword">if</span> player.is_empty():
+            <span class="hljs-variable language_">self</span>.game.game_over = <span class="hljs-literal">True</span>
+            <span class="hljs-variable language_">self</span>.game.winner = player
+            <span class="hljs-variable language_">self</span>.show_game_over()
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-variable language_">self</span>.game._next_player()
+        <span class="hljs-variable language_">self</span>.game_loop()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">pass_turn</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;玩家不出&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.is_player_turn:
+            <span class="hljs-keyword">return</span>
+
+        is_first = <span class="hljs-variable language_">self</span>.game.last_play <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> <span class="hljs-variable language_">self</span>.game.last_player == <span class="hljs-variable language_">self</span>.game.players[<span class="hljs-number">0</span>]
+        <span class="hljs-keyword">if</span> is_first:
+            messagebox.showwarning(<span class="hljs-string">&quot;提示&quot;</span>, <span class="hljs-string">&quot;第一手必须出牌！&quot;</span>)
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-variable language_">self</span>.history_panel.add_record(<span class="hljs-variable language_">self</span>.game.players[<span class="hljs-number">0</span>].name,
+                                     <span class="hljs-variable language_">self</span>.game.players[<span class="hljs-number">0</span>].is_landlord, [], is_pass=<span class="hljs-literal">True</span>)
+        <span class="hljs-variable language_">self</span>.deselect_all_cards()
+
+        <span class="hljs-variable language_">self</span>.game._next_player()
+        <span class="hljs-variable language_">self</span>.game_loop()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">deselect_all_cards</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;取消所有选中&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.selected_indices.clear()
+        <span class="hljs-keyword">for</span> btn <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.card_buttons:
+            btn.deselect()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">show_hint</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;显示提示&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.is_player_turn <span class="hljs-keyword">or</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.game:
+            <span class="hljs-keyword">return</span>
+
+        player = <span class="hljs-variable language_">self</span>.game.players[<span class="hljs-number">0</span>]
+        is_first = <span class="hljs-variable language_">self</span>.game.last_play <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> <span class="hljs-variable language_">self</span>.game.last_player == player
+
+        <span class="hljs-keyword">if</span> is_first:
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.card_buttons:
+                <span class="hljs-variable language_">self</span>.deselect_all_cards()
+                <span class="hljs-variable language_">self</span>.card_buttons[<span class="hljs-number">0</span>].set_selected(<span class="hljs-literal">True</span>)
+                <span class="hljs-variable language_">self</span>.selected_indices.add(<span class="hljs-number">0</span>)
+                messagebox.showinfo(<span class="hljs-string">&quot;提示&quot;</span>, <span class="hljs-string">&quot;建议出最小的单张&quot;</span>)
+        <span class="hljs-keyword">else</span>:
+            messagebox.showinfo(<span class="hljs-string">&quot;提示&quot;</span>, <span class="hljs-string">f&quot;上家出了 <span class="hljs-subst">{self.game.last_play.pattern.name}</span>，请选择能压过的牌&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">show_game_over</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;显示游戏结束&quot;&quot;&quot;</span>
+        winner = <span class="hljs-variable language_">self</span>.game.winner
+
+        <span class="hljs-keyword">if</span> winner.is_landlord:
+            result_text = <span class="hljs-string">f&quot;<span class="hljs-subst">{winner.name}</span> (地主) 获胜！&quot;</span>
+            is_player_win = winner == <span class="hljs-variable language_">self</span>.game.players[<span class="hljs-number">0</span>]
+        <span class="hljs-keyword">else</span>:
+            result_text = <span class="hljs-string">f&quot;<span class="hljs-subst">{winner.name}</span> (农民) 获胜！&quot;</span>
+            is_player_win = winner == <span class="hljs-variable language_">self</span>.game.players[<span class="hljs-number">0</span>]
+
+        <span class="hljs-variable language_">self</span>.status_label.config(text=<span class="hljs-string">f&quot;游戏结束 - <span class="hljs-subst">{result_text}</span>&quot;</span>)
+
+        <span class="hljs-keyword">if</span> is_player_win:
+            messagebox.showinfo(<span class="hljs-string">&quot;🎉 游戏结束&quot;</span>, <span class="hljs-string">f&quot;恭喜你获胜！\n<span class="hljs-subst">{result_text}</span>&quot;</span>)
+        <span class="hljs-keyword">else</span>:
+            messagebox.showinfo(<span class="hljs-string">&quot;😢 游戏结束&quot;</span>, <span class="hljs-string">f&quot;你输了！\n<span class="hljs-subst">{result_text}</span>&quot;</span>)
+
+        <span class="hljs-comment"># 显示重新开始按钮</span>
+        <span class="hljs-variable language_">self</span>.clear_control_bar()
+        btn_frame = tk.Frame(<span class="hljs-variable language_">self</span>.control_bar, bg=<span class="hljs-string">&quot;#2C3E50&quot;</span>)
+        btn_frame.pack(expand=<span class="hljs-literal">True</span>)
+
+        tk.Button(btn_frame, text=<span class="hljs-string">&quot;🔄 重新开始&quot;</span>,
+                 font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">14</span>, <span class="hljs-string">&quot;bold&quot;</span>),
+                 bg=<span class="hljs-string">&quot;#27AE60&quot;</span>, fg=<span class="hljs-string">&quot;white&quot;</span>,
+                 padx=<span class="hljs-number">30</span>, pady=<span class="hljs-number">10</span>,
+                 command=<span class="hljs-variable language_">self</span>.start_game).pack(side=tk.LEFT, padx=<span class="hljs-number">10</span>)
+
+        tk.Button(btn_frame, text=<span class="hljs-string">&quot;📊 查看记录&quot;</span>,
+                 font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">12</span>),
+                 bg=<span class="hljs-string">&quot;#3498DB&quot;</span>, fg=<span class="hljs-string">&quot;white&quot;</span>,
+                 padx=<span class="hljs-number">20</span>, pady=<span class="hljs-number">10</span>,
+                 command=<span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.history_panel.text_widget.see(tk.END)).pack(side=tk.LEFT, padx=<span class="hljs-number">10</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">run</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.root.mainloop()
+
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    game = DouDiZhuGUI()
+    game.run()
+</code></pre>
+<p><a href="http://player.py">player.py</a></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-string">&quot;&quot;&quot;
+斗地主游戏 - 玩家模块
+&quot;&quot;&quot;</span>
+<span class="hljs-keyword">import</span> random
+<span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> <span class="hljs-type">List</span>, <span class="hljs-type">Optional</span>, <span class="hljs-type">Tuple</span>
+<span class="hljs-keyword">from</span> card <span class="hljs-keyword">import</span> Card, PlayHand, CardPattern
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Player</span>:
+    <span class="hljs-string">&quot;&quot;&quot;玩家类&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, name: <span class="hljs-built_in">str</span>, is_ai: <span class="hljs-built_in">bool</span> = <span class="hljs-literal">False</span></span>):
+        <span class="hljs-variable language_">self</span>.name = name
+        <span class="hljs-variable language_">self</span>.is_ai = is_ai
+        <span class="hljs-variable language_">self</span>.cards: <span class="hljs-type">List</span>[Card] = []
+        <span class="hljs-variable language_">self</span>.is_landlord = <span class="hljs-literal">False</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">add_cards</span>(<span class="hljs-params">self, cards: <span class="hljs-type">List</span>[Card]</span>):
+        <span class="hljs-string">&quot;&quot;&quot;添加手牌&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.cards.extend(cards)
+        <span class="hljs-variable language_">self</span>.sort_cards()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">sort_cards</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;整理手牌&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.cards.sort(key=<span class="hljs-keyword">lambda</span> c: (c.value, c.suit))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">remove_cards</span>(<span class="hljs-params">self, cards: <span class="hljs-type">List</span>[Card]</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;移除手牌&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">for</span> card <span class="hljs-keyword">in</span> cards:
+            <span class="hljs-keyword">if</span> card <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards:
+                <span class="hljs-variable language_">self</span>.cards.remove(card)
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">has_cards</span>(<span class="hljs-params">self, cards: <span class="hljs-type">List</span>[Card]</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;检查是否拥有指定牌&quot;&quot;&quot;</span>
+        temp_cards = <span class="hljs-variable language_">self</span>.cards.copy()
+        <span class="hljs-keyword">for</span> card <span class="hljs-keyword">in</span> cards:
+            <span class="hljs-keyword">if</span> card <span class="hljs-keyword">in</span> temp_cards:
+                temp_cards.remove(card)
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_card_count</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">int</span>:
+        <span class="hljs-string">&quot;&quot;&quot;获取手牌数量&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.cards)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">is_empty</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">bool</span>:
+        <span class="hljs-string">&quot;&quot;&quot;检查手牌是否出完&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.cards) == <span class="hljs-number">0</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">display_cards</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">str</span>:
+        <span class="hljs-string">&quot;&quot;&quot;显示手牌&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot; &quot;</span>.join([<span class="hljs-string">f&quot;[<span class="hljs-subst">{i}</span>]<span class="hljs-subst">{card}</span>&quot;</span> <span class="hljs-keyword">for</span> i, card <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(<span class="hljs-variable language_">self</span>.cards)])
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__repr__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;<span class="hljs-subst">{self.name}</span>(<span class="hljs-subst">{<span class="hljs-string">&#x27;地主&#x27;</span> <span class="hljs-keyword">if</span> self.is_landlord <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;农民&#x27;</span>}</span>, <span class="hljs-subst">{<span class="hljs-built_in">len</span>(self.cards)}</span>张)&quot;</span>
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">AIPlayer</span>(<span class="hljs-title class_ inherited__">Player</span>):
+    <span class="hljs-string">&quot;&quot;&quot;AI玩家&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, name: <span class="hljs-built_in">str</span></span>):
+        <span class="hljs-built_in">super</span>().__init__(name, is_ai=<span class="hljs-literal">True</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">decide_call_landlord</span>(<span class="hljs-params">self, score: <span class="hljs-built_in">int</span></span>) -&gt; <span class="hljs-built_in">int</span>:
+        <span class="hljs-string">&quot;&quot;&quot;决定是否叫地主，返回0-3的分数&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 简单策略：根据手牌强度决定是否叫地主</span>
+        strength = <span class="hljs-variable language_">self</span>._evaluate_hand_strength()
+
+        <span class="hljs-keyword">if</span> score == <span class="hljs-number">0</span>:
+            <span class="hljs-comment"># 第一个叫分</span>
+            <span class="hljs-keyword">if</span> strength &gt; <span class="hljs-number">0.7</span>:
+                <span class="hljs-keyword">return</span> <span class="hljs-number">3</span>
+            <span class="hljs-keyword">elif</span> strength &gt; <span class="hljs-number">0.5</span>:
+                <span class="hljs-keyword">return</span> <span class="hljs-number">2</span>
+            <span class="hljs-keyword">elif</span> strength &gt; <span class="hljs-number">0.3</span>:
+                <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 后面叫分，必须比前面高</span>
+            <span class="hljs-keyword">if</span> strength &gt; <span class="hljs-number">0.8</span> <span class="hljs-keyword">and</span> score &lt; <span class="hljs-number">3</span>:
+                <span class="hljs-keyword">return</span> <span class="hljs-number">3</span>
+            <span class="hljs-keyword">elif</span> strength &gt; <span class="hljs-number">0.6</span> <span class="hljs-keyword">and</span> score &lt; <span class="hljs-number">2</span>:
+                <span class="hljs-keyword">return</span> <span class="hljs-number">2</span>
+            <span class="hljs-keyword">elif</span> strength &gt; <span class="hljs-number">0.4</span> <span class="hljs-keyword">and</span> score &lt; <span class="hljs-number">1</span>:
+                <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_evaluate_hand_strength</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">float</span>:
+        <span class="hljs-string">&quot;&quot;&quot;评估手牌强度&quot;&quot;&quot;</span>
+        strength = <span class="hljs-number">0.0</span>
+
+        <span class="hljs-comment"># 统计各种牌型</span>
+        rank_counts = {}
+        <span class="hljs-keyword">for</span> card <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards:
+            rank_counts[card.rank] = rank_counts.get(card.rank, <span class="hljs-number">0</span>) + <span class="hljs-number">1</span>
+
+        <span class="hljs-comment"># 有大王或小王加分</span>
+        <span class="hljs-keyword">if</span> CardRank.RED_JOKER <span class="hljs-keyword">in</span> rank_counts:
+            strength += <span class="hljs-number">0.2</span>
+        <span class="hljs-keyword">if</span> CardRank.BLACK_JOKER <span class="hljs-keyword">in</span> rank_counts:
+            strength += <span class="hljs-number">0.15</span>
+
+        <span class="hljs-comment"># 有2加分</span>
+        <span class="hljs-keyword">if</span> CardRank.TWO <span class="hljs-keyword">in</span> rank_counts:
+            strength += <span class="hljs-number">0.1</span> * rank_counts[CardRank.TWO]
+
+        <span class="hljs-comment"># 有炸弹加分</span>
+        <span class="hljs-keyword">for</span> count <span class="hljs-keyword">in</span> rank_counts.values():
+            <span class="hljs-keyword">if</span> count == <span class="hljs-number">4</span>:
+                strength += <span class="hljs-number">0.2</span>
+
+        <span class="hljs-comment"># 有连牌加分</span>
+        ranks = <span class="hljs-built_in">sorted</span>(rank_counts.keys())
+        consecutive = <span class="hljs-number">1</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(ranks) - <span class="hljs-number">1</span>):
+            <span class="hljs-keyword">if</span> ranks[i + <span class="hljs-number">1</span>] - ranks[i] == <span class="hljs-number">1</span> <span class="hljs-keyword">and</span> ranks[i] &lt; CardRank.TWO:
+                consecutive += <span class="hljs-number">1</span>
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-keyword">if</span> consecutive &gt;= <span class="hljs-number">5</span>:
+                    strength += <span class="hljs-number">0.1</span>
+                consecutive = <span class="hljs-number">1</span>
+
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">min</span>(strength, <span class="hljs-number">1.0</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">play_turn</span>(<span class="hljs-params">self, last_play: <span class="hljs-type">Optional</span>[PlayHand], is_first_play: <span class="hljs-built_in">bool</span></span>) -&gt; <span class="hljs-type">Optional</span>[<span class="hljs-type">List</span>[Card]]:
+        <span class="hljs-string">&quot;&quot;&quot;
+        AI出牌决策
+        返回要出的牌列表，如果不出则返回None
+        &quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> is_first_play:
+            <span class="hljs-comment"># 第一手出牌，出最小的单张</span>
+            <span class="hljs-keyword">return</span> [<span class="hljs-variable language_">self</span>.cards[<span class="hljs-number">0</span>]]
+
+        <span class="hljs-keyword">if</span> last_play <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-comment"># 上家不要，可以自由出牌</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>._choose_best_play(<span class="hljs-literal">None</span>)
+
+        <span class="hljs-comment"># 需要压过上家的牌</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>._find_beat_play(last_play)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_choose_best_play</span>(<span class="hljs-params">self, last_play: <span class="hljs-type">Optional</span>[PlayHand]</span>) -&gt; <span class="hljs-type">List</span>[Card]:
+        <span class="hljs-string">&quot;&quot;&quot;选择最佳出牌&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 优先出顺子、连对等组合</span>
+        plays = <span class="hljs-variable language_">self</span>._find_all_valid_plays()
+
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> plays:
+            <span class="hljs-keyword">return</span> [<span class="hljs-variable language_">self</span>.cards[<span class="hljs-number">0</span>]]
+
+        <span class="hljs-comment"># 优先出组合牌型，保留单张</span>
+        <span class="hljs-comment"># 按牌型优先级排序</span>
+        priority_order = [
+            CardPattern.ROCKET,
+            CardPattern.BOMB,
+            CardPattern.TRIPLE_STRAIGHT,
+            CardPattern.TRIPLE_STRAIGHT_WITH_PAIRS,
+            CardPattern.TRIPLE_STRAIGHT_WITH_SINGLES,
+            CardPattern.DOUBLE_STRAIGHT,
+            CardPattern.STRAIGHT,
+            CardPattern.TRIPLE_WITH_PAIR,
+            CardPattern.TRIPLE_WITH_SINGLE,
+            CardPattern.TRIPLE,
+            CardPattern.PAIR,
+            CardPattern.SINGLE,
+        ]
+
+        <span class="hljs-comment"># 找出非炸弹、非王炸的组合</span>
+        normal_plays = [p <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> plays <span class="hljs-keyword">if</span> p.pattern <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> (CardPattern.ROCKET, CardPattern.BOMB)]
+
+        <span class="hljs-keyword">if</span> normal_plays:
+            <span class="hljs-comment"># 优先出张数多的组合（快速走牌）</span>
+            normal_plays.sort(key=<span class="hljs-keyword">lambda</span> p: (-<span class="hljs-built_in">len</span>(p.cards), priority_order.index(p.pattern) <span class="hljs-keyword">if</span> p.pattern <span class="hljs-keyword">in</span> priority_order <span class="hljs-keyword">else</span> <span class="hljs-number">99</span>))
+            <span class="hljs-keyword">return</span> normal_plays[<span class="hljs-number">0</span>].cards
+
+        <span class="hljs-comment"># 没有组合，出最小的单张</span>
+        <span class="hljs-keyword">return</span> [<span class="hljs-variable language_">self</span>.cards[<span class="hljs-number">0</span>]]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_find_beat_play</span>(<span class="hljs-params">self, last_play: PlayHand</span>) -&gt; <span class="hljs-type">Optional</span>[<span class="hljs-type">List</span>[Card]]:
+        <span class="hljs-string">&quot;&quot;&quot;找出能压过上家的出牌&quot;&quot;&quot;</span>
+        plays = <span class="hljs-variable language_">self</span>._find_all_valid_plays()
+
+        <span class="hljs-comment"># 按牌型分组</span>
+        same_pattern_plays = [p <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> plays <span class="hljs-keyword">if</span> p.pattern == last_play.pattern <span class="hljs-keyword">and</span> <span class="hljs-built_in">len</span>(p.cards) == <span class="hljs-built_in">len</span>(last_play.cards)]
+        bombs = [p <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> plays <span class="hljs-keyword">if</span> p.pattern == CardPattern.BOMB]
+        rockets = [p <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> plays <span class="hljs-keyword">if</span> p.pattern == CardPattern.ROCKET]
+
+        <span class="hljs-comment"># 先找同类型的牌</span>
+        <span class="hljs-keyword">for</span> play <span class="hljs-keyword">in</span> same_pattern_plays:
+            <span class="hljs-keyword">if</span> play.can_beat(last_play):
+                <span class="hljs-keyword">return</span> play.cards
+
+        <span class="hljs-comment"># 如果上家不是炸弹，可以用炸弹压</span>
+        <span class="hljs-keyword">if</span> last_play.pattern != CardPattern.BOMB <span class="hljs-keyword">and</span> last_play.pattern != CardPattern.ROCKET:
+            <span class="hljs-comment"># 优先用小炸弹</span>
+            <span class="hljs-keyword">if</span> bombs:
+                bombs.sort(key=<span class="hljs-keyword">lambda</span> p: p.main_value)
+                <span class="hljs-keyword">return</span> bombs[<span class="hljs-number">0</span>].cards
+
+        <span class="hljs-comment"># 用王炸</span>
+        <span class="hljs-keyword">if</span> rockets:
+            <span class="hljs-keyword">return</span> rockets[<span class="hljs-number">0</span>].cards
+
+        <span class="hljs-comment"># 压不过，不出</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_find_all_valid_plays</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-type">List</span>[PlayHand]:
+        <span class="hljs-string">&quot;&quot;&quot;找出所有可能的出牌组合&quot;&quot;&quot;</span>
+        plays = []
+
+        <span class="hljs-comment"># 单张</span>
+        <span class="hljs-keyword">for</span> card <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards:
+            plays.append(PlayHand([card]))
+
+        <span class="hljs-comment"># 对子</span>
+        rank_cards = {}
+        <span class="hljs-keyword">for</span> card <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards:
+            rank_cards.setdefault(card.rank, []).append(card)
+
+        <span class="hljs-keyword">for</span> cards <span class="hljs-keyword">in</span> rank_cards.values():
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(cards) &gt;= <span class="hljs-number">2</span>:
+                plays.append(PlayHand(cards[:<span class="hljs-number">2</span>]))
+
+        <span class="hljs-comment"># 三张</span>
+        <span class="hljs-keyword">for</span> cards <span class="hljs-keyword">in</span> rank_cards.values():
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(cards) &gt;= <span class="hljs-number">3</span>:
+                plays.append(PlayHand(cards[:<span class="hljs-number">3</span>]))
+
+        <span class="hljs-comment"># 炸弹</span>
+        <span class="hljs-keyword">for</span> cards <span class="hljs-keyword">in</span> rank_cards.values():
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(cards) == <span class="hljs-number">4</span>:
+                plays.append(PlayHand(cards))
+
+        <span class="hljs-comment"># 王炸</span>
+        jokers = [c <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards <span class="hljs-keyword">if</span> c.rank <span class="hljs-keyword">in</span> (CardRank.BLACK_JOKER, CardRank.RED_JOKER)]
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(jokers) == <span class="hljs-number">2</span>:
+            plays.append(PlayHand(jokers))
+
+        <span class="hljs-comment"># 三带一、三带二</span>
+        <span class="hljs-keyword">for</span> rank, cards <span class="hljs-keyword">in</span> rank_cards.items():
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(cards) &gt;= <span class="hljs-number">3</span>:
+                <span class="hljs-comment"># 三带一</span>
+                <span class="hljs-keyword">for</span> other_card <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards:
+                    <span class="hljs-keyword">if</span> other_card.rank != rank:
+                        plays.append(PlayHand(cards[:<span class="hljs-number">3</span>] + [other_card]))
+                <span class="hljs-comment"># 三带二</span>
+                <span class="hljs-keyword">for</span> other_rank, other_cards <span class="hljs-keyword">in</span> rank_cards.items():
+                    <span class="hljs-keyword">if</span> other_rank != rank <span class="hljs-keyword">and</span> <span class="hljs-built_in">len</span>(other_cards) &gt;= <span class="hljs-number">2</span>:
+                        plays.append(PlayHand(cards[:<span class="hljs-number">3</span>] + other_cards[:<span class="hljs-number">2</span>]))
+
+        <span class="hljs-comment"># 顺子（5张及以上）</span>
+        unique_ranks = <span class="hljs-built_in">sorted</span>(<span class="hljs-built_in">set</span>(c.rank <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards <span class="hljs-keyword">if</span> c.rank &lt; CardRank.TWO))
+        <span class="hljs-keyword">for</span> length <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">5</span>, <span class="hljs-built_in">len</span>(unique_ranks) + <span class="hljs-number">1</span>):
+            <span class="hljs-keyword">for</span> start <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(unique_ranks) - length + <span class="hljs-number">1</span>):
+                straight_ranks = unique_ranks[start:start + length]
+                <span class="hljs-keyword">if</span> <span class="hljs-built_in">all</span>(straight_ranks[i+<span class="hljs-number">1</span>] - straight_ranks[i] == <span class="hljs-number">1</span> <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(length - <span class="hljs-number">1</span>)):
+                    <span class="hljs-comment"># 找到顺子，每种点数选一张</span>
+                    straight_cards = []
+                    <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> straight_ranks:
+                        <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards:
+                            <span class="hljs-keyword">if</span> c.rank == r:
+                                straight_cards.append(c)
+                                <span class="hljs-keyword">break</span>
+                    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(straight_cards) == length:
+                        plays.append(PlayHand(straight_cards))
+
+        <span class="hljs-comment"># 连对</span>
+        pair_ranks = [r <span class="hljs-keyword">for</span> r, cards <span class="hljs-keyword">in</span> rank_cards.items() <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(cards) &gt;= <span class="hljs-number">2</span> <span class="hljs-keyword">and</span> r &lt; CardRank.TWO]
+        pair_ranks.sort()
+        <span class="hljs-keyword">for</span> length <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">3</span>, <span class="hljs-built_in">len</span>(pair_ranks) + <span class="hljs-number">1</span>):
+            <span class="hljs-keyword">for</span> start <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(pair_ranks) - length + <span class="hljs-number">1</span>):
+                straight_pairs_ranks = pair_ranks[start:start + length]
+                <span class="hljs-keyword">if</span> <span class="hljs-built_in">all</span>(straight_pairs_ranks[i+<span class="hljs-number">1</span>] - straight_pairs_ranks[i] == <span class="hljs-number">1</span> <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(length - <span class="hljs-number">1</span>)):
+                    straight_pairs_cards = []
+                    <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> straight_pairs_ranks:
+                        <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cards:
+                            <span class="hljs-keyword">if</span> c.rank == r:
+                                straight_pairs_cards.append(c)
+                                <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>([x <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> straight_pairs_cards <span class="hljs-keyword">if</span> x.rank == r]) == <span class="hljs-number">2</span>:
+                                    <span class="hljs-keyword">break</span>
+                    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(straight_pairs_cards) == length * <span class="hljs-number">2</span>:
+                        plays.append(PlayHand(straight_pairs_cards))
+
+        <span class="hljs-comment"># 过滤掉无效的牌型</span>
+        valid_plays = [p <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> plays <span class="hljs-keyword">if</span> p.pattern != CardPattern.INVALID]
+
+        <span class="hljs-keyword">return</span> valid_plays
+
+
+<span class="hljs-keyword">from</span> card <span class="hljs-keyword">import</span> CardRank
+</code></pre>
+<p><a href="http://main.py">main.py</a></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-string">&quot;&quot;&quot;
+斗地主游戏 - 主程序入口
+&quot;&quot;&quot;</span>
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">from</span> game <span class="hljs-keyword">import</span> DouDiZhuGame, parse_card_indices
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">clear_screen</span>():
+    <span class="hljs-string">&quot;&quot;&quot;清屏&quot;&quot;&quot;</span>
+    os.system(<span class="hljs-string">&#x27;cls&#x27;</span> <span class="hljs-keyword">if</span> os.name == <span class="hljs-string">&#x27;nt&#x27;</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;clear&#x27;</span>)
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">print_header</span>():
+    <span class="hljs-string">&quot;&quot;&quot;打印游戏标题&quot;&quot;&quot;</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">50</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;           🎴 斗地主游戏 🎴&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">50</span>)
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">print_rules</span>():
+    <span class="hljs-string">&quot;&quot;&quot;打印游戏规则&quot;&quot;&quot;</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;&quot;&quot;
+游戏规则：
+1. 游戏共3人，1个地主，2个农民
+2. 每人初始17张牌，地主额外获得3张底牌
+3. 地主先出牌，然后按顺时针轮流出牌
+4. 后出的牌必须比前一家大，或选择不出
+5. 先出完牌的一方获胜
+
+牌型大小：
+- 单张、对子、三张：按点数比较
+- 顺子：5张及以上连续点数
+- 连对：3对及以上连续对子
+- 飞机：2组及以上连续三张
+- 炸弹：4张相同点数，可压任何非炸弹牌
+- 王炸：大王+小王，最大
+
+出牌方式：
+- 输入牌索引（如：0,2,4）选择要出的牌
+- 直接回车表示不出
+&quot;&quot;&quot;</span>)
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">print_game_status</span>(<span class="hljs-params">game: DouDiZhuGame</span>):
+    <span class="hljs-string">&quot;&quot;&quot;打印游戏状态&quot;&quot;&quot;</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;-&quot;</span> * <span class="hljs-number">50</span>)
+
+    <span class="hljs-comment"># 显示所有玩家信息</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;玩家状态:&quot;</span>)
+    <span class="hljs-keyword">for</span> player <span class="hljs-keyword">in</span> game.players:
+        role = <span class="hljs-string">&quot;👑地主&quot;</span> <span class="hljs-keyword">if</span> player.is_landlord <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;🧑‍🌾农民&quot;</span>
+        status = <span class="hljs-string">&quot;✅&quot;</span> <span class="hljs-keyword">if</span> player.is_empty() <span class="hljs-keyword">else</span> <span class="hljs-string">f&quot;<span class="hljs-subst">{player.get_card_count()}</span>张&quot;</span>
+        current = <span class="hljs-string">&quot;👉&quot;</span> <span class="hljs-keyword">if</span> player == game.get_current_player() <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;  &quot;</span>
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  <span class="hljs-subst">{current}</span> <span class="hljs-subst">{player.name}</span> <span class="hljs-subst">{role}</span>: <span class="hljs-subst">{status}</span>&quot;</span>)
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;-&quot;</span> * <span class="hljs-number">50</span>)
+
+    <span class="hljs-comment"># 显示场上牌</span>
+    <span class="hljs-keyword">if</span> game.last_play <span class="hljs-keyword">and</span> game.last_player:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;场上: <span class="hljs-subst">{<span class="hljs-string">&#x27; &#x27;</span>.join(<span class="hljs-built_in">str</span>(c) <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> game.last_play.cards)}</span> (<span class="hljs-subst">{game.last_play.pattern.name}</span>)&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;出牌者: <span class="hljs-subst">{game.last_player.name}</span>&quot;</span>)
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;场上: 无（新一轮）&quot;</span>)
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;-&quot;</span> * <span class="hljs-number">50</span>)
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">get_player_action</span>(<span class="hljs-params">player, game: DouDiZhuGame</span>) -&gt; <span class="hljs-built_in">list</span>:
+    <span class="hljs-string">&quot;&quot;&quot;获取玩家操作&quot;&quot;&quot;</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n&gt;&gt;&gt; 轮到你了，<span class="hljs-subst">{player.name}</span>!&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;你的手牌（共<span class="hljs-subst">{<span class="hljs-built_in">len</span>(player.cards)}</span>张）:&quot;</span>)
+    <span class="hljs-built_in">print</span>(player.display_cards())
+
+    <span class="hljs-comment"># 检查是否必须出牌</span>
+    is_first = game.last_play <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> game.last_player == player
+
+    <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+        <span class="hljs-keyword">if</span> is_first:
+            user_input = <span class="hljs-built_in">input</span>(<span class="hljs-string">&quot;\n请输入要出的牌索引（逗号分隔）: &quot;</span>).strip()
+        <span class="hljs-keyword">else</span>:
+            user_input = <span class="hljs-built_in">input</span>(<span class="hljs-string">&quot;\n请输入要出的牌索引（逗号分隔，回车=不出）: &quot;</span>).strip()
+
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> user_input:
+            <span class="hljs-keyword">if</span> is_first:
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;第一手必须出牌！&quot;</span>)
+                <span class="hljs-keyword">continue</span>
+            <span class="hljs-keyword">return</span> []  <span class="hljs-comment"># 不出</span>
+
+        indices = parse_card_indices(user_input)
+        <span class="hljs-keyword">if</span> indices <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;输入格式错误！请使用逗号分隔数字（如：0,1,2）&quot;</span>)
+            <span class="hljs-keyword">continue</span>
+
+        <span class="hljs-comment"># 验证索引范围</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">any</span>(i &lt; <span class="hljs-number">0</span> <span class="hljs-keyword">or</span> i &gt;= <span class="hljs-built_in">len</span>(player.cards) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> indices):
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;索引超出范围！请输入 0 到 <span class="hljs-subst">{<span class="hljs-built_in">len</span>(player.cards)-<span class="hljs-number">1</span>}</span> 之间的数字&quot;</span>)
+            <span class="hljs-keyword">continue</span>
+
+        <span class="hljs-keyword">return</span> indices
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">play_game</span>():
+    <span class="hljs-string">&quot;&quot;&quot;主游戏循环&quot;&quot;&quot;</span>
+    clear_screen()
+    print_header()
+    print_rules()
+
+    <span class="hljs-comment"># 获取玩家名字</span>
+    player_name = <span class="hljs-built_in">input</span>(<span class="hljs-string">&quot;\n请输入你的名字: &quot;</span>).strip()
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> player_name:
+        player_name = <span class="hljs-string">&quot;玩家&quot;</span>
+
+    <span class="hljs-comment"># 初始化游戏</span>
+    game = DouDiZhuGame()
+    game.init_game(player_name)
+
+    <span class="hljs-built_in">input</span>(<span class="hljs-string">&quot;\n按回车开始游戏...&quot;</span>)
+
+    <span class="hljs-comment"># 游戏主循环</span>
+    <span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> game.game_over:
+        clear_screen()
+        print_header()
+        print_game_status(game)
+
+        current_player = game.get_current_player()
+
+        <span class="hljs-keyword">if</span> current_player.is_ai:
+            <span class="hljs-comment"># AI回合</span>
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n<span class="hljs-subst">{current_player.name}</span> 正在思考...&quot;</span>)
+            <span class="hljs-keyword">import</span> time
+            time.sleep(<span class="hljs-number">1</span>)
+            success, msg = game.play_turn()
+            <span class="hljs-built_in">print</span>(msg)
+            <span class="hljs-built_in">input</span>(<span class="hljs-string">&quot;\n按回车继续...&quot;</span>)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 玩家回合</span>
+            indices = get_player_action(current_player, game)
+            success, msg = game.play_turn(indices)
+
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> success:
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n❌ 出牌失败: <span class="hljs-subst">{msg}</span>&quot;</span>)
+                <span class="hljs-built_in">input</span>(<span class="hljs-string">&quot;按回车重新选择...&quot;</span>)
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n✅ <span class="hljs-subst">{msg}</span>&quot;</span>)
+                <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> game.game_over:
+                    <span class="hljs-built_in">input</span>(<span class="hljs-string">&quot;按回车继续...&quot;</span>)
+
+    <span class="hljs-comment"># 游戏结束</span>
+    clear_screen()
+    print_header()
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">50</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;           🎉 游戏结束 🎉&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">50</span>)
+
+    winner = game.winner
+    <span class="hljs-keyword">if</span> winner.is_landlord:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n🏆 获胜者: <span class="hljs-subst">{winner.name}</span> (地主)&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;地主获胜！&quot;</span>)
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n🏆 获胜者: <span class="hljs-subst">{winner.name}</span> (农民)&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;农民获胜！&quot;</span>)
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n最终手牌:&quot;</span>)
+    <span class="hljs-keyword">for</span> player <span class="hljs-keyword">in</span> game.players:
+        cards_str = <span class="hljs-string">&quot;无&quot;</span> <span class="hljs-keyword">if</span> player.is_empty() <span class="hljs-keyword">else</span> <span class="hljs-string">&quot; &quot;</span>.join(<span class="hljs-built_in">str</span>(c) <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> player.cards)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  <span class="hljs-subst">{player.name}</span>: <span class="hljs-subst">{cards_str}</span>&quot;</span>)
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">50</span>)
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    <span class="hljs-string">&quot;&quot;&quot;程序入口&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+        play_game()
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n&quot;</span>)
+        again = <span class="hljs-built_in">input</span>(<span class="hljs-string">&quot;是否再来一局? (y/n): &quot;</span>).strip().lower()
+        <span class="hljs-keyword">if</span> again != <span class="hljs-string">&#x27;y&#x27;</span>:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n感谢游玩，再见！&quot;</span>)
+            <span class="hljs-keyword">break</span>
+
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    <span class="hljs-keyword">try</span>:
+        main()
+    <span class="hljs-keyword">except</span> KeyboardInterrupt:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n\n游戏已退出&quot;</span>)
+        sys.exit(<span class="hljs-number">0</span>)
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/python实现目标追踪代码与步骤详解.html">
+      <span>上一篇</span>
+      <strong>Python实现目标追踪代码与步骤详解</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/python制作太空人电子手表.html">
+      <span>下一篇</span>
+      <strong>Python制作太空人电子手表</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

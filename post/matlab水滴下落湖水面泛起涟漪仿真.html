@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>MATLAB水滴下落湖水面泛起涟漪仿真 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/matlab-仿真.html">MATLAB 仿真</a>
+        </nav>
+        <h1 class="post-title">MATLAB水滴下落湖水面泛起涟漪仿真</h1>
+        <p class="post-deck">本文介绍了一个增强版水波纹扩散仿真程序的MATLAB实现。程序通过波动方程模拟水滴冲击产生的水波扩散过程，采用网格化计算和阻尼边界条件提高仿真精度。主要功能包括：1) 随机生成水滴冲击点；2) 实时更新波动方程计算波面高度；3) 可视化3D波动效果；4) 自动将仿真过程保存为GIF动画。关键参数包括网格分辨率(100×100)、波速(0.3)和时间步长(0.9)。程序运行150帧，每25帧随机添加…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.013Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>10 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文介绍了一个增强版水波纹扩散仿真程序的MATLAB实现。程序通过波动方程模拟水滴冲击产生的水波扩散过程，采用网格化计算和阻尼边界条件提高仿真精度。主要功能包括：1) 随机生成水滴冲击点；2) 实时更新波动方程计算波面高度；3) 可视化3D波动效果；4) 自动将仿真过程保存为GIF动画。关键参数包括网格分辨率(100×100)、波速(0.3)和时间步长(0.9)。程序运行150帧，每25帧随机添加水滴扰动，并显示处理进度。最终输出包含光照效果的3D波纹扩散动画，文件大小通过控制帧数进行优化。</p>
+<p><img src="../uploads/csdn/matlab%E6%B0%B4%E6%BB%B4%E4%B8%8B%E8%90%BD%E6%B9%96%E6%B0%B4%E9%9D%A2%E6%B3%9B%E8%B5%B7%E6%B6%9F%E6%BC%AA%E4%BB%BF%E7%9C%9F/img-01.gif" alt=""></p>
+<p><img src="../uploads/csdn/matlab%E6%B0%B4%E6%BB%B4%E4%B8%8B%E8%90%BD%E6%B9%96%E6%B0%B4%E9%9D%A2%E6%B3%9B%E8%B5%B7%E6%B6%9F%E6%BC%AA%E4%BB%BF%E7%9C%9F/img-02.gif" alt=""></p>
+<p><img src="../uploads/csdn/matlab%E6%B0%B4%E6%BB%B4%E4%B8%8B%E8%90%BD%E6%B9%96%E6%B0%B4%E9%9D%A2%E6%B3%9B%E8%B5%B7%E6%B6%9F%E6%BC%AA%E4%BB%BF%E7%9C%9F/img-03.gif" alt=""></p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% 运行增强仿真</span>
+enhanced_wave_simulation();
+
+<span class="hljs-comment">% 增强版水波纹仿真 - 带GIF保存功能</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">enhanced_wave_simulation</span><span class="hljs-params">()</span></span>
+    <span class="hljs-comment">% 更精确的水波纹仿真</span>
+
+    <span class="hljs-comment">% 创建图形窗口</span>
+    fig = <span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">200</span>, <span class="hljs-number">200</span>, <span class="hljs-number">1000</span>, <span class="hljs-number">800</span>], <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>);
+
+    <span class="hljs-comment">% 参数设置</span>
+    grid_size = <span class="hljs-number">100</span>;
+    [X, Y] = <span class="hljs-built_in">meshgrid</span>(<span class="hljs-built_in">linspace</span>(<span class="hljs-number">-1</span>, <span class="hljs-number">1</span>, grid_size));
+    Z = <span class="hljs-built_in">zeros</span>(<span class="hljs-built_in">size</span>(X));
+
+    <span class="hljs-comment">% 波动方程参数</span>
+    c = <span class="hljs-number">0.3</span>;        <span class="hljs-comment">% 波速</span>
+    damping = <span class="hljs-number">0.02</span>; <span class="hljs-comment">% 阻尼</span>
+    dt = <span class="hljs-number">0.9</span>;      <span class="hljs-comment">% 时间步长（修正为更合理的值）</span>
+
+    <span class="hljs-comment">% 状态变量</span>
+    height = Z;
+    velocity = Z;
+
+    <span class="hljs-comment">% 冲击位置</span>
+    impacts = [];
+
+    <span class="hljs-comment">% 创建水面图形</span>
+    h_surf = surf(X, Y, Z, <span class="hljs-string">&#x27;FaceColor&#x27;</span>, <span class="hljs-string">&#x27;interp&#x27;</span>, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+    colormap(jet);
+    zlim([<span class="hljs-number">-0.1</span>, <span class="hljs-number">0.1</span>]);
+    view(<span class="hljs-number">45</span>, <span class="hljs-number">30</span>);
+    lighting gouraud;
+    light(<span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>]);
+
+    title(<span class="hljs-string">&#x27;水滴波纹扩散仿真 - 生成GIF中...&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">12</span>);
+    xlabel(<span class="hljs-string">&#x27;X&#x27;</span>); ylabel(<span class="hljs-string">&#x27;Y&#x27;</span>); zlabel(<span class="hljs-string">&#x27;高度&#x27;</span>);
+
+    <span class="hljs-comment">% GIF保存设置</span>
+    gif_filename = <span class="hljs-string">&#x27;wave_simulation.gif&#x27;</span>;
+    gif_delay_time = <span class="hljs-number">0.1</span>; <span class="hljs-comment">% GIF帧延迟时间</span>
+    frame_count = <span class="hljs-number">0</span>;
+
+    fprintf(<span class="hljs-string">&#x27;开始波纹仿真，将保存为GIF: %s\n&#x27;</span>, gif_filename);
+
+    <span class="hljs-comment">% 仿真循环</span>
+    <span class="hljs-keyword">for</span> frame = <span class="hljs-number">1</span>:<span class="hljs-number">150</span>  <span class="hljs-comment">% 减少帧数以控制文件大小</span>
+        <span class="hljs-comment">% 随机添加水滴冲击</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">mod</span>(frame, <span class="hljs-number">25</span>) == <span class="hljs-number">0</span> || frame == <span class="hljs-number">1</span>
+            impact_pos = [<span class="hljs-built_in">rand</span>()*<span class="hljs-number">1.6</span><span class="hljs-number">-0.8</span>, <span class="hljs-built_in">rand</span>()*<span class="hljs-number">1.6</span><span class="hljs-number">-0.8</span>];
+            impact_strength = <span class="hljs-number">0.05</span> + <span class="hljs-built_in">rand</span>()*<span class="hljs-number">0.05</span>;
+            impacts = [impacts; impact_pos, impact_strength, frame];
+        <span class="hljs-keyword">end</span>
+
+        <span class="hljs-comment">% 应用所有冲击</span>
+        <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(impacts,<span class="hljs-number">1</span>)
+            <span class="hljs-keyword">if</span> frame - impacts(<span class="hljs-built_in">i</span>,<span class="hljs-number">3</span>) &lt; <span class="hljs-number">20</span> <span class="hljs-comment">% 冲击影响时间</span>
+                dist = <span class="hljs-built_in">sqrt</span>((X - impacts(<span class="hljs-built_in">i</span>,<span class="hljs-number">1</span>)).^<span class="hljs-number">2</span> + (Y - impacts(<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>)).^<span class="hljs-number">2</span>);
+                time_factor = <span class="hljs-built_in">exp</span>(-(frame - impacts(<span class="hljs-built_in">i</span>,<span class="hljs-number">3</span>)) * <span class="hljs-number">0.1</span>);
+                height = height + impacts(<span class="hljs-built_in">i</span>,<span class="hljs-number">3</span>) * time_factor * <span class="hljs-built_in">exp</span>(-dist * <span class="hljs-number">10</span>) .* <span class="hljs-built_in">cos</span>(<span class="hljs-number">15</span>*dist - frame*<span class="hljs-number">0.3</span>);
+            <span class="hljs-keyword">end</span>
+        <span class="hljs-keyword">end</span>
+
+        <span class="hljs-comment">% 波动方程更新</span>
+        laplacian = del2(height);
+        acceleration = c^<span class="hljs-number">2</span> * laplacian - damping * velocity;
+        velocity = velocity + acceleration * dt;
+        height = height + velocity * dt;
+
+        <span class="hljs-comment">% 边界衰减</span>
+        boundary = (<span class="hljs-built_in">abs</span>(X) &gt; <span class="hljs-number">0.9</span>) | (<span class="hljs-built_in">abs</span>(Y) &gt; <span class="hljs-number">0.9</span>);
+        height(boundary) = height(boundary) * <span class="hljs-number">0.95</span>;
+        velocity(boundary) = velocity(boundary) * <span class="hljs-number">0.95</span>;
+
+        <span class="hljs-comment">% 更新图形</span>
+        set(h_surf, <span class="hljs-string">&#x27;ZData&#x27;</span>, height);
+        set(h_surf, <span class="hljs-string">&#x27;CData&#x27;</span>, height);
+
+        <span class="hljs-comment">% 动态标题</span>
+        title(sprintf(<span class="hljs-string">&#x27;水滴波纹扩散 - 帧: %d/150&#x27;</span>, frame), <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">12</span>);
+
+        drawnow;
+
+        <span class="hljs-comment">% 捕获帧并保存为GIF</span>
+        captureFrameForGIF(fig, gif_filename, frame, gif_delay_time);
+        frame_count = frame;
+
+        <span class="hljs-comment">% 显示进度</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">mod</span>(frame, <span class="hljs-number">15</span>) == <span class="hljs-number">0</span>
+            fprintf(<span class="hljs-string">&#x27;已处理帧: %d/150\n&#x27;</span>, frame);
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+
+    fprintf(<span class="hljs-string">&#x27;GIF保存完成: %s\n&#x27;</span>, gif_filename);
+    fprintf(<span class="hljs-string">&#x27;总帧数: %d\n&#x27;</span>, frame_count);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 辅助函数：捕获帧并保存为GIF</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">captureFrameForGIF</span><span class="hljs-params">(fig, filename, frame, delay_time)</span></span>
+    <span class="hljs-keyword">try</span>
+        <span class="hljs-comment">% 捕获帧</span>
+        frame_data = getframe(fig);
+        im = frame2im(frame_data);
+        [imind, cm] = rgb2ind(im, <span class="hljs-number">256</span>);
+
+        <span class="hljs-comment">% 写入GIF文件</span>
+        <span class="hljs-keyword">if</span> frame == <span class="hljs-number">1</span>
+            <span class="hljs-comment">% 第一帧</span>
+            imwrite(imind, cm, filename, <span class="hljs-string">&#x27;gif&#x27;</span>, ...
+                <span class="hljs-string">&#x27;Loopcount&#x27;</span>, <span class="hljs-built_in">inf</span>, <span class="hljs-string">&#x27;DelayTime&#x27;</span>, delay_time);
+        <span class="hljs-keyword">else</span>
+            <span class="hljs-comment">% 后续帧</span>
+            imwrite(imind, cm, filename, <span class="hljs-string">&#x27;gif&#x27;</span>, ...
+                <span class="hljs-string">&#x27;WriteMode&#x27;</span>, <span class="hljs-string">&#x27;append&#x27;</span>, <span class="hljs-string">&#x27;DelayTime&#x27;</span>, delay_time);
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">catch</span> ME
+        warning(<span class="hljs-string">&#x27;保存GIF帧时出错: %s&#x27;</span>, ME.message);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/matlab汽车行驶过程避障模拟简化.html">
+      <span>上一篇</span>
+      <strong>MATLAB汽车行驶过程避障模拟简化</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/matlab山地地形仿真与最高点到最低点最短路径.html">
+      <span>下一篇</span>
+      <strong>MATLAB山地地形仿真与最高点到最低点最短路径</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/凸包问题graham扫描算法matlab.html">凸包问题Graham扫描算法MATLAB</a></h3>
+        <p class="post-excerpt">算法要解决的问题</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.498Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

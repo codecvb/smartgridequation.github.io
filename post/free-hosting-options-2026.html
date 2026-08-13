@@ -15,12 +15,13 @@
   <header class="site-header">
     <div class="wrap header-inner">
       <a class="brand" href="../index.html">
-        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
         <span class="brand-text">常青笔记</span>
       </a>
       <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
       <nav class="site-nav" id="site-nav" aria-label="主导航">
         <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
         <a href="../archive.html" class="">归档</a>
         <a href="../tags.html" class="">标签</a>
         <a href="../about.html" class="">关于</a>
@@ -36,13 +37,11 @@
   <div class="post-layout">
     <article class="post-article">
       <header class="post-header">
-        <div class="tag-row">
-          
-            <a class="tag-chip" href="../tags/tag-3.html">部署</a>
-          
-            <a class="tag-chip" href="../tags/tag-6.html">指南</a>
-          
-        </div>
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/随笔.html">随笔</a>
+        </nav>
         <h1 class="post-title">把博客放上云端：免费挂载方案盘点</h1>
         <p class="post-deck">整理 2026 年仍可用的免费与低价部署方案，从开箱即用的 Render 到长期免费的 Oracle Cloud。</p>
         <div class="post-meta">
@@ -51,6 +50,13 @@
           <span>2 分钟</span>
           <span>·</span>
           <span>1 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-30.html">部署</a>
+          
+            <a class="tag-chip" href="../tags/tag-32.html">指南</a>
+          
         </div>
       </header>
       <div class="prose">
@@ -118,6 +124,8 @@
         <p class="footer-note">用文字把日子留住。</p>
       </div>
       <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
         
         
         

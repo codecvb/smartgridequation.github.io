@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Windows选择特定窗口录屏 单窗口录屏Python代码 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">Windows选择特定窗口录屏 单窗口录屏Python代码</h1>
+        <p class="post-deck">以下是一个带有界面操作的单窗口录屏 Python 程序，使用 tkinter 构建界面，结合 opencv 和 numpy 实现屏幕录制功能：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.461Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>29 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>以下是一个带有界面操作的单窗口录屏 Python 程序，使用 tkinter 构建界面，结合 opencv 和 numpy 实现屏幕录制功能：</p>
+<p>单窗口录屏工具（Python）</p>
+<p>V1</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> tkinter <span class="hljs-keyword">as</span> tk
+<span class="hljs-keyword">from</span> tkinter <span class="hljs-keyword">import</span> ttk, filedialog, messagebox
+<span class="hljs-keyword">import</span> cv2
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> pyautogui
+<span class="hljs-keyword">import</span> threading
+<span class="hljs-keyword">import</span> time
+<span class="hljs-keyword">import</span> win32gui
+<span class="hljs-keyword">import</span> win32con
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">from</span> datetime <span class="hljs-keyword">import</span> datetime
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">WindowRecorder</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, root</span>):
+        <span class="hljs-variable language_">self</span>.root = root
+        <span class="hljs-variable language_">self</span>.root.title(<span class="hljs-string">&quot;单窗口录屏工具&quot;</span>)
+        <span class="hljs-variable language_">self</span>.root.geometry(<span class="hljs-string">&quot;700x500&quot;</span>)
+        <span class="hljs-variable language_">self</span>.root.resizable(<span class="hljs-literal">True</span>, <span class="hljs-literal">True</span>)
+
+        <span class="hljs-comment"># 设置中文字体</span>
+        <span class="hljs-variable language_">self</span>.style = ttk.Style()
+        <span class="hljs-variable language_">self</span>.style.configure(<span class="hljs-string">&quot;TLabel&quot;</span>, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">10</span>))
+        <span class="hljs-variable language_">self</span>.style.configure(<span class="hljs-string">&quot;TButton&quot;</span>, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">10</span>))
+        <span class="hljs-variable language_">self</span>.style.configure(<span class="hljs-string">&quot;TCombobox&quot;</span>, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">10</span>))
+
+        <span class="hljs-comment"># 录制状态变量</span>
+        <span class="hljs-variable language_">self</span>.is_recording = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.is_paused = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.recorder_thread = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.selected_window = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.output_file = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.fps = <span class="hljs-number">15</span>
+        <span class="hljs-variable language_">self</span>.recording_start_time = <span class="hljs-number">0</span>
+        <span class="hljs-variable language_">self</span>.recording_duration = <span class="hljs-number">0</span>
+        <span class="hljs-variable language_">self</span>.timer_running = <span class="hljs-literal">False</span>
+
+        <span class="hljs-comment"># 创建界面</span>
+        <span class="hljs-variable language_">self</span>.create_widgets()
+
+        <span class="hljs-comment"># 刷新窗口列表</span>
+        <span class="hljs-variable language_">self</span>.refresh_window_list()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">create_widgets</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 主框架</span>
+        main_frame = ttk.Frame(<span class="hljs-variable language_">self</span>.root, padding=<span class="hljs-string">&quot;10&quot;</span>)
+        main_frame.pack(fill=tk.BOTH, expand=<span class="hljs-literal">True</span>)
+
+        <span class="hljs-comment"># 左侧：窗口列表</span>
+        left_frame = ttk.LabelFrame(main_frame, text=<span class="hljs-string">&quot;可用窗口&quot;</span>, padding=<span class="hljs-string">&quot;10&quot;</span>)
+        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=<span class="hljs-literal">True</span>, padx=(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>))
+
+        <span class="hljs-comment"># 窗口列表</span>
+        <span class="hljs-variable language_">self</span>.window_listbox = tk.Listbox(left_frame, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">10</span>), width=<span class="hljs-number">30</span>, height=<span class="hljs-number">15</span>)
+        <span class="hljs-variable language_">self</span>.window_listbox.pack(side=tk.TOP, fill=tk.BOTH, expand=<span class="hljs-literal">True</span>)
+        <span class="hljs-variable language_">self</span>.window_listbox.bind(<span class="hljs-string">&#x27;&lt;&lt;ListboxSelect&gt;&gt;&#x27;</span>, <span class="hljs-variable language_">self</span>.on_window_select)
+
+        <span class="hljs-comment"># 刷新按钮</span>
+        refresh_btn = ttk.Button(left_frame, text=<span class="hljs-string">&quot;刷新窗口列表&quot;</span>, command=<span class="hljs-variable language_">self</span>.refresh_window_list)
+        refresh_btn.pack(side=tk.BOTTOM, pady=<span class="hljs-number">10</span>, fill=tk.X)
+
+        <span class="hljs-comment"># 右侧：控制区域</span>
+        right_frame = ttk.Frame(main_frame, padding=<span class="hljs-string">&quot;10&quot;</span>)
+        right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=<span class="hljs-literal">True</span>)
+
+        <span class="hljs-comment"># 录制设置</span>
+        settings_frame = ttk.LabelFrame(right_frame, text=<span class="hljs-string">&quot;录制设置&quot;</span>, padding=<span class="hljs-string">&quot;10&quot;</span>)
+        settings_frame.pack(fill=tk.X, pady=(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>))
+
+        <span class="hljs-comment"># FPS设置</span>
+        ttk.Label(settings_frame, text=<span class="hljs-string">&quot;帧率:&quot;</span>).grid(row=<span class="hljs-number">0</span>, column=<span class="hljs-number">0</span>, sticky=tk.W, pady=<span class="hljs-number">5</span>)
+        <span class="hljs-variable language_">self</span>.fps_var = tk.StringVar(value=<span class="hljs-string">&quot;15&quot;</span>)
+        fps_combobox = ttk.Combobox(settings_frame, textvariable=<span class="hljs-variable language_">self</span>.fps_var, values=[<span class="hljs-string">&quot;10&quot;</span>, <span class="hljs-string">&quot;15&quot;</span>, <span class="hljs-string">&quot;20&quot;</span>, <span class="hljs-string">&quot;30&quot;</span>], width=<span class="hljs-number">10</span>)
+        fps_combobox.grid(row=<span class="hljs-number">0</span>, column=<span class="hljs-number">1</span>, sticky=tk.W, pady=<span class="hljs-number">5</span>)
+        fps_combobox.bind(<span class="hljs-string">&quot;&lt;&lt;ComboboxSelected&gt;&gt;&quot;</span>, <span class="hljs-keyword">lambda</span> e: <span class="hljs-built_in">setattr</span>(<span class="hljs-variable language_">self</span>, <span class="hljs-string">&#x27;fps&#x27;</span>, <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.fps_var.get())))
+
+        <span class="hljs-comment"># 保存路径</span>
+        ttk.Label(settings_frame, text=<span class="hljs-string">&quot;保存路径:&quot;</span>).grid(row=<span class="hljs-number">1</span>, column=<span class="hljs-number">0</span>, sticky=tk.W, pady=<span class="hljs-number">5</span>)
+        <span class="hljs-variable language_">self</span>.save_path_var = tk.StringVar(value=os.path.expanduser(<span class="hljs-string">&quot;~&quot;</span>) + <span class="hljs-string">&quot;/Videos&quot;</span>)
+        ttk.Entry(settings_frame, textvariable=<span class="hljs-variable language_">self</span>.save_path_var, width=<span class="hljs-number">25</span>).grid(row=<span class="hljs-number">1</span>, column=<span class="hljs-number">1</span>, sticky=tk.W, pady=<span class="hljs-number">5</span>)
+        browse_btn = ttk.Button(settings_frame, text=<span class="hljs-string">&quot;浏览...&quot;</span>, command=<span class="hljs-variable language_">self</span>.browse_save_path)
+        browse_btn.grid(row=<span class="hljs-number">1</span>, column=<span class="hljs-number">2</span>, padx=<span class="hljs-number">5</span>, pady=<span class="hljs-number">5</span>)
+
+        <span class="hljs-comment"># 录制控制</span>
+        control_frame = ttk.LabelFrame(right_frame, text=<span class="hljs-string">&quot;录制控制&quot;</span>, padding=<span class="hljs-string">&quot;10&quot;</span>)
+        control_frame.pack(fill=tk.BOTH, expand=<span class="hljs-literal">True</span>, pady=(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>))
+
+        <span class="hljs-comment"># 控制按钮</span>
+        btn_frame = ttk.Frame(control_frame)
+        btn_frame.pack(expand=<span class="hljs-literal">True</span>)
+
+        <span class="hljs-variable language_">self</span>.start_btn = ttk.Button(btn_frame, text=<span class="hljs-string">&quot;开始录制&quot;</span>, command=<span class="hljs-variable language_">self</span>.start_recording, width=<span class="hljs-number">12</span>)
+        <span class="hljs-variable language_">self</span>.start_btn.grid(row=<span class="hljs-number">0</span>, column=<span class="hljs-number">0</span>, padx=<span class="hljs-number">5</span>, pady=<span class="hljs-number">10</span>)
+
+        <span class="hljs-variable language_">self</span>.pause_btn = ttk.Button(btn_frame, text=<span class="hljs-string">&quot;暂停&quot;</span>, command=<span class="hljs-variable language_">self</span>.pause_recording, width=<span class="hljs-number">12</span>, state=tk.DISABLED)
+        <span class="hljs-variable language_">self</span>.pause_btn.grid(row=<span class="hljs-number">0</span>, column=<span class="hljs-number">1</span>, padx=<span class="hljs-number">5</span>, pady=<span class="hljs-number">10</span>)
+
+        <span class="hljs-variable language_">self</span>.stop_btn = ttk.Button(btn_frame, text=<span class="hljs-string">&quot;停止录制&quot;</span>, command=<span class="hljs-variable language_">self</span>.stop_recording, width=<span class="hljs-number">12</span>, state=tk.DISABLED)
+        <span class="hljs-variable language_">self</span>.stop_btn.grid(row=<span class="hljs-number">0</span>, column=<span class="hljs-number">2</span>, padx=<span class="hljs-number">5</span>, pady=<span class="hljs-number">10</span>)
+
+        <span class="hljs-comment"># 状态显示</span>
+        status_frame = ttk.LabelFrame(right_frame, text=<span class="hljs-string">&quot;录制状态&quot;</span>, padding=<span class="hljs-string">&quot;10&quot;</span>)
+        status_frame.pack(fill=tk.X, pady=(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>))
+
+        <span class="hljs-variable language_">self</span>.status_var = tk.StringVar(value=<span class="hljs-string">&quot;就绪&quot;</span>)
+        ttk.Label(status_frame, textvariable=<span class="hljs-variable language_">self</span>.status_var).pack(anchor=tk.W)
+
+        <span class="hljs-comment"># 录制时间</span>
+        <span class="hljs-variable language_">self</span>.time_var = tk.StringVar(value=<span class="hljs-string">&quot;00:00:00&quot;</span>)
+        ttk.Label(status_frame, text=<span class="hljs-string">&quot;录制时间:&quot;</span>).pack(anchor=tk.W, pady=(<span class="hljs-number">5</span>, <span class="hljs-number">0</span>))
+        ttk.Label(status_frame, textvariable=<span class="hljs-variable language_">self</span>.time_var, font=(<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-number">12</span>, <span class="hljs-string">&quot;bold&quot;</span>)).pack(anchor=tk.W)
+
+        <span class="hljs-comment"># 选中窗口信息</span>
+        <span class="hljs-variable language_">self</span>.window_info_var = tk.StringVar(value=<span class="hljs-string">&quot;未选择窗口&quot;</span>)
+        ttk.Label(status_frame, text=<span class="hljs-string">&quot;选中窗口:&quot;</span>).pack(anchor=tk.W, pady=(<span class="hljs-number">5</span>, <span class="hljs-number">0</span>))
+        ttk.Label(status_frame, textvariable=<span class="hljs-variable language_">self</span>.window_info_var).pack(anchor=tk.W)
+
+        <span class="hljs-comment"># 底部信息</span>
+        ttk.Label(right_frame, text=<span class="hljs-string">&quot;提示: 选择一个窗口后点击开始录制&quot;</span>, foreground=<span class="hljs-string">&quot;gray&quot;</span>).pack(side=tk.BOTTOM, pady=<span class="hljs-number">10</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">refresh_window_list</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;刷新窗口列表&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.window_listbox.delete(<span class="hljs-number">0</span>, tk.END)
+        <span class="hljs-variable language_">self</span>.windows = []
+
+        <span class="hljs-comment"># 枚举所有顶级窗口</span>
+        <span class="hljs-keyword">def</span> <span class="hljs-title function_">callback</span>(<span class="hljs-params">hwnd, extra</span>):
+            <span class="hljs-keyword">if</span> win32gui.IsWindowVisible(hwnd):
+                title = win32gui.GetWindowText(hwnd)
+                <span class="hljs-keyword">if</span> title:  <span class="hljs-comment"># 只添加有标题的窗口</span>
+                    <span class="hljs-variable language_">self</span>.windows.append((hwnd, title))
+                    <span class="hljs-variable language_">self</span>.window_listbox.insert(tk.END, title)
+
+        win32gui.EnumWindows(callback, <span class="hljs-literal">None</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_window_select</span>(<span class="hljs-params">self, event</span>):
+        <span class="hljs-string">&quot;&quot;&quot;处理窗口选择事件&quot;&quot;&quot;</span>
+        selection = <span class="hljs-variable language_">self</span>.window_listbox.curselection()
+        <span class="hljs-keyword">if</span> selection:
+            index = selection[<span class="hljs-number">0</span>]
+            <span class="hljs-variable language_">self</span>.selected_window = <span class="hljs-variable language_">self</span>.windows[index]
+            <span class="hljs-variable language_">self</span>.window_info_var.<span class="hljs-built_in">set</span>(<span class="hljs-variable language_">self</span>.selected_window[<span class="hljs-number">1</span>])
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">browse_save_path</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;浏览保存路径&quot;&quot;&quot;</span>
+        path = filedialog.askdirectory()
+        <span class="hljs-keyword">if</span> path:
+            <span class="hljs-variable language_">self</span>.save_path_var.<span class="hljs-built_in">set</span>(path)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">start_recording</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;开始录制&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.selected_window:
+            messagebox.showwarning(<span class="hljs-string">&quot;警告&quot;</span>, <span class="hljs-string">&quot;请先选择一个窗口&quot;</span>)
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.is_recording:
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-comment"># 更新状态</span>
+        <span class="hljs-variable language_">self</span>.is_recording = <span class="hljs-literal">True</span>
+        <span class="hljs-variable language_">self</span>.is_paused = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.status_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;正在录制...&quot;</span>)
+        <span class="hljs-variable language_">self</span>.start_btn.config(state=tk.DISABLED)
+        <span class="hljs-variable language_">self</span>.pause_btn.config(state=tk.NORMAL)
+        <span class="hljs-variable language_">self</span>.stop_btn.config(state=tk.NORMAL)
+
+        <span class="hljs-comment"># 创建输出文件名</span>
+        timestamp = datetime.now().strftime(<span class="hljs-string">&quot;%Y%m%d_%H%M%S&quot;</span>)
+        <span class="hljs-variable language_">self</span>.output_file = os.path.join(
+            <span class="hljs-variable language_">self</span>.save_path_var.get(),
+            <span class="hljs-string">f&quot;window_recording_<span class="hljs-subst">{timestamp}</span>.mp4&quot;</span>
+        )
+
+        <span class="hljs-comment"># 记录开始时间</span>
+        <span class="hljs-variable language_">self</span>.recording_start_time = time.time() - <span class="hljs-variable language_">self</span>.recording_duration
+        <span class="hljs-variable language_">self</span>.start_timer()
+
+        <span class="hljs-comment"># 启动录制线程</span>
+        <span class="hljs-variable language_">self</span>.recorder_thread = threading.Thread(target=<span class="hljs-variable language_">self</span>.record_window)
+        <span class="hljs-variable language_">self</span>.recorder_thread.daemon = <span class="hljs-literal">True</span>
+        <span class="hljs-variable language_">self</span>.recorder_thread.start()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">pause_recording</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;暂停录制&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.is_recording:
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.is_paused:
+            <span class="hljs-comment"># 继续录制</span>
+            <span class="hljs-variable language_">self</span>.is_paused = <span class="hljs-literal">False</span>
+            <span class="hljs-variable language_">self</span>.status_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;正在录制...&quot;</span>)
+            <span class="hljs-variable language_">self</span>.pause_btn.config(text=<span class="hljs-string">&quot;暂停&quot;</span>)
+            <span class="hljs-variable language_">self</span>.recording_start_time = time.time() - <span class="hljs-variable language_">self</span>.recording_duration
+            <span class="hljs-variable language_">self</span>.start_timer()
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 暂停录制</span>
+            <span class="hljs-variable language_">self</span>.is_paused = <span class="hljs-literal">True</span>
+            <span class="hljs-variable language_">self</span>.status_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;已暂停&quot;</span>)
+            <span class="hljs-variable language_">self</span>.pause_btn.config(text=<span class="hljs-string">&quot;继续&quot;</span>)
+            <span class="hljs-variable language_">self</span>.recording_duration = time.time() - <span class="hljs-variable language_">self</span>.recording_start_time
+            <span class="hljs-variable language_">self</span>.stop_timer()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">stop_recording</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;停止录制&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.is_recording:
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-variable language_">self</span>.is_recording = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.is_paused = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.status_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;录制已停止&quot;</span>)
+        <span class="hljs-variable language_">self</span>.start_btn.config(state=tk.NORMAL)
+        <span class="hljs-variable language_">self</span>.pause_btn.config(state=tk.DISABLED)
+        <span class="hljs-variable language_">self</span>.stop_btn.config(state=tk.DISABLED)
+        <span class="hljs-variable language_">self</span>.pause_btn.config(text=<span class="hljs-string">&quot;暂停&quot;</span>)
+
+        <span class="hljs-comment"># 停止计时器</span>
+        <span class="hljs-variable language_">self</span>.stop_timer()
+        <span class="hljs-variable language_">self</span>.recording_duration = <span class="hljs-number">0</span>
+
+        <span class="hljs-comment"># 等待录制线程结束</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.recorder_thread <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.recorder_thread.is_alive():
+            <span class="hljs-variable language_">self</span>.recorder_thread.join()
+
+        messagebox.showinfo(<span class="hljs-string">&quot;完成&quot;</span>, <span class="hljs-string">f&quot;录制已保存至:\n<span class="hljs-subst">{self.output_file}</span>&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">record_window</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;录制窗口的线程函数&quot;&quot;&quot;</span>
+        hwnd, title = <span class="hljs-variable language_">self</span>.selected_window
+
+        <span class="hljs-comment"># 获取窗口位置和大小</span>
+        rect = win32gui.GetWindowRect(hwnd)
+        x, y, width, height = rect
+        <span class="hljs-comment"># 调整窗口大小（去除边框）</span>
+        client_rect = win32gui.GetClientRect(hwnd)
+        border_width = (width - x - client_rect[<span class="hljs-number">2</span>]) // <span class="hljs-number">2</span>
+        title_bar_height = (height - y - client_rect[<span class="hljs-number">3</span>]) - border_width
+        x += border_width
+        y += title_bar_height
+        width = client_rect[<span class="hljs-number">2</span>]
+        height = client_rect[<span class="hljs-number">3</span>]
+
+        <span class="hljs-comment"># 确保窗口可见且有有效尺寸</span>
+        <span class="hljs-keyword">if</span> width &lt;= <span class="hljs-number">0</span> <span class="hljs-keyword">or</span> height &lt;= <span class="hljs-number">0</span>:
+            messagebox.showerror(<span class="hljs-string">&quot;错误&quot;</span>, <span class="hljs-string">&quot;无法获取窗口尺寸，请确保窗口可见&quot;</span>)
+            <span class="hljs-variable language_">self</span>.stop_recording()
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-comment"># 定义编码器并创建VideoWriter对象</span>
+        fourcc = cv2.VideoWriter_fourcc(*<span class="hljs-string">&#x27;mp4v&#x27;</span>)
+        out = cv2.VideoWriter(<span class="hljs-variable language_">self</span>.output_file, fourcc, <span class="hljs-variable language_">self</span>.fps, (width, height))
+
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> out.isOpened():
+            messagebox.showerror(<span class="hljs-string">&quot;错误&quot;</span>, <span class="hljs-string">&quot;无法创建视频文件，请检查保存路径&quot;</span>)
+            <span class="hljs-variable language_">self</span>.stop_recording()
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-keyword">while</span> <span class="hljs-variable language_">self</span>.is_recording:
+                <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.is_paused:
+                    <span class="hljs-comment"># 捕获窗口区域</span>
+                    screenshot = pyautogui.screenshot(region=(x, y, width, height))
+                    frame = np.array(screenshot)
+                    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)  <span class="hljs-comment"># 转换为OpenCV格式</span>
+                    out.write(frame)
+
+                <span class="hljs-comment"># 控制录制帧率</span>
+                time.sleep(<span class="hljs-number">1</span> / <span class="hljs-variable language_">self</span>.fps)
+        <span class="hljs-keyword">finally</span>:
+            out.release()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">start_timer</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;启动录制计时器&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.timer_running:
+            <span class="hljs-variable language_">self</span>.timer_running = <span class="hljs-literal">True</span>
+            <span class="hljs-variable language_">self</span>.update_timer()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update_timer</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;更新录制时间显示&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.is_recording <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.is_paused:
+            elapsed = time.time() - <span class="hljs-variable language_">self</span>.recording_start_time
+            hours = <span class="hljs-built_in">int</span>(elapsed // <span class="hljs-number">3600</span>)
+            minutes = <span class="hljs-built_in">int</span>((elapsed % <span class="hljs-number">3600</span>) // <span class="hljs-number">60</span>)
+            seconds = <span class="hljs-built_in">int</span>(elapsed % <span class="hljs-number">60</span>)
+            <span class="hljs-variable language_">self</span>.time_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{hours:02d}</span>:<span class="hljs-subst">{minutes:02d}</span>:<span class="hljs-subst">{seconds:02d}</span>&quot;</span>)
+            <span class="hljs-variable language_">self</span>.root.after(<span class="hljs-number">1000</span>, <span class="hljs-variable language_">self</span>.update_timer)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-variable language_">self</span>.timer_running = <span class="hljs-literal">False</span>
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    <span class="hljs-comment"># 确保中文显示正常</span>
+    root = tk.Tk()
+    app = WindowRecorder(root)
+    root.mainloop()
+</code></pre>
+<p>创建时间：09-06 23:51</p>
+<p>这个单窗口录屏工具具有以下功能：</p>
+<ol>
+<li></li>
+</ol>
+<pre><code>**窗口选择**：自动检测并列出所有可见窗口，用户可以从中选择要录制的窗口
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>**录制控制**：
+
+
+-   开始录制
+-   暂停 / 继续录制
+-   停止录制并保存
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>**录制设置**：
+
+
+-   可调整录制帧率（10/15/20/30 FPS）
+-   可自定义视频保存路径
+</code></pre>
+<ol start="4">
+<li></li>
+</ol>
+<pre><code>**状态显示**：
+
+
+-   实时显示录制时间
+-   显示当前选中的窗口
+-   显示录制状态（就绪 / 录制中 / 已暂停）
+</code></pre>
+<p>使用说明：</p>
+<ol>
+<li>运行程序后，会自动列出所有可见窗口</li>
+<li>从列表中选择要录制的窗口</li>
+<li>可以根据需要调整帧率和保存路径</li>
+<li>点击 “开始录制” 按钮开始录制</li>
+<li>录制过程中可以暂停或继续</li>
+<li>点击 “停止录制” 完成录制，视频会保存为 MP4 格式</li>
+</ol>
+<p>注意事项：</p>
+<ul>
+<li>需要安装所需依赖库：<code>pip install opencv-python numpy pyautogui pywin32</code></li>
+<li>程序适用于 Windows 系统</li>
+<li>确保录制的窗口保持可见，最小化窗口可能无法正常录制</li>
+<li>录制的视频默认保存在用户的 Videos 文件夹中</li>
+</ul>
+<p>这个工具界面简洁，操作直观，适合需要对特定窗口进行录制的场景，如软件演示、游戏录制等。</p>
+<p>录制效果如下</p>
+<p><img src="../uploads/csdn/windows%E9%80%89%E6%8B%A9%E7%89%B9%E5%AE%9A%E7%AA%97%E5%8F%A3%E5%BD%95%E5%B1%8F-%E5%8D%95%E7%AA%97%E5%8F%A3%E5%BD%95%E5%B1%8Fpython%E4%BB%A3%E7%A0%81/img-01.gif" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/wokwi仿真esp32s3ssd1306播放gif图.html">
+      <span>上一篇</span>
+      <strong>WOKWI仿真ESP32S3SSD1306播放GIF图</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/vs2022python3-10c调用python文件并执行函数.html">
+      <span>下一篇</span>
+      <strong>VS2022PYTHON3.10C调用Python文件并执行函数</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

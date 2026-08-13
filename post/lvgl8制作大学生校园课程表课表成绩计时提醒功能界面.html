@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>LVGL8制作大学生校园课程表课表成绩计时提醒功能界面 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/嵌入式与硬件.html">嵌入式与硬件</a>
+        </nav>
+        <h1 class="post-title">LVGL8制作大学生校园课程表课表成绩计时提醒功能界面</h1>
+        <p class="post-deck">本文介绍了一个基于LVGL的大学课表应用，采用甜美风格设计，包含课程表展示、上课提醒和成绩查询三大功能。系统使用C语言开发，在Windows平台运行，采用柔和色彩和圆润UI元素，定义了粉色系主题色。应用包含三个主要模块：课表展示模块支持按周/日切换查看课程；成绩查询模块显示各科成绩和GPA统计；提醒模块可设置课前通知。文中详细阐述了UI组件实现、数据结构设计以及事件处理机制，展示了完整的代码框架和…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.338Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>99 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-10.html">科技</a>
+          
+            <a class="tag-chip" href="../tags/tag-11.html">社会</a>
+          
+            <a class="tag-chip" href="../tags/tag-25.html">LVGL</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文介绍了一个基于LVGL的大学课表应用，采用甜美风格设计，包含课程表展示、上课提醒和成绩查询三大功能。系统使用C语言开发，在Windows平台运行，采用柔和色彩和圆润UI元素，定义了粉色系主题色。应用包含三个主要模块：课表展示模块支持按周/日切换查看课程；成绩查询模块显示各科成绩和GPA统计；提醒模块可设置课前通知。文中详细阐述了UI组件实现、数据结构设计以及事件处理机制，展示了完整的代码框架和交互逻辑。该应用实现了大学生课程管理的核心需求，具有美观友好的界面和实用的功能特性。</p>
+<p><img src="../uploads/csdn/lvgl8%E5%88%B6%E4%BD%9C%E5%A4%A7%E5%AD%A6%E7%94%9F%E6%A0%A1%E5%9B%AD%E8%AF%BE%E7%A8%8B%E8%A1%A8%E8%AF%BE%E8%A1%A8%E6%88%90%E7%BB%A9%E8%AE%A1%E6%97%B6%E6%8F%90%E9%86%92%E5%8A%9F%E8%83%BD%E7%95%8C%E9%9D%A2/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/lvgl8%E5%88%B6%E4%BD%9C%E5%A4%A7%E5%AD%A6%E7%94%9F%E6%A0%A1%E5%9B%AD%E8%AF%BE%E7%A8%8B%E8%A1%A8%E8%AF%BE%E8%A1%A8%E6%88%90%E7%BB%A9%E8%AE%A1%E6%97%B6%E6%8F%90%E9%86%92%E5%8A%9F%E8%83%BD%E7%95%8C%E9%9D%A2/img-02.png" alt=""></p>
+<p><img src="../uploads/csdn/lvgl8%E5%88%B6%E4%BD%9C%E5%A4%A7%E5%AD%A6%E7%94%9F%E6%A0%A1%E5%9B%AD%E8%AF%BE%E7%A8%8B%E8%A1%A8%E8%AF%BE%E8%A1%A8%E6%88%90%E7%BB%A9%E8%AE%A1%E6%97%B6%E6%8F%90%E9%86%92%E5%8A%9F%E8%83%BD%E7%95%8C%E9%9D%A2/img-03.png" alt=""></p>
+<p><img src="../uploads/csdn/lvgl8%E5%88%B6%E4%BD%9C%E5%A4%A7%E5%AD%A6%E7%94%9F%E6%A0%A1%E5%9B%AD%E8%AF%BE%E7%A8%8B%E8%A1%A8%E8%AF%BE%E8%A1%A8%E6%88%90%E7%BB%A9%E8%AE%A1%E6%97%B6%E6%8F%90%E9%86%92%E5%8A%9F%E8%83%BD%E7%95%8C%E9%9D%A2/img-04.png" alt=""></p>
+<p>代码</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-comment">/**
+ * LVGL大学课表应用 - 甜美风格设计
+ * 功能：课程表展示、上课提醒、成绩查询
+ * 设计风格：甜美可爱，采用柔和色彩和圆润元素
+ */</span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;lvgl.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdlib.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;time.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;windows.h&gt;</span></span>
+
+<span class="hljs-comment">/* Windows驱动支持 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;lvgl/src/drivers/windows/lv_windows_display.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;lvgl/src/drivers/windows/lv_windows_context.h&quot;</span></span>
+
+<span class="hljs-comment">/* 简化版鼠标输入处理 */</span>
+<span class="hljs-function"><span class="hljs-keyword">extern</span> <span class="hljs-type">lv_indev_t</span> * <span class="hljs-title">lv_windows_acquire_pointer_indev</span><span class="hljs-params">(<span class="hljs-type">lv_display_t</span> * display)</span></span>;
+<span class="hljs-function"><span class="hljs-keyword">extern</span> <span class="hljs-type">bool</span> <span class="hljs-title">lv_windows_pointer_device_window_message_handler</span><span class="hljs-params">(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT * plResult)</span></span>;
+
+<span class="hljs-comment">/* 甜美风格颜色定义 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> COLOR_BG          lv_color_make(255, 245, 250)    <span class="hljs-comment">/* 浅粉背景 */</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> COLOR_CARD        lv_color_make(255, 255, 255)    <span class="hljs-comment">/* 白色卡片 */</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> COLOR_PRIMARY     lv_color_make(255, 182, 193)    <span class="hljs-comment">/* 浅粉色 */</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> COLOR_SECONDARY   lv_color_make(173, 216, 230)    <span class="hljs-comment">/* 浅蓝色 */</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> COLOR_ACCENT      lv_color_make(255, 209, 220)    <span class="hljs-comment">/* 粉色强调 */</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> COLOR_TEXT        lv_color_make(105, 105, 105)    <span class="hljs-comment">/* 深灰色文字 */</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> COLOR_TEXT_LIGHT  lv_color_make(180, 180, 180)    <span class="hljs-comment">/* 浅灰色文字 */</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> COLOR_SUCCESS     lv_color_make(152, 251, 152)    <span class="hljs-comment">/* 浅绿色 */</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> COLOR_WARNING     lv_color_make(255, 228, 181)    <span class="hljs-comment">/* 浅橙色 */</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> COLOR_DANGER      lv_color_make(255, 182, 193)    <span class="hljs-comment">/* 浅红色 */</span></span>
+
+<span class="hljs-comment">/* 课程数据结构 */</span>
+<span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> {
+    <span class="hljs-type">char</span> name[<span class="hljs-number">32</span>];
+    <span class="hljs-type">char</span> teacher[<span class="hljs-number">24</span>];
+    <span class="hljs-type">char</span> location[<span class="hljs-number">24</span>];
+    <span class="hljs-type">int</span> weekday;        <span class="hljs-comment">/* 1-5: 周一至周五 */</span>
+    <span class="hljs-type">int</span> start_time;     <span class="hljs-comment">/* 8, 10, 14, 16, 19等 */</span>
+    <span class="hljs-type">int</span> duration;       <span class="hljs-comment">/* 通常为2小时 */</span>
+    <span class="hljs-type">int</span> credit;         <span class="hljs-comment">/* 学分 */</span>
+    <span class="hljs-type">char</span> color[<span class="hljs-number">16</span>];     <span class="hljs-comment">/* 课程颜色 */</span>
+} Course;
+
+<span class="hljs-comment">/* 成绩数据结构 */</span>
+<span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> {
+    <span class="hljs-type">char</span> course_name[<span class="hljs-number">32</span>];
+    <span class="hljs-type">float</span> score;
+    <span class="hljs-type">int</span> credit;
+    <span class="hljs-type">char</span> grade[<span class="hljs-number">4</span>];      <span class="hljs-comment">/* A, B, C, D, F */</span>
+} Grade;
+
+<span class="hljs-comment">/* 提醒数据结构 */</span>
+<span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> {
+    <span class="hljs-type">char</span> course_name[<span class="hljs-number">32</span>];
+    <span class="hljs-type">int</span> time_before;    <span class="hljs-comment">/* 提前多少分钟提醒 */</span>
+    <span class="hljs-type">int</span> enabled;
+} Reminder;
+
+<span class="hljs-comment">/* 函数原型 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">weekday_btn_clicked</span><span class="hljs-params">(<span class="hljs-type">lv_event_t</span> *e)</span></span>;
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">week_minus_clicked</span><span class="hljs-params">(<span class="hljs-type">lv_event_t</span> *e)</span></span>;
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">week_plus_clicked</span><span class="hljs-params">(<span class="hljs-type">lv_event_t</span> *e)</span></span>;
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">add_reminder_clicked</span><span class="hljs-params">(<span class="hljs-type">lv_event_t</span> *e)</span></span>;
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">nav_btn_clicked</span><span class="hljs-params">(<span class="hljs-type">lv_event_t</span> *e)</span></span>;
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">reminder_btn_clicked</span><span class="hljs-params">(<span class="hljs-type">lv_event_t</span> *e)</span></span>;
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">update_timetable_display</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+
+<span class="hljs-comment">/* 全局变量 */</span>
+<span class="hljs-type">static</span> Course courses[] = {
+    {<span class="hljs-string">&quot;Advanced Mathematics&quot;</span>, <span class="hljs-string">&quot;Prof. Zhang&quot;</span>, <span class="hljs-string">&quot;Yifu Building 201&quot;</span>, <span class="hljs-number">1</span>, <span class="hljs-number">8</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-string">&quot;primary&quot;</span>},
+    {<span class="hljs-string">&quot;College English&quot;</span>, <span class="hljs-string">&quot;Mr. Wang&quot;</span>, <span class="hljs-string">&quot;Foreign Language Building 101&quot;</span>, <span class="hljs-number">1</span>, <span class="hljs-number">10</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-string">&quot;secondary&quot;</span>},
+    {<span class="hljs-string">&quot;Programming&quot;</span>, <span class="hljs-string">&quot;Prof. Li&quot;</span>, <span class="hljs-string">&quot;Computer Center 302&quot;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">14</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-string">&quot;accent&quot;</span>},
+    {<span class="hljs-string">&quot;Physical Education&quot;</span>, <span class="hljs-string">&quot;Mr. Liu&quot;</span>, <span class="hljs-string">&quot;Gymnasium&quot;</span>, <span class="hljs-number">3</span>, <span class="hljs-number">10</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-string">&quot;success&quot;</span>},
+    {<span class="hljs-string">&quot;Physics Lab&quot;</span>, <span class="hljs-string">&quot;Prof. Zhao&quot;</span>, <span class="hljs-string">&quot;Physics Lab Building&quot;</span>, <span class="hljs-number">4</span>, <span class="hljs-number">14</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&quot;warning&quot;</span>},
+    {<span class="hljs-string">&quot;Ideological and Political Education&quot;</span>, <span class="hljs-string">&quot;Mr. Chen&quot;</span>, <span class="hljs-string">&quot;Teaching Building 105&quot;</span>, <span class="hljs-number">5</span>, <span class="hljs-number">8</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&quot;primary&quot;</span>},
+    {<span class="hljs-string">&quot;Data Structures&quot;</span>, <span class="hljs-string">&quot;Prof. Li&quot;</span>, <span class="hljs-string">&quot;Computer Center 305&quot;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">16</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-string">&quot;secondary&quot;</span>},
+    {<span class="hljs-string">&quot;Art Appreciation&quot;</span>, <span class="hljs-string">&quot;Mr. Sun&quot;</span>, <span class="hljs-string">&quot;Art Building 101&quot;</span>, <span class="hljs-number">4</span>, <span class="hljs-number">10</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&quot;accent&quot;</span>},
+};
+
+<span class="hljs-type">static</span> Grade grades[] = {
+    {<span class="hljs-string">&quot;Advanced Mathematics&quot;</span>, <span class="hljs-number">92.5</span>, <span class="hljs-number">4</span>, <span class="hljs-string">&quot;A&quot;</span>},
+    {<span class="hljs-string">&quot;College English&quot;</span>, <span class="hljs-number">85.0</span>, <span class="hljs-number">3</span>, <span class="hljs-string">&quot;B+&quot;</span>},
+    {<span class="hljs-string">&quot;Programming&quot;</span>, <span class="hljs-number">88.0</span>, <span class="hljs-number">4</span>, <span class="hljs-string">&quot;B+&quot;</span>},
+    {<span class="hljs-string">&quot;Physical Education&quot;</span>, <span class="hljs-number">95.0</span>, <span class="hljs-number">1</span>, <span class="hljs-string">&quot;A&quot;</span>},
+    {<span class="hljs-string">&quot;Physics Lab&quot;</span>, <span class="hljs-number">78.5</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&quot;C+&quot;</span>},
+    {<span class="hljs-string">&quot;Ideological and Political Education&quot;</span>, <span class="hljs-number">90.0</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&quot;A-&quot;</span>},
+    {<span class="hljs-string">&quot;Data Structures&quot;</span>, <span class="hljs-number">87.0</span>, <span class="hljs-number">4</span>, <span class="hljs-string">&quot;B+&quot;</span>},
+    {<span class="hljs-string">&quot;Art Appreciation&quot;</span>, <span class="hljs-number">93.0</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&quot;A&quot;</span>},
+};
+
+<span class="hljs-type">static</span> Reminder reminders[] = {
+    {<span class="hljs-string">&quot;Advanced Mathematics&quot;</span>, <span class="hljs-number">10</span>, <span class="hljs-number">1</span>},
+    {<span class="hljs-string">&quot;College English&quot;</span>, <span class="hljs-number">15</span>, <span class="hljs-number">1</span>},
+    {<span class="hljs-string">&quot;Programming&quot;</span>, <span class="hljs-number">5</span>, <span class="hljs-number">0</span>},
+    {<span class="hljs-string">&quot;Physical Education&quot;</span>, <span class="hljs-number">30</span>, <span class="hljs-number">1</span>},
+};
+
+<span class="hljs-type">static</span> <span class="hljs-type">int</span> current_day = <span class="hljs-number">1</span>;  <span class="hljs-comment">/* 默认显示周一 */</span>
+<span class="hljs-type">static</span> <span class="hljs-type">int</span> current_week = <span class="hljs-number">1</span>; <span class="hljs-comment">/* 当前周数 */</span>
+<span class="hljs-type">static</span> <span class="hljs-type">lv_obj_t</span> *timetable_grid;
+<span class="hljs-type">static</span> <span class="hljs-type">lv_obj_t</span> *grade_list;
+<span class="hljs-type">static</span> <span class="hljs-type">lv_obj_t</span> *reminder_list;
+<span class="hljs-type">static</span> <span class="hljs-type">lv_obj_t</span> *current_day_label;
+<span class="hljs-type">static</span> <span class="hljs-type">lv_obj_t</span> *current_week_label;
+
+<span class="hljs-comment">/* 获取课程颜色 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">lv_color_t</span> <span class="hljs-title">get_course_color</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span> *color_name)</span> </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(color_name, <span class="hljs-string">&quot;primary&quot;</span>) == <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> COLOR_PRIMARY;
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(color_name, <span class="hljs-string">&quot;secondary&quot;</span>) == <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> COLOR_SECONDARY;
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(color_name, <span class="hljs-string">&quot;accent&quot;</span>) == <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> COLOR_ACCENT;
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(color_name, <span class="hljs-string">&quot;success&quot;</span>) == <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> COLOR_SUCCESS;
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(color_name, <span class="hljs-string">&quot;warning&quot;</span>) == <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> COLOR_WARNING;
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(color_name, <span class="hljs-string">&quot;danger&quot;</span>) == <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> COLOR_DANGER;
+    <span class="hljs-keyword">return</span> COLOR_PRIMARY; <span class="hljs-comment">/* 默认颜色 */</span>
+}
+
+<span class="hljs-comment">/* 创建圆形图标按钮 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">lv_obj_t</span> *<span class="hljs-title">create_round_btn</span><span class="hljs-params">(<span class="hljs-type">lv_obj_t</span> *parent, <span class="hljs-type">const</span> <span class="hljs-type">void</span> *icon, <span class="hljs-type">lv_color_t</span> color)</span> </span>{
+    <span class="hljs-type">lv_obj_t</span> *btn = <span class="hljs-built_in">lv_btn_create</span>(parent);
+    <span class="hljs-built_in">lv_obj_set_size</span>(btn, <span class="hljs-number">60</span>, <span class="hljs-number">60</span>); <span class="hljs-comment">// 默认增大按钮</span>
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(btn, color, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_radius</span>(btn, <span class="hljs-number">30</span>, <span class="hljs-number">0</span>); <span class="hljs-comment">// 相应调整圆角半径</span>
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(btn, LV_OPA_100, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_color</span>(btn, <span class="hljs-built_in">lv_color_darken</span>(color, LV_OPA_30), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_width</span>(btn, <span class="hljs-number">10</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_spread</span>(btn, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-keyword">if</span> (icon) {
+        <span class="hljs-type">lv_obj_t</span> *icon_obj = <span class="hljs-built_in">lv_img_create</span>(btn);
+        <span class="hljs-built_in">lv_img_set_src</span>(icon_obj, icon);
+        <span class="hljs-built_in">lv_obj_center</span>(icon_obj);
+    }
+
+    <span class="hljs-keyword">return</span> btn;
+}
+
+<span class="hljs-comment">/* 创建课程卡片 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">lv_obj_t</span> *<span class="hljs-title">create_course_card</span><span class="hljs-params">(<span class="hljs-type">lv_obj_t</span> *parent, Course *course)</span> </span>{
+    <span class="hljs-type">lv_obj_t</span> *card = <span class="hljs-built_in">lv_obj_create</span>(parent);
+    <span class="hljs-built_in">lv_obj_set_size</span>(card, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), LV_SIZE_CONTENT);
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(card, <span class="hljs-built_in">get_course_color</span>(course-&gt;color), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(card, LV_OPA_70, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_radius</span>(card, <span class="hljs-number">15</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(card, <span class="hljs-number">12</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(card, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_color</span>(card, <span class="hljs-built_in">lv_color_darken</span>(<span class="hljs-built_in">get_course_color</span>(course-&gt;color), LV_OPA_20), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_width</span>(card, <span class="hljs-number">8</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_spread</span>(card, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_ofs_y</span>(card, <span class="hljs-number">3</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-comment">/* 课程名称 */</span>
+    <span class="hljs-type">lv_obj_t</span> *name_label = <span class="hljs-built_in">lv_label_create</span>(card);
+    <span class="hljs-built_in">lv_label_set_text_fmt</span>(name_label, <span class="hljs-string">&quot;%s&quot;</span>, course-&gt;name);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(name_label, <span class="hljs-built_in">lv_color_white</span>(), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_font</span>(name_label, &amp;lv_font_montserrat_16, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_opa</span>(name_label, LV_OPA_100, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_align</span>(name_label, LV_ALIGN_TOP_LEFT, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-comment">/* 课程详情 */</span>
+    <span class="hljs-type">lv_obj_t</span> *details_label = <span class="hljs-built_in">lv_label_create</span>(card);
+    <span class="hljs-built_in">lv_label_set_text_fmt</span>(details_label, <span class="hljs-string">&quot;%s\n%s Period %d-%d&quot;</span>,
+                         course-&gt;teacher, course-&gt;location,
+                         course-&gt;start_time, course-&gt;start_time + course-&gt;duration - <span class="hljs-number">1</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(details_label, <span class="hljs-built_in">lv_color_white</span>(), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_font</span>(details_label, &amp;lv_font_montserrat_12, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_opa</span>(details_label, LV_OPA_90, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_align_to</span>(details_label, name_label, LV_ALIGN_OUT_BOTTOM_LEFT, <span class="hljs-number">0</span>, <span class="hljs-number">5</span>);
+
+    <span class="hljs-comment">/* 学分标签 */</span>
+    <span class="hljs-type">lv_obj_t</span> *credit_label = <span class="hljs-built_in">lv_label_create</span>(card);
+    <span class="hljs-built_in">lv_label_set_text_fmt</span>(credit_label, <span class="hljs-string">&quot;%d Credits&quot;</span>, course-&gt;credit);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(credit_label, <span class="hljs-built_in">lv_color_white</span>(), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_font</span>(credit_label, &amp;lv_font_montserrat_12, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_opa</span>(credit_label, LV_OPA_100, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_align</span>(credit_label, LV_ALIGN_TOP_RIGHT, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-keyword">return</span> card;
+}
+
+<span class="hljs-comment">/* 创建课表页面 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">create_timetable_tab</span><span class="hljs-params">(<span class="hljs-type">lv_obj_t</span> *parent)</span> </span>{
+    <span class="hljs-comment">/* 顶部栏 */</span>
+    <span class="hljs-type">lv_obj_t</span> *top_bar = <span class="hljs-built_in">lv_obj_create</span>(parent);
+    <span class="hljs-built_in">lv_obj_set_size</span>(top_bar, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-number">70</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(top_bar, COLOR_CARD, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(top_bar, LV_OPA_100, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_radius</span>(top_bar, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(top_bar, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_color</span>(top_bar, <span class="hljs-built_in">lv_color_hex</span>(<span class="hljs-number">0x888888</span>), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_width</span>(top_bar, <span class="hljs-number">10</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_spread</span>(top_bar, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_align</span>(top_bar, LV_ALIGN_TOP_MID, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-comment">/* 星期选择器 */</span>
+    <span class="hljs-type">lv_obj_t</span> *weekday_selector = <span class="hljs-built_in">lv_obj_create</span>(top_bar);
+    <span class="hljs-built_in">lv_obj_set_size</span>(weekday_selector, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">80</span>), <span class="hljs-number">40</span>);
+    <span class="hljs-built_in">lv_obj_align</span>(weekday_selector, LV_ALIGN_BOTTOM_MID, <span class="hljs-number">0</span>, <span class="hljs-number">-5</span>);
+    <span class="hljs-built_in">lv_obj_set_flex_flow</span>(weekday_selector, LV_FLEX_FLOW_ROW);
+    <span class="hljs-built_in">lv_obj_set_flex_align</span>(weekday_selector, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(weekday_selector, <span class="hljs-number">5</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(weekday_selector, LV_OPA_0, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(weekday_selector, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-type">const</span> <span class="hljs-type">char</span> *weekdays[] = {<span class="hljs-string">&quot;Mon&quot;</span>, <span class="hljs-string">&quot;Tue&quot;</span>, <span class="hljs-string">&quot;Wed&quot;</span>, <span class="hljs-string">&quot;Thu&quot;</span>, <span class="hljs-string">&quot;Fri&quot;</span>, <span class="hljs-string">&quot;Sat&quot;</span>, <span class="hljs-string">&quot;Sun&quot;</span>};
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">7</span>; i++) {
+        <span class="hljs-type">lv_obj_t</span> *btn = <span class="hljs-built_in">lv_btn_create</span>(weekday_selector);
+        <span class="hljs-built_in">lv_obj_set_size</span>(btn, <span class="hljs-number">50</span>, <span class="hljs-number">30</span>);
+        <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(btn, (i<span class="hljs-number">+1</span> == current_day) ? COLOR_PRIMARY : <span class="hljs-built_in">lv_color_hex</span>(<span class="hljs-number">0xF0F0F0</span>), <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_radius</span>(btn, <span class="hljs-number">15</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_border_width</span>(btn, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+        <span class="hljs-type">lv_obj_t</span> *label = <span class="hljs-built_in">lv_label_create</span>(btn);
+        <span class="hljs-built_in">lv_label_set_text</span>(label, weekdays[i]);
+        <span class="hljs-built_in">lv_obj_set_style_text_color</span>(label, (i<span class="hljs-number">+1</span> == current_day) ? <span class="hljs-built_in">lv_color_white</span>() : COLOR_TEXT, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_center</span>(label);
+
+        <span class="hljs-built_in">lv_obj_set_user_data</span>(btn, (<span class="hljs-type">void</span> *)(<span class="hljs-type">intptr_t</span>)(i<span class="hljs-number">+1</span>));
+        <span class="hljs-built_in">lv_obj_add_event_cb</span>(btn, weekday_btn_clicked, LV_EVENT_CLICKED, <span class="hljs-literal">NULL</span>);
+    }
+
+    <span class="hljs-comment">/* 当前日期显示 */</span>
+    current_day_label = <span class="hljs-built_in">lv_label_create</span>(top_bar);
+    <span class="hljs-built_in">lv_label_set_text_fmt</span>(current_day_label, <span class="hljs-string">&quot;Today: Mon Week %d&quot;</span>, current_week);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(current_day_label, COLOR_TEXT, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_font</span>(current_day_label, &amp;lv_font_montserrat_14, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_align</span>(current_day_label, LV_ALIGN_TOP_LEFT, <span class="hljs-number">15</span>, <span class="hljs-number">15</span>);
+
+    <span class="hljs-comment">/* 周数调整按钮 */</span>
+    <span class="hljs-type">lv_obj_t</span> *week_cont = <span class="hljs-built_in">lv_obj_create</span>(top_bar);
+    <span class="hljs-built_in">lv_obj_set_size</span>(week_cont, <span class="hljs-number">100</span>, <span class="hljs-number">30</span>);
+    <span class="hljs-built_in">lv_obj_align</span>(week_cont, LV_ALIGN_TOP_RIGHT, <span class="hljs-number">-15</span>, <span class="hljs-number">15</span>);
+    <span class="hljs-built_in">lv_obj_set_flex_flow</span>(week_cont, LV_FLEX_FLOW_ROW);
+    <span class="hljs-built_in">lv_obj_set_flex_align</span>(week_cont, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(week_cont, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(week_cont, LV_OPA_0, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(week_cont, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-type">lv_obj_t</span> *week_minus = <span class="hljs-built_in">lv_btn_create</span>(week_cont);
+    <span class="hljs-built_in">lv_obj_set_size</span>(week_minus, <span class="hljs-number">30</span>, <span class="hljs-number">30</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(week_minus, COLOR_PRIMARY, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_radius</span>(week_minus, <span class="hljs-number">15</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(week_minus, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-type">lv_obj_t</span> *minus_label = <span class="hljs-built_in">lv_label_create</span>(week_minus);
+    <span class="hljs-built_in">lv_label_set_text</span>(minus_label, <span class="hljs-string">&quot;-&quot;</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(minus_label, <span class="hljs-built_in">lv_color_white</span>(), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_center</span>(minus_label);
+
+    current_week_label = <span class="hljs-built_in">lv_label_create</span>(week_cont);
+    <span class="hljs-built_in">lv_label_set_text_fmt</span>(current_week_label, <span class="hljs-string">&quot;Week %d&quot;</span>, current_week);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(current_week_label, COLOR_TEXT, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_font</span>(current_week_label, &amp;lv_font_montserrat_14, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_pad_hor</span>(current_week_label, <span class="hljs-number">5</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-type">lv_obj_t</span> *week_plus = <span class="hljs-built_in">lv_btn_create</span>(week_cont);
+    <span class="hljs-built_in">lv_obj_set_size</span>(week_plus, <span class="hljs-number">30</span>, <span class="hljs-number">30</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(week_plus, COLOR_PRIMARY, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_radius</span>(week_plus, <span class="hljs-number">15</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(week_plus, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-type">lv_obj_t</span> *plus_label = <span class="hljs-built_in">lv_label_create</span>(week_plus);
+    <span class="hljs-built_in">lv_label_set_text</span>(plus_label, <span class="hljs-string">&quot;+&quot;</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(plus_label, <span class="hljs-built_in">lv_color_white</span>(), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_center</span>(plus_label);
+
+    <span class="hljs-built_in">lv_obj_add_event_cb</span>(week_minus, week_minus_clicked, LV_EVENT_CLICKED, <span class="hljs-literal">NULL</span>);
+
+    <span class="hljs-built_in">lv_obj_add_event_cb</span>(week_plus, week_plus_clicked, LV_EVENT_CLICKED, <span class="hljs-literal">NULL</span>);
+
+    <span class="hljs-comment">/* 课表内容区域 */</span>
+    <span class="hljs-type">lv_obj_t</span> *content = <span class="hljs-built_in">lv_obj_create</span>(parent);
+    <span class="hljs-built_in">lv_obj_set_size</span>(content, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>) - <span class="hljs-number">70</span>);
+    <span class="hljs-built_in">lv_obj_align_to</span>(content, top_bar, LV_ALIGN_OUT_BOTTOM_MID, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(content, COLOR_BG, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(content, LV_OPA_100, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(content, <span class="hljs-number">10</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(content, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-comment">/* 时间表网格 */</span>
+    timetable_grid = <span class="hljs-built_in">lv_obj_create</span>(content);
+    <span class="hljs-built_in">lv_obj_set_size</span>(timetable_grid, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>));
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(timetable_grid, COLOR_BG, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(timetable_grid, LV_OPA_0, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(timetable_grid, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_flex_flow</span>(timetable_grid, LV_FLEX_FLOW_COLUMN);
+    <span class="hljs-built_in">lv_obj_set_flex_align</span>(timetable_grid, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(timetable_grid, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_pad_row</span>(timetable_grid, <span class="hljs-number">10</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-comment">/* 初始化课表显示 */</span>
+    <span class="hljs-built_in">update_timetable_display</span>();
+}
+
+<span class="hljs-comment">/* 更新课表显示 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">update_timetable_display</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Updating timetable display for day %d\n&quot;</span>, current_day);
+    <span class="hljs-keyword">if</span> (!timetable_grid) {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Error: timetable_grid is NULL!\n&quot;</span>);
+        <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-built_in">lv_obj_clean</span>(timetable_grid);
+
+    <span class="hljs-comment">/* 时间槽位 */</span>
+    <span class="hljs-type">int</span> time_slots[] = {<span class="hljs-number">8</span>, <span class="hljs-number">10</span>, <span class="hljs-number">14</span>, <span class="hljs-number">16</span>, <span class="hljs-number">19</span>};
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">5</span>; i++) {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Processing time slot %d: %02d:00-%02d:00\n&quot;</span>, i, time_slots[i], time_slots[i] + <span class="hljs-number">2</span>);
+        <span class="hljs-type">lv_obj_t</span> *time_slot = <span class="hljs-built_in">lv_obj_create</span>(timetable_grid);
+        <span class="hljs-keyword">if</span> (!time_slot) {
+            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Error: failed to create time_slot!\n&quot;</span>);
+            <span class="hljs-keyword">continue</span>;
+        }
+        <span class="hljs-built_in">lv_obj_set_size</span>(time_slot, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-number">80</span>); <span class="hljs-comment">/* 固定高度 */</span>
+        <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(time_slot, COLOR_BG, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(time_slot, LV_OPA_100, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_border_width</span>(time_slot, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_flex_flow</span>(time_slot, LV_FLEX_FLOW_ROW);
+        <span class="hljs-built_in">lv_obj_set_flex_align</span>(time_slot, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+        <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(time_slot, <span class="hljs-number">5</span>, <span class="hljs-number">0</span>);
+
+        <span class="hljs-comment">/* 时间标签 */</span>
+        <span class="hljs-type">lv_obj_t</span> *time_label = <span class="hljs-built_in">lv_label_create</span>(time_slot);
+        <span class="hljs-built_in">lv_label_set_text_fmt</span>(time_label, <span class="hljs-string">&quot;%02d:00&quot;</span>, time_slots[i]);
+        <span class="hljs-built_in">lv_obj_set_width</span>(time_label, <span class="hljs-number">80</span>);
+        <span class="hljs-built_in">lv_obj_set_style_text_color</span>(time_label, COLOR_TEXT, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_text_font</span>(time_label, &amp;lv_font_montserrat_14, <span class="hljs-number">0</span>);
+
+        <span class="hljs-comment">/* 查找当前时间段的课程 */</span>
+        <span class="hljs-type">int</span> course_found = <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> j = <span class="hljs-number">0</span>; j &lt; <span class="hljs-built_in">sizeof</span>(courses) / <span class="hljs-built_in">sizeof</span>(courses[<span class="hljs-number">0</span>]); j++) {
+            <span class="hljs-keyword">if</span> (courses[j].weekday == current_day &amp;&amp;
+                courses[j].start_time == time_slots[i]) {
+                <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Found course: %s at %02d:00\n&quot;</span>, courses[j].name, courses[j].start_time);
+                <span class="hljs-built_in">create_course_card</span>(time_slot, &amp;courses[j]);
+                course_found = <span class="hljs-number">1</span>;
+                <span class="hljs-keyword">break</span>;
+            }
+        }
+
+        <span class="hljs-comment">/* 如果没有课程，显示空白卡片 */</span>
+        <span class="hljs-keyword">if</span> (!course_found) {
+            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;No course found for time slot %d\n&quot;</span>, i);
+            <span class="hljs-type">lv_obj_t</span> *empty_card = <span class="hljs-built_in">lv_obj_create</span>(time_slot);
+            <span class="hljs-built_in">lv_obj_set_size</span>(empty_card, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>) - <span class="hljs-number">80</span>, <span class="hljs-number">60</span>);
+            <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(empty_card, COLOR_CARD, <span class="hljs-number">0</span>);
+            <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(empty_card, LV_OPA_100, <span class="hljs-number">0</span>);
+            <span class="hljs-built_in">lv_obj_set_style_radius</span>(empty_card, <span class="hljs-number">10</span>, <span class="hljs-number">0</span>);
+            <span class="hljs-built_in">lv_obj_set_style_border_width</span>(empty_card, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>);
+            <span class="hljs-built_in">lv_obj_set_style_border_color</span>(empty_card, <span class="hljs-built_in">lv_color_hex</span>(<span class="hljs-number">0xE0E0E0</span>), <span class="hljs-number">0</span>);
+
+            <span class="hljs-type">lv_obj_t</span> *empty_label = <span class="hljs-built_in">lv_label_create</span>(empty_card);
+            <span class="hljs-built_in">lv_label_set_text</span>(empty_label, <span class="hljs-string">&quot;No Class&quot;</span>);
+            <span class="hljs-built_in">lv_obj_set_style_text_color</span>(empty_label, COLOR_TEXT_LIGHT, <span class="hljs-number">0</span>);
+            <span class="hljs-built_in">lv_obj_set_style_text_font</span>(empty_label, &amp;lv_font_montserrat_14, <span class="hljs-number">0</span>);
+            <span class="hljs-built_in">lv_obj_center</span>(empty_label);
+        }
+    }
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Timetable display updated\n&quot;</span>);
+}
+
+<span class="hljs-comment">/* 创建成绩页面 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">create_grades_tab</span><span class="hljs-params">(<span class="hljs-type">lv_obj_t</span> *parent)</span> </span>{
+    <span class="hljs-comment">/* 顶部栏 */</span>
+    <span class="hljs-type">lv_obj_t</span> *top_bar = <span class="hljs-built_in">lv_obj_create</span>(parent);
+    <span class="hljs-built_in">lv_obj_set_size</span>(top_bar, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-number">70</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(top_bar, COLOR_CARD, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(top_bar, LV_OPA_100, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_radius</span>(top_bar, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(top_bar, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_color</span>(top_bar, <span class="hljs-built_in">lv_color_hex</span>(<span class="hljs-number">0x888888</span>), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_width</span>(top_bar, <span class="hljs-number">10</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_spread</span>(top_bar, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_align</span>(top_bar, LV_ALIGN_TOP_MID, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-comment">/* 标题 */</span>
+    <span class="hljs-type">lv_obj_t</span> *title = <span class="hljs-built_in">lv_label_create</span>(top_bar);
+    <span class="hljs-built_in">lv_label_set_text</span>(title, <span class="hljs-string">&quot;Grade Query&quot;</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(title, COLOR_TEXT, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_font</span>(title, &amp;lv_font_montserrat_20, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_center</span>(title);
+
+    <span class="hljs-comment">/* 平均分计算 */</span>
+    <span class="hljs-type">float</span> total_score = <span class="hljs-number">0</span>;
+    <span class="hljs-type">float</span> total_weighted_score = <span class="hljs-number">0</span>;
+    <span class="hljs-type">int</span> total_credits = <span class="hljs-number">0</span>;
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">sizeof</span>(grades) / <span class="hljs-built_in">sizeof</span>(grades[<span class="hljs-number">0</span>]); i++) {
+        total_score += grades[i].score;
+        total_weighted_score += grades[i].score * grades[i].credit;
+        total_credits += grades[i].credit;
+    }
+
+    <span class="hljs-type">float</span> avg_score = total_score / (<span class="hljs-built_in">sizeof</span>(grades) / <span class="hljs-built_in">sizeof</span>(grades[<span class="hljs-number">0</span>]));
+    <span class="hljs-type">float</span> gpa = total_weighted_score / total_credits / <span class="hljs-number">20.0</span>; <span class="hljs-comment">/* 简化GPA计算 */</span>
+
+    <span class="hljs-comment">/* 统计信息 */</span>
+    <span class="hljs-type">lv_obj_t</span> *stats_cont = <span class="hljs-built_in">lv_obj_create</span>(top_bar);
+    <span class="hljs-built_in">lv_obj_set_size</span>(stats_cont, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-number">30</span>);
+    <span class="hljs-built_in">lv_obj_align</span>(stats_cont, LV_ALIGN_BOTTOM_MID, <span class="hljs-number">0</span>, <span class="hljs-number">-5</span>);
+    <span class="hljs-built_in">lv_obj_set_flex_flow</span>(stats_cont, LV_FLEX_FLOW_ROW);
+    <span class="hljs-built_in">lv_obj_set_flex_align</span>(stats_cont, LV_FLEX_ALIGN_SPACE_AROUND, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(stats_cont, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(stats_cont, LV_OPA_0, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(stats_cont, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-type">lv_obj_t</span> *avg_label = <span class="hljs-built_in">lv_label_create</span>(stats_cont);
+    <span class="hljs-built_in">lv_label_set_text_fmt</span>(avg_label, <span class="hljs-string">&quot;Avg: %.1f&quot;</span>, avg_score);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(avg_label, COLOR_TEXT, <span class="hljs-number">0</span>);
+
+    <span class="hljs-type">lv_obj_t</span> *gpa_label = <span class="hljs-built_in">lv_label_create</span>(stats_cont);
+    <span class="hljs-built_in">lv_label_set_text_fmt</span>(gpa_label, <span class="hljs-string">&quot;GPA: %.2f&quot;</span>, gpa);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(gpa_label, COLOR_TEXT, <span class="hljs-number">0</span>);
+
+    <span class="hljs-type">lv_obj_t</span> *credit_label = <span class="hljs-built_in">lv_label_create</span>(stats_cont);
+    <span class="hljs-built_in">lv_label_set_text_fmt</span>(credit_label, <span class="hljs-string">&quot;Total Credits: %d&quot;</span>, total_credits);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(credit_label, COLOR_TEXT, <span class="hljs-number">0</span>);
+
+    <span class="hljs-comment">/* 成绩列表 */</span>
+    <span class="hljs-type">lv_obj_t</span> *content = <span class="hljs-built_in">lv_obj_create</span>(parent);
+    <span class="hljs-built_in">lv_obj_set_size</span>(content, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>) - <span class="hljs-number">70</span>);
+    <span class="hljs-built_in">lv_obj_align_to</span>(content, top_bar, LV_ALIGN_OUT_BOTTOM_MID, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(content, COLOR_BG, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(content, LV_OPA_100, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(content, <span class="hljs-number">10</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(content, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+    grade_list = <span class="hljs-built_in">lv_obj_create</span>(content);
+    <span class="hljs-built_in">lv_obj_set_size</span>(grade_list, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>));
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(grade_list, COLOR_BG, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(grade_list, LV_OPA_0, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(grade_list, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_flex_flow</span>(grade_list, LV_FLEX_FLOW_COLUMN);
+    <span class="hljs-built_in">lv_obj_set_flex_align</span>(grade_list, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(grade_list, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_pad_row</span>(grade_list, <span class="hljs-number">10</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">sizeof</span>(grades) / <span class="hljs-built_in">sizeof</span>(grades[<span class="hljs-number">0</span>]); i++) {
+        <span class="hljs-comment">/* 成绩卡片 */</span>
+        <span class="hljs-type">lv_color_t</span> grade_color;
+        <span class="hljs-keyword">if</span> (grades[i].score &gt;= <span class="hljs-number">90</span>) grade_color = COLOR_SUCCESS;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (grades[i].score &gt;= <span class="hljs-number">80</span>) grade_color = COLOR_SECONDARY;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (grades[i].score &gt;= <span class="hljs-number">70</span>) grade_color = COLOR_WARNING;
+        <span class="hljs-keyword">else</span> grade_color = COLOR_DANGER;
+
+        <span class="hljs-type">lv_obj_t</span> *card = <span class="hljs-built_in">lv_obj_create</span>(grade_list);
+        <span class="hljs-built_in">lv_obj_set_size</span>(card, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-number">80</span>);
+        <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(card, COLOR_CARD, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(card, LV_OPA_100, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_radius</span>(card, <span class="hljs-number">15</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(card, <span class="hljs-number">15</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_border_width</span>(card, <span class="hljs-number">3</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_border_color</span>(card, grade_color, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_shadow_color</span>(card, <span class="hljs-built_in">lv_color_darken</span>(grade_color, LV_OPA_20), <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_shadow_width</span>(card, <span class="hljs-number">8</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_shadow_spread</span>(card, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_shadow_ofs_y</span>(card, <span class="hljs-number">3</span>, <span class="hljs-number">0</span>);
+
+        <span class="hljs-comment">/* 课程名称和学分 */</span>
+        <span class="hljs-type">lv_obj_t</span> *name_cont = <span class="hljs-built_in">lv_obj_create</span>(card);
+        <span class="hljs-built_in">lv_obj_set_size</span>(name_cont, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">60</span>), LV_SIZE_CONTENT);
+        <span class="hljs-built_in">lv_obj_align</span>(name_cont, LV_ALIGN_TOP_LEFT, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(name_cont, LV_OPA_0, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_border_width</span>(name_cont, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_flex_flow</span>(name_cont, LV_FLEX_FLOW_COLUMN);
+        <span class="hljs-built_in">lv_obj_set_flex_align</span>(name_cont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+        <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(name_cont, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+        <span class="hljs-type">lv_obj_t</span> *name_label = <span class="hljs-built_in">lv_label_create</span>(name_cont);
+        <span class="hljs-built_in">lv_label_set_text_fmt</span>(name_label, <span class="hljs-string">&quot;%s&quot;</span>, grades[i].course_name);
+        <span class="hljs-built_in">lv_obj_set_style_text_color</span>(name_label, COLOR_TEXT, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_text_font</span>(name_label, &amp;lv_font_montserrat_16, <span class="hljs-number">0</span>);
+
+        <span class="hljs-type">lv_obj_t</span> *credit_label = <span class="hljs-built_in">lv_label_create</span>(name_cont);
+        <span class="hljs-built_in">lv_label_set_text_fmt</span>(credit_label, <span class="hljs-string">&quot;%d Credits&quot;</span>, grades[i].credit);
+        <span class="hljs-built_in">lv_obj_set_style_text_color</span>(credit_label, COLOR_TEXT_LIGHT, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_text_font</span>(credit_label, &amp;lv_font_montserrat_12, <span class="hljs-number">0</span>);
+
+        <span class="hljs-comment">/* 成绩和等级 */</span>
+        <span class="hljs-type">lv_obj_t</span> *score_cont = <span class="hljs-built_in">lv_obj_create</span>(card);
+        <span class="hljs-built_in">lv_obj_set_size</span>(score_cont, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">40</span>), LV_SIZE_CONTENT);
+        <span class="hljs-built_in">lv_obj_align</span>(score_cont, LV_ALIGN_TOP_RIGHT, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(score_cont, LV_OPA_0, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_border_width</span>(score_cont, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_flex_flow</span>(score_cont, LV_FLEX_FLOW_COLUMN);
+        <span class="hljs-built_in">lv_obj_set_flex_align</span>(score_cont, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+        <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(score_cont, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+        <span class="hljs-type">lv_obj_t</span> *score_label = <span class="hljs-built_in">lv_label_create</span>(score_cont);
+        <span class="hljs-built_in">lv_label_set_text_fmt</span>(score_label, <span class="hljs-string">&quot;%.1f&quot;</span>, grades[i].score);
+        <span class="hljs-built_in">lv_obj_set_style_text_color</span>(score_label, COLOR_TEXT, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_text_font</span>(score_label, &amp;lv_font_montserrat_18, <span class="hljs-number">0</span>);
+
+        <span class="hljs-type">lv_obj_t</span> *grade_label = <span class="hljs-built_in">lv_label_create</span>(score_cont);
+        <span class="hljs-built_in">lv_label_set_text_fmt</span>(grade_label, <span class="hljs-string">&quot;Grade: %s&quot;</span>, grades[i].grade);
+        <span class="hljs-built_in">lv_obj_set_style_text_color</span>(grade_label, grade_color, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_text_font</span>(grade_label, &amp;lv_font_montserrat_14, <span class="hljs-number">0</span>);
+    }
+}
+
+<span class="hljs-comment">/* 创建提醒页面 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">create_reminders_tab</span><span class="hljs-params">(<span class="hljs-type">lv_obj_t</span> *parent)</span> </span>{
+    <span class="hljs-comment">/* 顶部栏 */</span>
+    <span class="hljs-type">lv_obj_t</span> *top_bar = <span class="hljs-built_in">lv_obj_create</span>(parent);
+    <span class="hljs-built_in">lv_obj_set_size</span>(top_bar, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-number">70</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(top_bar, COLOR_CARD, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(top_bar, LV_OPA_100, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_radius</span>(top_bar, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(top_bar, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_color</span>(top_bar, <span class="hljs-built_in">lv_color_hex</span>(<span class="hljs-number">0x888888</span>), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_width</span>(top_bar, <span class="hljs-number">10</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_spread</span>(top_bar, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_align</span>(top_bar, LV_ALIGN_TOP_MID, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-comment">/* 标题 */</span>
+    <span class="hljs-type">lv_obj_t</span> *title = <span class="hljs-built_in">lv_label_create</span>(top_bar);
+    <span class="hljs-built_in">lv_label_set_text</span>(title, <span class="hljs-string">&quot;Class Reminders&quot;</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(title, COLOR_TEXT, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_font</span>(title, &amp;lv_font_montserrat_20, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_center</span>(title);
+
+    <span class="hljs-comment">/* 添加提醒按钮 */</span>
+    <span class="hljs-type">lv_obj_t</span> *add_btn = <span class="hljs-built_in">create_round_btn</span>(top_bar, <span class="hljs-literal">NULL</span>, COLOR_PRIMARY);
+    <span class="hljs-built_in">lv_obj_align</span>(add_btn, LV_ALIGN_RIGHT_MID, <span class="hljs-number">-15</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-type">lv_obj_t</span> *add_label = <span class="hljs-built_in">lv_label_create</span>(add_btn);
+    <span class="hljs-built_in">lv_label_set_text</span>(add_label, <span class="hljs-string">&quot;+&quot;</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(add_label, <span class="hljs-built_in">lv_color_white</span>(), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_font</span>(add_label, &amp;lv_font_montserrat_24, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_center</span>(add_label);
+
+    <span class="hljs-built_in">lv_obj_add_event_cb</span>(add_btn, add_reminder_clicked, LV_EVENT_CLICKED, <span class="hljs-literal">NULL</span>);
+
+    <span class="hljs-comment">/* 提醒列表 */</span>
+    <span class="hljs-type">lv_obj_t</span> *content = <span class="hljs-built_in">lv_obj_create</span>(parent);
+    <span class="hljs-built_in">lv_obj_set_size</span>(content, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>) - <span class="hljs-number">70</span>);
+    <span class="hljs-built_in">lv_obj_align_to</span>(content, top_bar, LV_ALIGN_OUT_BOTTOM_MID, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(content, COLOR_BG, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(content, LV_OPA_100, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(content, <span class="hljs-number">10</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(content, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+    reminder_list = <span class="hljs-built_in">lv_obj_create</span>(content);
+    <span class="hljs-built_in">lv_obj_set_size</span>(reminder_list, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>));
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(reminder_list, COLOR_BG, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(reminder_list, LV_OPA_0, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(reminder_list, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_flex_flow</span>(reminder_list, LV_FLEX_FLOW_COLUMN);
+    <span class="hljs-built_in">lv_obj_set_flex_align</span>(reminder_list, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(reminder_list, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_pad_row</span>(reminder_list, <span class="hljs-number">10</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">sizeof</span>(reminders) / <span class="hljs-built_in">sizeof</span>(reminders[<span class="hljs-number">0</span>]); i++) {
+        <span class="hljs-comment">/* 查找课程信息 */</span>
+        Course *course = <span class="hljs-literal">NULL</span>;
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> j = <span class="hljs-number">0</span>; j &lt; <span class="hljs-built_in">sizeof</span>(courses) / <span class="hljs-built_in">sizeof</span>(courses[<span class="hljs-number">0</span>]); j++) {
+            <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(courses[j].name, reminders[i].course_name) == <span class="hljs-number">0</span>) {
+                course = &amp;courses[j];
+                <span class="hljs-keyword">break</span>;
+            }
+        }
+
+        <span class="hljs-keyword">if</span> (!course) <span class="hljs-keyword">continue</span>;
+
+        <span class="hljs-comment">/* 提醒卡片 */</span>
+        <span class="hljs-type">lv_obj_t</span> *card = <span class="hljs-built_in">lv_obj_create</span>(reminder_list);
+        <span class="hljs-built_in">lv_obj_set_size</span>(card, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-number">100</span>);
+        <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(card, COLOR_CARD, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(card, LV_OPA_100, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_radius</span>(card, <span class="hljs-number">15</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(card, <span class="hljs-number">15</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_border_width</span>(card, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_shadow_color</span>(card, <span class="hljs-built_in">lv_color_hex</span>(<span class="hljs-number">0x888888</span>), <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_shadow_width</span>(card, <span class="hljs-number">8</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_shadow_spread</span>(card, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_shadow_ofs_y</span>(card, <span class="hljs-number">3</span>, <span class="hljs-number">0</span>);
+
+        <span class="hljs-comment">/* 左侧颜色指示条 */</span>
+        <span class="hljs-type">lv_obj_t</span> *color_bar = <span class="hljs-built_in">lv_obj_create</span>(card);
+        <span class="hljs-built_in">lv_obj_set_size</span>(color_bar, <span class="hljs-number">8</span>, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>));
+        <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(color_bar, <span class="hljs-built_in">get_course_color</span>(course-&gt;color), <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(color_bar, LV_OPA_100, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_radius</span>(color_bar, <span class="hljs-number">4</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_align</span>(color_bar, LV_ALIGN_LEFT_MID, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+        <span class="hljs-comment">/* 课程信息 */</span>
+        <span class="hljs-type">lv_obj_t</span> *info_cont = <span class="hljs-built_in">lv_obj_create</span>(card);
+        <span class="hljs-built_in">lv_obj_set_size</span>(info_cont, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">70</span>), LV_SIZE_CONTENT);
+        <span class="hljs-built_in">lv_obj_align_to</span>(info_cont, color_bar, LV_ALIGN_OUT_RIGHT_MID, <span class="hljs-number">10</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(info_cont, LV_OPA_0, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_border_width</span>(info_cont, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_flex_flow</span>(info_cont, LV_FLEX_FLOW_COLUMN);
+        <span class="hljs-built_in">lv_obj_set_flex_align</span>(info_cont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+        <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(info_cont, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+        <span class="hljs-type">lv_obj_t</span> *name_label = <span class="hljs-built_in">lv_label_create</span>(info_cont);
+        <span class="hljs-built_in">lv_label_set_text_fmt</span>(name_label, <span class="hljs-string">&quot;%s&quot;</span>, course-&gt;name);
+        <span class="hljs-built_in">lv_obj_set_style_text_color</span>(name_label, COLOR_TEXT, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_text_font</span>(name_label, &amp;lv_font_montserrat_16, <span class="hljs-number">0</span>);
+
+        <span class="hljs-type">lv_obj_t</span> *time_label = <span class="hljs-built_in">lv_label_create</span>(info_cont);
+        <span class="hljs-type">const</span> <span class="hljs-type">char</span> *weekdays[] = {<span class="hljs-string">&quot;Mon&quot;</span>, <span class="hljs-string">&quot;Tue&quot;</span>, <span class="hljs-string">&quot;Wed&quot;</span>, <span class="hljs-string">&quot;Thu&quot;</span>, <span class="hljs-string">&quot;Fri&quot;</span>, <span class="hljs-string">&quot;Sat&quot;</span>, <span class="hljs-string">&quot;Sun&quot;</span>};
+        <span class="hljs-built_in">lv_label_set_text_fmt</span>(time_label, <span class="hljs-string">&quot;%s %02d:00&quot;</span>, weekdays[course-&gt;weekday<span class="hljs-number">-1</span>], course-&gt;start_time);
+        <span class="hljs-built_in">lv_obj_set_style_text_color</span>(time_label, COLOR_TEXT_LIGHT, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_text_font</span>(time_label, &amp;lv_font_montserrat_12, <span class="hljs-number">0</span>);
+
+        <span class="hljs-type">lv_obj_t</span> *reminder_label = <span class="hljs-built_in">lv_label_create</span>(info_cont);
+        <span class="hljs-built_in">lv_label_set_text_fmt</span>(reminder_label, <span class="hljs-string">&quot;%d min before&quot;</span>, reminders[i].time_before);
+        <span class="hljs-built_in">lv_obj_set_style_text_color</span>(reminder_label, COLOR_TEXT_LIGHT, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_set_style_text_font</span>(reminder_label, &amp;lv_font_montserrat_12, <span class="hljs-number">0</span>);
+
+        <span class="hljs-comment">/* 开关 */</span>
+        <span class="hljs-type">lv_obj_t</span> *sw = <span class="hljs-built_in">lv_switch_create</span>(card);
+        <span class="hljs-built_in">lv_obj_set_size</span>(sw, <span class="hljs-number">50</span>, <span class="hljs-number">25</span>);
+        <span class="hljs-built_in">lv_obj_align</span>(sw, LV_ALIGN_RIGHT_MID, <span class="hljs-number">-10</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-keyword">if</span> (reminders[i].enabled) {
+            <span class="hljs-built_in">lv_obj_add_state</span>(sw, LV_STATE_CHECKED);
+        }
+        <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(sw, COLOR_PRIMARY, LV_STATE_CHECKED);
+
+        <span class="hljs-comment">/* 开关标签 */</span>
+        <span class="hljs-type">lv_obj_t</span> *sw_label = <span class="hljs-built_in">lv_label_create</span>(card);
+        <span class="hljs-built_in">lv_label_set_text</span>(sw_label, reminders[i].enabled ? <span class="hljs-string">&quot;On&quot;</span> : <span class="hljs-string">&quot;Off&quot;</span>);
+        <span class="hljs-built_in">lv_obj_set_style_text_color</span>(sw_label, COLOR_TEXT_LIGHT, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">lv_obj_align_to</span>(sw_label, sw, LV_ALIGN_OUT_BOTTOM_MID, <span class="hljs-number">0</span>, <span class="hljs-number">5</span>);
+    }
+}
+
+<span class="hljs-comment">/* 全局变量 - 用于标签页切换 */</span>
+<span class="hljs-type">static</span> <span class="hljs-type">lv_obj_t</span> *g_tabview;
+
+<span class="hljs-comment">/* 创建底部导航栏 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">create_bottom_nav</span><span class="hljs-params">(<span class="hljs-type">lv_obj_t</span> *parent)</span> </span>{
+    <span class="hljs-type">lv_obj_t</span> *nav = <span class="hljs-built_in">lv_obj_create</span>(parent);
+    <span class="hljs-built_in">lv_obj_set_size</span>(nav, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-number">80</span>); <span class="hljs-comment">// 增加高度</span>
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(nav, COLOR_CARD, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(nav, LV_OPA_100, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_radius</span>(nav, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(nav, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_color</span>(nav, <span class="hljs-built_in">lv_color_hex</span>(<span class="hljs-number">0x888888</span>), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_width</span>(nav, <span class="hljs-number">10</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_spread</span>(nav, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_align</span>(nav, LV_ALIGN_BOTTOM_MID, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-comment">/* 导航按钮容器 */</span>
+    <span class="hljs-type">lv_obj_t</span> *btn_cont = <span class="hljs-built_in">lv_obj_create</span>(nav);
+    <span class="hljs-built_in">lv_obj_set_size</span>(btn_cont, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>));
+    <span class="hljs-built_in">lv_obj_set_flex_flow</span>(btn_cont, LV_FLEX_FLOW_ROW);
+    <span class="hljs-built_in">lv_obj_set_flex_align</span>(btn_cont, LV_FLEX_ALIGN_SPACE_AROUND, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    <span class="hljs-built_in">lv_obj_set_style_pad_all</span>(btn_cont, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(btn_cont, LV_OPA_0, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(btn_cont, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-comment">/* 课表按钮 */</span>
+    <span class="hljs-type">lv_obj_t</span> *timetable_btn = <span class="hljs-built_in">create_round_btn</span>(btn_cont, <span class="hljs-literal">NULL</span>, COLOR_PRIMARY);
+    <span class="hljs-built_in">lv_obj_set_size</span>(timetable_btn, <span class="hljs-number">60</span>, <span class="hljs-number">60</span>); <span class="hljs-comment">// 增大按钮</span>
+    <span class="hljs-type">lv_obj_t</span> *timetable_label = <span class="hljs-built_in">lv_label_create</span>(timetable_btn);
+    <span class="hljs-built_in">lv_label_set_text</span>(timetable_label, <span class="hljs-string">&quot;Schedule&quot;</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(timetable_label, <span class="hljs-built_in">lv_color_white</span>(), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_font</span>(timetable_label, &amp;lv_font_montserrat_12, <span class="hljs-number">0</span>); <span class="hljs-comment">// 调整字体大小</span>
+    <span class="hljs-built_in">lv_obj_center</span>(timetable_label);
+    <span class="hljs-built_in">lv_obj_set_user_data</span>(timetable_btn, (<span class="hljs-type">void</span> *)<span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_add_event_cb</span>(timetable_btn, nav_btn_clicked, LV_EVENT_CLICKED, <span class="hljs-literal">NULL</span>);
+
+    <span class="hljs-comment">/* 成绩按钮 */</span>
+    <span class="hljs-type">lv_obj_t</span> *grades_btn = <span class="hljs-built_in">create_round_btn</span>(btn_cont, <span class="hljs-literal">NULL</span>, COLOR_SECONDARY);
+    <span class="hljs-built_in">lv_obj_set_size</span>(grades_btn, <span class="hljs-number">60</span>, <span class="hljs-number">60</span>); <span class="hljs-comment">// 增大按钮</span>
+    <span class="hljs-type">lv_obj_t</span> *grades_label = <span class="hljs-built_in">lv_label_create</span>(grades_btn);
+    <span class="hljs-built_in">lv_label_set_text</span>(grades_label, <span class="hljs-string">&quot;Grades&quot;</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(grades_label, <span class="hljs-built_in">lv_color_white</span>(), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_font</span>(grades_label, &amp;lv_font_montserrat_12, <span class="hljs-number">0</span>); <span class="hljs-comment">// 调整字体大小</span>
+    <span class="hljs-built_in">lv_obj_center</span>(grades_label);
+    <span class="hljs-built_in">lv_obj_set_user_data</span>(grades_btn, (<span class="hljs-type">void</span> *)<span class="hljs-number">1</span>);
+    <span class="hljs-built_in">lv_obj_add_event_cb</span>(grades_btn, nav_btn_clicked, LV_EVENT_CLICKED, <span class="hljs-literal">NULL</span>);
+
+    <span class="hljs-comment">/* 提醒按钮 */</span>
+    <span class="hljs-type">lv_obj_t</span> *reminders_btn = <span class="hljs-built_in">create_round_btn</span>(btn_cont, <span class="hljs-literal">NULL</span>, COLOR_ACCENT);
+    <span class="hljs-built_in">lv_obj_set_size</span>(reminders_btn, <span class="hljs-number">60</span>, <span class="hljs-number">60</span>); <span class="hljs-comment">// 增大按钮</span>
+    <span class="hljs-type">lv_obj_t</span> *reminders_label = <span class="hljs-built_in">lv_label_create</span>(reminders_btn);
+    <span class="hljs-built_in">lv_label_set_text</span>(reminders_label, <span class="hljs-string">&quot;Reminders&quot;</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(reminders_label, <span class="hljs-built_in">lv_color_white</span>(), <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_font</span>(reminders_label, &amp;lv_font_montserrat_12, <span class="hljs-number">0</span>); <span class="hljs-comment">// 调整字体大小</span>
+    <span class="hljs-built_in">lv_obj_center</span>(reminders_label);
+    <span class="hljs-built_in">lv_obj_set_user_data</span>(reminders_btn, (<span class="hljs-type">void</span> *)<span class="hljs-number">2</span>);
+    <span class="hljs-built_in">lv_obj_add_event_cb</span>(reminders_btn, nav_btn_clicked, LV_EVENT_CLICKED, <span class="hljs-literal">NULL</span>);
+}
+
+<span class="hljs-comment">/* 主函数：创建应用 */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">create_university_timetable_app</span><span class="hljs-params">(<span class="hljs-type">lv_obj_t</span> *parent)</span> </span>{
+    <span class="hljs-comment">/* 设置背景 */</span>
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(parent, COLOR_BG, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(parent, LV_OPA_100, <span class="hljs-number">0</span>);
+
+    <span class="hljs-comment">/* 创建标签页 */</span>
+    g_tabview = <span class="hljs-built_in">lv_tabview_create</span>(parent);
+    <span class="hljs-built_in">lv_obj_set_size</span>(g_tabview, <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>), <span class="hljs-built_in">lv_pct</span>(<span class="hljs-number">100</span>) - <span class="hljs-number">140</span>); <span class="hljs-comment">// 为底部导航留出更多空间</span>
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(g_tabview, LV_OPA_0, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(g_tabview, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-comment">/* 隐藏标签页头部 */</span>
+    <span class="hljs-type">lv_obj_t</span> *tab_btns = <span class="hljs-built_in">lv_tabview_get_tab_btns</span>(g_tabview);
+    <span class="hljs-built_in">lv_obj_set_height</span>(tab_btns, <span class="hljs-number">0</span>);
+
+    <span class="hljs-comment">/* 创建三个标签页 */</span>
+    <span class="hljs-type">lv_obj_t</span> *timetable_tab = <span class="hljs-built_in">lv_tabview_add_tab</span>(g_tabview, <span class="hljs-string">&quot;Schedule&quot;</span>);
+    <span class="hljs-type">lv_obj_t</span> *grades_tab = <span class="hljs-built_in">lv_tabview_add_tab</span>(g_tabview, <span class="hljs-string">&quot;Grades&quot;</span>);
+    <span class="hljs-type">lv_obj_t</span> *reminders_tab = <span class="hljs-built_in">lv_tabview_add_tab</span>(g_tabview, <span class="hljs-string">&quot;Reminders&quot;</span>);
+
+    <span class="hljs-comment">/* 创建各页面内容 */</span>
+    <span class="hljs-built_in">create_timetable_tab</span>(timetable_tab);
+    <span class="hljs-built_in">create_grades_tab</span>(grades_tab);
+    <span class="hljs-built_in">create_reminders_tab</span>(reminders_tab);
+
+    <span class="hljs-comment">/* 创建底部导航栏 */</span>
+    <span class="hljs-built_in">create_bottom_nav</span>(parent);
+}
+
+<span class="hljs-comment">/* 模拟课程提醒弹窗 */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">show_class_reminder</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Creating class reminder messagebox...\n&quot;</span>);
+
+    <span class="hljs-type">lv_obj_t</span> *mbox = <span class="hljs-built_in">lv_msgbox_create</span>(<span class="hljs-literal">NULL</span>);
+    <span class="hljs-built_in">lv_msgbox_add_title</span>(mbox, <span class="hljs-string">&quot;Class Reminder&quot;</span>);
+    <span class="hljs-built_in">lv_msgbox_add_text</span>(mbox, <span class="hljs-string">&quot;Advanced Mathematics class in 10 minutes\n\n\nLocation: Yifu Building 201&quot;</span>);
+    <span class="hljs-comment">//lv_msgbox_add_footer_button(mbox, &quot;Got it&quot;);</span>
+    <span class="hljs-built_in">lv_msgbox_add_close_button</span>(mbox);
+
+    <span class="hljs-comment">/* 设置消息框样式 - 只设置内容区域，不覆盖整个屏幕 */</span>
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(mbox, COLOR_CARD, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(mbox, LV_OPA_100, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(mbox, COLOR_TEXT, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(mbox, <span class="hljs-number">0</span>, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_radius</span>(mbox, <span class="hljs-number">15</span>, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_color</span>(mbox, <span class="hljs-built_in">lv_color_hex</span>(<span class="hljs-number">0x888888</span>), LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_width</span>(mbox, <span class="hljs-number">10</span>, LV_PART_MAIN);
+
+    <span class="hljs-comment">/* 设置按钮样式 */</span>
+    <span class="hljs-type">lv_obj_t</span> *btn = <span class="hljs-built_in">lv_msgbox_get_footer</span>(mbox);
+    <span class="hljs-keyword">if</span> (btn) {
+        <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(btn, COLOR_PRIMARY, LV_PART_MAIN);
+        <span class="hljs-built_in">lv_obj_set_style_text_color</span>(btn, <span class="hljs-built_in">lv_color_white</span>(), LV_PART_MAIN);
+    }
+
+    <span class="hljs-built_in">lv_obj_center</span>(mbox);
+
+    <span class="hljs-comment">/* 添加事件回调 */</span>
+    <span class="hljs-built_in">lv_obj_add_event_cb</span>(mbox, reminder_btn_clicked, LV_EVENT_CLICKED, <span class="hljs-literal">NULL</span>);
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Class reminder messagebox created and event callback added\n&quot;</span>);
+
+}
+
+<span class="hljs-comment">/* 事件处理函数 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">weekday_btn_clicked</span><span class="hljs-params">(<span class="hljs-type">lv_event_t</span> *e)</span> </span>{
+    <span class="hljs-type">lv_obj_t</span> *btn = <span class="hljs-built_in">lv_event_get_target</span>(e);
+    <span class="hljs-type">int</span> day = (<span class="hljs-type">int</span>)(<span class="hljs-type">intptr_t</span>)<span class="hljs-built_in">lv_obj_get_user_data</span>(btn);
+    current_day = day;
+
+    <span class="hljs-type">const</span> <span class="hljs-type">char</span> *weekdays[] = {<span class="hljs-string">&quot;Mon&quot;</span>, <span class="hljs-string">&quot;Tue&quot;</span>, <span class="hljs-string">&quot;Wed&quot;</span>, <span class="hljs-string">&quot;Thu&quot;</span>, <span class="hljs-string">&quot;Fri&quot;</span>, <span class="hljs-string">&quot;Sat&quot;</span>, <span class="hljs-string">&quot;Sun&quot;</span>};
+    <span class="hljs-built_in">lv_label_set_text_fmt</span>(current_day_label, <span class="hljs-string">&quot;Today: %s Week %d&quot;</span>, weekdays[current_day<span class="hljs-number">-1</span>], current_week);
+
+    <span class="hljs-built_in">update_timetable_display</span>();
+}
+
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">week_minus_clicked</span><span class="hljs-params">(<span class="hljs-type">lv_event_t</span> *e)</span> </span>{
+    <span class="hljs-keyword">if</span> (current_week &gt; <span class="hljs-number">1</span>) {
+        current_week--;
+        <span class="hljs-built_in">lv_label_set_text_fmt</span>(current_week_label, <span class="hljs-string">&quot;Week %d&quot;</span>, current_week);
+        <span class="hljs-type">const</span> <span class="hljs-type">char</span> *weekdays[] = {<span class="hljs-string">&quot;Mon&quot;</span>, <span class="hljs-string">&quot;Tue&quot;</span>, <span class="hljs-string">&quot;Wed&quot;</span>, <span class="hljs-string">&quot;Thu&quot;</span>, <span class="hljs-string">&quot;Fri&quot;</span>, <span class="hljs-string">&quot;Sat&quot;</span>, <span class="hljs-string">&quot;Sun&quot;</span>};
+        <span class="hljs-built_in">lv_label_set_text_fmt</span>(current_day_label, <span class="hljs-string">&quot;Today: %s Week %d&quot;</span>, weekdays[current_day<span class="hljs-number">-1</span>], current_week);
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">week_plus_clicked</span><span class="hljs-params">(<span class="hljs-type">lv_event_t</span> *e)</span> </span>{
+    <span class="hljs-keyword">if</span> (current_week &lt; <span class="hljs-number">20</span>) {
+        current_week++;
+        <span class="hljs-built_in">lv_label_set_text_fmt</span>(current_week_label, <span class="hljs-string">&quot;Week %d&quot;</span>, current_week);
+        <span class="hljs-type">const</span> <span class="hljs-type">char</span> *weekdays[] = {<span class="hljs-string">&quot;Mon&quot;</span>, <span class="hljs-string">&quot;Tue&quot;</span>, <span class="hljs-string">&quot;Wed&quot;</span>, <span class="hljs-string">&quot;Thu&quot;</span>, <span class="hljs-string">&quot;Fri&quot;</span>, <span class="hljs-string">&quot;Sat&quot;</span>, <span class="hljs-string">&quot;Sun&quot;</span>};
+        <span class="hljs-built_in">lv_label_set_text_fmt</span>(current_day_label, <span class="hljs-string">&quot;Today: %s Week %d&quot;</span>, weekdays[current_day<span class="hljs-number">-1</span>], current_week);
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">add_reminder_clicked</span><span class="hljs-params">(<span class="hljs-type">lv_event_t</span> *e)</span> </span>{
+    <span class="hljs-type">lv_obj_t</span> *msgbox = <span class="hljs-built_in">lv_msgbox_create</span>(<span class="hljs-literal">NULL</span>);
+    <span class="hljs-built_in">lv_msgbox_add_title</span>(msgbox, <span class="hljs-string">&quot;Add Reminder&quot;</span>);
+    <span class="hljs-built_in">lv_msgbox_add_text</span>(msgbox, <span class="hljs-string">&quot;This feature requires server connection\nPlease check network settings&quot;</span>);
+    <span class="hljs-built_in">lv_msgbox_add_footer_button</span>(msgbox, <span class="hljs-string">&quot;OK&quot;</span>);
+    <span class="hljs-built_in">lv_obj_center</span>(msgbox);
+
+    <span class="hljs-comment">/* 为消息框添加用户数据以便识别 */</span>
+    <span class="hljs-built_in">lv_obj_set_user_data</span>(msgbox, (<span class="hljs-type">void</span>*)<span class="hljs-number">1</span>);
+
+    <span class="hljs-comment">/* 添加事件回调来处理按钮点击 */</span>
+    <span class="hljs-built_in">lv_obj_add_event_cb</span>(msgbox, reminder_btn_clicked, LV_EVENT_CLICKED, <span class="hljs-literal">NULL</span>);
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Messagebox created and event callback added\n&quot;</span>);
+}
+
+<span class="hljs-comment">/* 导航按钮点击事件 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">nav_btn_clicked</span><span class="hljs-params">(<span class="hljs-type">lv_event_t</span> *e)</span> </span>{
+    <span class="hljs-type">lv_obj_t</span> *btn = <span class="hljs-built_in">lv_event_get_target</span>(e);
+    <span class="hljs-type">int</span> tab_idx = (<span class="hljs-type">int</span>)(<span class="hljs-type">intptr_t</span>)<span class="hljs-built_in">lv_obj_get_user_data</span>(btn);
+    <span class="hljs-keyword">if</span> (g_tabview) {
+        <span class="hljs-built_in">lv_tabview_set_act</span>(g_tabview, tab_idx, LV_ANIM_ON);
+    }
+}
+
+<span class="hljs-comment">/* 提醒消息按钮点击事件 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">reminder_btn_clicked</span><span class="hljs-params">(<span class="hljs-type">lv_event_t</span> *e)</span> </span>{
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;=== Event Handler Called ===\n&quot;</span>);
+
+    <span class="hljs-type">lv_event_code_t</span> code = <span class="hljs-built_in">lv_event_get_code</span>(e);
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Event code: %d\n&quot;</span>, code);
+
+    <span class="hljs-type">lv_obj_t</span> *target = <span class="hljs-built_in">lv_event_get_target</span>(e);
+    <span class="hljs-keyword">if</span> (target) {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Target object type: %s\n&quot;</span>, <span class="hljs-built_in">lv_obj_get_class</span>(target)-&gt;name);
+    }
+
+    <span class="hljs-comment">/* 检查是否是按钮点击事件 */</span>
+    <span class="hljs-keyword">if</span> (code == LV_EVENT_CLICKED) {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;CLICK EVENT DETECTED\n&quot;</span>);
+
+        <span class="hljs-comment">/* 直接尝试删除目标对象（如果是消息框的话）*/</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">lv_obj_check_type</span>(target, &amp;lv_msgbox_class)) {
+            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Target is messagebox, deleting...\n&quot;</span>);
+            <span class="hljs-built_in">lv_obj_del</span>(target);
+            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Messagebox deleted successfully\n&quot;</span>);
+            <span class="hljs-keyword">return</span>;
+        }
+
+        <span class="hljs-comment">/* 向上查找消息框对象 */</span>
+        <span class="hljs-type">lv_obj_t</span> *parent = <span class="hljs-built_in">lv_obj_get_parent</span>(target);
+        <span class="hljs-type">int</span> attempts = <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">while</span> (parent &amp;&amp; attempts &lt; <span class="hljs-number">5</span>) {
+            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Checking parent %d: %s\n&quot;</span>, attempts, <span class="hljs-built_in">lv_obj_get_class</span>(parent)-&gt;name);
+
+            <span class="hljs-keyword">if</span> (<span class="hljs-built_in">lv_obj_check_type</span>(parent, &amp;lv_msgbox_class)) {
+                <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Found messagebox in parent chain, deleting...\n&quot;</span>);
+                <span class="hljs-built_in">lv_obj_del</span>(parent);
+                <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Messagebox deleted successfully\n&quot;</span>);
+                <span class="hljs-keyword">return</span>;
+            }
+
+            parent = <span class="hljs-built_in">lv_obj_get_parent</span>(parent);
+            attempts++;
+        }
+    }
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Event handling completed\n&quot;</span>);
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;==========================\n&quot;</span>);
+}
+
+<span class="hljs-comment">/**
+ * 主函数
+ * 初始化LVGL并启动大学课表应用
+ */</span>
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+    <span class="hljs-comment">/* 初始化LVGL库 */</span>
+    <span class="hljs-built_in">lv_init</span>();
+
+    <span class="hljs-comment">/* 初始化Windows显示驱动 */</span>
+     <span class="hljs-type">lv_display_t</span> *display = <span class="hljs-built_in">lv_windows_create_display</span>(
+        <span class="hljs-string">L&quot;University Schedule&quot;</span>,
+        <span class="hljs-number">800</span>,
+        <span class="hljs-number">600</span>,
+        <span class="hljs-number">100</span>,
+        FALSE,
+        FALSE
+    );
+
+    <span class="hljs-keyword">if</span> (display == <span class="hljs-literal">NULL</span>) {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Failed to create Windows display\n&quot;</span>);
+        <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+    }
+
+    <span class="hljs-comment">/* 只初始化指针输入设备（鼠标），跳过键盘以避免缺少组件的错误 */</span>
+    <span class="hljs-type">lv_indev_t</span> *mouse_indev = <span class="hljs-built_in">lv_windows_acquire_pointer_indev</span>(display);
+    <span class="hljs-keyword">if</span> (!mouse_indev) {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Warning: pointer indev not created. Mouse won&#x27;t work.\n&quot;</span>);
+    }
+    <span class="hljs-type">lv_indev_t</span> *kb_indev = <span class="hljs-built_in">lv_windows_acquire_keypad_indev</span>(display);
+    <span class="hljs-keyword">if</span> (!kb_indev) {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Warning: keypad indev not created.\n&quot;</span>);
+    }
+    <span class="hljs-comment">/* 确保 LVGL 事件系统正常工作 */</span>
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;LVGL event system initialized.\n&quot;</span>);
+
+    <span class="hljs-type">lv_obj_t</span> *scr = <span class="hljs-built_in">lv_scr_act</span>();
+    <span class="hljs-keyword">if</span> (scr == <span class="hljs-literal">NULL</span>) {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Failed to get active screen\n&quot;</span>);
+        <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+    }
+
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(scr, COLOR_BG, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">lv_obj_set_style_bg_opa</span>(scr, LV_OPA_100, <span class="hljs-number">0</span>);
+
+    <span class="hljs-built_in">create_university_timetable_app</span>(scr);
+    <span class="hljs-comment">// 暂时不显示提醒弹窗，避免遮挡界面</span>
+    <span class="hljs-built_in">show_class_reminder</span>();
+
+    <span class="hljs-type">const</span> <span class="hljs-type">uint32_t</span> loop_delay = <span class="hljs-number">5</span>; <span class="hljs-comment">/* ms */</span>
+    <span class="hljs-comment">/* 主循环：先 lv_tick_inc，再 lv_timer_handler */</span>
+    <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>) {
+        <span class="hljs-built_in">lv_tick_inc</span>(loop_delay);
+        <span class="hljs-built_in">lv_timer_handler</span>();
+        <span class="hljs-built_in">Sleep</span>(loop_delay);
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/lvgl智能手表心跳脉搏波动显示数字动态图像.html">
+      <span>上一篇</span>
+      <strong>lvgl智能手表心跳脉搏波动显示数字动态图像</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/详细案例说明ai所用的算法列出公式用python代码说明用法.html">
+      <span>下一篇</span>
+      <strong>详细案例说明AI所用的算法列出公式用Python代码说明用法</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/科学家的祛魅与返魅论当代学生科学职业理想式微的背后.html">科学家的祛魅与返魅论当代学生科学职业理想式微的背后</a></h3>
+        <p class="post-excerpt">小学作文里，“我的理想是当科学家”曾是与“当老师”“当医生”并列的标准答案。那时的科学家在孩子心中是一个光辉而模糊的符号——穿着白大褂，拿着试管，代表着智慧与荣耀。然而，当这批孩子成长为高中生、大学生，真正面临职业选择时，“科学家”却成了一个被谨慎回避的选项。中国人民大学统计学院的一项调查显示，58%的大学生希望成为职场精英，仅有15%希望成为专业领域内的一流专家 \-7。另一项面向全国20个城市…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.271Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/目前地理信息科学与气候技术需要什么样的编程技术推荐几篇相关论文.html">目前地理信息科学与气候技术需要什么样的编程技术推荐几篇相关论文</a></h3>
+        <p class="post-excerpt">需要回答的问题：“目前地理信息科学与气候技术需要什么样的编程技术？推荐几篇相关论文。” 首先，我要回顾之前的对话历史，用户之前询问了未来科学软件开发趋势以及地球气候变化科学软件的开发技术和人才需求，而我的回答详细涵盖了 AI、量子计算、开源生态等方面的技术，以及数据处理、模型开发、应用层的具体技术工具和人才类型。现在用户进一步询问地理信息科学（GIS）与气候技术所需的编程技术，并要求推荐相关论文。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.241Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/当代科学技术视角下值得学习的知识-豆包问答分享.html">当代科学技术视角下值得学习的知识 豆包问答分享</a></h3>
+        <p class="post-excerpt">探讨最值得学习的知识以及如何学习，还要详细说明学习步骤。首先，我需要确定在当前科技环境下，哪些知识领域是核心且具有前瞻性的。考虑到 2025 年的时间点，可能需要涵盖人工智能、大数据、量子计算、生物技术、新能源、跨学科方法等。这些领域不仅是当前的热点，也是推动未来科技发展的关键。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.178Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>嫦娥号地月轨道环月一个月MATLAB仿真 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">嫦娥号地月轨道环月一个月MATLAB仿真</h1>
+        <p class="post-deck">本文基于MATLAB实现了嫦娥系列探测器登月任务的轨道仿真，包含地月转移轨道和30天的环月轨道运行。仿真考虑了地球停泊轨道（200km）、地月转移轨道（200×405000km）、中途修正、月球捕获和环月轨道（100km）等关键阶段。结果显示：总速度增量约3.3km/s，转移时间约5.2天，30天环月运行约450圈轨道。通过数值积分和可视化分析，验证了轨道设计的合理性。该仿真为深空探测任务提供了轨…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.515Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>36 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+            <a class="tag-chip" href="../tags/tag-15.html">卫星</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文基于MATLAB实现了嫦娥系列探测器登月任务的轨道仿真，包含地月转移轨道和30天的环月轨道运行。仿真考虑了地球停泊轨道（200km）、地月转移轨道（200×405000km）、中途修正、月球捕获和环月轨道（100km）等关键阶段。结果显示：总速度增量约3.3km/s，转移时间约5.2天，30天环月运行约450圈轨道。通过数值积分和可视化分析，验证了轨道设计的合理性。该仿真为深空探测任务提供了轨道动力学参考，完整呈现了从发射到长期环月的全过程。</p>
+<p><img src="../uploads/csdn/%E5%AB%A6%E5%A8%A5%E5%8F%B7%E5%9C%B0%E6%9C%88%E8%BD%A8%E9%81%93%E7%8E%AF%E6%9C%88%E4%B8%80%E4%B8%AA%E6%9C%88matlab%E4%BB%BF%E7%9C%9F/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%AB%A6%E5%A8%A5%E5%8F%B7%E5%9C%B0%E6%9C%88%E8%BD%A8%E9%81%93%E7%8E%AF%E6%9C%88%E4%B8%80%E4%B8%AA%E6%9C%88matlab%E4%BB%BF%E7%9C%9F/img-02.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%AB%A6%E5%A8%A5%E5%8F%B7%E5%9C%B0%E6%9C%88%E8%BD%A8%E9%81%93%E7%8E%AF%E6%9C%88%E4%B8%80%E4%B8%AA%E6%9C%88matlab%E4%BB%BF%E7%9C%9F/img-03.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%AB%A6%E5%A8%A5%E5%8F%B7%E5%9C%B0%E6%9C%88%E8%BD%A8%E9%81%93%E7%8E%AF%E6%9C%88%E4%B8%80%E4%B8%AA%E6%9C%88matlab%E4%BB%BF%E7%9C%9F/img-04.png" alt=""></p>
+<p>MATLAB代码实现</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">%% 嫦娥登月轨道仿真（完整一个月环月轨道）</span>
+<span class="hljs-comment">% 参考嫦娥一号、二号、三号任务数据</span>
+<span class="hljs-comment">% 包含地月转移轨道和完整的环月轨道</span>
+
+clear; clc; close all;
+
+<span class="hljs-comment">%% 物理常数和任务参数</span>
+mu_earth = <span class="hljs-number">3.986004418e5</span>;     <span class="hljs-comment">% 地球引力常数 (km^3/s^2)</span>
+mu_moon = <span class="hljs-number">4.9028e3</span>;           <span class="hljs-comment">% 月球引力常数 (km^3/s^2)</span>
+R_earth = <span class="hljs-number">6378.137</span>;           <span class="hljs-comment">% 地球半径 (km)</span>
+R_moon = <span class="hljs-number">1737.4</span>;              <span class="hljs-comment">% 月球半径 (km)</span>
+a_moon = <span class="hljs-number">384400</span>;              <span class="hljs-comment">% 月球轨道半长轴 (km)</span>
+
+<span class="hljs-comment">% 嫦娥任务参考参数</span>
+h_parking = <span class="hljs-number">200</span>;              <span class="hljs-comment">% 地球停泊轨道高度 (km)</span>
+h_transfer_perigee = <span class="hljs-number">200</span>;     <span class="hljs-comment">% 转移轨道近地点高度 (km)</span>
+h_transfer_apogee = <span class="hljs-number">405000</span>;   <span class="hljs-comment">% 转移轨道远地点略超过月球轨道</span>
+h_lunar_orbit = <span class="hljs-number">100</span>;          <span class="hljs-comment">% 环月轨道高度 (km)</span>
+
+<span class="hljs-comment">%% 轨道阶段定义</span>
+fprintf(<span class="hljs-string">&#x27;═══════════════════════════════════════════════════\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;              嫦娥登月轨道仿真（完整一个月）\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;═══════════════════════════════════════════════════\n\n&#x27;</span>);
+
+<span class="hljs-comment">%% 阶段1: 发射和地球停泊轨道</span>
+fprintf(<span class="hljs-string">&#x27;阶段1: 发射和地球停泊轨道\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;----------------------------------------\n&#x27;</span>);
+
+r_parking = R_earth + h_parking;
+v_parking = <span class="hljs-built_in">sqrt</span>(mu_earth / r_parking);
+
+fprintf(<span class="hljs-string">&#x27;停泊轨道高度: %.0f km\n&#x27;</span>, h_parking);
+fprintf(<span class="hljs-string">&#x27;停泊轨道速度: %.3f km/s\n&#x27;</span>, v_parking);
+fprintf(<span class="hljs-string">&#x27;轨道周期: %.1f 分钟\n\n&#x27;</span>, <span class="hljs-number">2</span>*<span class="hljs-built_in">pi</span>*<span class="hljs-built_in">sqrt</span>(r_parking^<span class="hljs-number">3</span>/mu_earth)/<span class="hljs-number">60</span>);
+
+<span class="hljs-comment">%% 阶段2: 地月转移轨道注入</span>
+fprintf(<span class="hljs-string">&#x27;阶段2: 地月转移轨道注入\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;----------------------------------------\n&#x27;</span>);
+
+r1 = R_earth + h_transfer_perigee;
+r2 = R_earth + h_transfer_apogee;
+
+<span class="hljs-comment">% 转移轨道计算</span>
+a_transfer = (r1 + r2) / <span class="hljs-number">2</span>;
+e_transfer = (r2 - r1) / (r2 + r1);
+v_perigee_transfer = <span class="hljs-built_in">sqrt</span>(<span class="hljs-number">2</span>*mu_earth/r1 - mu_earth/a_transfer);
+v_apogee_transfer = <span class="hljs-built_in">sqrt</span>(<span class="hljs-number">2</span>*mu_earth/r2 - mu_earth/a_transfer);
+
+<span class="hljs-comment">% 第一次变轨机动</span>
+delta_v1 = v_perigee_transfer - v_parking;
+T_transfer = <span class="hljs-built_in">pi</span> * <span class="hljs-built_in">sqrt</span>(a_transfer^<span class="hljs-number">3</span> / mu_earth);
+
+fprintf(<span class="hljs-string">&#x27;转移轨道近地点: %.0f km\n&#x27;</span>, h_transfer_perigee);
+fprintf(<span class="hljs-string">&#x27;转移轨道远地点: %.0f km\n&#x27;</span>, h_transfer_apogee);
+fprintf(<span class="hljs-string">&#x27;转移轨道偏心率: %.4f\n&#x27;</span>, e_transfer);
+fprintf(<span class="hljs-string">&#x27;第一次变轨 ΔV: %.3f km/s\n&#x27;</span>, delta_v1);
+fprintf(<span class="hljs-string">&#x27;转移时间: %.2f 天\n\n&#x27;</span>, T_transfer/(<span class="hljs-number">24</span>*<span class="hljs-number">3600</span>));
+
+<span class="hljs-comment">%% 阶段3: 中途修正</span>
+fprintf(<span class="hljs-string">&#x27;阶段3: 中途修正\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;----------------------------------------\n&#x27;</span>);
+
+n_corrections = <span class="hljs-number">2</span>;
+correction_dv = [<span class="hljs-number">0.005</span>, <span class="hljs-number">0.003</span>];
+
+fprintf(<span class="hljs-string">&#x27;计划进行 %d 次中途修正\n&#x27;</span>, n_corrections);
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:n_corrections
+    fprintf(<span class="hljs-string">&#x27;修正 %d ΔV: %.4f km/s\n&#x27;</span>, <span class="hljs-built_in">i</span>, correction_dv(<span class="hljs-built_in">i</span>));
+<span class="hljs-keyword">end</span>
+fprintf(<span class="hljs-string">&#x27;总修正 ΔV: %.4f km/s\n\n&#x27;</span>, sum(correction_dv));
+
+<span class="hljs-comment">%% 阶段4: 月球捕获</span>
+fprintf(<span class="hljs-string">&#x27;阶段4: 月球捕获\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;----------------------------------------\n&#x27;</span>);
+
+<span class="hljs-comment">% 月球影响球边界</span>
+r_soi = a_moon * (mu_moon / mu_earth)^(<span class="hljs-number">2</span>/<span class="hljs-number">5</span>);
+fprintf(<span class="hljs-string">&#x27;月球影响球半径: %.1f km\n&#x27;</span>, r_soi);
+
+<span class="hljs-comment">% 修正的捕获逻辑</span>
+v_infinity = <span class="hljs-number">0.8</span>;  <span class="hljs-comment">% km/s，典型的双曲线超速</span>
+v_moon_orbital = <span class="hljs-built_in">sqrt</span>(mu_earth / a_moon);  <span class="hljs-comment">% 月球轨道速度</span>
+
+<span class="hljs-comment">% 捕获到环月轨道</span>
+r_capture = R_moon + h_lunar_orbit;
+v_circular_lunar = <span class="hljs-built_in">sqrt</span>(mu_moon / r_capture);
+
+<span class="hljs-comment">% 从双曲线轨道到圆形轨道的速度增量</span>
+v_perilune_hyp = <span class="hljs-built_in">sqrt</span>(v_infinity^<span class="hljs-number">2</span> + <span class="hljs-number">2</span>*mu_moon/r_capture);
+delta_v2 = v_perilune_hyp - v_circular_lunar;
+
+fprintf(<span class="hljs-string">&#x27;月球轨道速度: %.3f km/s\n&#x27;</span>, v_moon_orbital);
+fprintf(<span class="hljs-string">&#x27;双曲线超速: %.3f km/s\n&#x27;</span>, v_infinity);
+fprintf(<span class="hljs-string">&#x27;环月轨道速度: %.3f km/s\n&#x27;</span>, v_circular_lunar);
+fprintf(<span class="hljs-string">&#x27;双曲线近月点速度: %.3f km/s\n&#x27;</span>, v_perilune_hyp);
+fprintf(<span class="hljs-string">&#x27;第二次变轨 ΔV: %.3f km/s\n\n&#x27;</span>, delta_v2);
+
+<span class="hljs-comment">%% 阶段5: 环月轨道运行（一个月）</span>
+fprintf(<span class="hljs-string">&#x27;阶段5: 环月轨道运行\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;----------------------------------------\n&#x27;</span>);
+
+delta_v3 = <span class="hljs-number">0.015</span>;
+T_lunar_orbit = <span class="hljs-number">2</span>*<span class="hljs-built_in">pi</span>*<span class="hljs-built_in">sqrt</span>(r_capture^<span class="hljs-number">3</span>/mu_moon); <span class="hljs-comment">% 单圈环月轨道周期</span>
+lunar_orbit_days = <span class="hljs-number">30</span>; <span class="hljs-comment">% 运行30天</span>
+T_lunar_total = lunar_orbit_days * <span class="hljs-number">24</span> * <span class="hljs-number">3600</span>; <span class="hljs-comment">% 总环月运行时间</span>
+
+fprintf(<span class="hljs-string">&#x27;轨道调整 ΔV: %.3f km/s\n&#x27;</span>, delta_v3);
+fprintf(<span class="hljs-string">&#x27;单圈环月轨道周期: %.2f 小时\n&#x27;</span>, T_lunar_orbit/<span class="hljs-number">3600</span>);
+fprintf(<span class="hljs-string">&#x27;计划环月运行时间: %d 天\n\n&#x27;</span>, lunar_orbit_days);
+
+<span class="hljs-comment">%% 总速度增量汇总</span>
+total_dv = delta_v1 + sum(correction_dv) + delta_v2 + delta_v3;
+
+fprintf(<span class="hljs-string">&#x27;总速度增量分析:\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;----------------------------------------\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;地月转移注入: %.3f km/s\n&#x27;</span>, delta_v1);
+fprintf(<span class="hljs-string">&#x27;中途修正:     %.3f km/s\n&#x27;</span>, sum(correction_dv));
+fprintf(<span class="hljs-string">&#x27;月球捕获:     %.3f km/s\n&#x27;</span>, delta_v2);
+fprintf(<span class="hljs-string">&#x27;轨道调整:     %.3f km/s\n&#x27;</span>, delta_v3);
+fprintf(<span class="hljs-string">&#x27;----------------------------------------\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;总计:         %.3f km/s\n&#x27;</span>, total_dv);
+
+<span class="hljs-comment">%% 轨道传播和可视化</span>
+<span class="hljs-comment">% 时间设置 - 转移轨道</span>
+t_span_transfer = <span class="hljs-built_in">linspace</span>(<span class="hljs-number">0</span>, T_transfer, <span class="hljs-number">1000</span>);
+
+<span class="hljs-comment">% 初始条件 - 从转移轨道近地点开始</span>
+y0_transfer = [r1, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, v_perigee_transfer];
+
+<span class="hljs-comment">% 传播转移轨道</span>
+options = odeset(<span class="hljs-string">&#x27;RelTol&#x27;</span>, <span class="hljs-number">1e-8</span>, <span class="hljs-string">&#x27;AbsTol&#x27;</span>, <span class="hljs-number">1e-8</span>);
+[t_transfer, Y_transfer] = ode45(@(t,y) two_body_ode(t, y, mu_earth), t_span_transfer, y0_transfer, options);
+
+<span class="hljs-comment">% 提取转移轨道数据</span>
+x_transfer = Y_transfer(:,<span class="hljs-number">1</span>);
+y_transfer = Y_transfer(:,<span class="hljs-number">2</span>);
+vx_transfer = Y_transfer(:,<span class="hljs-number">3</span>);
+vy_transfer = Y_transfer(:,<span class="hljs-number">4</span>);
+
+<span class="hljs-comment">% 定义角度变量</span>
+theta = <span class="hljs-built_in">linspace</span>(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>*<span class="hljs-built_in">pi</span>, <span class="hljs-number">100</span>);
+
+<span class="hljs-comment">% 月球轨道 (简化圆轨道)</span>
+x_moon_orbit = a_moon * <span class="hljs-built_in">cos</span>(theta);
+y_moon_orbit = a_moon * <span class="hljs-built_in">sin</span>(theta);
+
+<span class="hljs-comment">% 找到捕获点位置 - 在转移轨道与月球轨道相交处</span>
+[~, capture_idx] = <span class="hljs-built_in">min</span>(<span class="hljs-built_in">abs</span>(<span class="hljs-built_in">sqrt</span>(x_transfer.^<span class="hljs-number">2</span> + y_transfer.^<span class="hljs-number">2</span>) - a_moon));
+capture_point = [x_transfer(capture_idx), y_transfer(capture_idx)];
+capture_velocity = [vx_transfer(capture_idx), vy_transfer(capture_idx)];
+
+fprintf(<span class="hljs-string">&#x27;捕获点位置: (%.0f, %.0f) km\n&#x27;</span>, capture_point(<span class="hljs-number">1</span>), capture_point(<span class="hljs-number">2</span>));
+fprintf(<span class="hljs-string">&#x27;捕获点速度: (%.3f, %.3f) km/s\n&#x27;</span>, capture_velocity(<span class="hljs-number">1</span>), capture_velocity(<span class="hljs-number">2</span>));
+
+<span class="hljs-comment">%% 模拟捕获后的环月轨道（一个月）</span>
+fprintf(<span class="hljs-string">&#x27;\n开始模拟一个月的环月轨道...\n&#x27;</span>);
+
+<span class="hljs-comment">% 月球位置（假设在x轴正方向）</span>
+moon_pos = [a_moon, <span class="hljs-number">0</span>];
+
+<span class="hljs-comment">% 转换到月球中心坐标系</span>
+r_capture_moon = capture_point - moon_pos;
+v_capture_moon = capture_velocity - [<span class="hljs-number">0</span>, v_moon_orbital]; <span class="hljs-comment">% 减去月球轨道速度</span>
+
+fprintf(<span class="hljs-string">&#x27;相对于月球的位置: (%.0f, %.0f) km\n&#x27;</span>, r_capture_moon(<span class="hljs-number">1</span>), r_capture_moon(<span class="hljs-number">2</span>));
+fprintf(<span class="hljs-string">&#x27;相对于月球的速度: (%.3f, %.3f) km/s\n&#x27;</span>, v_capture_moon(<span class="hljs-number">1</span>), v_capture_moon(<span class="hljs-number">2</span>));
+
+<span class="hljs-comment">% 环月轨道传播（在月球坐标系中）- 一个月</span>
+t_span_lunar = <span class="hljs-built_in">linspace</span>(<span class="hljs-number">0</span>, T_lunar_total, <span class="hljs-number">3000</span>); <span class="hljs-comment">% 一个月的环月轨道</span>
+
+<span class="hljs-comment">% 初始状态（月球坐标系）- 假设已经完成捕获机动，进入圆形轨道</span>
+<span class="hljs-comment">% 修正初始条件为圆形轨道</span>
+r_circular = R_moon + h_lunar_orbit;
+v_circular = <span class="hljs-built_in">sqrt</span>(mu_moon / r_circular);
+<span class="hljs-comment">% 假设初始位置在x轴正方向，速度在y轴正方向（圆形轨道）</span>
+y0_lunar_circular = [r_circular, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, v_circular];
+
+<span class="hljs-comment">% 传播环月轨道（在月球引力场中）</span>
+[t_lunar, Y_lunar_moon_frame] = ode45(@(t,y) two_body_ode(t, y, mu_moon), t_span_lunar, y0_lunar_circular, options);
+
+<span class="hljs-comment">% 月球运动（简化，假设月球在圆轨道上匀速运动）</span>
+moon_angular_velocity = v_moon_orbital / a_moon;
+moon_motion_x = a_moon * <span class="hljs-built_in">cos</span>(moon_angular_velocity * (t_lunar + t_transfer(capture_idx)));
+moon_motion_y = a_moon * <span class="hljs-built_in">sin</span>(moon_angular_velocity * (t_lunar + t_transfer(capture_idx)));
+
+<span class="hljs-comment">% 转换回地心坐标系 - 考虑月球运动</span>
+x_lunar_earth_frame = Y_lunar_moon_frame(:,<span class="hljs-number">1</span>) + moon_motion_x;
+y_lunar_earth_frame = Y_lunar_moon_frame(:,<span class="hljs-number">2</span>) + moon_motion_y;
+
+fprintf(<span class="hljs-string">&#x27;环月轨道模拟完成: %d 天，%.0f 圈轨道\n&#x27;</span>, lunar_orbit_days, T_lunar_total/T_lunar_orbit);
+
+<span class="hljs-comment">%% 合并所有轨道数据</span>
+<span class="hljs-comment">% 转移轨道时间（相对时间）</span>
+time_transfer = t_transfer;
+x_all = x_transfer;
+y_all = y_transfer;
+
+<span class="hljs-comment">% 环月轨道时间（连续时间）</span>
+time_lunar = t_transfer(capture_idx) + t_lunar;
+x_all = [x_all; x_lunar_earth_frame];
+y_all = [y_all; y_lunar_earth_frame];
+
+<span class="hljs-comment">% 合并时间向量</span>
+time_all = [time_transfer; time_lunar];
+
+fprintf(<span class="hljs-string">&#x27;总轨道数据点数: %d\n&#x27;</span>, <span class="hljs-built_in">length</span>(time_all));
+fprintf(<span class="hljs-string">&#x27;总仿真时间: %.1f 天\n&#x27;</span>, <span class="hljs-built_in">max</span>(time_all)/(<span class="hljs-number">24</span>*<span class="hljs-number">3600</span>));
+
+<span class="hljs-comment">%% 绘制完整的轨道（转移轨道 + 一个月环月轨道）</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">100</span>, <span class="hljs-number">100</span>, <span class="hljs-number">1400</span>, <span class="hljs-number">1000</span>]);
+
+<span class="hljs-comment">% 主轨道图</span>
+subplot(<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,[<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>]);
+<span class="hljs-built_in">hold</span> on; grid on; axis equal;
+
+<span class="hljs-comment">% 绘制地球和轨道</span>
+plot_earth();
+<span class="hljs-built_in">plot</span>(R_earth * <span class="hljs-built_in">cos</span>(theta), R_earth * <span class="hljs-built_in">sin</span>(theta), <span class="hljs-string">&#x27;b&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1</span>);
+<span class="hljs-built_in">plot</span>(r_parking * <span class="hljs-built_in">cos</span>(theta), r_parking * <span class="hljs-built_in">sin</span>(theta), <span class="hljs-string">&#x27;g--&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>);
+
+<span class="hljs-comment">% 绘制转移轨道</span>
+<span class="hljs-built_in">plot</span>(x_transfer, y_transfer, <span class="hljs-string">&#x27;r-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2.5</span>);
+
+<span class="hljs-comment">% 绘制环月轨道（一个月）</span>
+<span class="hljs-built_in">plot</span>(x_lunar_earth_frame, y_lunar_earth_frame, <span class="hljs-string">&#x27;m-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, [<span class="hljs-number">0.8</span> <span class="hljs-number">0.2</span> <span class="hljs-number">0.8</span>]);
+
+<span class="hljs-comment">% 绘制月球轨道和月球</span>
+<span class="hljs-built_in">plot</span>(x_moon_orbit, y_moon_orbit, <span class="hljs-string">&#x27;k--&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1</span>);
+<span class="hljs-built_in">plot</span>(moon_pos(<span class="hljs-number">1</span>), moon_pos(<span class="hljs-number">2</span>), <span class="hljs-string">&#x27;ko&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">10</span>, <span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>, [<span class="hljs-number">0.6</span> <span class="hljs-number">0.6</span> <span class="hljs-number">0.6</span>]);
+
+<span class="hljs-comment">% 标记关键点和机动位置</span>
+plot_maneuver_points(r1, r_parking, capture_point, delta_v1, delta_v2, moon_pos);
+
+<span class="hljs-comment">% 标记环月轨道起点</span>
+<span class="hljs-built_in">plot</span>(x_lunar_earth_frame(<span class="hljs-number">1</span>), y_lunar_earth_frame(<span class="hljs-number">1</span>), <span class="hljs-string">&#x27;co&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">8</span>, <span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>, <span class="hljs-string">&#x27;c&#x27;</span>);
+text(x_lunar_earth_frame(<span class="hljs-number">1</span>), y_lunar_earth_frame(<span class="hljs-number">1</span>)+<span class="hljs-number">20000</span>, <span class="hljs-string">&#x27;环月开始&#x27;</span>, ...
+     <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">9</span>, <span class="hljs-string">&#x27;HorizontalAlignment&#x27;</span>, <span class="hljs-string">&#x27;center&#x27;</span>, <span class="hljs-string">&#x27;Interpreter&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+
+<span class="hljs-comment">% 标记环月轨道终点</span>
+<span class="hljs-built_in">plot</span>(x_lunar_earth_frame(<span class="hljs-keyword">end</span>), y_lunar_earth_frame(<span class="hljs-keyword">end</span>), <span class="hljs-string">&#x27;c*&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">12</span>);
+text(x_lunar_earth_frame(<span class="hljs-keyword">end</span>), y_lunar_earth_frame(<span class="hljs-keyword">end</span>)<span class="hljs-number">-20000</span>, sprintf(<span class="hljs-string">&#x27;环月结束\n(%d天后)&#x27;</span>, lunar_orbit_days), ...
+     <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">9</span>, <span class="hljs-string">&#x27;HorizontalAlignment&#x27;</span>, <span class="hljs-string">&#x27;center&#x27;</span>, <span class="hljs-string">&#x27;Interpreter&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+
+<span class="hljs-comment">% 装饰图形</span>
+xlabel(<span class="hljs-string">&#x27;x (km)&#x27;</span>); ylabel(<span class="hljs-string">&#x27;y (km)&#x27;</span>);
+title(sprintf(<span class="hljs-string">&#x27;嫦娥登月完整轨道（转移 + %d天环月）&#x27;</span>, lunar_orbit_days), <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">14</span>, <span class="hljs-string">&#x27;FontWeight&#x27;</span>, <span class="hljs-string">&#x27;bold&#x27;</span>);
+<span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x27;地球&#x27;</span>, <span class="hljs-string">&#x27;停泊轨道&#x27;</span>, <span class="hljs-string">&#x27;地月转移轨道&#x27;</span>, sprintf(<span class="hljs-string">&#x27;%d天环月轨道&#x27;</span>, lunar_orbit_days), ...
+       <span class="hljs-string">&#x27;月球轨道&#x27;</span>, <span class="hljs-string">&#x27;月球&#x27;</span>, <span class="hljs-string">&#x27;发射点&#x27;</span>, <span class="hljs-string">&#x27;月球捕获点&#x27;</span>, <span class="hljs-string">&#x27;环月开始&#x27;</span>, <span class="hljs-string">&#x27;环月结束&#x27;</span>, <span class="hljs-string">&#x27;Location&#x27;</span>, <span class="hljs-string">&#x27;best&#x27;</span>);
+
+<span class="hljs-comment">% 轨道高度变化（完整任务）</span>
+subplot(<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">3</span>);
+r_all = <span class="hljs-built_in">sqrt</span>(x_all.^<span class="hljs-number">2</span> + y_all.^<span class="hljs-number">2</span>);
+<span class="hljs-built_in">plot</span>(time_all/(<span class="hljs-number">24</span>*<span class="hljs-number">3600</span>), (r_all - R_earth)/<span class="hljs-number">1000</span>, <span class="hljs-string">&#x27;b-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>);
+<span class="hljs-built_in">hold</span> on;
+
+<span class="hljs-comment">% 标记关键点</span>
+<span class="hljs-built_in">plot</span>(time_transfer(capture_idx)/(<span class="hljs-number">24</span>*<span class="hljs-number">3600</span>), (norm(capture_point) - R_earth)/<span class="hljs-number">1000</span>, <span class="hljs-string">&#x27;ro&#x27;</span>, ...
+     <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">8</span>, <span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>, <span class="hljs-string">&#x27;r&#x27;</span>);
+<span class="hljs-built_in">plot</span>(time_lunar(<span class="hljs-number">1</span>)/(<span class="hljs-number">24</span>*<span class="hljs-number">3600</span>), (r_all(capture_idx) - R_earth)/<span class="hljs-number">1000</span>, <span class="hljs-string">&#x27;mo&#x27;</span>, ...
+     <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">8</span>, <span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>, <span class="hljs-string">&#x27;m&#x27;</span>);
+<span class="hljs-built_in">plot</span>(time_lunar(<span class="hljs-keyword">end</span>)/(<span class="hljs-number">24</span>*<span class="hljs-number">3600</span>), (r_all(<span class="hljs-keyword">end</span>) - R_earth)/<span class="hljs-number">1000</span>, <span class="hljs-string">&#x27;c*&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">10</span>);
+
+grid on;
+xlabel(<span class="hljs-string">&#x27;任务时间 (天)&#x27;</span>); ylabel(<span class="hljs-string">&#x27;高度 (千公里)&#x27;</span>);
+title(<span class="hljs-string">&#x27;完整任务轨道高度变化&#x27;</span>);
+<span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x27;轨道高度&#x27;</span>, <span class="hljs-string">&#x27;捕获点&#x27;</span>, <span class="hljs-string">&#x27;环月开始&#x27;</span>, sprintf(<span class="hljs-string">&#x27;环月结束(%d天)&#x27;</span>, lunar_orbit_days), <span class="hljs-string">&#x27;Location&#x27;</span>, <span class="hljs-string">&#x27;best&#x27;</span>);
+
+<span class="hljs-comment">% 速度变化（完整任务）</span>
+subplot(<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">6</span>);
+<span class="hljs-comment">% 计算速度（数值微分）</span>
+vx_all = gradient(x_all, time_all);
+vy_all = gradient(y_all, time_all);
+v_all = <span class="hljs-built_in">sqrt</span>(vx_all.^<span class="hljs-number">2</span> + vy_all.^<span class="hljs-number">2</span>);
+
+<span class="hljs-built_in">plot</span>(time_all/(<span class="hljs-number">24</span>*<span class="hljs-number">3600</span>), v_all, <span class="hljs-string">&#x27;r-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>);
+<span class="hljs-built_in">hold</span> on;
+
+<span class="hljs-comment">% 标记关键点</span>
+<span class="hljs-built_in">plot</span>(time_transfer(capture_idx)/(<span class="hljs-number">24</span>*<span class="hljs-number">3600</span>), v_all(capture_idx), <span class="hljs-string">&#x27;ro&#x27;</span>, ...
+     <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">8</span>, <span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>, <span class="hljs-string">&#x27;r&#x27;</span>);
+<span class="hljs-built_in">plot</span>(time_lunar(<span class="hljs-number">1</span>)/(<span class="hljs-number">24</span>*<span class="hljs-number">3600</span>), v_all(<span class="hljs-built_in">length</span>(time_transfer)+<span class="hljs-number">1</span>), <span class="hljs-string">&#x27;mo&#x27;</span>, ...
+     <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">8</span>, <span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>, <span class="hljs-string">&#x27;m&#x27;</span>);
+<span class="hljs-built_in">plot</span>(time_lunar(<span class="hljs-keyword">end</span>)/(<span class="hljs-number">24</span>*<span class="hljs-number">3600</span>), v_all(<span class="hljs-keyword">end</span>), <span class="hljs-string">&#x27;c*&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">10</span>);
+
+grid on;
+xlabel(<span class="hljs-string">&#x27;任务时间 (天)&#x27;</span>); ylabel(<span class="hljs-string">&#x27;速度 (km/s)&#x27;</span>);
+title(<span class="hljs-string">&#x27;完整任务轨道速度变化&#x27;</span>);
+<span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x27;轨道速度&#x27;</span>, <span class="hljs-string">&#x27;捕获点&#x27;</span>, <span class="hljs-string">&#x27;环月开始&#x27;</span>, sprintf(<span class="hljs-string">&#x27;环月结束(%d天)&#x27;</span>, lunar_orbit_days), <span class="hljs-string">&#x27;Location&#x27;</span>, <span class="hljs-string">&#x27;best&#x27;</span>);
+
+<span class="hljs-comment">%% 绘制月球坐标系中的环月轨道</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">100</span>, <span class="hljs-number">100</span>, <span class="hljs-number">800</span>, <span class="hljs-number">600</span>]);
+<span class="hljs-built_in">hold</span> on; grid on; axis equal;
+
+<span class="hljs-comment">% 绘制月球</span>
+plot_moon();
+
+<span class="hljs-comment">% 绘制环月轨道（月球坐标系）- 一个月</span>
+<span class="hljs-built_in">plot</span>(Y_lunar_moon_frame(:,<span class="hljs-number">1</span>), Y_lunar_moon_frame(:,<span class="hljs-number">2</span>), <span class="hljs-string">&#x27;m-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, [<span class="hljs-number">0.8</span> <span class="hljs-number">0.2</span> <span class="hljs-number">0.8</span>]);
+
+<span class="hljs-comment">% 绘制环月轨道圆形参考</span>
+theta_circle = <span class="hljs-built_in">linspace</span>(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>*<span class="hljs-built_in">pi</span>, <span class="hljs-number">100</span>);
+<span class="hljs-built_in">plot</span>(r_circular * <span class="hljs-built_in">cos</span>(theta_circle), r_circular * <span class="hljs-built_in">sin</span>(theta_circle), <span class="hljs-string">&#x27;k--&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1</span>);
+
+<span class="hljs-comment">% 标记轨道圈数（每5圈标记一次）</span>
+orbits_per_marker = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:orbits_per_marker:<span class="hljs-built_in">floor</span>(T_lunar_total/T_lunar_orbit)
+    idx = <span class="hljs-built_in">find</span>(t_lunar &gt;= <span class="hljs-built_in">i</span> * T_lunar_orbit, <span class="hljs-number">1</span>);
+    <span class="hljs-keyword">if</span> ~<span class="hljs-built_in">isempty</span>(idx)
+        <span class="hljs-built_in">plot</span>(Y_lunar_moon_frame(idx,<span class="hljs-number">1</span>), Y_lunar_moon_frame(idx,<span class="hljs-number">2</span>), <span class="hljs-string">&#x27;bo&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">6</span>);
+        text(Y_lunar_moon_frame(idx,<span class="hljs-number">1</span>), Y_lunar_moon_frame(idx,<span class="hljs-number">2</span>)+<span class="hljs-number">500</span>, sprintf(<span class="hljs-string">&#x27;第%d圈&#x27;</span>, <span class="hljs-built_in">i</span>), ...
+             <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">8</span>, <span class="hljs-string">&#x27;HorizontalAlignment&#x27;</span>, <span class="hljs-string">&#x27;center&#x27;</span>);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+xlabel(<span class="hljs-string">&#x27;x (km, 月球坐标系)&#x27;</span>); ylabel(<span class="hljs-string">&#x27;y (km, 月球坐标系)&#x27;</span>);
+title(sprintf(<span class="hljs-string">&#x27;环月轨道（月球坐标系）- %d天运行&#x27;</span>, lunar_orbit_days), <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">14</span>, <span class="hljs-string">&#x27;FontWeight&#x27;</span>, <span class="hljs-string">&#x27;bold&#x27;</span>);
+<span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x27;月球&#x27;</span>, sprintf(<span class="hljs-string">&#x27;%d天环月轨道&#x27;</span>, lunar_orbit_days), <span class="hljs-string">&#x27;参考圆轨道&#x27;</span>, <span class="hljs-string">&#x27;轨道圈数标记&#x27;</span>, <span class="hljs-string">&#x27;Location&#x27;</span>, <span class="hljs-string">&#x27;best&#x27;</span>);
+
+<span class="hljs-comment">%% 任务总结输出</span>
+fprintf(<span class="hljs-string">&#x27;\n═══════════════════════════════════════════════════\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;                    任务总结（完整一个月）\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;═══════════════════════════════════════════════════\n\n&#x27;</span>);
+
+fprintf(<span class="hljs-string">&#x27;轨道阶段详情:\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;1. 发射至 %.0f km 地球停泊轨道\n&#x27;</span>, h_parking);
+fprintf(<span class="hljs-string">&#x27;2. 地月转移轨道注入 (%.3f km/s, %.2f 天)\n&#x27;</span>, delta_v1, T_transfer/(<span class="hljs-number">24</span>*<span class="hljs-number">3600</span>));
+fprintf(<span class="hljs-string">&#x27;3. %d 次中途修正 (总计 %.4f km/s)\n&#x27;</span>, n_corrections, sum(correction_dv));
+fprintf(<span class="hljs-string">&#x27;4. 月球捕获机动 (%.3f km/s)\n&#x27;</span>, delta_v2);
+fprintf(<span class="hljs-string">&#x27;5. %d 天环月轨道运行 (%.0f 圈轨道)\n\n&#x27;</span>, lunar_orbit_days, T_lunar_total/T_lunar_orbit);
+
+fprintf(<span class="hljs-string">&#x27;关键参数:\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;• 总任务时间: %.1f 天\n&#x27;</span>, <span class="hljs-built_in">max</span>(time_all)/(<span class="hljs-number">24</span>*<span class="hljs-number">3600</span>));
+fprintf(<span class="hljs-string">&#x27;• 总速度增量: %.3f km/s\n&#x27;</span>, total_dv);
+fprintf(<span class="hljs-string">&#x27;• 转移轨道: %.0f × %.0f km 椭圆\n&#x27;</span>, h_transfer_perigee, h_transfer_apogee);
+fprintf(<span class="hljs-string">&#x27;• 环月轨道: %.0f km 圆形轨道，周期 %.2f 小时\n&#x27;</span>, h_lunar_orbit, T_lunar_orbit/<span class="hljs-number">3600</span>);
+fprintf(<span class="hljs-string">&#x27;• 总轨道圈数: %.0f 圈\n\n&#x27;</span>, T_lunar_total/T_lunar_orbit);
+
+fprintf(<span class="hljs-string">&#x27;仿真完成！现在可以看到从发射到一个月环月运行的完整轨道轨迹。\n&#x27;</span>);
+
+<span class="hljs-comment">%% 辅助函数</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dydt</span> = <span class="hljs-title">two_body_ode</span><span class="hljs-params">(~, y, mu)</span></span>
+    <span class="hljs-comment">% 二体问题微分方程</span>
+    r = <span class="hljs-built_in">sqrt</span>(y(<span class="hljs-number">1</span>)^<span class="hljs-number">2</span> + y(<span class="hljs-number">2</span>)^<span class="hljs-number">2</span>);
+
+    dydt = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">4</span>,<span class="hljs-number">1</span>);
+    dydt(<span class="hljs-number">1</span>) = y(<span class="hljs-number">3</span>);
+    dydt(<span class="hljs-number">2</span>) = y(<span class="hljs-number">4</span>);
+    dydt(<span class="hljs-number">3</span>) = -mu * y(<span class="hljs-number">1</span>) / r^<span class="hljs-number">3</span>;
+    dydt(<span class="hljs-number">4</span>) = -mu * y(<span class="hljs-number">2</span>) / r^<span class="hljs-number">3</span>;
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">plot_earth</span><span class="hljs-params">()</span></span>
+    <span class="hljs-comment">% 绘制地球</span>
+    theta_local = <span class="hljs-built_in">linspace</span>(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>*<span class="hljs-built_in">pi</span>, <span class="hljs-number">100</span>);
+    fill(<span class="hljs-number">6378</span> * <span class="hljs-built_in">cos</span>(theta_local), <span class="hljs-number">6378</span> * <span class="hljs-built_in">sin</span>(theta_local), [<span class="hljs-number">0.2</span> <span class="hljs-number">0.4</span> <span class="hljs-number">0.8</span>], <span class="hljs-string">&#x27;FaceAlpha&#x27;</span>, <span class="hljs-number">0.6</span>);
+    <span class="hljs-built_in">plot</span>(<span class="hljs-number">6378</span> * <span class="hljs-built_in">cos</span>(theta_local), <span class="hljs-number">6378</span> * <span class="hljs-built_in">sin</span>(theta_local), <span class="hljs-string">&#x27;b&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">plot_moon</span><span class="hljs-params">()</span></span>
+    <span class="hljs-comment">% 绘制月球</span>
+    theta_local = <span class="hljs-built_in">linspace</span>(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>*<span class="hljs-built_in">pi</span>, <span class="hljs-number">100</span>);
+    fill(<span class="hljs-number">1737</span> * <span class="hljs-built_in">cos</span>(theta_local), <span class="hljs-number">1737</span> * <span class="hljs-built_in">sin</span>(theta_local), [<span class="hljs-number">0.6</span> <span class="hljs-number">0.6</span> <span class="hljs-number">0.6</span>], <span class="hljs-string">&#x27;FaceAlpha&#x27;</span>, <span class="hljs-number">0.6</span>);
+    <span class="hljs-built_in">plot</span>(<span class="hljs-number">1737</span> * <span class="hljs-built_in">cos</span>(theta_local), <span class="hljs-number">1737</span> * <span class="hljs-built_in">sin</span>(theta_local), <span class="hljs-string">&#x27;k&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">plot_maneuver_points</span><span class="hljs-params">(r1, r_parking, capture_point, delta_v1, delta_v2, moon_pos)</span></span>
+    <span class="hljs-comment">% 标记机动点</span>
+
+    <span class="hljs-comment">% 转移轨道注入点</span>
+    <span class="hljs-built_in">plot</span>(r1, <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;ro&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">10</span>, <span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>, <span class="hljs-string">&#x27;r&#x27;</span>);
+    text(r1, <span class="hljs-number">5000</span>, sprintf(<span class="hljs-string">&#x27;转移注入\nΔV=%.3f km/s&#x27;</span>, delta_v1), ...
+         <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">9</span>, <span class="hljs-string">&#x27;HorizontalAlignment&#x27;</span>, <span class="hljs-string">&#x27;center&#x27;</span>, <span class="hljs-string">&#x27;Interpreter&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+
+    <span class="hljs-comment">% 停泊轨道</span>
+    <span class="hljs-built_in">plot</span>(r_parking, <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;go&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">8</span>, <span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>, <span class="hljs-string">&#x27;g&#x27;</span>);
+    text(r_parking, <span class="hljs-number">-8000</span>, <span class="hljs-string">&#x27;停泊轨道&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">9</span>, <span class="hljs-string">&#x27;HorizontalAlignment&#x27;</span>, <span class="hljs-string">&#x27;center&#x27;</span>, <span class="hljs-string">&#x27;Interpreter&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+
+    <span class="hljs-comment">% 月球捕获点</span>
+    <span class="hljs-built_in">plot</span>(capture_point(<span class="hljs-number">1</span>), capture_point(<span class="hljs-number">2</span>), <span class="hljs-string">&#x27;mo&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">10</span>, <span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>, <span class="hljs-string">&#x27;m&#x27;</span>);
+    text(capture_point(<span class="hljs-number">1</span>), capture_point(<span class="hljs-number">2</span>)+<span class="hljs-number">15000</span>, sprintf(<span class="hljs-string">&#x27;月球捕获\nΔV=%.3f km/s&#x27;</span>, delta_v2), ...
+         <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">9</span>, <span class="hljs-string">&#x27;HorizontalAlignment&#x27;</span>, <span class="hljs-string">&#x27;center&#x27;</span>, <span class="hljs-string">&#x27;Interpreter&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+
+    <span class="hljs-comment">% 月球位置</span>
+    <span class="hljs-built_in">plot</span>(moon_pos(<span class="hljs-number">1</span>), moon_pos(<span class="hljs-number">2</span>), <span class="hljs-string">&#x27;ko&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">8</span>, <span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>, [<span class="hljs-number">0.6</span> <span class="hljs-number">0.6</span> <span class="hljs-number">0.6</span>]);
+    text(moon_pos(<span class="hljs-number">1</span>), moon_pos(<span class="hljs-number">2</span>)<span class="hljs-number">-20000</span>, <span class="hljs-string">&#x27;月球&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">10</span>, <span class="hljs-string">&#x27;HorizontalAlignment&#x27;</span>, <span class="hljs-string">&#x27;center&#x27;</span>, <span class="hljs-string">&#x27;Interpreter&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+<span class="hljs-keyword">end</span>
+
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/小球在摆线上下落的物理过程matlab代码.html">
+      <span>上一篇</span>
+      <strong>小球在摆线上下落的物理过程MATLAB代码</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">
+      <span>下一篇</span>
+      <strong>天体轨道的物理推导全过程Python绘制天体圆锥轨道</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/计算卫星与地面时差用广义相对论给出计算公式与matlab代码.html">计算卫星与地面时差用广义相对论给出计算公式与MATLAB代码</a></h3>
+        <p class="post-excerpt">一、相对论时差的主要来源</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.817Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/空间飞行器轨道旅行者号行星际飞行轨道递推计算与分析matlab代码.html">空间飞行器轨道旅行者号行星际飞行轨道递推计算与分析Matlab代码</a></h3>
+        <p class="post-excerpt">本文基于Wagner和Wie的论文思路，实现了旅行者号引力辅助(MGA)轨迹的教学版仿真。程序首先计算各行星在简化圆轨道下的日心状态，通过分段Lambert求解得到转移轨道。核心部分分析了飞越点的关键参数：相对速度(vinf)、转角(delta)、近拱点距离(rp)和速度增量(DeltaV\GA)。结果显示木星、土星、天王星飞越时的转角分别为47.8°、83.3°和88.1°。程序还提供了3D可视…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.721Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

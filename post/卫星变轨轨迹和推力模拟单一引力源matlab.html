@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>卫星变轨轨迹和推力模拟单一引力源MATLAB · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">卫星变轨轨迹和推力模拟单一引力源MATLAB</h1>
+        <p class="post-deck">代码说明：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.346Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>12 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+            <a class="tag-chip" href="../tags/tag-15.html">卫星</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p><img src="../uploads/csdn/%E5%8D%AB%E6%98%9F%E5%8F%98%E8%BD%A8%E8%BD%A8%E8%BF%B9%E5%92%8C%E6%8E%A8%E5%8A%9B%E6%A8%A1%E6%8B%9F%E5%8D%95%E4%B8%80%E5%BC%95%E5%8A%9B%E6%BA%90matlab/img-01.jpeg" alt=""></p>
+<h4 id="代码说明" class="prose-heading">代码说明：</h4>
+<ol>
+<li><strong>常量定义</strong>：定义了万有引力常数、地球和月球的质量、半径以及地月平均距离。</li>
+<li><strong>初始状态设置</strong>：设置卫星的初始位置、速度和姿态，以及月球的初始位置。</li>
+<li><strong>模拟循环</strong>：在循环中计算地球和月球对卫星的引力，模拟机动变轨推力，更新卫星的速度、位置和姿态。</li>
+<li><strong>绘制 3D 场景</strong>：卫星轨迹、卫星姿态和推力矢量。</li>
+<li><strong>辅助函数</strong>：<code>rotationMatrix</code> 函数用于计算旋转矩阵，<code>drawSatellite</code> 函数用于绘制卫星（长方体）。</li>
+</ol>
+<p>你可以根据需要调整模拟参数和卫星的初始状态。</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% 常量定义</span>
+G = <span class="hljs-number">6.67430e-20</span>; <span class="hljs-comment">% 万有引力常数 (km^3 kg^-1 s^-2)</span>
+M_earth = <span class="hljs-number">5.972e12</span>; <span class="hljs-comment">% 地球质量 (kg)</span>
+
+<span class="hljs-comment">% 卫星初始状态</span>
+initial_position = [<span class="hljs-number">5</span>; <span class="hljs-number">0</span>; <span class="hljs-number">0</span>]; <span class="hljs-comment">% 初始位置 (km)，椭圆轨道长半轴的端点</span>
+initial_velocity = [<span class="hljs-number">0</span>; <span class="hljs-number">2</span>; <span class="hljs-number">0</span>]; <span class="hljs-comment">% 初始速度 (km/s)，垂直于长半轴方向</span>
+initial_attitude = [<span class="hljs-number">1</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>; <span class="hljs-number">0</span> <span class="hljs-number">1</span> <span class="hljs-number">0</span>; <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">1</span>]; <span class="hljs-comment">% 初始姿态矩阵</span>
+
+<span class="hljs-comment">% 引力源位置（假设在原点）</span>
+gravitational_source_position = [<span class="hljs-number">0</span>; <span class="hljs-number">0</span>; <span class="hljs-number">0</span>];
+
+<span class="hljs-comment">% 模拟参数</span>
+total_time = <span class="hljs-number">200</span>; <span class="hljs-comment">% 总模拟时间 (s)，根据椭圆轨道周期调整</span>
+dt = <span class="hljs-number">0.1</span>; <span class="hljs-comment">% 时间步长 (s)</span>
+num_steps = total_time / dt;
+
+<span class="hljs-comment">% 初始化数组</span>
+position = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">3</span>, num_steps);
+velocity = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">3</span>, num_steps);
+attitude = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">3</span>, <span class="hljs-number">3</span>, num_steps);
+
+position(:, <span class="hljs-number">1</span>) = initial_position;
+velocity(:, <span class="hljs-number">1</span>) = initial_velocity;
+attitude(:, :, <span class="hljs-number">1</span>) = initial_attitude;
+
+<span class="hljs-comment">% 椭圆轨道参数</span>
+semi_major_axis = norm(initial_position); <span class="hljs-comment">% 长半轴</span>
+angular_velocity = norm(initial_velocity) / semi_major_axis; <span class="hljs-comment">% 角速度</span>
+
+<span class="hljs-comment">% 模拟循环</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:num_steps - <span class="hljs-number">1</span>
+    <span class="hljs-comment">% 计算引力</span>
+    r = position(:, <span class="hljs-built_in">i</span>) - gravitational_source_position;
+    gravitational_force = -G * M_earth * r / norm(r)^<span class="hljs-number">3</span>;
+
+    <span class="hljs-comment">% 计算当前位置的角度</span>
+    current_angle = <span class="hljs-built_in">atan2</span>(position(<span class="hljs-number">2</span>, <span class="hljs-built_in">i</span>), position(<span class="hljs-number">1</span>, <span class="hljs-built_in">i</span>));
+
+    <span class="hljs-comment">% 计算向心力方向的单位向量</span>
+    centripetal_direction = -position(:, <span class="hljs-built_in">i</span>) / norm(position(:, <span class="hljs-built_in">i</span>));
+
+    <span class="hljs-comment">% 计算向心力大小（根据圆周运动公式 F = m * v^2 / r，这里假设 m = 1）</span>
+    centripetal_magnitude = norm(velocity(:, <span class="hljs-built_in">i</span>))^<span class="hljs-number">2</span> / norm(position(:, <span class="hljs-built_in">i</span>));
+
+    <span class="hljs-comment">% 计算推力</span>
+    thrust = centripetal_direction * centripetal_magnitude;
+
+    <span class="hljs-comment">% 计算总加速度</span>
+    acceleration = gravitational_force + thrust;
+
+    <span class="hljs-comment">% 更新速度和位置</span>
+    velocity(:, <span class="hljs-built_in">i</span> + <span class="hljs-number">1</span>) = velocity(:, <span class="hljs-built_in">i</span>) + acceleration * dt;
+    position(:, <span class="hljs-built_in">i</span> + <span class="hljs-number">1</span>) = position(:, <span class="hljs-built_in">i</span>) + velocity(:, <span class="hljs-built_in">i</span>) * dt;
+
+    <span class="hljs-comment">% 更新姿态（这里简单假设姿态绕推力方向旋转一个小角度）</span>
+    rotation_angle = <span class="hljs-number">0.001</span>; <span class="hljs-comment">% 旋转角度 (rad)</span>
+    rotation_axis = thrust / norm(thrust);
+    rotation_matrix = rotationMatrix(rotation_axis, rotation_angle);
+    attitude(:, :, <span class="hljs-built_in">i</span> + <span class="hljs-number">1</span>) = rotation_matrix * attitude(:, :, <span class="hljs-built_in">i</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 绘制 3D 轨迹</span>
+<span class="hljs-built_in">figure</span>;
+<span class="hljs-built_in">plot3</span>(position(<span class="hljs-number">1</span>, :), position(<span class="hljs-number">2</span>, :), position(<span class="hljs-number">3</span>, :), <span class="hljs-string">&#x27;b&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>);
+xlabel(<span class="hljs-string">&#x27;X (km)&#x27;</span>);
+ylabel(<span class="hljs-string">&#x27;Y (km)&#x27;</span>);
+zlabel(<span class="hljs-string">&#x27;Z (km)&#x27;</span>);
+title(<span class="hljs-string">&#x27;卫星变轨 3D 轨迹（考虑引力源）&#x27;</span>);
+grid on;
+
+<span class="hljs-comment">% 绘制卫星姿态和推力矢量</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:<span class="hljs-number">10</span>:num_steps
+    <span class="hljs-comment">% 绘制卫星（长方体）</span>
+    drawSatellite(position(:, <span class="hljs-built_in">i</span>), attitude(:, :, <span class="hljs-built_in">i</span>));
+
+    <span class="hljs-comment">% 确定立方体底面中心位置</span>
+    <span class="hljs-built_in">length</span> = <span class="hljs-number">1</span>;
+    width = <span class="hljs-number">0.5</span>;
+    height = <span class="hljs-number">0.2</span>;
+    base_center_local = [<span class="hljs-built_in">length</span>/<span class="hljs-number">2</span>; width/<span class="hljs-number">2</span>; <span class="hljs-number">0</span>];
+    base_center_global = attitude(:, :, <span class="hljs-built_in">i</span>) * base_center_local + position(:, <span class="hljs-built_in">i</span>);
+
+    <span class="hljs-comment">% 计算当前位置的角度</span>
+    current_angle = <span class="hljs-built_in">atan2</span>(position(<span class="hljs-number">2</span>, <span class="hljs-built_in">i</span>), position(<span class="hljs-number">1</span>, <span class="hljs-built_in">i</span>));
+
+    <span class="hljs-comment">% 计算向心力方向的单位向量</span>
+    centripetal_direction = -position(:, <span class="hljs-built_in">i</span>) / norm(position(:, <span class="hljs-built_in">i</span>));
+
+    <span class="hljs-comment">% 计算向心力大小（根据圆周运动公式 F = m * v^2 / r，这里假设 m = 1）</span>
+    centripetal_magnitude = norm(velocity(:, <span class="hljs-built_in">i</span>))^<span class="hljs-number">2</span> / norm(position(:, <span class="hljs-built_in">i</span>));
+
+    <span class="hljs-comment">% 计算推力</span>
+    thrust = centripetal_direction * centripetal_magnitude;
+
+    <span class="hljs-comment">% 绘制推力矢量</span>
+    quiver3(base_center_global(<span class="hljs-number">1</span>), base_center_global(<span class="hljs-number">2</span>), base_center_global(<span class="hljs-number">3</span>), thrust(<span class="hljs-number">1</span>), thrust(<span class="hljs-number">2</span>), thrust(<span class="hljs-number">3</span>), <span class="hljs-string">&#x27;r&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;MaxHeadSize&#x27;</span>, <span class="hljs-number">0.5</span>);
+    <span class="hljs-comment">% 标注矢量大小</span>
+    text(base_center_global(<span class="hljs-number">1</span>)+thrust(<span class="hljs-number">1</span>), base_center_global(<span class="hljs-number">2</span>)+thrust(<span class="hljs-number">2</span>), base_center_global(<span class="hljs-number">3</span>)+thrust(<span class="hljs-number">3</span>), num2str(centripetal_magnitude), <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;r&#x27;</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 旋转矩阵函数</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">R</span> = <span class="hljs-title">rotationMatrix</span><span class="hljs-params">(axis, angle)</span></span>
+    axis = axis / norm(axis);
+    c = <span class="hljs-built_in">cos</span>(<span class="hljs-built_in">angle</span>);
+    s = <span class="hljs-built_in">sin</span>(<span class="hljs-built_in">angle</span>);
+    t = <span class="hljs-number">1</span> - c;
+    x = axis(<span class="hljs-number">1</span>);
+    y = axis(<span class="hljs-number">2</span>);
+    z = axis(<span class="hljs-number">3</span>);
+
+    R = [t*x^<span class="hljs-number">2</span> + c    t*x*y - s*z  t*x*z + s*y;
+         t*x*y + s*z  t*y^<span class="hljs-number">2</span> + c    t*y*z - s*x;
+         t*x*z - s*y  t*y*z + s*x  t*z^<span class="hljs-number">2</span> + c];
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 绘制卫星（长方体）函数</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">drawSatellite</span><span class="hljs-params">(position, attitude)</span></span>
+    <span class="hljs-comment">% 长方体尺寸</span>
+    <span class="hljs-built_in">length</span> = <span class="hljs-number">1</span>;
+    width = <span class="hljs-number">0.5</span>;
+    height = <span class="hljs-number">0.2</span>;
+
+    <span class="hljs-comment">% 长方体顶点坐标</span>
+    vertices = [<span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>;
+                <span class="hljs-built_in">length</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>;
+                <span class="hljs-built_in">length</span> width <span class="hljs-number">0</span>;
+                <span class="hljs-number">0</span> width <span class="hljs-number">0</span>;
+                <span class="hljs-number">0</span> <span class="hljs-number">0</span> height;
+                <span class="hljs-built_in">length</span> <span class="hljs-number">0</span> height;
+                <span class="hljs-built_in">length</span> width height;
+                <span class="hljs-number">0</span> width height];
+
+    <span class="hljs-comment">% 应用姿态变换</span>
+    vertices = vertices * attitude&#x27;;
+
+    <span class="hljs-comment">% 平移到当前位置</span>
+    vertices = <span class="hljs-built_in">bsxfun</span>(@plus, vertices, position&#x27;);
+
+    <span class="hljs-comment">% 绘制长方体</span>
+    faces = [<span class="hljs-number">1</span> <span class="hljs-number">2</span> <span class="hljs-number">3</span> <span class="hljs-number">4</span>; <span class="hljs-number">5</span> <span class="hljs-number">6</span> <span class="hljs-number">7</span> <span class="hljs-number">8</span>; <span class="hljs-number">1</span> <span class="hljs-number">2</span> <span class="hljs-number">6</span> <span class="hljs-number">5</span>; <span class="hljs-number">2</span> <span class="hljs-number">3</span> <span class="hljs-number">7</span> <span class="hljs-number">6</span>; <span class="hljs-number">3</span> <span class="hljs-number">4</span> <span class="hljs-number">8</span> <span class="hljs-number">7</span>; <span class="hljs-number">4</span> <span class="hljs-number">1</span> <span class="hljs-number">5</span> <span class="hljs-number">8</span>];
+    patch(<span class="hljs-string">&#x27;Vertices&#x27;</span>, vertices, <span class="hljs-string">&#x27;Faces&#x27;</span>, faces, <span class="hljs-string">&#x27;FaceColor&#x27;</span>, <span class="hljs-string">&#x27;g&#x27;</span>, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;k&#x27;</span>);
+    <span class="hljs-built_in">hold</span> on;
+<span class="hljs-keyword">end</span>
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#代码说明">代码说明：</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/卫星轨道matlab动力学仿真.html">
+      <span>上一篇</span>
+      <strong>卫星轨道MATLAB动力学仿真</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/利用激光衍射法测量超细丝的直径关键词激光衍射超细丝碳纤维长绒棉智能手机.html">
+      <span>下一篇</span>
+      <strong>利用激光衍射法测量超细丝的直径关键词激光衍射超细丝碳纤维长绒棉智能手机</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/计算卫星与地面时差用广义相对论给出计算公式与matlab代码.html">计算卫星与地面时差用广义相对论给出计算公式与MATLAB代码</a></h3>
+        <p class="post-excerpt">一、相对论时差的主要来源</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.817Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/空间飞行器轨道旅行者号行星际飞行轨道递推计算与分析matlab代码.html">空间飞行器轨道旅行者号行星际飞行轨道递推计算与分析Matlab代码</a></h3>
+        <p class="post-excerpt">本文基于Wagner和Wie的论文思路，实现了旅行者号引力辅助(MGA)轨迹的教学版仿真。程序首先计算各行星在简化圆轨道下的日心状态，通过分段Lambert求解得到转移轨道。核心部分分析了飞越点的关键参数：相对速度(vinf)、转角(delta)、近拱点距离(rp)和速度增量(DeltaV\GA)。结果显示木星、土星、天王星飞越时的转角分别为47.8°、83.3°和88.1°。程序还提供了3D可视…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.721Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

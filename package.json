@@ -8,6 +8,7 @@
     "dev": "node server.js",
     "build:static": "node scripts/build-static.js",
     "publish": "node scripts/publish-markdown.js",
+    "import:csdn": "node scripts/import-csdn.js",
     "reset-password": "node scripts/reset-password.js"
   },
   "engines": {
@@ -22,6 +23,7 @@
     "highlight.js": "^11.11.1",
     "katex": "^0.18.4",
     "markdown-it": "^14.1.0",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "turndown": "^7.2.4"
   }
 }

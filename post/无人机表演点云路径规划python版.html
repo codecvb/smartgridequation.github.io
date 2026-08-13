@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>无人机表演点云路径规划Python版 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">无人机表演点云路径规划Python版</h1>
+        <p class="post-deck">摘要：本文介绍了一个无人机表演路径规划系统，支持加载两个TXT格式的点云数据文件进行路径规划。系统采用PyQt5框架开发3D可视化界面，包含点云加载、路径优化、动画控制等功能模块。核心算法通过KD树实现点云匹配和路径优化，支持多种插值方式生成平滑动画。系统可调整无人机数量、大小、颜色等参数，提供3D可视化视图和轨迹显示功能，适用于大型无人机编队表演的路径规划需求。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.134Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>81 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-5.html">人工智能</a>
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>摘要：本文介绍了一个无人机表演路径规划系统，支持加载两个TXT格式的点云数据文件进行路径规划。系统采用PyQt5框架开发3D可视化界面，包含点云加载、路径优化、动画控制等功能模块。核心算法通过KD树实现点云匹配和路径优化，支持多种插值方式生成平滑动画。系统可调整无人机数量、大小、颜色等参数，提供3D可视化视图和轨迹显示功能，适用于大型无人机编队表演的路径规划需求。</p>
+<p><img src="../uploads/csdn/%E6%97%A0%E4%BA%BA%E6%9C%BA%E8%A1%A8%E6%BC%94%E7%82%B9%E4%BA%91%E8%B7%AF%E5%BE%84%E8%A7%84%E5%88%92python%E7%89%88/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/%E6%97%A0%E4%BA%BA%E6%9C%BA%E8%A1%A8%E6%BC%94%E7%82%B9%E4%BA%91%E8%B7%AF%E5%BE%84%E8%A7%84%E5%88%92python%E7%89%88/img-02.png" alt=""></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-string">&quot;&quot;&quot;
+无人机表演路径规划系统
+支持加载两个TXT点云数据文件进行路径规划
+&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">from</span> scipy.spatial <span class="hljs-keyword">import</span> KDTree
+<span class="hljs-keyword">from</span> PyQt5.QtWidgets <span class="hljs-keyword">import</span> (QApplication, QMainWindow, QWidget, QVBoxLayout,
+                             QHBoxLayout, QPushButton, QLabel, QSlider, QGroupBox,
+                             QSpinBox, QDoubleSpinBox, QGridLayout, QProgressBar,
+                             QComboBox, QCheckBox, QFileDialog, QMessageBox, QLineEdit)
+<span class="hljs-keyword">from</span> PyQt5.QtCore <span class="hljs-keyword">import</span> Qt, QTimer, pyqtSignal, QThread
+<span class="hljs-keyword">from</span> PyQt5.QtGui <span class="hljs-keyword">import</span> QFont, QColor, QPalette
+<span class="hljs-keyword">import</span> pyqtgraph <span class="hljs-keyword">as</span> pg
+<span class="hljs-keyword">import</span> pyqtgraph.opengl <span class="hljs-keyword">as</span> gl
+<span class="hljs-keyword">from</span> pyqtgraph.opengl <span class="hljs-keyword">import</span> GLViewWidget, GLScatterPlotItem, GLLinePlotItem, GLGridItem, GLAxisItem
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">TXTPointCloudLoader</span>:
+    <span class="hljs-string">&quot;&quot;&quot;TXT点云数据加载器&quot;&quot;&quot;</span>
+
+<span class="hljs-meta">    @staticmethod</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">load_txt</span>(<span class="hljs-params">file_path</span>):
+        <span class="hljs-string">&quot;&quot;&quot;从TXT文件加载点云数据&quot;&quot;&quot;</span>
+        points = []
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(file_path, <span class="hljs-string">&#x27;r&#x27;</span>, encoding=<span class="hljs-string">&#x27;utf-8&#x27;</span>) <span class="hljs-keyword">as</span> f:
+                <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> f:
+                    line = line.strip()
+                    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> line <span class="hljs-keyword">or</span> line.startswith(<span class="hljs-string">&#x27;#&#x27;</span>):
+                        <span class="hljs-keyword">continue</span>
+                    parts = line.split()
+                    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(parts) &gt;= <span class="hljs-number">3</span>:
+                        <span class="hljs-keyword">try</span>:
+                            x, y, z = <span class="hljs-built_in">float</span>(parts[<span class="hljs-number">0</span>]), <span class="hljs-built_in">float</span>(parts[<span class="hljs-number">1</span>]), <span class="hljs-built_in">float</span>(parts[<span class="hljs-number">2</span>])
+                            points.append([x, y, z])
+                        <span class="hljs-keyword">except</span> ValueError:
+                            <span class="hljs-keyword">continue</span>
+
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(points) == <span class="hljs-number">0</span>:
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;警告: 文件 <span class="hljs-subst">{file_path}</span> 中没有找到有效的点数据&quot;</span>)
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+            points = np.array(points)
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;成功加载 <span class="hljs-subst">{<span class="hljs-built_in">len</span>(points)}</span> 个点&quot;</span>)
+
+            <span class="hljs-comment"># 数据清洗：移除异常值</span>
+            mean = np.mean(points, axis=<span class="hljs-number">0</span>)
+            std = np.std(points, axis=<span class="hljs-number">0</span>)
+            points = points[np.<span class="hljs-built_in">all</span>(np.<span class="hljs-built_in">abs</span>(points - mean) &lt; <span class="hljs-number">3</span> * std, axis=<span class="hljs-number">1</span>)]
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;清洗后剩余 <span class="hljs-subst">{<span class="hljs-built_in">len</span>(points)}</span> 个点&quot;</span>)
+
+            <span class="hljs-keyword">return</span> points
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;加载点云失败: <span class="hljs-subst">{e}</span>&quot;</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+<span class="hljs-meta">    @staticmethod</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">preprocess_pointcloud</span>(<span class="hljs-params">points, target_count=<span class="hljs-literal">None</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;预处理点云：下采样/上采样到目标数量&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> target_count <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">return</span> points
+
+        current_count = <span class="hljs-built_in">len</span>(points)
+        <span class="hljs-keyword">if</span> current_count == target_count:
+            <span class="hljs-keyword">return</span> points
+
+        <span class="hljs-keyword">if</span> current_count &gt; target_count:
+            <span class="hljs-comment"># 下采样</span>
+            indices = np.random.choice(current_count, target_count, replace=<span class="hljs-literal">False</span>)
+            <span class="hljs-keyword">return</span> points[indices]
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 上采样：随机复制并添加噪声</span>
+            indices = np.random.choice(current_count, target_count - current_count, replace=<span class="hljs-literal">True</span>)
+            new_points = points[indices].copy()
+            <span class="hljs-comment"># 添加微小噪声</span>
+            noise = np.random.normal(<span class="hljs-number">0</span>, <span class="hljs-number">0.005</span>, new_points.shape)
+            new_points += noise
+            <span class="hljs-keyword">return</span> np.vstack([points, new_points])
+
+<span class="hljs-meta">    @staticmethod</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">normalize_pointcloud</span>(<span class="hljs-params">points</span>):
+        <span class="hljs-string">&quot;&quot;&quot;归一化点云到标准范围&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 计算中心</span>
+        center = np.mean(points, axis=<span class="hljs-number">0</span>)
+        <span class="hljs-comment"># 移动到原点</span>
+        centered = points - center
+        <span class="hljs-comment"># 缩放以适应[-2, 2]范围</span>
+        max_dist = np.<span class="hljs-built_in">max</span>(np.<span class="hljs-built_in">abs</span>(centered))
+        <span class="hljs-keyword">if</span> max_dist == <span class="hljs-number">0</span>:
+            max_dist = <span class="hljs-number">1</span>
+        scale = <span class="hljs-number">2.0</span> / max_dist
+        <span class="hljs-keyword">return</span> centered * scale, center, scale
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">DronePathPlanner</span>:
+    <span class="hljs-string">&quot;&quot;&quot;无人机路径规划器&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.source_positions = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.target_positions = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.num_drones = <span class="hljs-number">800</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">load_pointcloud_from_txt</span>(<span class="hljs-params">self, file_path, target_count=<span class="hljs-literal">None</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;从TXT文件加载点云&quot;&quot;&quot;</span>
+        points = TXTPointCloudLoader.load_txt(file_path)
+        <span class="hljs-keyword">if</span> points <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+        <span class="hljs-keyword">if</span> target_count <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            points = TXTPointCloudLoader.preprocess_pointcloud(points, target_count)
+
+        <span class="hljs-comment"># 归一化</span>
+        points, center, scale = TXTPointCloudLoader.normalize_pointcloud(points)
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;点云加载完成: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(points)}</span> 点&quot;</span>)
+        <span class="hljs-keyword">return</span> points
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">optimize_paths</span>(<span class="hljs-params">self, start_points, end_points</span>):
+        <span class="hljs-string">&quot;&quot;&quot;优化路径规划，避免交叉碰撞&quot;&quot;&quot;</span>
+        n_points = <span class="hljs-built_in">len</span>(start_points)
+
+        <span class="hljs-comment"># 使用KD树找到最近点对应</span>
+        kdtree_start = KDTree(start_points)
+        kdtree_end = KDTree(end_points)
+
+        <span class="hljs-comment"># 双向匹配算法</span>
+        _, indices_start = kdtree_start.query(end_points)
+        _, indices_end = kdtree_end.query(start_points)
+
+        <span class="hljs-comment"># 创建优化映射</span>
+        mapping = np.zeros(n_points, dtype=<span class="hljs-built_in">int</span>)
+        used_end = <span class="hljs-built_in">set</span>()
+        used_start = <span class="hljs-built_in">set</span>()
+
+        <span class="hljs-comment"># 第一阶段：匹配双向最优的点对</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(n_points):
+            <span class="hljs-keyword">if</span> indices_end[indices_start[i]] == i <span class="hljs-keyword">and</span> i <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> used_end <span class="hljs-keyword">and</span> indices_start[i] <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> used_start:
+                mapping[indices_start[i]] = i
+                used_end.add(i)
+                used_start.add(indices_start[i])
+
+        <span class="hljs-comment"># 第二阶段：处理剩余点</span>
+        remaining_start = [i <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(n_points) <span class="hljs-keyword">if</span> i <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> used_start]
+        remaining_end = [i <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(n_points) <span class="hljs-keyword">if</span> i <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> used_end]
+
+        <span class="hljs-keyword">if</span> remaining_start <span class="hljs-keyword">and</span> remaining_end:
+            remaining_start_arr = np.array(remaining_start)
+            remaining_end_arr = np.array(remaining_end)
+
+            <span class="hljs-comment"># 计算剩余点的距离矩阵</span>
+            dist_matrix = np.linalg.norm(
+                start_points[remaining_start_arr][:, np.newaxis] - end_points[remaining_end_arr][np.newaxis, :],
+                axis=<span class="hljs-number">2</span>
+            )
+
+            <span class="hljs-comment"># 贪心匹配</span>
+            <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">min</span>(<span class="hljs-built_in">len</span>(remaining_start), <span class="hljs-built_in">len</span>(remaining_end))):
+                min_idx = np.unravel_index(np.argmin(dist_matrix), dist_matrix.shape)
+                start_idx = remaining_start[min_idx[<span class="hljs-number">0</span>]]
+                end_idx = remaining_end[min_idx[<span class="hljs-number">1</span>]]
+
+                mapping[start_idx] = end_idx
+                dist_matrix[min_idx[<span class="hljs-number">0</span>], :] = np.inf
+                dist_matrix[:, min_idx[<span class="hljs-number">1</span>]] = np.inf
+
+        <span class="hljs-comment"># 重新排列终点</span>
+        <span class="hljs-keyword">return</span> end_points[mapping]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">interpolate_positions</span>(<span class="hljs-params">self, start_pos, end_pos, progress, method=<span class="hljs-string">&#x27;smooth&#x27;</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;插值计算中间位置&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> method == <span class="hljs-string">&#x27;linear&#x27;</span>:
+            <span class="hljs-keyword">return</span> start_pos + (end_pos - start_pos) * progress
+        <span class="hljs-keyword">elif</span> method == <span class="hljs-string">&#x27;smooth&#x27;</span>:
+            <span class="hljs-comment"># 五次缓动函数</span>
+            t = progress
+            smooth_t = t * t * t * (t * (<span class="hljs-number">6</span> * t - <span class="hljs-number">15</span>) + <span class="hljs-number">10</span>)
+            <span class="hljs-keyword">return</span> start_pos + (end_pos - start_pos) * smooth_t
+        <span class="hljs-keyword">elif</span> method == <span class="hljs-string">&#x27;elastic&#x27;</span>:
+            t = progress
+            <span class="hljs-keyword">if</span> t == <span class="hljs-number">0</span> <span class="hljs-keyword">or</span> t == <span class="hljs-number">1</span>:
+                <span class="hljs-keyword">return</span> start_pos + (end_pos - start_pos) * t
+            c4 = (<span class="hljs-number">2</span> * np.pi) / <span class="hljs-number">3</span>
+            elastic_t = -np.power(<span class="hljs-number">2</span>, <span class="hljs-number">10</span> * t - <span class="hljs-number">10</span>) * np.sin((t * <span class="hljs-number">10</span> - <span class="hljs-number">10.75</span>) * c4)
+            <span class="hljs-keyword">return</span> start_pos + (end_pos - start_pos) * elastic_t
+        <span class="hljs-keyword">elif</span> method == <span class="hljs-string">&#x27;bounce&#x27;</span>:
+            t = progress
+            n1 = <span class="hljs-number">7.5625</span>
+            d1 = <span class="hljs-number">2.75</span>
+            <span class="hljs-keyword">if</span> t &lt; <span class="hljs-number">1</span> / d1:
+                bounce_t = n1 * t * t
+            <span class="hljs-keyword">elif</span> t &lt; <span class="hljs-number">2</span> / d1:
+                t = t - <span class="hljs-number">1.5</span> / d1
+                bounce_t = n1 * t * t + <span class="hljs-number">0.75</span>
+            <span class="hljs-keyword">elif</span> t &lt; <span class="hljs-number">2.5</span> / d1:
+                t = t - <span class="hljs-number">2.25</span> / d1
+                bounce_t = n1 * t * t + <span class="hljs-number">0.9375</span>
+            <span class="hljs-keyword">else</span>:
+                t = t - <span class="hljs-number">2.625</span> / d1
+                bounce_t = n1 * t * t + <span class="hljs-number">0.984375</span>
+            <span class="hljs-keyword">return</span> start_pos + (end_pos - start_pos) * bounce_t
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">return</span> start_pos + (end_pos - start_pos) * progress
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">AnimationThread</span>(<span class="hljs-title class_ inherited__">QThread</span>):
+    <span class="hljs-string">&quot;&quot;&quot;动画线程&quot;&quot;&quot;</span>
+    frame_ready = pyqtSignal(np.ndarray, <span class="hljs-built_in">float</span>)
+    finished_signal = pyqtSignal()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, planner, start_pos, end_pos, duration=<span class="hljs-number">5.0</span>, fps=<span class="hljs-number">30</span>, method=<span class="hljs-string">&#x27;smooth&#x27;</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.planner = planner
+        <span class="hljs-variable language_">self</span>.start_pos = start_pos
+        <span class="hljs-variable language_">self</span>.end_pos = end_pos
+        <span class="hljs-variable language_">self</span>.duration = duration
+        <span class="hljs-variable language_">self</span>.fps = fps
+        <span class="hljs-variable language_">self</span>.method = method
+        <span class="hljs-variable language_">self</span>.running = <span class="hljs-literal">True</span>
+        <span class="hljs-variable language_">self</span>.paused = <span class="hljs-literal">False</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">run</span>(<span class="hljs-params">self</span>):
+        total_frames = <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.duration * <span class="hljs-variable language_">self</span>.fps)
+        <span class="hljs-keyword">for</span> frame <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(total_frames):
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.running:
+                <span class="hljs-keyword">break</span>
+            <span class="hljs-keyword">while</span> <span class="hljs-variable language_">self</span>.paused:
+                <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.running:
+                    <span class="hljs-keyword">break</span>
+                <span class="hljs-variable language_">self</span>.msleep(<span class="hljs-number">100</span>)
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.running:
+                <span class="hljs-keyword">break</span>
+            progress = frame / total_frames
+            current_pos = <span class="hljs-variable language_">self</span>.planner.interpolate_positions(
+                <span class="hljs-variable language_">self</span>.start_pos, <span class="hljs-variable language_">self</span>.end_pos, progress, <span class="hljs-variable language_">self</span>.method
+            )
+            <span class="hljs-variable language_">self</span>.frame_ready.emit(current_pos, progress)
+            <span class="hljs-variable language_">self</span>.msleep(<span class="hljs-built_in">int</span>(<span class="hljs-number">1000</span> / <span class="hljs-variable language_">self</span>.fps))
+        <span class="hljs-variable language_">self</span>.finished_signal.emit()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">stop</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.running = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.paused = <span class="hljs-literal">False</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">pause</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.paused = <span class="hljs-literal">True</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">resume</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.paused = <span class="hljs-literal">False</span>
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">DroneShowMainWindow</span>(<span class="hljs-title class_ inherited__">QMainWindow</span>):
+    <span class="hljs-string">&quot;&quot;&quot;主窗口&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.setWindowTitle(<span class="hljs-string">&quot;🚁 无人机表演路径规划系统&quot;</span>)
+        <span class="hljs-variable language_">self</span>.setGeometry(<span class="hljs-number">100</span>, <span class="hljs-number">100</span>, <span class="hljs-number">1600</span>, <span class="hljs-number">1000</span>)
+
+        <span class="hljs-variable language_">self</span>.planner = DronePathPlanner()
+        <span class="hljs-variable language_">self</span>.source_positions = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.target_positions = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.current_positions = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.animation_thread = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.trail_items = []
+
+        <span class="hljs-variable language_">self</span>.source_file_path = <span class="hljs-string">&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.target_file_path = <span class="hljs-string">&quot;&quot;</span>
+
+        <span class="hljs-variable language_">self</span>.init_ui()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">init_ui</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;初始化UI&quot;&quot;&quot;</span>
+        central = QWidget()
+        <span class="hljs-variable language_">self</span>.setCentralWidget(central)
+        main_layout = QHBoxLayout(central)
+        main_layout.setSpacing(<span class="hljs-number">10</span>)
+
+        <span class="hljs-comment"># 左侧控制面板</span>
+        control_panel = <span class="hljs-variable language_">self</span>._create_control_panel()
+        main_layout.addWidget(control_panel, <span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 右侧3D视图</span>
+        right_panel = <span class="hljs-variable language_">self</span>._create_right_panel()
+        main_layout.addWidget(right_panel, <span class="hljs-number">3</span>)
+
+        <span class="hljs-variable language_">self</span>._apply_styles()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_create_control_panel</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;创建控制面板&quot;&quot;&quot;</span>
+        panel = QWidget()
+        layout = QVBoxLayout(panel)
+        layout.setSpacing(<span class="hljs-number">10</span>)
+
+        <span class="hljs-comment"># 标题</span>
+        title = QLabel(<span class="hljs-string">&quot;🚁 无人机路径规划&quot;</span>)
+        title.setFont(QFont(<span class="hljs-string">&quot;Microsoft YaHei&quot;</span>, <span class="hljs-number">16</span>, QFont.Bold))
+        title.setStyleSheet(<span class="hljs-string">&quot;color: #ff6b6b;&quot;</span>)
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+
+        <span class="hljs-comment"># 文件加载区域</span>
+        file_group = QGroupBox(<span class="hljs-string">&quot;📁 点云数据加载&quot;</span>)
+        file_layout = QGridLayout()
+
+        <span class="hljs-comment"># 源点云文件</span>
+        file_layout.addWidget(QLabel(<span class="hljs-string">&quot;源点云 (起点):&quot;</span>), <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+        <span class="hljs-variable language_">self</span>.source_path_edit = QLineEdit()
+        <span class="hljs-variable language_">self</span>.source_path_edit.setPlaceholderText(<span class="hljs-string">&quot;选择源点云TXT文件...&quot;</span>)
+        file_layout.addWidget(<span class="hljs-variable language_">self</span>.source_path_edit, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>)
+        source_btn = QPushButton(<span class="hljs-string">&quot;浏览...&quot;</span>)
+        source_btn.clicked.connect(<span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.load_file(<span class="hljs-string">&#x27;source&#x27;</span>))
+        file_layout.addWidget(source_btn, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>)
+
+        <span class="hljs-comment"># 目标点云文件</span>
+        file_layout.addWidget(QLabel(<span class="hljs-string">&quot;目标点云 (终点):&quot;</span>), <span class="hljs-number">1</span>, <span class="hljs-number">0</span>)
+        <span class="hljs-variable language_">self</span>.target_path_edit = QLineEdit()
+        <span class="hljs-variable language_">self</span>.target_path_edit.setPlaceholderText(<span class="hljs-string">&quot;选择目标点云TXT文件...&quot;</span>)
+        file_layout.addWidget(<span class="hljs-variable language_">self</span>.target_path_edit, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)
+        target_btn = QPushButton(<span class="hljs-string">&quot;浏览...&quot;</span>)
+        target_btn.clicked.connect(<span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.load_file(<span class="hljs-string">&#x27;target&#x27;</span>))
+        file_layout.addWidget(target_btn, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+
+        file_group.setLayout(file_layout)
+        layout.addWidget(file_group)
+
+        <span class="hljs-comment"># 无人机设置</span>
+        drone_group = QGroupBox(<span class="hljs-string">&quot;⚙️ 无人机设置&quot;</span>)
+        drone_layout = QGridLayout()
+
+        drone_layout.addWidget(QLabel(<span class="hljs-string">&quot;无人机数量:&quot;</span>), <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+        <span class="hljs-variable language_">self</span>.drone_count_spin = QSpinBox()
+        <span class="hljs-variable language_">self</span>.drone_count_spin.setRange(<span class="hljs-number">100</span>, <span class="hljs-number">3000</span>)
+        <span class="hljs-variable language_">self</span>.drone_count_spin.setValue(<span class="hljs-number">800</span>)
+        <span class="hljs-variable language_">self</span>.drone_count_spin.setSingleStep(<span class="hljs-number">100</span>)
+        drone_layout.addWidget(<span class="hljs-variable language_">self</span>.drone_count_spin, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>)
+
+        drone_layout.addWidget(QLabel(<span class="hljs-string">&quot;无人机大小:&quot;</span>), <span class="hljs-number">1</span>, <span class="hljs-number">0</span>)
+        <span class="hljs-variable language_">self</span>.drone_size_spin = QDoubleSpinBox()
+        <span class="hljs-variable language_">self</span>.drone_size_spin.setRange(<span class="hljs-number">0.01</span>, <span class="hljs-number">0.3</span>)
+        <span class="hljs-variable language_">self</span>.drone_size_spin.setValue(<span class="hljs-number">0.05</span>)
+        <span class="hljs-variable language_">self</span>.drone_size_spin.setSingleStep(<span class="hljs-number">0.01</span>)
+        drone_layout.addWidget(<span class="hljs-variable language_">self</span>.drone_size_spin, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)
+
+        drone_layout.addWidget(QLabel(<span class="hljs-string">&quot;颜色模式:&quot;</span>), <span class="hljs-number">2</span>, <span class="hljs-number">0</span>)
+        <span class="hljs-variable language_">self</span>.color_combo = QComboBox()
+        <span class="hljs-variable language_">self</span>.color_combo.addItems([<span class="hljs-string">&quot;高度渐变&quot;</span>, <span class="hljs-string">&quot;彩虹色&quot;</span>, <span class="hljs-string">&quot;单色&quot;</span>])
+        drone_layout.addWidget(<span class="hljs-variable language_">self</span>.color_combo, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>)
+
+        drone_group.setLayout(drone_layout)
+        layout.addWidget(drone_group)
+
+        <span class="hljs-comment"># 动画设置</span>
+        anim_group = QGroupBox(<span class="hljs-string">&quot;🎬 动画设置&quot;</span>)
+        anim_layout = QGridLayout()
+
+        anim_layout.addWidget(QLabel(<span class="hljs-string">&quot;动画时长(秒):&quot;</span>), <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+        <span class="hljs-variable language_">self</span>.duration_spin = QDoubleSpinBox()
+        <span class="hljs-variable language_">self</span>.duration_spin.setRange(<span class="hljs-number">1</span>, <span class="hljs-number">30</span>)
+        <span class="hljs-variable language_">self</span>.duration_spin.setValue(<span class="hljs-number">5</span>)
+        <span class="hljs-variable language_">self</span>.duration_spin.setSingleStep(<span class="hljs-number">0.5</span>)
+        drone_layout.addWidget(<span class="hljs-variable language_">self</span>.duration_spin, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>)
+
+        anim_layout.addWidget(QLabel(<span class="hljs-string">&quot;帧率(FPS):&quot;</span>), <span class="hljs-number">1</span>, <span class="hljs-number">0</span>)
+        <span class="hljs-variable language_">self</span>.fps_spin = QSpinBox()
+        <span class="hljs-variable language_">self</span>.fps_spin.setRange(<span class="hljs-number">10</span>, <span class="hljs-number">120</span>)
+        <span class="hljs-variable language_">self</span>.fps_spin.setValue(<span class="hljs-number">30</span>)
+        anim_layout.addWidget(<span class="hljs-variable language_">self</span>.fps_spin, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)
+
+        anim_layout.addWidget(QLabel(<span class="hljs-string">&quot;插值方式:&quot;</span>), <span class="hljs-number">2</span>, <span class="hljs-number">0</span>)
+        <span class="hljs-variable language_">self</span>.interp_combo = QComboBox()
+        <span class="hljs-variable language_">self</span>.interp_combo.addItems([<span class="hljs-string">&quot;平滑过渡&quot;</span>, <span class="hljs-string">&quot;弹性效果&quot;</span>, <span class="hljs-string">&quot;弹跳效果&quot;</span>, <span class="hljs-string">&quot;线性过渡&quot;</span>])
+        anim_layout.addWidget(<span class="hljs-variable language_">self</span>.interp_combo, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>)
+
+        anim_group.setLayout(anim_layout)
+        layout.addWidget(anim_group)
+
+        <span class="hljs-comment"># 视图控制</span>
+        view_group = QGroupBox(<span class="hljs-string">&quot;👁️ 视图控制&quot;</span>)
+        view_layout = QVBoxLayout()
+
+        <span class="hljs-variable language_">self</span>.show_source_btn = QPushButton(<span class="hljs-string">&quot;📍 显示源点云&quot;</span>)
+        <span class="hljs-variable language_">self</span>.show_source_btn.clicked.connect(<span class="hljs-variable language_">self</span>.show_source)
+        <span class="hljs-variable language_">self</span>.show_source_btn.setEnabled(<span class="hljs-literal">False</span>)
+        view_layout.addWidget(<span class="hljs-variable language_">self</span>.show_source_btn)
+
+        <span class="hljs-variable language_">self</span>.show_target_btn = QPushButton(<span class="hljs-string">&quot;🎯 显示目标点云&quot;</span>)
+        <span class="hljs-variable language_">self</span>.show_target_btn.clicked.connect(<span class="hljs-variable language_">self</span>.show_target)
+        <span class="hljs-variable language_">self</span>.show_target_btn.setEnabled(<span class="hljs-literal">False</span>)
+        view_layout.addWidget(<span class="hljs-variable language_">self</span>.show_target_btn)
+
+        <span class="hljs-variable language_">self</span>.toggle_rotation_btn = QPushButton(<span class="hljs-string">&quot;🔄 自动旋转&quot;</span>)
+        <span class="hljs-variable language_">self</span>.toggle_rotation_btn.setCheckable(<span class="hljs-literal">True</span>)
+        <span class="hljs-variable language_">self</span>.toggle_rotation_btn.clicked.connect(<span class="hljs-variable language_">self</span>.toggle_rotation)
+        view_layout.addWidget(<span class="hljs-variable language_">self</span>.toggle_rotation_btn)
+
+        <span class="hljs-variable language_">self</span>.reset_view_btn = QPushButton(<span class="hljs-string">&quot;🔃 重置视图&quot;</span>)
+        <span class="hljs-variable language_">self</span>.reset_view_btn.clicked.connect(<span class="hljs-variable language_">self</span>.reset_view)
+        view_layout.addWidget(<span class="hljs-variable language_">self</span>.reset_view_btn)
+
+        view_group.setLayout(view_layout)
+        layout.addWidget(view_group)
+
+        <span class="hljs-comment"># 动画控制</span>
+        play_group = QGroupBox(<span class="hljs-string">&quot;▶️ 动画控制&quot;</span>)
+        play_layout = QVBoxLayout()
+
+        <span class="hljs-variable language_">self</span>.play_btn = QPushButton(<span class="hljs-string">&quot;▶️ 开始变换&quot;</span>)
+        <span class="hljs-variable language_">self</span>.play_btn.clicked.connect(<span class="hljs-variable language_">self</span>.start_animation)
+        <span class="hljs-variable language_">self</span>.play_btn.setStyleSheet(<span class="hljs-string">&quot;background-color: #ff6b6b;&quot;</span>)
+        <span class="hljs-variable language_">self</span>.play_btn.setEnabled(<span class="hljs-literal">False</span>)
+        play_layout.addWidget(<span class="hljs-variable language_">self</span>.play_btn)
+
+        btn_layout = QHBoxLayout()
+        <span class="hljs-variable language_">self</span>.pause_btn = QPushButton(<span class="hljs-string">&quot;⏸️ 暂停&quot;</span>)
+        <span class="hljs-variable language_">self</span>.pause_btn.clicked.connect(<span class="hljs-variable language_">self</span>.pause_animation)
+        <span class="hljs-variable language_">self</span>.pause_btn.setEnabled(<span class="hljs-literal">False</span>)
+        btn_layout.addWidget(<span class="hljs-variable language_">self</span>.pause_btn)
+
+        <span class="hljs-variable language_">self</span>.stop_btn = QPushButton(<span class="hljs-string">&quot;⏹️ 停止&quot;</span>)
+        <span class="hljs-variable language_">self</span>.stop_btn.clicked.connect(<span class="hljs-variable language_">self</span>.stop_animation)
+        <span class="hljs-variable language_">self</span>.stop_btn.setEnabled(<span class="hljs-literal">False</span>)
+        btn_layout.addWidget(<span class="hljs-variable language_">self</span>.stop_btn)
+        play_layout.addLayout(btn_layout)
+
+        <span class="hljs-comment"># 进度条</span>
+        <span class="hljs-variable language_">self</span>.progress_bar = QProgressBar()
+        <span class="hljs-variable language_">self</span>.progress_bar.setValue(<span class="hljs-number">0</span>)
+        play_layout.addWidget(<span class="hljs-variable language_">self</span>.progress_bar)
+
+        <span class="hljs-comment"># 进度滑块</span>
+        <span class="hljs-variable language_">self</span>.progress_slider = QSlider(Qt.Horizontal)
+        <span class="hljs-variable language_">self</span>.progress_slider.setRange(<span class="hljs-number">0</span>, <span class="hljs-number">100</span>)
+        <span class="hljs-variable language_">self</span>.progress_slider.setValue(<span class="hljs-number">0</span>)
+        <span class="hljs-variable language_">self</span>.progress_slider.valueChanged.connect(<span class="hljs-variable language_">self</span>.on_slider_changed)
+        play_layout.addWidget(<span class="hljs-variable language_">self</span>.progress_slider)
+
+        play_group.setLayout(play_layout)
+        layout.addWidget(play_group)
+
+        <span class="hljs-comment"># 显示选项</span>
+        display_group = QGroupBox(<span class="hljs-string">&quot;📊 显示选项&quot;</span>)
+        display_layout = QVBoxLayout()
+
+        <span class="hljs-variable language_">self</span>.show_grid_check = QCheckBox(<span class="hljs-string">&quot;显示网格&quot;</span>)
+        <span class="hljs-variable language_">self</span>.show_grid_check.setChecked(<span class="hljs-literal">True</span>)
+        <span class="hljs-variable language_">self</span>.show_grid_check.stateChanged.connect(<span class="hljs-variable language_">self</span>.toggle_grid)
+        display_layout.addWidget(<span class="hljs-variable language_">self</span>.show_grid_check)
+
+        <span class="hljs-variable language_">self</span>.show_axes_check = QCheckBox(<span class="hljs-string">&quot;显示坐标轴&quot;</span>)
+        <span class="hljs-variable language_">self</span>.show_axes_check.setChecked(<span class="hljs-literal">True</span>)
+        <span class="hljs-variable language_">self</span>.show_axes_check.stateChanged.connect(<span class="hljs-variable language_">self</span>.toggle_axes)
+        display_layout.addWidget(<span class="hljs-variable language_">self</span>.show_axes_check)
+
+        <span class="hljs-variable language_">self</span>.show_trails_check = QCheckBox(<span class="hljs-string">&quot;显示轨迹&quot;</span>)
+        <span class="hljs-variable language_">self</span>.show_trails_check.setChecked(<span class="hljs-literal">False</span>)
+        display_layout.addWidget(<span class="hljs-variable language_">self</span>.show_trails_check)
+
+        display_group.setLayout(display_layout)
+        layout.addWidget(display_group)
+
+        <span class="hljs-comment"># 状态信息</span>
+        status_group = QGroupBox(<span class="hljs-string">&quot;📈 状态信息&quot;</span>)
+        status_layout = QVBoxLayout()
+
+        <span class="hljs-variable language_">self</span>.status_label = QLabel(<span class="hljs-string">&quot;请加载两个点云文件&quot;</span>)
+        <span class="hljs-variable language_">self</span>.status_label.setAlignment(Qt.AlignCenter)
+        status_layout.addWidget(<span class="hljs-variable language_">self</span>.status_label)
+
+        <span class="hljs-variable language_">self</span>.source_info_label = QLabel(<span class="hljs-string">&quot;源点云: 未加载&quot;</span>)
+        status_layout.addWidget(<span class="hljs-variable language_">self</span>.source_info_label)
+
+        <span class="hljs-variable language_">self</span>.target_info_label = QLabel(<span class="hljs-string">&quot;目标点云: 未加载&quot;</span>)
+        status_layout.addWidget(<span class="hljs-variable language_">self</span>.target_info_label)
+
+        <span class="hljs-variable language_">self</span>.drone_info_label = QLabel(<span class="hljs-string">&quot;无人机数量: 0&quot;</span>)
+        status_layout.addWidget(<span class="hljs-variable language_">self</span>.drone_info_label)
+
+        status_group.setLayout(status_layout)
+        layout.addWidget(status_group)
+
+        layout.addStretch()
+        <span class="hljs-keyword">return</span> panel
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_create_right_panel</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;创建右侧3D视图面板&quot;&quot;&quot;</span>
+        panel = QWidget()
+        layout = QVBoxLayout(panel)
+        layout.setContentsMargins(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+
+        <span class="hljs-comment"># 3D视图</span>
+        <span class="hljs-variable language_">self</span>.view = GLViewWidget()
+        <span class="hljs-variable language_">self</span>.view.setCameraPosition(distance=<span class="hljs-number">12</span>, elevation=<span class="hljs-number">30</span>, azimuth=<span class="hljs-number">45</span>)
+        <span class="hljs-variable language_">self</span>.view.setBackgroundColor(<span class="hljs-string">&#x27;#0a0a1a&#x27;</span>)
+
+        <span class="hljs-comment"># 添加网格</span>
+        <span class="hljs-variable language_">self</span>.grid = GLGridItem()
+        <span class="hljs-variable language_">self</span>.grid.setSize(<span class="hljs-number">20</span>, <span class="hljs-number">20</span>)
+        <span class="hljs-variable language_">self</span>.grid.setSpacing(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>)
+        <span class="hljs-variable language_">self</span>.grid.setColor((<span class="hljs-number">0.2</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">0.5</span>))
+        <span class="hljs-variable language_">self</span>.view.addItem(<span class="hljs-variable language_">self</span>.grid)
+
+        <span class="hljs-comment"># 添加坐标轴</span>
+        <span class="hljs-variable language_">self</span>.axis = GLAxisItem()
+        <span class="hljs-variable language_">self</span>.axis.setSize(<span class="hljs-number">4</span>, <span class="hljs-number">4</span>, <span class="hljs-number">4</span>)
+        <span class="hljs-variable language_">self</span>.view.addItem(<span class="hljs-variable language_">self</span>.axis)
+
+        <span class="hljs-comment"># 散点图</span>
+        <span class="hljs-variable language_">self</span>.scatter = GLScatterPlotItem()
+        <span class="hljs-variable language_">self</span>.view.addItem(<span class="hljs-variable language_">self</span>.scatter)
+
+        layout.addWidget(<span class="hljs-variable language_">self</span>.view)
+
+        <span class="hljs-comment"># 创建自动旋转定时器</span>
+        <span class="hljs-variable language_">self</span>.rotation_timer = QTimer()
+        <span class="hljs-variable language_">self</span>.rotation_timer.timeout.connect(<span class="hljs-variable language_">self</span>.auto_rotate)
+        <span class="hljs-variable language_">self</span>.rotation_angle = <span class="hljs-number">45</span>
+
+        <span class="hljs-keyword">return</span> panel
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_apply_styles</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;应用样式&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+            QMainWindow {
+                background-color: #1a1a2e;
+            }
+            QGroupBox {
+                background-color: #16213e;
+                color: #e6e6e6;
+                border: 2px solid #0f3460;
+                border-radius: 8px;
+                margin-top: 10px;
+                padding-top: 15px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 15px;
+                padding: 0 8px;
+                color: #ff6b6b;
+            }
+            QPushButton {
+                background-color: #0f3460;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #e94560;
+            }
+            QPushButton:pressed {
+                background-color: #c13651;
+            }
+            QPushButton:disabled {
+                background-color: #444;
+                color: #888;
+            }
+            QLabel {
+                color: #e6e6e6;
+                font-size: 12px;
+            }
+            QLineEdit {
+                background-color: #0f3460;
+                color: white;
+                border: 1px solid #1a4a7a;
+                padding: 5px;
+                border-radius: 4px;
+            }
+            QSlider::groove:horizontal {
+                height: 8px;
+                background: #0f3460;
+                border-radius: 4px;
+            }
+            QSlider::handle:horizontal {
+                background: #ff6b6b;
+                width: 18px;
+                margin: -5px 0;
+                border-radius: 9px;
+            }
+            QProgressBar {
+                border: 2px solid #0f3460;
+                border-radius: 5px;
+                text-align: center;
+                color: white;
+            }
+            QProgressBar::chunk {
+                background-color: #ff6b6b;
+                border-radius: 3px;
+            }
+            QSpinBox, QDoubleSpinBox, QComboBox {
+                background-color: #0f3460;
+                color: white;
+                border: none;
+                padding: 5px;
+                border-radius: 4px;
+            }
+            QCheckBox {
+                color: #e6e6e6;
+            }
+            QCheckBox::indicator {
+                width: 18px;
+                height: 18px;
+            }
+        &quot;&quot;&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">load_file</span>(<span class="hljs-params">self, file_type</span>):
+        <span class="hljs-string">&quot;&quot;&quot;加载点云文件&quot;&quot;&quot;</span>
+        file_path, _ = QFileDialog.getOpenFileName(
+            <span class="hljs-variable language_">self</span>,
+            <span class="hljs-string">f&quot;选择<span class="hljs-subst">{<span class="hljs-string">&#x27;源&#x27;</span> <span class="hljs-keyword">if</span> file_type == <span class="hljs-string">&#x27;source&#x27;</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;目标&#x27;</span>}</span>点云文件&quot;</span>,
+            <span class="hljs-string">&quot;&quot;</span>,
+            <span class="hljs-string">&quot;TXT Files (*.txt);;All Files (*)&quot;</span>
+        )
+
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> file_path:
+            <span class="hljs-keyword">return</span>
+
+        target_count = <span class="hljs-variable language_">self</span>.drone_count_spin.value()
+        points = <span class="hljs-variable language_">self</span>.planner.load_pointcloud_from_txt(file_path, target_count)
+
+        <span class="hljs-keyword">if</span> points <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            QMessageBox.warning(<span class="hljs-variable language_">self</span>, <span class="hljs-string">&quot;加载失败&quot;</span>, <span class="hljs-string">f&quot;无法加载文件:\n<span class="hljs-subst">{file_path}</span>&quot;</span>)
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-keyword">if</span> file_type == <span class="hljs-string">&#x27;source&#x27;</span>:
+            <span class="hljs-variable language_">self</span>.source_positions = points
+            <span class="hljs-variable language_">self</span>.source_file_path = file_path
+            <span class="hljs-variable language_">self</span>.source_path_edit.setText(file_path)
+            <span class="hljs-variable language_">self</span>.source_info_label.setText(<span class="hljs-string">f&quot;源点云: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(points)}</span> 点&quot;</span>)
+            <span class="hljs-variable language_">self</span>.show_source_btn.setEnabled(<span class="hljs-literal">True</span>)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-variable language_">self</span>.target_positions = points
+            <span class="hljs-variable language_">self</span>.target_file_path = file_path
+            <span class="hljs-variable language_">self</span>.target_path_edit.setText(file_path)
+            <span class="hljs-variable language_">self</span>.target_info_label.setText(<span class="hljs-string">f&quot;目标点云: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(points)}</span> 点&quot;</span>)
+            <span class="hljs-variable language_">self</span>.show_target_btn.setEnabled(<span class="hljs-literal">True</span>)
+
+        <span class="hljs-comment"># 更新无人机数量</span>
+        <span class="hljs-variable language_">self</span>.drone_count_spin.setValue(<span class="hljs-built_in">len</span>(points))
+        <span class="hljs-variable language_">self</span>.drone_info_label.setText(<span class="hljs-string">f&quot;无人机数量: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(points)}</span>&quot;</span>)
+
+        <span class="hljs-comment"># 检查是否可以开始动画</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.source_positions <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.target_positions <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-comment"># 确保两个点云数量一致</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.source_positions) != <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.target_positions):
+                <span class="hljs-comment"># 重新采样到相同数量</span>
+                count = <span class="hljs-built_in">max</span>(<span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.source_positions), <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.target_positions))
+                <span class="hljs-variable language_">self</span>.source_positions = TXTPointCloudLoader.preprocess_pointcloud(
+                    <span class="hljs-variable language_">self</span>.source_positions, count
+                )
+                <span class="hljs-variable language_">self</span>.target_positions = TXTPointCloudLoader.preprocess_pointcloud(
+                    <span class="hljs-variable language_">self</span>.target_positions, count
+                )
+                <span class="hljs-variable language_">self</span>.drone_count_spin.setValue(count)
+                <span class="hljs-variable language_">self</span>.drone_info_label.setText(<span class="hljs-string">f&quot;无人机数量: <span class="hljs-subst">{count}</span>&quot;</span>)
+
+            <span class="hljs-comment"># 优化路径</span>
+            <span class="hljs-variable language_">self</span>.target_positions = <span class="hljs-variable language_">self</span>.planner.optimize_paths(
+                <span class="hljs-variable language_">self</span>.source_positions, <span class="hljs-variable language_">self</span>.target_positions
+            )
+
+            <span class="hljs-variable language_">self</span>.play_btn.setEnabled(<span class="hljs-literal">True</span>)
+            <span class="hljs-variable language_">self</span>.status_label.setText(<span class="hljs-string">&quot;✅ 准备就绪，可以开始动画&quot;</span>)
+            <span class="hljs-variable language_">self</span>.show_source()
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-variable language_">self</span>.status_label.setText(<span class="hljs-string">f&quot;✅ <span class="hljs-subst">{<span class="hljs-string">&#x27;源&#x27;</span> <span class="hljs-keyword">if</span> file_type == <span class="hljs-string">&#x27;source&#x27;</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;目标&#x27;</span>}</span>点云已加载，请加载另一个&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">show_source</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;显示源点云&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.source_positions <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-variable language_">self</span>.current_positions = <span class="hljs-variable language_">self</span>.source_positions.copy()
+            <span class="hljs-variable language_">self</span>.update_scatter()
+            <span class="hljs-variable language_">self</span>.clear_trails()
+            <span class="hljs-variable language_">self</span>.progress_slider.setValue(<span class="hljs-number">0</span>)
+            <span class="hljs-variable language_">self</span>.progress_bar.setValue(<span class="hljs-number">0</span>)
+            <span class="hljs-variable language_">self</span>.status_label.setText(<span class="hljs-string">&quot;📍 显示: 源点云&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">show_target</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;显示目标点云&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.target_positions <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-variable language_">self</span>.current_positions = <span class="hljs-variable language_">self</span>.target_positions.copy()
+            <span class="hljs-variable language_">self</span>.update_scatter()
+            <span class="hljs-variable language_">self</span>.clear_trails()
+            <span class="hljs-variable language_">self</span>.progress_slider.setValue(<span class="hljs-number">100</span>)
+            <span class="hljs-variable language_">self</span>.progress_bar.setValue(<span class="hljs-number">100</span>)
+            <span class="hljs-variable language_">self</span>.status_label.setText(<span class="hljs-string">&quot;🎯 显示: 目标点云&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update_scatter</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;更新散点显示&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.current_positions <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">return</span>
+
+        pos = <span class="hljs-variable language_">self</span>.current_positions
+        size = <span class="hljs-variable language_">self</span>.drone_size_spin.value()
+
+        <span class="hljs-comment"># 根据颜色模式设置颜色</span>
+        color_mode = <span class="hljs-variable language_">self</span>.color_combo.currentIndex()
+        colors = []
+
+        <span class="hljs-keyword">if</span> color_mode == <span class="hljs-number">0</span>:  <span class="hljs-comment"># 高度渐变</span>
+            <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> pos:
+                y = p[<span class="hljs-number">1</span>]
+                r = <span class="hljs-built_in">min</span>(<span class="hljs-number">1.0</span>, <span class="hljs-built_in">max</span>(<span class="hljs-number">0.0</span>, (y + <span class="hljs-number">2</span>) / <span class="hljs-number">4</span>))
+                b = <span class="hljs-built_in">min</span>(<span class="hljs-number">1.0</span>, <span class="hljs-built_in">max</span>(<span class="hljs-number">0.0</span>, (<span class="hljs-number">2</span> - y) / <span class="hljs-number">4</span>))
+                g = <span class="hljs-number">0.3</span>
+                colors.append([r, g, b, <span class="hljs-number">1.0</span>])
+        <span class="hljs-keyword">elif</span> color_mode == <span class="hljs-number">1</span>:  <span class="hljs-comment"># 彩虹色</span>
+            <span class="hljs-keyword">for</span> i, p <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(pos):
+                hue = (i / <span class="hljs-built_in">len</span>(pos)) * <span class="hljs-number">360</span>
+                r, g, b = <span class="hljs-variable language_">self</span>.hsv_to_rgb(hue, <span class="hljs-number">0.8</span>, <span class="hljs-number">1.0</span>)
+                colors.append([r, g, b, <span class="hljs-number">1.0</span>])
+        <span class="hljs-keyword">else</span>:  <span class="hljs-comment"># 单色</span>
+            colors = [[<span class="hljs-number">0.2</span>, <span class="hljs-number">0.8</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">1.0</span>]] * <span class="hljs-built_in">len</span>(pos)
+
+        colors = np.array(colors)
+
+        <span class="hljs-variable language_">self</span>.scatter.setData(
+            pos=pos,
+            size=size,
+            color=colors,
+            pxMode=<span class="hljs-literal">False</span>
+        )
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">hsv_to_rgb</span>(<span class="hljs-params">self, h, s, v</span>):
+        <span class="hljs-string">&quot;&quot;&quot;HSV转RGB&quot;&quot;&quot;</span>
+        h = h / <span class="hljs-number">360.0</span>
+        i = <span class="hljs-built_in">int</span>(h * <span class="hljs-number">6</span>)
+        f = h * <span class="hljs-number">6</span> - i
+        p = v * (<span class="hljs-number">1</span> - s)
+        q = v * (<span class="hljs-number">1</span> - f * s)
+        t = v * (<span class="hljs-number">1</span> - (<span class="hljs-number">1</span> - f) * s)
+
+        i = i % <span class="hljs-number">6</span>
+        <span class="hljs-keyword">if</span> i == <span class="hljs-number">0</span>: <span class="hljs-keyword">return</span> v, t, p
+        <span class="hljs-keyword">if</span> i == <span class="hljs-number">1</span>: <span class="hljs-keyword">return</span> q, v, p
+        <span class="hljs-keyword">if</span> i == <span class="hljs-number">2</span>: <span class="hljs-keyword">return</span> p, v, t
+        <span class="hljs-keyword">if</span> i == <span class="hljs-number">3</span>: <span class="hljs-keyword">return</span> p, q, v
+        <span class="hljs-keyword">if</span> i == <span class="hljs-number">4</span>: <span class="hljs-keyword">return</span> t, p, v
+        <span class="hljs-keyword">return</span> v, p, q
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">clear_trails</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;清除轨迹&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.trail_items:
+            <span class="hljs-variable language_">self</span>.view.removeItem(item)
+        <span class="hljs-variable language_">self</span>.trail_items = []
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">auto_rotate</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;自动旋转视图&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.rotation_angle += <span class="hljs-number">0.5</span>
+        <span class="hljs-variable language_">self</span>.view.setCameraPosition(azimuth=<span class="hljs-variable language_">self</span>.rotation_angle)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">toggle_rotation</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;切换自动旋转&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.toggle_rotation_btn.isChecked():
+            <span class="hljs-variable language_">self</span>.rotation_timer.start(<span class="hljs-number">30</span>)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-variable language_">self</span>.rotation_timer.stop()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">reset_view</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;重置视图&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.rotation_angle = <span class="hljs-number">45</span>
+        <span class="hljs-variable language_">self</span>.view.setCameraPosition(distance=<span class="hljs-number">12</span>, elevation=<span class="hljs-number">30</span>, azimuth=<span class="hljs-number">45</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">toggle_grid</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;切换网格显示&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.grid.setVisible(<span class="hljs-variable language_">self</span>.show_grid_check.isChecked())
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">toggle_axes</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;切换坐标轴显示&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.axis.setVisible(<span class="hljs-variable language_">self</span>.show_axes_check.isChecked())
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">start_animation</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;开始动画&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.animation_thread <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.animation_thread.isRunning():
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-variable language_">self</span>.clear_trails()
+        <span class="hljs-variable language_">self</span>.status_label.setText(<span class="hljs-string">&quot;🚀 动画播放中...&quot;</span>)
+        <span class="hljs-variable language_">self</span>.play_btn.setEnabled(<span class="hljs-literal">False</span>)
+        <span class="hljs-variable language_">self</span>.pause_btn.setEnabled(<span class="hljs-literal">True</span>)
+        <span class="hljs-variable language_">self</span>.stop_btn.setEnabled(<span class="hljs-literal">True</span>)
+
+        <span class="hljs-comment"># 获取动画参数</span>
+        interpolation_map = {
+            <span class="hljs-string">&quot;平滑过渡&quot;</span>: <span class="hljs-string">&#x27;smooth&#x27;</span>,
+            <span class="hljs-string">&quot;弹性效果&quot;</span>: <span class="hljs-string">&#x27;elastic&#x27;</span>,
+            <span class="hljs-string">&quot;弹跳效果&quot;</span>: <span class="hljs-string">&#x27;bounce&#x27;</span>,
+            <span class="hljs-string">&quot;线性过渡&quot;</span>: <span class="hljs-string">&#x27;linear&#x27;</span>
+        }
+        method = interpolation_map.get(<span class="hljs-variable language_">self</span>.interp_combo.currentText(), <span class="hljs-string">&#x27;smooth&#x27;</span>)
+
+        <span class="hljs-variable language_">self</span>.animation_thread = AnimationThread(
+            <span class="hljs-variable language_">self</span>.planner,
+            <span class="hljs-variable language_">self</span>.source_positions,
+            <span class="hljs-variable language_">self</span>.target_positions,
+            <span class="hljs-variable language_">self</span>.duration_spin.value(),
+            <span class="hljs-variable language_">self</span>.fps_spin.value(),
+            method
+        )
+        <span class="hljs-variable language_">self</span>.animation_thread.frame_ready.connect(<span class="hljs-variable language_">self</span>.on_frame_ready)
+        <span class="hljs-variable language_">self</span>.animation_thread.finished_signal.connect(<span class="hljs-variable language_">self</span>.on_animation_finished)
+        <span class="hljs-variable language_">self</span>.animation_thread.start()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">pause_animation</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;暂停/继续动画&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.animation_thread <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.animation_thread.isRunning():
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.animation_thread.paused:
+                <span class="hljs-variable language_">self</span>.animation_thread.resume()
+                <span class="hljs-variable language_">self</span>.pause_btn.setText(<span class="hljs-string">&quot;⏸️ 暂停&quot;</span>)
+                <span class="hljs-variable language_">self</span>.status_label.setText(<span class="hljs-string">&quot;🚀 动画播放中...&quot;</span>)
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-variable language_">self</span>.animation_thread.pause()
+                <span class="hljs-variable language_">self</span>.pause_btn.setText(<span class="hljs-string">&quot;▶️ 继续&quot;</span>)
+                <span class="hljs-variable language_">self</span>.status_label.setText(<span class="hljs-string">&quot;⏸️ 动画已暂停&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">stop_animation</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;停止动画&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.animation_thread:
+            <span class="hljs-variable language_">self</span>.animation_thread.stop()
+            <span class="hljs-variable language_">self</span>.animation_thread.wait()
+        <span class="hljs-variable language_">self</span>.show_source()
+        <span class="hljs-variable language_">self</span>.play_btn.setEnabled(<span class="hljs-literal">True</span>)
+        <span class="hljs-variable language_">self</span>.pause_btn.setEnabled(<span class="hljs-literal">False</span>)
+        <span class="hljs-variable language_">self</span>.stop_btn.setEnabled(<span class="hljs-literal">False</span>)
+        <span class="hljs-variable language_">self</span>.pause_btn.setText(<span class="hljs-string">&quot;⏸️ 暂停&quot;</span>)
+        <span class="hljs-variable language_">self</span>.status_label.setText(<span class="hljs-string">&quot;⏹️ 动画已停止&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_frame_ready</span>(<span class="hljs-params">self, positions, progress</span>):
+        <span class="hljs-string">&quot;&quot;&quot;帧就绪回调&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.current_positions = positions
+        <span class="hljs-variable language_">self</span>.update_scatter()
+
+        progress_percent = <span class="hljs-built_in">int</span>(progress * <span class="hljs-number">100</span>)
+        <span class="hljs-variable language_">self</span>.progress_bar.setValue(progress_percent)
+        <span class="hljs-variable language_">self</span>.progress_slider.setValue(progress_percent)
+
+        <span class="hljs-comment"># 显示轨迹</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.show_trails_check.isChecked() <span class="hljs-keyword">and</span> progress &gt; <span class="hljs-number">0</span>:
+            <span class="hljs-variable language_">self</span>._add_trail_segment(positions, progress)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_add_trail_segment</span>(<span class="hljs-params">self, positions, progress</span>):
+        <span class="hljs-string">&quot;&quot;&quot;添加轨迹段&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.trail_items) &gt; <span class="hljs-number">20</span>:  <span class="hljs-comment"># 限制轨迹数量</span>
+            old_item = <span class="hljs-variable language_">self</span>.trail_items.pop(<span class="hljs-number">0</span>)
+            <span class="hljs-variable language_">self</span>.view.removeItem(old_item)
+
+        <span class="hljs-comment"># 采样部分点显示轨迹</span>
+        sample_indices = np.random.choice(<span class="hljs-built_in">len</span>(positions), <span class="hljs-built_in">min</span>(<span class="hljs-number">50</span>, <span class="hljs-built_in">len</span>(positions)), replace=<span class="hljs-literal">False</span>)
+        trail_points = positions[sample_indices]
+
+        alpha = <span class="hljs-number">0.3</span> + progress * <span class="hljs-number">0.4</span>
+        color = (<span class="hljs-number">0.9</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0.1</span>, alpha)
+
+        <span class="hljs-comment"># 创建小点表示轨迹</span>
+        trail_scatter = GLScatterPlotItem(
+            pos=trail_points,
+            size=<span class="hljs-number">0.02</span>,
+            color=[color] * <span class="hljs-built_in">len</span>(trail_points),
+            pxMode=<span class="hljs-literal">False</span>
+        )
+        <span class="hljs-variable language_">self</span>.view.addItem(trail_scatter)
+        <span class="hljs-variable language_">self</span>.trail_items.append(trail_scatter)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_animation_finished</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;动画完成回调&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.play_btn.setEnabled(<span class="hljs-literal">True</span>)
+        <span class="hljs-variable language_">self</span>.pause_btn.setEnabled(<span class="hljs-literal">False</span>)
+        <span class="hljs-variable language_">self</span>.stop_btn.setEnabled(<span class="hljs-literal">False</span>)
+        <span class="hljs-variable language_">self</span>.pause_btn.setText(<span class="hljs-string">&quot;⏸️ 暂停&quot;</span>)
+        <span class="hljs-variable language_">self</span>.status_label.setText(<span class="hljs-string">&quot;✅ 动画完成&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_slider_changed</span>(<span class="hljs-params">self, value</span>):
+        <span class="hljs-string">&quot;&quot;&quot;滑块变化回调&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.animation_thread <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.animation_thread.isRunning():
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.source_positions <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> <span class="hljs-variable language_">self</span>.target_positions <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">return</span>
+
+        progress = value / <span class="hljs-number">100.0</span>
+        <span class="hljs-variable language_">self</span>.current_positions = <span class="hljs-variable language_">self</span>.planner.interpolate_positions(
+            <span class="hljs-variable language_">self</span>.source_positions,
+            <span class="hljs-variable language_">self</span>.target_positions,
+            progress,
+            <span class="hljs-string">&#x27;smooth&#x27;</span>
+        )
+        <span class="hljs-variable language_">self</span>.update_scatter()
+        <span class="hljs-variable language_">self</span>.progress_bar.setValue(value)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">closeEvent</span>(<span class="hljs-params">self, event</span>):
+        <span class="hljs-string">&quot;&quot;&quot;关闭事件&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.animation_thread:
+            <span class="hljs-variable language_">self</span>.animation_thread.stop()
+            <span class="hljs-variable language_">self</span>.animation_thread.wait()
+        event.accept()
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    app = QApplication(sys.argv)
+
+    <span class="hljs-comment"># 设置应用样式</span>
+    app.setStyle(<span class="hljs-string">&#x27;Fusion&#x27;</span>)
+    palette = QPalette()
+    palette.setColor(QPalette.Window, QColor(<span class="hljs-number">26</span>, <span class="hljs-number">26</span>, <span class="hljs-number">46</span>))
+    palette.setColor(QPalette.WindowText, Qt.white)
+    app.setPalette(palette)
+
+    window = DroneShowMainWindow()
+    window.show()
+    sys.exit(app.exec_())
+
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    main()
+</code></pre>
+<p>点云推荐下载地址</p>
+<p><a href="https://gitcode.com/open-source-toolkit/d98ff" title="https://gitcode.com/open-source-toolkit/d98ff">https://gitcode.com/open-source-toolkit/d98ff</a></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/波浪纹噪声无法消除有好的方法吗.html">
+      <span>上一篇</span>
+      <strong>波浪纹噪声无法消除有好的方法吗</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/指纹灰度图提取特征点minutiaepoints指纹识别算法.html">
+      <span>下一篇</span>
+      <strong>指纹灰度图提取特征点minutiaepoints指纹识别算法</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/详细案例说明ai所用的算法列出公式用python代码说明用法.html">详细案例说明AI所用的算法列出公式用Python代码说明用法</a></h3>
+        <p class="post-excerpt">我们来详细拆解一个最经典、最基础的 AI 算法 ——线性回归 (Linear Regression)。它是理解几乎所有更复杂 AI 模型（如神经网络）的基石。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.312Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/yolopython实现多种物体识别时钟水杯小熊路人车辆.html">YOLOpython实现多种物体识别时钟水杯小熊路人车辆</a></h3>
+        <p class="post-excerpt">本文介绍了一个基于YOLO的目标检测类ObjectDetector，支持YOLOv8标准模型和YOLO-World自定义模型。该类提供了两种模型加载方式：标准YOLOv8模型（80类）和可自定义检测类别的YOLO-World模型。主要功能包括模型自动加载和单张图片检测，能够输出检测目标的类别、数量和平均置信度，并保存检测结果图像。使用示例展示了如何初始化检测器并进行图片检测。该实现具有自动回退机制…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.835Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/python实现视频目标检测与轨迹跟踪流程详解转载.html">Python实现视频目标检测与轨迹跟踪流程详解转载</a></h3>
+        <p class="post-excerpt">更新时间：2023年01月28日 09:38:00   作者：倾城一少</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.788Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

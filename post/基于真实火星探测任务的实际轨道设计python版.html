@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>基于真实火星探测任务的实际轨道设计Python版 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">基于真实火星探测任务的实际轨道设计Python版</h1>
+        <p class="post-deck">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>34 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+            <a class="tag-chip" href="../tags/tag-15.html">卫星</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从地球轨道出发，经多次机动后到达火星轨道的完整轨迹。该模拟为火星探测任务提供了轨道设计和机动规划的参考框架。</p>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8E%E7%9C%9F%E5%AE%9E%E7%81%AB%E6%98%9F%E6%8E%A2%E6%B5%8B%E4%BB%BB%E5%8A%A1%E7%9A%84%E5%AE%9E%E9%99%85%E8%BD%A8%E9%81%93%E8%AE%BE%E8%AE%A1python%E7%89%88/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8E%E7%9C%9F%E5%AE%9E%E7%81%AB%E6%98%9F%E6%8E%A2%E6%B5%8B%E4%BB%BB%E5%8A%A1%E7%9A%84%E5%AE%9E%E9%99%85%E8%BD%A8%E9%81%93%E8%AE%BE%E8%AE%A1python%E7%89%88/img-02.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8E%E7%9C%9F%E5%AE%9E%E7%81%AB%E6%98%9F%E6%8E%A2%E6%B5%8B%E4%BB%BB%E5%8A%A1%E7%9A%84%E5%AE%9E%E9%99%85%E8%BD%A8%E9%81%93%E8%AE%BE%E8%AE%A1python%E7%89%88/img-03.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8E%E7%9C%9F%E5%AE%9E%E7%81%AB%E6%98%9F%E6%8E%A2%E6%B5%8B%E4%BB%BB%E5%8A%A1%E7%9A%84%E5%AE%9E%E9%99%85%E8%BD%A8%E9%81%93%E8%AE%BE%E8%AE%A1python%E7%89%88/img-04.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8E%E7%9C%9F%E5%AE%9E%E7%81%AB%E6%98%9F%E6%8E%A2%E6%B5%8B%E4%BB%BB%E5%8A%A1%E7%9A%84%E5%AE%9E%E9%99%85%E8%BD%A8%E9%81%93%E8%AE%BE%E8%AE%A1python%E7%89%88/img-05.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8E%E7%9C%9F%E5%AE%9E%E7%81%AB%E6%98%9F%E6%8E%A2%E6%B5%8B%E4%BB%BB%E5%8A%A1%E7%9A%84%E5%AE%9E%E9%99%85%E8%BD%A8%E9%81%93%E8%AE%BE%E8%AE%A1python%E7%89%88/img-06.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8E%E7%9C%9F%E5%AE%9E%E7%81%AB%E6%98%9F%E6%8E%A2%E6%B5%8B%E4%BB%BB%E5%8A%A1%E7%9A%84%E5%AE%9E%E9%99%85%E8%BD%A8%E9%81%93%E8%AE%BE%E8%AE%A1python%E7%89%88/img-07.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8E%E7%9C%9F%E5%AE%9E%E7%81%AB%E6%98%9F%E6%8E%A2%E6%B5%8B%E4%BB%BB%E5%8A%A1%E7%9A%84%E5%AE%9E%E9%99%85%E8%BD%A8%E9%81%93%E8%AE%BE%E8%AE%A1python%E7%89%88/img-08.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8E%E7%9C%9F%E5%AE%9E%E7%81%AB%E6%98%9F%E6%8E%A2%E6%B5%8B%E4%BB%BB%E5%8A%A1%E7%9A%84%E5%AE%9E%E9%99%85%E8%BD%A8%E9%81%93%E8%AE%BE%E8%AE%A1python%E7%89%88/img-09.png" alt=""></p>
+<h3 id="五-轨迹出现直线-错位问题的数学原因-原代码-bug-根源" class="prose-heading">五、轨迹出现直线 / 错位问题的数学原因（原代码 bug 根源）</h3>
+<ol>
+<li>原积分未均匀布点 <code>t_eval</code>，仅用自适应步长，分段拼接时<strong>时间点稀疏</strong>，视觉出现直线段；</li>
+<li>机动状态赋值顺序错误，先存轨迹再改速度，造成<strong>轨迹点与机动不同步</strong>，重复画线；</li>
+<li>修正方案：每段积分均匀取时间采样点，先积分结束再统一更新速度状态，保证轨迹连续光滑。</li>
+</ol>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">from</span> scipy.integrate <span class="hljs-keyword">import</span> solve_ivp
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> matplotlib.patches <span class="hljs-keyword">import</span> Circle
+<span class="hljs-keyword">from</span> mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3D
+
+<span class="hljs-comment"># ==================== Celestial Constants &amp; Orbital Parameters ====================</span>
+<span class="hljs-comment"># Astronomical Unit (AU) and time units (seconds)</span>
+AU = <span class="hljs-number">1.495978707e11</span>          <span class="hljs-comment"># 1 AU [m]</span>
+DAY = <span class="hljs-number">86400.0</span>                <span class="hljs-comment"># 1 day [s]</span>
+SIDEREAL_YEAR = <span class="hljs-number">365.256363004</span> * DAY  <span class="hljs-comment"># 1 sidereal year [s]</span>
+
+<span class="hljs-comment"># Gravitational parameters</span>
+MU_SUN = <span class="hljs-number">1.32712440018e20</span>    <span class="hljs-comment"># Sun gravitational parameter [m^3/s^2]</span>
+MU_EARTH = <span class="hljs-number">3.986004418e14</span>    <span class="hljs-comment"># Earth gravitational parameter [m^3/s^2]</span>
+MU_MARS  = <span class="hljs-number">4.282837e13</span>       <span class="hljs-comment"># Mars gravitational parameter [m^3/s^2]</span>
+
+<span class="hljs-comment"># Sun radius (for visualization)</span>
+R_SUN = <span class="hljs-number">6.957e8</span>              <span class="hljs-comment"># Sun radius [m]</span>
+
+<span class="hljs-comment"># ==================== Mission Parameters ====================</span>
+T_FLIGHT = <span class="hljs-number">202.0</span> * DAY       <span class="hljs-comment"># Total flight time [s]</span>
+
+<span class="hljs-comment"># ==================== Orbital Mechanics Helper Functions ====================</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">norm</span>(<span class="hljs-params">v</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Compute Euclidean norm of a vector&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">return</span> np.sqrt(np.dot(v, v))
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">acceleration_sun</span>(<span class="hljs-params">t, state</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    Heliocentric two-body acceleration
+    state: [x, y, z, vx, vy, vz]
+    return: [vx, vy, vz, ax, ay, az]
+    &quot;&quot;&quot;</span>
+    r_vec = state[:<span class="hljs-number">3</span>]
+    r = norm(r_vec)
+    a_grav = -MU_SUN / r**<span class="hljs-number">3</span> * r_vec
+    <span class="hljs-keyword">return</span> np.concatenate([state[<span class="hljs-number">3</span>:], a_grav])
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">hohmann_transfer</span>(<span class="hljs-params">r1, r2</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    Calculate Hohmann transfer orbit parameters
+    r1: Earth orbit radius [m] (circular approximation)
+    r2: Mars orbit radius [m] (circular approximation)
+    return: semi-major axis, velocity increments, transfer time, velocities
+    &quot;&quot;&quot;</span>
+    a_trans = (r1 + r2) / <span class="hljs-number">2.0</span>
+    v_earth = np.sqrt(MU_SUN / r1)
+    v_perihelion = np.sqrt(<span class="hljs-number">2</span>*MU_SUN/r1 - MU_SUN/a_trans)
+    v_aphelion = np.sqrt(<span class="hljs-number">2</span>*MU_SUN/r2 - MU_SUN/a_trans)
+    v_mars = np.sqrt(MU_SUN / r2)
+    delta_v1 = v_perihelion - v_earth
+    delta_v2 = v_mars - v_aphelion
+    T_trans = np.pi * np.sqrt(a_trans**<span class="hljs-number">3</span> / MU_SUN)
+    <span class="hljs-keyword">return</span> a_trans, delta_v1, delta_v2, T_trans, v_perihelion, v_aphelion
+
+<span class="hljs-comment"># ==================== Main Simulation ====================</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">simulate_mars_mission</span>():
+    <span class="hljs-string">&quot;&quot;&quot;
+    Mars exploration mission trajectory simulation
+    Includes: heliocentric transfer with deep space maneuver and trajectory corrections
+    &quot;&quot;&quot;</span>
+    <span class="hljs-comment"># Simplified circular orbit parameters</span>
+    r_earth = <span class="hljs-number">1.0</span> * AU
+    r_mars  = <span class="hljs-number">1.524</span> * AU
+
+    <span class="hljs-comment"># Hohmann transfer calculation</span>
+    a_trans, dv1, dv2, T_trans, v_perihelion, v_aphelion = hohmann_transfer(r_earth, r_mars)
+    e_trans = <span class="hljs-number">1.0</span> - r_earth / a_trans
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;MARS EXPLORATION ORBIT SIMULATION PARAMETERS&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Transfer semi-major axis:      <span class="hljs-subst">{a_trans/AU:<span class="hljs-number">.4</span>f}</span> AU&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Transfer eccentricity:         <span class="hljs-subst">{e_trans:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Hohmann transfer time:         <span class="hljs-subst">{T_trans/DAY:<span class="hljs-number">.2</span>f}</span> days&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;ΔV1 (Departure burn):          <span class="hljs-subst">{dv1:<span class="hljs-number">.2</span>f}</span> m/s&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;ΔV2 (Arrival burn):            <span class="hljs-subst">{dv2:<span class="hljs-number">.2</span>f}</span> m/s&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Perihelion velocity:           <span class="hljs-subst">{v_perihelion:<span class="hljs-number">.2</span>f}</span> m/s&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Aphelion velocity:             <span class="hljs-subst">{v_aphelion:<span class="hljs-number">.2</span>f}</span> m/s&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Total flight time:             <span class="hljs-subst">{T_FLIGHT/DAY:<span class="hljs-number">.2</span>f}</span> days&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+
+    <span class="hljs-comment"># Maneuver timeline</span>
+    t_dsm  = <span class="hljs-number">0.40</span> * T_trans
+    t_tcm1 = <span class="hljs-number">0.15</span> * T_trans
+    t_tcm2 = <span class="hljs-number">0.25</span> * T_trans
+    t_tcm3 = <span class="hljs-number">0.70</span> * T_trans
+    t_moi  = <span class="hljs-number">0.98</span> * T_trans
+
+    maneuvers = {
+        <span class="hljs-string">&quot;TCM-1&quot;</span>: {<span class="hljs-string">&quot;t&quot;</span>: t_tcm1, <span class="hljs-string">&quot;dv&quot;</span>: np.array([<span class="hljs-number">15.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>])},
+        <span class="hljs-string">&quot;TCM-2&quot;</span>: {<span class="hljs-string">&quot;t&quot;</span>: t_tcm2, <span class="hljs-string">&quot;dv&quot;</span>: np.array([<span class="hljs-number">0.0</span>, <span class="hljs-number">10.0</span>, <span class="hljs-number">0.0</span>])},
+        <span class="hljs-string">&quot;DSM&quot;</span>:   {<span class="hljs-string">&quot;t&quot;</span>: t_dsm,  <span class="hljs-string">&quot;dv&quot;</span>: np.array([<span class="hljs-number">250.0</span>, <span class="hljs-number">0.0</span>, -<span class="hljs-number">50.0</span>])},
+        <span class="hljs-string">&quot;TCM-3&quot;</span>: {<span class="hljs-string">&quot;t&quot;</span>: t_tcm3, <span class="hljs-string">&quot;dv&quot;</span>: np.array([<span class="hljs-number">8.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>])},
+        <span class="hljs-string">&quot;MOI&quot;</span>:   {<span class="hljs-string">&quot;t&quot;</span>: t_moi,  <span class="hljs-string">&quot;dv&quot;</span>: np.array([-dv2, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>])},
+    }
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\nManeuver Timeline:&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;-&quot;</span>*<span class="hljs-number">60</span>)
+    <span class="hljs-keyword">for</span> name, m <span class="hljs-keyword">in</span> maneuvers.items():
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  <span class="hljs-subst">{name:6s}</span>: t = <span class="hljs-subst">{m[<span class="hljs-string">&#x27;t&#x27;</span>]/DAY:<span class="hljs-number">8.2</span>f}</span> days, |ΔV| = <span class="hljs-subst">{norm(m[<span class="hljs-string">&#x27;dv&#x27;</span>]):<span class="hljs-number">8.2</span>f}</span> m/s&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+
+    <span class="hljs-comment"># Initial state</span>
+    v_earth = np.sqrt(MU_SUN / r_earth)
+    r0 = np.array([r_earth, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>])
+    v0 = np.array([<span class="hljs-number">0.0</span>, v_earth + dv1, <span class="hljs-number">0.0</span>])
+    state0 = np.concatenate([r0, v0])
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nInitial State:&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  Position: [<span class="hljs-subst">{r0[<span class="hljs-number">0</span>]/AU:<span class="hljs-number">.4</span>f}</span>, <span class="hljs-subst">{r0[<span class="hljs-number">1</span>]/AU:<span class="hljs-number">.4</span>f}</span>, <span class="hljs-subst">{r0[<span class="hljs-number">2</span>]/AU:<span class="hljs-number">.4</span>f}</span>] AU&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  Velocity: [<span class="hljs-subst">{v0[<span class="hljs-number">0</span>]:<span class="hljs-number">.2</span>f}</span>, <span class="hljs-subst">{v0[<span class="hljs-number">1</span>]:<span class="hljs-number">.2</span>f}</span>, <span class="hljs-subst">{v0[<span class="hljs-number">2</span>]:<span class="hljs-number">.2</span>f}</span>] m/s&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  Departure ΔV: <span class="hljs-subst">{dv1:<span class="hljs-number">.2</span>f}</span> m/s&quot;</span>)
+
+    <span class="hljs-comment"># Segmented integration with smooth time points</span>
+    t_events = <span class="hljs-built_in">sorted</span>([m[<span class="hljs-string">&quot;t&quot;</span>] <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> maneuvers.values()])
+    t_events = [<span class="hljs-number">0.0</span>] + t_events + [T_trans]
+
+    trajectory_segments = []
+    time_segments = []
+    maneuver_points = []
+    current_state = state0.copy()
+
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(t_events) - <span class="hljs-number">1</span>):
+        t_start = t_events[i]
+        t_end   = t_events[i + <span class="hljs-number">1</span>]
+
+        <span class="hljs-comment"># Generate smooth time points for continuous curve</span>
+        t_eval = np.linspace(t_start, t_end, <span class="hljs-number">100</span>)
+
+        <span class="hljs-comment"># Integrate trajectory segment</span>
+        sol = solve_ivp(
+            acceleration_sun,
+            [t_start, t_end],
+            current_state,
+            method=<span class="hljs-string">&#x27;DOP853&#x27;</span>,
+            t_eval=t_eval,
+            rtol=<span class="hljs-number">1e-10</span>,
+            atol=<span class="hljs-number">1e-10</span>
+        )
+
+        <span class="hljs-comment"># Store segment data</span>
+        trajectory_segments.append(sol.y.T)
+        time_segments.append(sol.t)
+
+        <span class="hljs-comment"># Update state and apply maneuver</span>
+        current_state = sol.y[:, -<span class="hljs-number">1</span>].copy()
+
+        <span class="hljs-keyword">if</span> t_end &lt; T_trans:
+            <span class="hljs-keyword">for</span> name, m <span class="hljs-keyword">in</span> maneuvers.items():
+                <span class="hljs-keyword">if</span> <span class="hljs-built_in">abs</span>(m[<span class="hljs-string">&quot;t&quot;</span>] - t_end) &lt; <span class="hljs-number">1.0</span>:
+                    r_pre = current_state[:<span class="hljs-number">3</span>].copy()
+                    v_pre = current_state[<span class="hljs-number">3</span>:].copy()
+
+                    maneuver_points.append({
+                        <span class="hljs-string">&quot;name&quot;</span>: name,
+                        <span class="hljs-string">&quot;t&quot;</span>: t_end,
+                        <span class="hljs-string">&quot;r&quot;</span>: r_pre.copy(),
+                        <span class="hljs-string">&quot;v_before&quot;</span>: v_pre.copy(),
+                        <span class="hljs-string">&quot;dv&quot;</span>: m[<span class="hljs-string">&quot;dv&quot;</span>].copy(),
+                        <span class="hljs-string">&quot;v_after&quot;</span>: v_pre + m[<span class="hljs-string">&quot;dv&quot;</span>]
+                    })
+
+                    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n&gt;&gt;&gt; Maneuver [<span class="hljs-subst">{name}</span>] @ t = <span class="hljs-subst">{t_end/DAY:<span class="hljs-number">.2</span>f}</span> days&quot;</span>)
+                    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;    Position: [<span class="hljs-subst">{r_pre[<span class="hljs-number">0</span>]/AU:<span class="hljs-number">.4</span>f}</span>, <span class="hljs-subst">{r_pre[<span class="hljs-number">1</span>]/AU:<span class="hljs-number">.4</span>f}</span>, <span class="hljs-subst">{r_pre[<span class="hljs-number">2</span>]/AU:<span class="hljs-number">.4</span>f}</span>] AU&quot;</span>)
+                    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;    Velocity before: [<span class="hljs-subst">{v_pre[<span class="hljs-number">0</span>]:<span class="hljs-number">.2</span>f}</span>, <span class="hljs-subst">{v_pre[<span class="hljs-number">1</span>]:<span class="hljs-number">.2</span>f}</span>, <span class="hljs-subst">{v_pre[<span class="hljs-number">2</span>]:<span class="hljs-number">.2</span>f}</span>] m/s&quot;</span>)
+                    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;    ΔV: [<span class="hljs-subst">{m[<span class="hljs-string">&#x27;dv&#x27;</span>][<span class="hljs-number">0</span>]:<span class="hljs-number">.2</span>f}</span>, <span class="hljs-subst">{m[<span class="hljs-string">&#x27;dv&#x27;</span>][<span class="hljs-number">1</span>]:<span class="hljs-number">.2</span>f}</span>, <span class="hljs-subst">{m[<span class="hljs-string">&#x27;dv&#x27;</span>][<span class="hljs-number">2</span>]:<span class="hljs-number">.2</span>f}</span>] m/s&quot;</span>)
+                    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;    |ΔV| = <span class="hljs-subst">{norm(m[<span class="hljs-string">&#x27;dv&#x27;</span>]):<span class="hljs-number">.2</span>f}</span> m/s&quot;</span>)
+
+                    current_state[<span class="hljs-number">3</span>:] = v_pre + m[<span class="hljs-string">&quot;dv&quot;</span>]
+                    <span class="hljs-keyword">break</span>
+
+    <span class="hljs-comment"># Combine all segments</span>
+    trajectory = np.vstack(trajectory_segments)
+    time_array = np.hstack(time_segments)
+
+    <span class="hljs-keyword">return</span> trajectory, time_array, maneuver_points, r_earth, r_mars, T_trans
+
+<span class="hljs-comment"># ==================== Main Execution ====================</span>
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    <span class="hljs-comment"># Run simulation</span>
+    trajectory, time_array, maneuver_points, r_earth, r_mars, T_trans = simulate_mars_mission()
+
+    <span class="hljs-comment"># ==================== 2D Heliocentric Trajectory Visualization ====================</span>
+    fig, ax = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, figsize=(<span class="hljs-number">12</span>, <span class="hljs-number">10</span>))
+
+    <span class="hljs-comment"># Plot Sun</span>
+    sun = Circle((<span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">0.05</span>, color=<span class="hljs-string">&#x27;orange&#x27;</span>, label=<span class="hljs-string">&#x27;Sun&#x27;</span>)
+    ax.add_patch(sun)
+
+    <span class="hljs-comment"># Plot orbits</span>
+    theta = np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>*np.pi, <span class="hljs-number">360</span>)
+    earth_orbit_x = r_earth / AU * np.cos(theta)
+    earth_orbit_y = r_earth / AU * np.sin(theta)
+    ax.plot(earth_orbit_x, earth_orbit_y, <span class="hljs-string">&#x27;b--&#x27;</span>, linewidth=<span class="hljs-number">0.8</span>, alpha=<span class="hljs-number">0.5</span>, label=<span class="hljs-string">&#x27;Earth Orbit (1.0 AU)&#x27;</span>)
+
+    mars_orbit_x = r_mars / AU * np.cos(theta)
+    mars_orbit_y = r_mars / AU * np.sin(theta)
+    ax.plot(mars_orbit_x, mars_orbit_y, <span class="hljs-string">&#x27;r--&#x27;</span>, linewidth=<span class="hljs-number">0.8</span>, alpha=<span class="hljs-number">0.5</span>, label=<span class="hljs-string">&#x27;Mars Orbit (1.524 AU)&#x27;</span>)
+
+    <span class="hljs-comment"># Plot smooth probe trajectory</span>
+    traj_x = trajectory[:, <span class="hljs-number">0</span>] / AU
+    traj_y = trajectory[:, <span class="hljs-number">1</span>] / AU
+    ax.plot(traj_x, traj_y, <span class="hljs-string">&#x27;k-&#x27;</span>, linewidth=<span class="hljs-number">1.2</span>, alpha=<span class="hljs-number">0.8</span>, label=<span class="hljs-string">&#x27;Probe Heliocentric Trajectory&#x27;</span>)
+
+    <span class="hljs-comment"># Plot maneuver points</span>
+    colors = {<span class="hljs-string">&#x27;TCM-1&#x27;</span>: <span class="hljs-string">&#x27;green&#x27;</span>, <span class="hljs-string">&#x27;TCM-2&#x27;</span>: <span class="hljs-string">&#x27;cyan&#x27;</span>, <span class="hljs-string">&#x27;DSM&#x27;</span>: <span class="hljs-string">&#x27;magenta&#x27;</span>, <span class="hljs-string">&#x27;TCM-3&#x27;</span>: <span class="hljs-string">&#x27;orange&#x27;</span>, <span class="hljs-string">&#x27;MOI&#x27;</span>: <span class="hljs-string">&#x27;red&#x27;</span>}
+    <span class="hljs-keyword">for</span> mp <span class="hljs-keyword">in</span> maneuver_points:
+        c = colors.get(mp[<span class="hljs-string">&quot;name&quot;</span>], <span class="hljs-string">&#x27;blue&#x27;</span>)
+        ax.plot(mp[<span class="hljs-string">&quot;r&quot;</span>][<span class="hljs-number">0</span>]/AU, mp[<span class="hljs-string">&quot;r&quot;</span>][<span class="hljs-number">1</span>]/AU, <span class="hljs-string">&#x27;o&#x27;</span>, color=c, markersize=<span class="hljs-number">9</span>,
+                markeredgecolor=<span class="hljs-string">&#x27;black&#x27;</span>, markeredgewidth=<span class="hljs-number">1.2</span>, zorder=<span class="hljs-number">5</span>)
+        ax.annotate(mp[<span class="hljs-string">&quot;name&quot;</span>],
+                    (mp[<span class="hljs-string">&quot;r&quot;</span>][<span class="hljs-number">0</span>]/AU, mp[<span class="hljs-string">&quot;r&quot;</span>][<span class="hljs-number">1</span>]/AU),
+                    xytext=(<span class="hljs-number">8</span>, <span class="hljs-number">12</span>), textcoords=<span class="hljs-string">&#x27;offset points&#x27;</span>,
+                    fontsize=<span class="hljs-number">9</span>, fontweight=<span class="hljs-string">&#x27;bold&#x27;</span>, color=c,
+                    bbox=<span class="hljs-built_in">dict</span>(boxstyle=<span class="hljs-string">&#x27;round,pad=0.3&#x27;</span>, facecolor=<span class="hljs-string">&#x27;white&#x27;</span>, alpha=<span class="hljs-number">0.8</span>))
+
+    <span class="hljs-comment"># Plot launch and arrival points</span>
+    ax.plot(traj_x[<span class="hljs-number">0</span>], traj_y[<span class="hljs-number">0</span>], <span class="hljs-string">&#x27;go&#x27;</span>, markersize=<span class="hljs-number">11</span>, label=<span class="hljs-string">&#x27;Launch (Earth)&#x27;</span>)
+    ax.plot(traj_x[-<span class="hljs-number">1</span>], traj_y[-<span class="hljs-number">1</span>], <span class="hljs-string">&#x27;ro&#x27;</span>, markersize=<span class="hljs-number">11</span>, label=<span class="hljs-string">&#x27;Arrival (Mars)&#x27;</span>)
+
+    <span class="hljs-comment"># Plot theoretical Hohmann ellipse</span>
+    a_trans_au = (r_earth + r_mars) / (<span class="hljs-number">2</span> * AU)
+    c_au = (r_mars - r_earth) / (<span class="hljs-number">2</span> * AU)
+    b_au = np.sqrt(a_trans_au**<span class="hljs-number">2</span> - c_au**<span class="hljs-number">2</span>)
+    center_x = -c_au
+    ellipse_theta = np.linspace(<span class="hljs-number">0</span>, np.pi, <span class="hljs-number">200</span>)
+    ellipse_x = center_x + a_trans_au * np.cos(ellipse_theta)
+    ellipse_y = b_au * np.sin(ellipse_theta)
+    ax.plot(ellipse_x, ellipse_y, <span class="hljs-string">&#x27;gray&#x27;</span>, linewidth=<span class="hljs-number">1.2</span>, linestyle=<span class="hljs-string">&#x27;:&#x27;</span>, alpha=<span class="hljs-number">0.6</span>, label=<span class="hljs-string">&#x27;Theoretical Hohmann Ellipse&#x27;</span>)
+
+    <span class="hljs-comment"># Plot settings</span>
+    ax.set_xlabel(<span class="hljs-string">&#x27;X [AU]&#x27;</span>, fontsize=<span class="hljs-number">13</span>)
+    ax.set_ylabel(<span class="hljs-string">&#x27;Y [AU]&#x27;</span>, fontsize=<span class="hljs-number">13</span>)
+    ax.set_title(<span class="hljs-string">&#x27;Mars Exploration Heliocentric Transfer Trajectory\n(Tianwen-1 / MSL Reference with Maneuvers)&#x27;</span>,
+                 fontsize=<span class="hljs-number">15</span>, fontweight=<span class="hljs-string">&#x27;bold&#x27;</span>)
+    ax.legend(loc=<span class="hljs-string">&#x27;upper right&#x27;</span>, fontsize=<span class="hljs-number">10</span>)
+    ax.set_aspect(<span class="hljs-string">&#x27;equal&#x27;</span>)
+    ax.grid(<span class="hljs-literal">True</span>, alpha=<span class="hljs-number">0.3</span>)
+    ax.set_xlim(-<span class="hljs-number">1.8</span>, <span class="hljs-number">1.8</span>)
+    ax.set_ylim(-<span class="hljs-number">1.8</span>, <span class="hljs-number">1.8</span>)
+
+    plt.tight_layout()
+    plt.savefig(<span class="hljs-string">&#x27;mars_mission_trajectory_2d.png&#x27;</span>, dpi=<span class="hljs-number">150</span>)
+    plt.show()
+
+    <span class="hljs-comment"># ==================== 3D Trajectory Visualization ====================</span>
+    fig3d = plt.figure(figsize=(<span class="hljs-number">14</span>, <span class="hljs-number">10</span>))
+    ax3d = fig3d.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+    <span class="hljs-comment"># 3D trajectory</span>
+    ax3d.plot(trajectory[:, <span class="hljs-number">0</span>]/AU, trajectory[:, <span class="hljs-number">1</span>]/AU, trajectory[:, <span class="hljs-number">2</span>]/AU,
+              <span class="hljs-string">&#x27;k-&#x27;</span>, linewidth=<span class="hljs-number">1.2</span>, alpha=<span class="hljs-number">0.8</span>, label=<span class="hljs-string">&#x27;Probe Trajectory&#x27;</span>)
+
+    <span class="hljs-comment"># 3D orbits</span>
+    ax3d.plot(earth_orbit_x, earth_orbit_y, np.zeros_like(earth_orbit_x),
+              <span class="hljs-string">&#x27;b--&#x27;</span>, linewidth=<span class="hljs-number">0.8</span>, alpha=<span class="hljs-number">0.5</span>, label=<span class="hljs-string">&#x27;Earth Orbit&#x27;</span>)
+    ax3d.plot(mars_orbit_x, mars_orbit_y, np.zeros_like(mars_orbit_x),
+              <span class="hljs-string">&#x27;r--&#x27;</span>, linewidth=<span class="hljs-number">0.8</span>, alpha=<span class="hljs-number">0.5</span>, label=<span class="hljs-string">&#x27;Mars Orbit&#x27;</span>)
+
+    <span class="hljs-comment"># 3D maneuver points</span>
+    <span class="hljs-keyword">for</span> mp <span class="hljs-keyword">in</span> maneuver_points:
+        c = colors.get(mp[<span class="hljs-string">&quot;name&quot;</span>], <span class="hljs-string">&#x27;blue&#x27;</span>)
+        ax3d.scatter(mp[<span class="hljs-string">&quot;r&quot;</span>][<span class="hljs-number">0</span>]/AU, mp[<span class="hljs-string">&quot;r&quot;</span>][<span class="hljs-number">1</span>]/AU, mp[<span class="hljs-string">&quot;r&quot;</span>][<span class="hljs-number">2</span>]/AU,
+                    color=c, s=<span class="hljs-number">90</span>, edgecolors=<span class="hljs-string">&#x27;black&#x27;</span>, linewidth=<span class="hljs-number">1.2</span>, zorder=<span class="hljs-number">5</span>)
+        ax3d.text(mp[<span class="hljs-string">&quot;r&quot;</span>][<span class="hljs-number">0</span>]/AU, mp[<span class="hljs-string">&quot;r&quot;</span>][<span class="hljs-number">1</span>]/AU, mp[<span class="hljs-string">&quot;r&quot;</span>][<span class="hljs-number">2</span>]/AU,
+                 <span class="hljs-string">f&#x27;  <span class="hljs-subst">{mp[<span class="hljs-string">&quot;name&quot;</span>]}</span>&#x27;</span>, fontsize=<span class="hljs-number">9</span>, fontweight=<span class="hljs-string">&#x27;bold&#x27;</span>, color=c)
+
+    <span class="hljs-comment"># Sun</span>
+    ax3d.scatter(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, color=<span class="hljs-string">&#x27;orange&#x27;</span>, s=<span class="hljs-number">300</span>, label=<span class="hljs-string">&#x27;Sun&#x27;</span>)
+
+    <span class="hljs-comment"># 3D plot settings</span>
+    ax3d.set_xlabel(<span class="hljs-string">&#x27;X [AU]&#x27;</span>, fontsize=<span class="hljs-number">12</span>)
+    ax3d.set_ylabel(<span class="hljs-string">&#x27;Y [AU]&#x27;</span>, fontsize=<span class="hljs-number">12</span>)
+    ax3d.set_zlabel(<span class="hljs-string">&#x27;Z [AU]&#x27;</span>, fontsize=<span class="hljs-number">12</span>)
+    ax3d.set_title(<span class="hljs-string">&#x27;Mars Exploration Heliocentric Transfer Trajectory (3D View)&#x27;</span>,
+                   fontsize=<span class="hljs-number">14</span>, fontweight=<span class="hljs-string">&#x27;bold&#x27;</span>)
+    ax3d.legend(loc=<span class="hljs-string">&#x27;upper right&#x27;</span>, fontsize=<span class="hljs-number">9</span>)
+
+    max_range = <span class="hljs-number">2.0</span>
+    ax3d.set_xlim(-max_range, max_range)
+    ax3d.set_ylim(-max_range, max_range)
+    ax3d.set_zlim(-<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>)
+
+    plt.tight_layout()
+    plt.savefig(<span class="hljs-string">&#x27;mars_mission_trajectory_3d.png&#x27;</span>, dpi=<span class="hljs-number">150</span>)
+    plt.show()
+
+    <span class="hljs-comment"># ==================== Simulation Summary ====================</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;SIMULATION SUMMARY&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Total data points: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(trajectory)}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Flight duration: <span class="hljs-subst">{T_trans/DAY:<span class="hljs-number">.2</span>f}</span> days (~<span class="hljs-subst">{T_trans/DAY/<span class="hljs-number">30.44</span>:<span class="hljs-number">.1</span>f}</span> months)&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Total maneuvers: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(maneuver_points)}</span>&quot;</span>)
+    total_dv = <span class="hljs-built_in">sum</span>([norm(mp[<span class="hljs-string">&#x27;dv&#x27;</span>]) <span class="hljs-keyword">for</span> mp <span class="hljs-keyword">in</span> maneuver_points])
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Total ΔV budget: <span class="hljs-subst">{total_dv:<span class="hljs-number">.2</span>f}</span> m/s&quot;</span>)
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\nManeuver Details:&quot;</span>)
+    <span class="hljs-keyword">for</span> mp <span class="hljs-keyword">in</span> maneuver_points:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  <span class="hljs-subst">{mp[<span class="hljs-string">&#x27;name&#x27;</span>]:6s}</span> | t=<span class="hljs-subst">{mp[<span class="hljs-string">&#x27;t&#x27;</span>]/DAY:<span class="hljs-number">7.2</span>f}</span>d | |ΔV|=<span class="hljs-subst">{norm(mp[<span class="hljs-string">&#x27;dv&#x27;</span>]):<span class="hljs-number">8.2</span>f}</span> m/s | &quot;</span>
+              <span class="hljs-string">f&quot;r=(<span class="hljs-subst">{mp[<span class="hljs-string">&#x27;r&#x27;</span>][<span class="hljs-number">0</span>]/AU:<span class="hljs-number">.3</span>f}</span>, <span class="hljs-subst">{mp[<span class="hljs-string">&#x27;r&#x27;</span>][<span class="hljs-number">1</span>]/AU:<span class="hljs-number">.3</span>f}</span>, <span class="hljs-subst">{mp[<span class="hljs-string">&#x27;r&#x27;</span>][<span class="hljs-number">2</span>]/AU:<span class="hljs-number">.3</span>f}</span>) AU&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-3" href="#五-轨迹出现直线-错位问题的数学原因-原代码-bug-根源">五、轨迹出现直线 / 错位问题的数学原因（原代码 bug 根源）</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">
+      <span>上一篇</span>
+      <strong>天体轨道的物理推导全过程Python绘制天体圆锥轨道</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/基于的黏滞阻力作用下的物体运动仿真模拟黏滞阻力终极速度牛顿第二定律.html">
+      <span>下一篇</span>
+      <strong>基于的黏滞阻力作用下的物体运动仿真模拟黏滞阻力终极速度牛顿第二定律</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/仿真模拟两颗卫星的自主交会对接过程python版.html">仿真模拟两颗卫星的自主交会对接过程Python版</a></h3>
+        <p class="post-excerpt">摘要：本文实现了一个基于LQR控制的航天器交会对接仿真系统。系统模拟了初始高度差50km、轨道平面倾角差30°的追踪航天器向目标航天器的自主接近过程。通过求解连续时间代数Riccati方程设计最优控制器，采用四阶龙格库塔法进行轨道动力学积分，并实现了LVLH坐标系下的相对运动控制。仿真结果显示系统能在5个轨道周期内完成对接，最终相对距离小于100米，速度差小于1m/s。可视化部分展示了3D轨迹、推…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.260Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

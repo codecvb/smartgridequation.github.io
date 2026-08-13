@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>基于像素置乱和比特运算的小波变换域隐藏加密图像算法MATLAB版 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/matlab-仿真.html">MATLAB 仿真</a>
+        </nav>
+        <h1 class="post-title">基于像素置乱和比特运算的小波变换域隐藏加密图像算法MATLAB版</h1>
+        <p class="post-deck">本文提出了一种基于像素置乱和比特运算的小波变换域图像加密隐藏算法。算法流程包括：1)初始化阶段，设置外部密钥并验证载体图像尺寸；2)加密与隐藏阶段，通过置乱和比特运算将256×256明文图像嵌入512×512载体图像；3)解密与提取阶段，从含密载体中恢复原始图像；4)结果评估，计算PSNR值并可视化各阶段图像。实验结果表明，该方法能有效隐藏加密图像，且解密图像质量良好（PSNR值较高）。算法结合了…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.129Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>7 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+            <a class="tag-chip" href="../tags/tag-14.html">图像处理</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文提出了一种基于像素置乱和比特运算的小波变换域图像加密隐藏算法。算法流程包括：1)初始化阶段，设置外部密钥并验证载体图像尺寸；2)加密与隐藏阶段，通过置乱和比特运算将256×256明文图像嵌入512×512载体图像；3)解密与提取阶段，从含密载体中恢复原始图像；4)结果评估，计算PSNR值并可视化各阶段图像。实验结果表明，该方法能有效隐藏加密图像，且解密图像质量良好（PSNR值较高）。算法结合了混沌系统和小波变换，增强了安全性。完整实现代码可通过邮箱或私信获取。</p>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8E%E5%83%8F%E7%B4%A0%E7%BD%AE%E4%B9%B1%E5%92%8C%E6%AF%94%E7%89%B9%E8%BF%90%E7%AE%97%E7%9A%84%E5%B0%8F%E6%B3%A2%E5%8F%98%E6%8D%A2%E5%9F%9F%E9%9A%90%E8%97%8F%E5%8A%A0%E5%AF%86%E5%9B%BE%E5%83%8F%E7%AE%97%E6%B3%95matlab%E7%89%88/img-01.png" alt=""></p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% =========================================================================</span>
+<span class="hljs-comment">% 主函数: 基于像素置乱和比特运算的小波变换域隐藏加密图像算法</span>
+<span class="hljs-comment">% Main script for the image encryption and hiding algorithm based on the paper:</span>
+<span class="hljs-comment">% =========================================================================</span>
+
+clear;
+close all;
+clc;
+
+<span class="hljs-comment">%% 1. 初始化 (Initialization)</span>
+<span class="hljs-built_in">disp</span>(<span class="hljs-string">&#x27;--- 1. 初始化参数和图像 ---&#x27;</span>);
+
+<span class="hljs-comment">% 载入明文图像和载体图像</span>
+plain_img_path = <span class="hljs-string">&#x27;lena_color_256_2.png&#x27;</span>;   <span class="hljs-comment">% 明文图像 (256x256)</span>
+carrier_img_path = <span class="hljs-string">&#x27;baboon_color_512_2.png&#x27;</span>; <span class="hljs-comment">% 载体图像 (512x512)</span>
+
+plain_img = imread(plain_img_path);
+carrier_img = imread(carrier_img_path);
+
+<span class="hljs-comment">% 确保图像是uint8类型</span>
+plain_img = im2uint8(plain_img);
+carrier_img = im2uint8(carrier_img);
+
+<span class="hljs-comment">% 获取图像尺寸</span>
+[M, N, ~] = <span class="hljs-built_in">size</span>(plain_img);
+[carrier_M, carrier_N, ~] = <span class="hljs-built_in">size</span>(carrier_img);
+
+<span class="hljs-comment">% 检查载体图像尺寸是否符合要求 (2M x 2N)</span>
+<span class="hljs-keyword">if</span> carrier_M ~= <span class="hljs-number">2</span>*M || carrier_N ~= <span class="hljs-number">2</span>*N
+    error(<span class="hljs-string">&#x27;载体图像的尺寸必须是明文图像的两倍！&#x27;</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 设置外部密钥 (External Keys) - 对应论文4.1节</span>
+keys.x0 = <span class="hljs-number">0.6323</span>;
+keys.y0 = <span class="hljs-number">0.1271</span>;
+keys.a = <span class="hljs-number">31</span>;
+keys.u = <span class="hljs-number">51</span>;
+<span class="hljs-built_in">disp</span>(<span class="hljs-string">&#x27;外部密钥设置完成。&#x27;</span>);
+
+<span class="hljs-comment">%% 2. 加密与隐藏 (Encryption and Hiding)</span>
+<span class="hljs-built_in">disp</span>(<span class="hljs-string">&#x27;--- 2. 开始加密和隐藏过程 ---&#x27;</span>);
+
+<span class="hljs-comment">% 调用加密函数</span>
+[stego_img, internal_keys] = encrypt_and_hide_3(plain_img, carrier_img, keys);
+
+<span class="hljs-built_in">disp</span>(<span class="hljs-string">&#x27;加密和隐藏完成！&#x27;</span>);
+
+<span class="hljs-comment">%% 3. 解密与提取 (Decryption and Extraction)</span>
+<span class="hljs-built_in">disp</span>(<span class="hljs-string">&#x27;--- 3. 开始解密和提取过程 ---&#x27;</span>);
+
+<span class="hljs-comment">% 调用解密函数</span>
+decrypted_img = extract_and_decrypt_3(stego_img, internal_keys);
+
+<span class="hljs-built_in">disp</span>(<span class="hljs-string">&#x27;解密和提取完成！&#x27;</span>);
+
+<span class="hljs-comment">%% 4. 结果展示与评估 (Result Display and Evaluation)</span>
+<span class="hljs-built_in">disp</span>(<span class="hljs-string">&#x27;--- 4. 显示结果并进行评估 ---&#x27;</span>);
+
+<span class="hljs-comment">% 计算解密图像与原始明文图像的PSNR值 - 对应论文公式(12)</span>
+psnr_val = psnr(decrypted_img, plain_img);
+fprintf(<span class="hljs-string">&#x27;解密图像与原始明文图像的 PSNR 值为: %.4f dB\n&#x27;</span>, psnr_val);
+
+<span class="hljs-comment">% 显示所有图像</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Name&#x27;</span>, <span class="hljs-string">&#x27;图像加密隐藏与解密提取全流程&#x27;</span>, <span class="hljs-string">&#x27;NumberTitle&#x27;</span>, <span class="hljs-string">&#x27;off&#x27;</span>);
+
+<span class="hljs-comment">% 原始明文图像</span>
+subplot(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>);
+imshow(plain_img);
+title(<span class="hljs-string">&#x27;1. 原始明文图像&#x27;</span>);
+
+<span class="hljs-comment">% 原始载体图像</span>
+subplot(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">2</span>);
+imshow(carrier_img);
+title(<span class="hljs-string">&#x27;2. 原始载体图像&#x27;</span>);
+
+<span class="hljs-comment">% 加密隐藏后的载体图像</span>
+subplot(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">3</span>);
+imshow(stego_img);
+title(<span class="hljs-string">&#x27;3. 含密载体图像 (Stego Image)&#x27;</span>);
+
+<span class="hljs-comment">% 预加密后的密文图像 (从internal_keys中获取用于显示)</span>
+subplot(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>);
+imshow(internal_keys.cipher_img_for_display);
+title(<span class="hljs-string">&#x27;4. 预加密密文图像 (中间过程)&#x27;</span>);
+
+<span class="hljs-comment">% 提取并解密后的图像</span>
+subplot(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">5</span>);
+imshow(decrypted_img);
+title(<span class="hljs-string">&#x27;5. 解密后的图像&#x27;</span>);
+
+<span class="hljs-comment">% 对比含密载体和原始载体</span>
+psnr_stego_vs_carrier = psnr(stego_img, carrier_img);
+subplot(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">6</span>);
+imshow(imabsdiff(stego_img, carrier_img) * <span class="hljs-number">10</span>); <span class="hljs-comment">% 放大差异以便观察</span>
+title(sprintf(<span class="hljs-string">&#x27;6. 载体图像变化 (PSNR: %.2fdB)&#x27;</span>, psnr_stego_vs_carrier));
+</code></pre>
+<p>需要完整源代码请留邮箱或者私信告知!</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/求过椭圆上一定点的诸弦的中点的轨迹并讨论用matlab画出来轨迹图高考试题.html">
+      <span>上一篇</span>
+      <strong>求过椭圆上一定点的诸弦的中点的轨迹并讨论用MATLAB画出来轨迹图高考试题</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/基于a算法的雷雨绕飞路径matlab实现.html">
+      <span>下一篇</span>
+      <strong>基于A算法的雷雨绕飞路径MATLAB实现</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/基于改进标准映射的图像加密算法matlab代码版本.html">基于改进标准映射的图像加密算法MATLAB代码版本</a></h3>
+        <p class="post-excerpt">!在这里插入图片描述代码运行结果如上图</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.037Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/基于二维小波变换的图像增强matlab代码.html">基于二维小波变换的图像增强MATLAB代码</a></h3>
+        <p class="post-excerpt">Matlab</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.991Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/matlab实现神经网络的ocr识别.html">MATLAB实现神经网络的OCR识别</a></h3>
+        <p class="post-excerpt">使用说明：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.694Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

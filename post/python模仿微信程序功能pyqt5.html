@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Python模仿微信程序功能PyQt5 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">Python模仿微信程序功能PyQt5</h1>
+        <p class="post-deck">本文介绍了一个基于PyQt5的微信界面克隆实现。该程序创建了一个包含侧边栏和聊天区域的主窗口，模拟了微信的基本UI元素和交互功能。侧边栏包含用户信息、搜索框、功能按钮和聊天列表，聊天区域则实现了消息显示和输入功能。程序支持发送文本消息、表情符号和文件，并模拟了自动回复功能。界面设计遵循微信风格，包括圆形头像、气泡消息框和绿色主题色。该实现展示了如何使用PyQt5构建复杂的GUI应用程序，涵盖了布局…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.328Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>108 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文介绍了一个基于PyQt5的微信界面克隆实现。该程序创建了一个包含侧边栏和聊天区域的主窗口，模拟了微信的基本UI元素和交互功能。侧边栏包含用户信息、搜索框、功能按钮和聊天列表，聊天区域则实现了消息显示和输入功能。程序支持发送文本消息、表情符号和文件，并模拟了自动回复功能。界面设计遵循微信风格，包括圆形头像、气泡消息框和绿色主题色。该实现展示了如何使用PyQt5构建复杂的GUI应用程序，涵盖了布局管理、样式定制、事件处理和组件交互等关键技术。</p>
+<p><img src="../uploads/csdn/python%E6%A8%A1%E4%BB%BF%E5%BE%AE%E4%BF%A1%E7%A8%8B%E5%BA%8F%E5%8A%9F%E8%83%BDpyqt5/img-01.png" alt=""></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">from</span> PyQt5.QtWidgets <span class="hljs-keyword">import</span> (QApplication, QMainWindow, QWidget, QVBoxLayout,
+                            QHBoxLayout, QListWidget, QListWidgetItem, QLineEdit,
+                            QTextEdit, QPushButton, QLabel, QSplitter, QFrame,
+                            QScrollArea, QComboBox, QMenu, QAction, QSizePolicy,
+                            QMessageBox, QFileDialog, QGridLayout)
+<span class="hljs-keyword">from</span> PyQt5.QtGui <span class="hljs-keyword">import</span> (QPixmap, QIcon, QFont, QColor, QPainter, QBrush, QPen,
+                         QPalette, QCursor)
+<span class="hljs-keyword">from</span> PyQt5.QtCore <span class="hljs-keyword">import</span> Qt, QSize, QPoint, pyqtSignal, QRect, QTimer, QEvent
+
+<span class="hljs-comment"># 移除matplotlib依赖，因为我们不需要它</span>
+<span class="hljs-comment"># 移除以下导入：</span>
+<span class="hljs-comment"># import matplotlib</span>
+<span class="hljs-comment"># matplotlib.use(&#x27;Agg&#x27;)</span>
+<span class="hljs-comment"># import matplotlib.pyplot as plt</span>
+<span class="hljs-comment"># plt.rcParams[&quot;font.family&quot;] = [&quot;SimHei&quot;, &quot;WenQuanYi Micro Hei&quot;, &quot;Heiti TC&quot;]</span>
+
+<span class="hljs-comment"># 直接在PyQt5中设置字体支持中文</span>
+QFont.insertSubstitutions(<span class="hljs-string">&quot;SimHei&quot;</span>, [<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-string">&quot;WenQuanYi Micro Hei&quot;</span>, <span class="hljs-string">&quot;Heiti TC&quot;</span>])
+
+<span class="hljs-comment"># 主应用程序类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">WeChatClone</span>(<span class="hljs-title class_ inherited__">QMainWindow</span>):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.initUI()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">initUI</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 全局样式优化</span>
+        <span class="hljs-comment"># 设置窗口标题和大小</span>
+        <span class="hljs-variable language_">self</span>.setWindowTitle(<span class="hljs-string">&#x27;微信&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.setGeometry(<span class="hljs-number">300</span>, <span class="hljs-number">300</span>, <span class="hljs-number">1200</span>, <span class="hljs-number">800</span>)
+
+        <span class="hljs-comment"># 设置窗口样式 - 微信风格</span>
+        <span class="hljs-variable language_">self</span>.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+            QMainWindow {
+                background-color: #f5f5f5;
+            }
+            QSplitter::handle {
+                background-color: #e0e0e0;
+            }
+        &quot;&quot;&quot;</span>)
+
+        <span class="hljs-comment"># 创建中心窗口部件</span>
+        central_widget = QWidget()
+        <span class="hljs-variable language_">self</span>.setCentralWidget(central_widget)
+
+        <span class="hljs-comment"># 创建主布局</span>
+        main_layout = QHBoxLayout(central_widget)
+        main_layout.setContentsMargins(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+        main_layout.setSpacing(<span class="hljs-number">0</span>)
+
+        <span class="hljs-comment"># 创建分割器来分隔侧边栏和聊天区域</span>
+        splitter = QSplitter(Qt.Horizontal)
+        splitter.setHandleWidth(<span class="hljs-number">1</span>)
+        splitter.setStyleSheet(<span class="hljs-string">&quot;QSplitter::handle { background-color: #e0e0e0; }&quot;</span>)
+
+        <span class="hljs-comment"># 创建侧边栏</span>
+        <span class="hljs-variable language_">self</span>.create_sidebar(splitter)
+
+        <span class="hljs-comment"># 创建聊天区域</span>
+        <span class="hljs-variable language_">self</span>.create_chat_area(splitter)
+
+        <span class="hljs-comment"># 设置分割器的初始大小</span>
+        splitter.setSizes([<span class="hljs-number">300</span>, <span class="hljs-number">900</span>])
+
+        <span class="hljs-comment"># 限制最小宽度</span>
+        splitter.setChildrenCollapsible(<span class="hljs-literal">False</span>)
+
+        <span class="hljs-comment"># 将分割器添加到主布局</span>
+        main_layout.addWidget(splitter)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">create_sidebar</span>(<span class="hljs-params">self, parent</span>):
+        <span class="hljs-comment"># 创建侧边栏框架</span>
+        sidebar = QWidget()
+        sidebar.setStyleSheet(<span class="hljs-string">&quot;background-color: white;&quot;</span>)
+        sidebar_layout = QVBoxLayout(sidebar)
+        sidebar_layout.setContentsMargins(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+        sidebar_layout.setSpacing(<span class="hljs-number">0</span>)
+
+        <span class="hljs-comment"># 创建顶部用户信息区域</span>
+        user_info_widget = QWidget()
+        user_info_widget.setStyleSheet(<span class="hljs-string">&quot;background-color: white; border-bottom: 1px solid #e0e0e0;&quot;</span>)
+        user_info_layout = QHBoxLayout(user_info_widget)
+        user_info_layout.setContentsMargins(<span class="hljs-number">15</span>, <span class="hljs-number">10</span>, <span class="hljs-number">10</span>, <span class="hljs-number">10</span>)
+
+        <span class="hljs-comment"># 用户头像 - 圆形</span>
+        <span class="hljs-variable language_">self</span>.avatar_label = QLabel()
+        avatar_pixmap = QPixmap(<span class="hljs-number">50</span>, <span class="hljs-number">50</span>)
+        avatar_pixmap.fill(QColor(<span class="hljs-number">100</span>, <span class="hljs-number">181</span>, <span class="hljs-number">246</span>))
+        <span class="hljs-comment"># 创建圆形头像</span>
+        painter = QPainter(avatar_pixmap)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setBrush(QBrush(QColor(<span class="hljs-number">100</span>, <span class="hljs-number">181</span>, <span class="hljs-number">246</span>)))
+        painter.setPen(Qt.NoPen)
+        painter.drawEllipse(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">50</span>, <span class="hljs-number">50</span>)
+        painter.end()
+
+        <span class="hljs-variable language_">self</span>.avatar_label.setPixmap(avatar_pixmap)
+        <span class="hljs-variable language_">self</span>.avatar_label.setFixedSize(<span class="hljs-number">50</span>, <span class="hljs-number">50</span>)
+        <span class="hljs-variable language_">self</span>.avatar_label.setScaledContents(<span class="hljs-literal">True</span>)
+
+        <span class="hljs-comment"># 用户名</span>
+        <span class="hljs-variable language_">self</span>.username_label = QLabel(<span class="hljs-string">&#x27;我&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.username_label.setFont(QFont(<span class="hljs-string">&#x27;SimHei&#x27;</span>, <span class="hljs-number">12</span>, QFont.Bold))
+
+        <span class="hljs-comment"># 更多按钮</span>
+        more_btn = QPushButton()
+        more_btn.setText(<span class="hljs-string">&#x27;⋮&#x27;</span>)
+        more_btn.setFont(QFont(<span class="hljs-string">&#x27;SimHei&#x27;</span>, <span class="hljs-number">14</span>))
+        more_btn.setFixedSize(<span class="hljs-number">30</span>, <span class="hljs-number">30</span>)
+        more_btn.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+            QPushButton {
+                border: none;
+                background-color: transparent;
+                color: #666;
+            }
+            QPushButton:hover {
+                background-color: #f0f0f0;
+                border-radius: 15px;
+            }
+        &quot;&quot;&quot;</span>)
+
+        user_info_layout.addWidget(<span class="hljs-variable language_">self</span>.avatar_label)
+        user_info_layout.addWidget(<span class="hljs-variable language_">self</span>.username_label, <span class="hljs-number">0</span>, Qt.AlignVCenter)
+        user_info_layout.addStretch()
+        user_info_layout.addWidget(more_btn)
+
+        <span class="hljs-comment"># 创建搜索框</span>
+        search_layout = QHBoxLayout()
+        search_layout.setContentsMargins(<span class="hljs-number">15</span>, <span class="hljs-number">10</span>, <span class="hljs-number">15</span>, <span class="hljs-number">10</span>)
+
+        <span class="hljs-comment"># 搜索容器</span>
+        search_container = QWidget()
+        search_container.setStyleSheet(<span class="hljs-string">&quot;background-color: #f0f0f0; border-radius: 18px;&quot;</span>)
+        search_container_layout = QHBoxLayout(search_container)
+        search_container_layout.setContentsMargins(<span class="hljs-number">10</span>, <span class="hljs-number">6</span>, <span class="hljs-number">10</span>, <span class="hljs-number">6</span>)
+
+        search_icon = QLabel()
+        search_icon.setText(<span class="hljs-string">&#x27;🔍&#x27;</span>)
+        search_icon.setFixedSize(<span class="hljs-number">20</span>, <span class="hljs-number">20</span>)
+        search_icon.setAlignment(Qt.AlignCenter)
+
+        <span class="hljs-variable language_">self</span>.search_edit = QLineEdit()
+        <span class="hljs-variable language_">self</span>.search_edit.setPlaceholderText(<span class="hljs-string">&#x27;搜索&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.search_edit.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+            QLineEdit {
+                border: none;
+                background-color: transparent;
+                font-family: SimHei, Microsoft YaHei;
+                font-size: 14px;
+                color: #333;
+            }
+            QLineEdit::placeholder {
+                color: #999;
+            }
+        &quot;&quot;&quot;</span>)
+        <span class="hljs-variable language_">self</span>.search_edit.textChanged.connect(<span class="hljs-variable language_">self</span>.on_search_text_changed)
+
+        search_container_layout.addWidget(search_icon)
+        search_container_layout.addWidget(<span class="hljs-variable language_">self</span>.search_edit)
+
+        search_layout.addWidget(search_container)
+
+        <span class="hljs-comment"># 创建功能按钮区域</span>
+        features_widget = QWidget()
+        features_widget.setStyleSheet(<span class="hljs-string">&quot;background-color: white; border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;&quot;</span>)
+        features_layout = QHBoxLayout(features_widget)
+        features_layout.setContentsMargins(<span class="hljs-number">15</span>, <span class="hljs-number">0</span>, <span class="hljs-number">15</span>, <span class="hljs-number">0</span>)
+        features_layout.setSpacing(<span class="hljs-number">0</span>)
+
+        <span class="hljs-comment"># 创建功能按钮</span>
+        <span class="hljs-variable language_">self</span>.chat_btn = QPushButton(<span class="hljs-string">&#x27;聊天&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.contact_btn = QPushButton(<span class="hljs-string">&#x27;联系人&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.favorite_btn = QPushButton(<span class="hljs-string">&#x27;收藏&#x27;</span>)
+
+        <span class="hljs-comment"># 设置按钮样式</span>
+        <span class="hljs-keyword">for</span> btn <span class="hljs-keyword">in</span> [<span class="hljs-variable language_">self</span>.chat_btn, <span class="hljs-variable language_">self</span>.contact_btn, <span class="hljs-variable language_">self</span>.favorite_btn]:
+            btn.setFixedHeight(<span class="hljs-number">40</span>)
+            btn.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+                QPushButton {
+                    border: none;
+                    background-color: transparent;
+                    font-family: SimHei, Microsoft YaHei;
+                    font-size: 14px;
+                    color: #666;
+                    padding: 0 20px;
+                }
+                QPushButton:hover {
+                    background-color: #f5f5f5;
+                }
+            &quot;&quot;&quot;</span>)
+
+        <span class="hljs-comment"># 设置默认选中聊天按钮 - 微信绿色主题</span>
+        <span class="hljs-variable language_">self</span>.chat_btn.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+            QPushButton {
+                border: none;
+                background-color: #e8f0fe;
+                font-family: SimHei, Microsoft YaHei;
+                font-size: 14px;
+                color: #07c160;
+                font-weight: bold;
+                padding: 0 20px;
+            }
+            QPushButton:hover {
+                background-color: #e8f0fe;
+            }
+        &quot;&quot;&quot;</span>)
+
+        <span class="hljs-comment"># 连接按钮点击信号</span>
+        <span class="hljs-variable language_">self</span>.chat_btn.clicked.connect(<span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.on_feature_button_clicked(<span class="hljs-string">&#x27;chat&#x27;</span>))
+        <span class="hljs-variable language_">self</span>.contact_btn.clicked.connect(<span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.on_feature_button_clicked(<span class="hljs-string">&#x27;contact&#x27;</span>))
+        <span class="hljs-variable language_">self</span>.favorite_btn.clicked.connect(<span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.on_feature_button_clicked(<span class="hljs-string">&#x27;favorite&#x27;</span>))
+
+        features_layout.addWidget(<span class="hljs-variable language_">self</span>.chat_btn)
+        features_layout.addWidget(<span class="hljs-variable language_">self</span>.contact_btn)
+        features_layout.addWidget(<span class="hljs-variable language_">self</span>.favorite_btn)
+
+        <span class="hljs-comment"># 创建聊天列表</span>
+        <span class="hljs-variable language_">self</span>.chat_list = QListWidget()
+        <span class="hljs-variable language_">self</span>.chat_list.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+            QListWidget {
+                border: none;
+                background-color: white;
+            }
+            QListWidget::item {
+                height: 72px;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            QListWidget::item:hover {
+                background-color: #f5f5f5;
+            }
+            QListWidget::item:selected {
+                background-color: #e8f0fe;
+            }
+            QScrollBar:vertical {
+                width: 6px;
+                background-color: white;
+            }
+            QScrollBar::handle:vertical {
+                background-color: #c0c0c0;
+                border-radius: 3px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background-color: #a0a0a0;
+            }
+        &quot;&quot;&quot;</span>)
+
+        <span class="hljs-comment"># 连接聊天列表点击信号</span>
+        <span class="hljs-variable language_">self</span>.chat_list.itemClicked.connect(<span class="hljs-variable language_">self</span>.on_chat_item_clicked)
+
+        <span class="hljs-comment"># 添加示例聊天项</span>
+        <span class="hljs-variable language_">self</span>.add_chat_item(<span class="hljs-string">&#x27;仙女帅哥俱乐部&#x27;</span>, <span class="hljs-string">&#x27;盟词: [阵营] 公示! ...&#x27;</span>, <span class="hljs-string">&#x27;17:48&#x27;</span>, <span class="hljs-string">&#x27;group.png&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.add_chat_item(<span class="hljs-string">&#x27;Andy&#x27;</span>, <span class="hljs-string">&#x27;没出现锅巴吧&#x27;</span>, <span class="hljs-string">&#x27;17:01&#x27;</span>, <span class="hljs-string">&#x27;user1.png&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.add_chat_item(<span class="hljs-string">&#x27;0705-极简技术...&#x27;</span>, <span class="hljs-string">&#x27;康雨秋: 上课去了&#x27;</span>, <span class="hljs-string">&#x27;16:49&#x27;</span>, <span class="hljs-string">&#x27;group.png&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.add_chat_item(<span class="hljs-string">&#x27;折腾的群聊&#x27;</span>, <span class="hljs-string">&#x27;不坑老师做俯卧撑-12&#x27;</span>, <span class="hljs-string">&#x27;16:45&#x27;</span>, <span class="hljs-string">&#x27;group.png&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.add_chat_item(<span class="hljs-string">&#x27;学科网 | 20...&#x27;</span>, <span class="hljs-string">&#x27;柠檬老师: 文案:&#x27;</span>, <span class="hljs-string">&#x27;16:44&#x27;</span>, <span class="hljs-string">&#x27;group.png&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.add_chat_item(<span class="hljs-string">&#x27;不坑老师付...&#x27;</span>, <span class="hljs-string">&#x27;康雨秋: [链接] 我把...&#x27;</span>, <span class="hljs-string">&#x27;16:39&#x27;</span>, <span class="hljs-string">&#x27;group.png&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.add_chat_item(<span class="hljs-string">&#x27;师门 🔥 🔥 🔥&#x27;</span>, <span class="hljs-string">&#x27;小号: [图片]&#x27;</span>, <span class="hljs-string">&#x27;16:22&#x27;</span>, <span class="hljs-string">&#x27;group.png&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.add_chat_item(<span class="hljs-string">&#x27;不坑老师私...&#x27;</span>, <span class="hljs-string">&#x27;AI助理-波比 (道义干...&#x27;</span>, <span class="hljs-string">&#x27;16:16&#x27;</span>, <span class="hljs-string">&#x27;user2.png&#x27;</span>)
+
+        <span class="hljs-comment"># 将所有部件添加到侧边栏布局</span>
+        sidebar_layout.addWidget(user_info_widget)
+        sidebar_layout.addLayout(search_layout)
+        sidebar_layout.addWidget(features_widget)
+        sidebar_layout.addWidget(<span class="hljs-variable language_">self</span>.chat_list)
+
+        <span class="hljs-comment"># 将侧边栏添加到父部件</span>
+        parent.addWidget(sidebar)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">add_chat_item</span>(<span class="hljs-params">self, name, message, time, avatar_file</span>):
+        <span class="hljs-comment"># 创建聊天项部件</span>
+        item_widget = QWidget()
+        item_layout = QHBoxLayout(item_widget)
+        item_layout.setContentsMargins(<span class="hljs-number">15</span>, <span class="hljs-number">10</span>, <span class="hljs-number">15</span>, <span class="hljs-number">10</span>)
+
+        <span class="hljs-comment"># 头像</span>
+        avatar_label = QLabel()
+        <span class="hljs-comment"># 创建圆形头像</span>
+        avatar_pixmap = QPixmap(<span class="hljs-number">44</span>, <span class="hljs-number">44</span>)
+        avatar_pixmap.fill(Qt.transparent)
+        painter = QPainter(avatar_pixmap)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        <span class="hljs-comment"># 根据类型设置不同的背景色</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-string">&#x27;group&#x27;</span> <span class="hljs-keyword">in</span> avatar_file:
+            painter.setBrush(QBrush(QColor(<span class="hljs-number">255</span>, <span class="hljs-number">193</span>, <span class="hljs-number">7</span>)))  <span class="hljs-comment"># 群聊使用橙色</span>
+        <span class="hljs-keyword">else</span>:
+            painter.setBrush(QBrush(QColor(<span class="hljs-number">100</span>, <span class="hljs-number">181</span>, <span class="hljs-number">246</span>)))  <span class="hljs-comment"># 个人聊天使用蓝色</span>
+
+        painter.setPen(Qt.NoPen)
+        painter.drawEllipse(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">44</span>, <span class="hljs-number">44</span>)
+        painter.end()
+
+        avatar_label.setPixmap(avatar_pixmap)
+        avatar_label.setFixedSize(<span class="hljs-number">44</span>, <span class="hljs-number">44</span>)
+        avatar_label.setScaledContents(<span class="hljs-literal">True</span>)
+
+        <span class="hljs-comment"># 右侧信息区域</span>
+        info_widget = QWidget()
+        info_layout = QVBoxLayout(info_widget)
+        info_layout.setContentsMargins(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+        info_layout.setSpacing(<span class="hljs-number">4</span>)
+
+        <span class="hljs-comment"># 名称和时间</span>
+        name_time_widget = QWidget()
+        name_time_layout = QHBoxLayout(name_time_widget)
+        name_time_layout.setContentsMargins(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+        name_time_layout.setSpacing(<span class="hljs-number">5</span>)
+
+        name_label = QLabel(name)
+        name_label.setFont(QFont(<span class="hljs-string">&#x27;SimHei&#x27;</span>, <span class="hljs-number">14</span>, QFont.Bold))
+        name_label.setStyleSheet(<span class="hljs-string">&#x27;color: #333;&#x27;</span>)
+        name_label.setObjectName(<span class="hljs-string">&#x27;chatNameLabel&#x27;</span>)  <span class="hljs-comment"># 设置对象名以便查找</span>
+
+        time_label = QLabel(time)
+        time_label.setFont(QFont(<span class="hljs-string">&#x27;SimHei&#x27;</span>, <span class="hljs-number">12</span>))
+        time_label.setStyleSheet(<span class="hljs-string">&#x27;color: #999;&#x27;</span>)
+
+        name_time_layout.addWidget(name_label)
+        name_time_layout.addStretch()
+        name_time_layout.addWidget(time_label)
+
+        <span class="hljs-comment"># 消息内容</span>
+        message_label = QLabel(message)
+        message_label.setFont(QFont(<span class="hljs-string">&#x27;SimHei&#x27;</span>, <span class="hljs-number">13</span>))
+        message_label.setStyleSheet(<span class="hljs-string">&#x27;color: #666;&#x27;</span>)
+        message_label.setMaximumWidth(<span class="hljs-number">200</span>)
+        message_label.setWordWrap(<span class="hljs-literal">True</span>)
+
+        info_layout.addWidget(name_time_widget)
+        info_layout.addWidget(message_label)
+
+        <span class="hljs-comment"># 添加到主布局</span>
+        item_layout.addWidget(avatar_label)
+        item_layout.addWidget(info_widget, <span class="hljs-number">1</span>, Qt.AlignTop)
+
+        <span class="hljs-comment"># 创建列表项并设置部件</span>
+        item = QListWidgetItem()
+        item.setSizeHint(item_widget.sizeHint())
+        <span class="hljs-variable language_">self</span>.chat_list.addItem(item)
+        <span class="hljs-variable language_">self</span>.chat_list.setItemWidget(item, item_widget)
+
+        <span class="hljs-comment"># 保存聊天信息</span>
+        item.setData(Qt.UserRole, {<span class="hljs-string">&#x27;name&#x27;</span>: name, <span class="hljs-string">&#x27;message&#x27;</span>: message, <span class="hljs-string">&#x27;time&#x27;</span>: time, <span class="hljs-string">&#x27;avatar_file&#x27;</span>: avatar_file})
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">create_chat_area</span>(<span class="hljs-params">self, parent</span>):
+        <span class="hljs-comment"># 创建聊天区域框架</span>
+        chat_area = QWidget()
+        chat_area.setStyleSheet(<span class="hljs-string">&quot;background-color: #f8f9fa;&quot;</span>)
+        chat_area_layout = QVBoxLayout(chat_area)
+        chat_area_layout.setContentsMargins(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+        chat_area_layout.setSpacing(<span class="hljs-number">0</span>)
+
+        <span class="hljs-comment"># 创建聊天头部</span>
+        chat_header = QWidget()
+        chat_header.setStyleSheet(<span class="hljs-string">&quot;background-color: white; border-bottom: 1px solid #e0e0e0;&quot;</span>)
+        chat_header_layout = QHBoxLayout(chat_header)
+        chat_header_layout.setContentsMargins(<span class="hljs-number">15</span>, <span class="hljs-number">10</span>, <span class="hljs-number">10</span>, <span class="hljs-number">10</span>)
+
+        back_btn = QPushButton(<span class="hljs-string">&#x27;←&#x27;</span>)
+        back_btn.setFixedSize(<span class="hljs-number">36</span>, <span class="hljs-number">36</span>)
+        back_btn.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+            QPushButton {
+                border: none;
+                background-color: transparent;
+                color: #333;
+                font-size: 16px;
+                border-radius: 18px;
+            }
+            QPushButton:hover {
+                background-color: #f0f0f0;
+            }
+        &quot;&quot;&quot;</span>)
+        back_btn.clicked.connect(<span class="hljs-variable language_">self</span>.on_back_button_clicked)
+
+        <span class="hljs-comment"># 聊天信息区域</span>
+        chat_info_widget = QWidget()
+        chat_info_layout = QVBoxLayout(chat_info_widget)
+        chat_info_layout.setContentsMargins(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+        chat_info_layout.setSpacing(<span class="hljs-number">2</span>)
+
+        <span class="hljs-comment"># 聊天对象名称</span>
+        <span class="hljs-variable language_">self</span>.current_chat_name = QLabel(<span class="hljs-string">&#x27;Andy&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.current_chat_name.setFont(QFont(<span class="hljs-string">&#x27;SimHei&#x27;</span>, <span class="hljs-number">14</span>, QFont.Bold))
+        <span class="hljs-variable language_">self</span>.current_chat_name.setStyleSheet(<span class="hljs-string">&quot;color: #333;&quot;</span>)
+
+        <span class="hljs-comment"># 在线状态 - 微信风格绿色圆点</span>
+        <span class="hljs-variable language_">self</span>.online_status = QLabel()
+        <span class="hljs-variable language_">self</span>.online_status.setText(<span class="hljs-string">&#x27;在线&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.online_status.setFont(QFont(<span class="hljs-string">&#x27;SimHei&#x27;</span>, <span class="hljs-number">11</span>))
+        <span class="hljs-variable language_">self</span>.online_status.setStyleSheet(<span class="hljs-string">&quot;color: #07c160;&quot;</span>)
+
+        chat_info_layout.addWidget(<span class="hljs-variable language_">self</span>.current_chat_name)
+        chat_info_layout.addWidget(<span class="hljs-variable language_">self</span>.online_status)
+
+        header_btns_widget = QWidget()
+        header_btns_layout = QHBoxLayout(header_btns_widget)
+        header_btns_layout.setSpacing(<span class="hljs-number">5</span>)
+
+        search_btn = QPushButton(<span class="hljs-string">&#x27;🔍&#x27;</span>)
+        voice_btn = QPushButton(<span class="hljs-string">&#x27;📞&#x27;</span>)
+        video_btn = QPushButton(<span class="hljs-string">&#x27;📹&#x27;</span>)
+        more_btn = QPushButton(<span class="hljs-string">&#x27;⋮&#x27;</span>)
+        more_btn.setFont(QFont(<span class="hljs-string">&#x27;SimHei&#x27;</span>, <span class="hljs-number">14</span>))
+
+        <span class="hljs-keyword">for</span> btn <span class="hljs-keyword">in</span> [search_btn, voice_btn, video_btn, more_btn]:
+            btn.setFixedSize(<span class="hljs-number">36</span>, <span class="hljs-number">36</span>)
+            btn.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+                QPushButton {
+                    border: none;
+                    background-color: transparent;
+                    color: #666;
+                    font-size: 16px;
+                }
+                QPushButton:hover {
+                    background-color: #f0f0f0;
+                    border-radius: 18px;
+                }
+            &quot;&quot;&quot;</span>)
+
+        header_btns_layout.addWidget(search_btn)
+        header_btns_layout.addWidget(voice_btn)
+        header_btns_layout.addWidget(video_btn)
+        header_btns_layout.addWidget(more_btn)
+
+        chat_header_layout.addWidget(back_btn)
+        chat_header_layout.addWidget(chat_info_widget, <span class="hljs-number">0</span>, Qt.AlignVCenter)
+        chat_header_layout.addStretch()
+        chat_header_layout.addWidget(header_btns_widget)
+
+        <span class="hljs-comment"># 创建消息显示区域</span>
+        <span class="hljs-variable language_">self</span>.message_area = QScrollArea()
+        <span class="hljs-variable language_">self</span>.message_area.setWidgetResizable(<span class="hljs-literal">True</span>)
+        <span class="hljs-variable language_">self</span>.message_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        <span class="hljs-variable language_">self</span>.message_area.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+            QScrollArea {
+                background-color: #f8f9fa;
+                border: none;
+            }
+            QScrollBar:vertical {
+                width: 8px;
+                background-color: transparent;
+            }
+            QScrollBar::handle:vertical {
+                background-color: #c0c0c0;
+                border-radius: 4px;
+                margin: 4px 0;
+            }
+            QScrollBar::handle:vertical:hover {
+                background-color: #a0a0a0;
+            }
+            QScrollBar::add-line:vertical,
+            QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+        &quot;&quot;&quot;</span>)
+
+        <span class="hljs-variable language_">self</span>.message_widget = QWidget()
+        <span class="hljs-variable language_">self</span>.message_widget.setStyleSheet(<span class="hljs-string">&quot;background-color: #f8f9fa;&quot;</span>)
+        <span class="hljs-variable language_">self</span>.message_layout = QVBoxLayout(<span class="hljs-variable language_">self</span>.message_widget)
+        <span class="hljs-variable language_">self</span>.message_layout.setAlignment(Qt.AlignTop)
+        <span class="hljs-variable language_">self</span>.message_layout.setSpacing(<span class="hljs-number">12</span>)
+        <span class="hljs-variable language_">self</span>.message_layout.setContentsMargins(<span class="hljs-number">15</span>, <span class="hljs-number">15</span>, <span class="hljs-number">15</span>, <span class="hljs-number">15</span>)
+
+        <span class="hljs-variable language_">self</span>.message_area.setWidget(<span class="hljs-variable language_">self</span>.message_widget)
+
+        <span class="hljs-comment"># 添加示例消息</span>
+        <span class="hljs-variable language_">self</span>.add_message(<span class="hljs-string">&#x27;我一会回来再看看还能少点啥&#x27;</span>, <span class="hljs-literal">False</span>)
+        <span class="hljs-variable language_">self</span>.add_message(<span class="hljs-string">&#x27;可真行啊你&#x27;</span>, <span class="hljs-literal">True</span>)
+        <span class="hljs-variable language_">self</span>.add_message(<span class="hljs-string">&#x27;在干嘛！&#x27;</span>, <span class="hljs-literal">False</span>)
+        <span class="hljs-variable language_">self</span>.add_message(<span class="hljs-string">&#x27;不想理你&#x27;</span>, <span class="hljs-literal">True</span>)
+        <span class="hljs-variable language_">self</span>.add_message(<span class="hljs-string">&#x27;丽丽&#x27;</span>, <span class="hljs-literal">False</span>)
+        <span class="hljs-variable language_">self</span>.add_message(<span class="hljs-string">&#x27;什么意思&#x27;</span>, <span class="hljs-literal">True</span>)
+
+        <span class="hljs-comment"># 创建输入区域</span>
+        input_area = QWidget()
+        input_area.setStyleSheet(<span class="hljs-string">&quot;background-color: white; border-top: 1px solid #e0e0e0;&quot;</span>)
+        input_area_layout = QVBoxLayout(input_area)
+        input_area_layout.setContentsMargins(<span class="hljs-number">15</span>, <span class="hljs-number">10</span>, <span class="hljs-number">15</span>, <span class="hljs-number">10</span>)
+        input_area_layout.setSpacing(<span class="hljs-number">8</span>)
+
+        <span class="hljs-comment"># 工具按钮区域</span>
+        tools_widget = QWidget()
+        tools_layout = QHBoxLayout(tools_widget)
+        tools_layout.setSpacing(<span class="hljs-number">8</span>)
+
+        <span class="hljs-comment"># 工具按钮样式</span>
+        tool_btn_style = <span class="hljs-string">&quot;&quot;&quot;
+            QPushButton {
+                border: none;
+                background-color: transparent;
+                font-size: 18px;
+                border-radius: 18px;
+            }
+            QPushButton:hover {
+                background-color: #f0f0f0;
+                border-radius: 18px;
+            }
+        &quot;&quot;&quot;</span>
+
+        emoji_btn = QPushButton(<span class="hljs-string">&#x27;😀&#x27;</span>)
+        emoji_btn.setFixedSize(<span class="hljs-number">36</span>, <span class="hljs-number">36</span>)
+        emoji_btn.setStyleSheet(tool_btn_style)
+        emoji_btn.clicked.connect(<span class="hljs-variable language_">self</span>.on_emoji_button_clicked)
+        emoji_btn.setToolTip(<span class="hljs-string">&#x27;表情&#x27;</span>)
+
+        file_btn = QPushButton(<span class="hljs-string">&#x27;📎&#x27;</span>)
+        file_btn.setFixedSize(<span class="hljs-number">36</span>, <span class="hljs-number">36</span>)
+        file_btn.setStyleSheet(tool_btn_style)
+        file_btn.clicked.connect(<span class="hljs-variable language_">self</span>.on_file_button_clicked)
+        file_btn.setToolTip(<span class="hljs-string">&#x27;文件&#x27;</span>)
+
+        image_btn = QPushButton(<span class="hljs-string">&#x27;🖼️&#x27;</span>)
+        image_btn.setFixedSize(<span class="hljs-number">36</span>, <span class="hljs-number">36</span>)
+        image_btn.setStyleSheet(tool_btn_style)
+        image_btn.clicked.connect(<span class="hljs-variable language_">self</span>.on_image_button_clicked)
+        image_btn.setToolTip(<span class="hljs-string">&#x27;图片&#x27;</span>)
+
+        voice_btn = QPushButton(<span class="hljs-string">&#x27;🎤&#x27;</span>)
+        voice_btn.setFixedSize(<span class="hljs-number">36</span>, <span class="hljs-number">36</span>)
+        voice_btn.setStyleSheet(tool_btn_style)
+        voice_btn.clicked.connect(<span class="hljs-variable language_">self</span>.on_voice_button_clicked)
+        voice_btn.setToolTip(<span class="hljs-string">&#x27;语音&#x27;</span>)
+
+        tools_layout.addWidget(emoji_btn)
+        tools_layout.addWidget(file_btn)
+        tools_layout.addWidget(image_btn)
+        tools_layout.addWidget(voice_btn)
+        tools_layout.addStretch()
+
+        <span class="hljs-comment"># 消息输入框</span>
+        <span class="hljs-variable language_">self</span>.message_input = QTextEdit()
+        <span class="hljs-variable language_">self</span>.message_input.setFixedHeight(<span class="hljs-number">80</span>)
+        <span class="hljs-variable language_">self</span>.message_input.setPlaceholderText(<span class="hljs-string">&#x27;输入消息...&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.message_input.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+            QTextEdit {
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 8px 10px;
+                font-family: SimHei, Microsoft YaHei;
+                font-size: 14px;
+                background-color: white;
+            }
+            QTextEdit:focus {
+                border-color: #07c160;
+                outline: none;
+            }
+        &quot;&quot;&quot;</span>)
+        <span class="hljs-comment"># 监听输入框内容变化，启用/禁用发送按钮</span>
+        <span class="hljs-variable language_">self</span>.message_input.textChanged.connect(<span class="hljs-variable language_">self</span>.on_message_text_changed)
+
+        <span class="hljs-comment"># 发送按钮区域</span>
+        send_widget = QWidget()
+        send_layout = QHBoxLayout(send_widget)
+
+        <span class="hljs-variable language_">self</span>.send_btn = QPushButton(<span class="hljs-string">&#x27;发送&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.send_btn.setFixedSize(<span class="hljs-number">86</span>, <span class="hljs-number">36</span>)
+        <span class="hljs-variable language_">self</span>.send_btn.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+            QPushButton {
+                background-color: #07c160;
+                color: white;
+                border: none;
+                border-radius: 18px;
+                font-family: SimHei, Microsoft YaHei;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #06b156;
+            }
+            QPushButton:disabled {
+                background-color: #b3e8c5;
+                color: #f0f0f0;
+            }
+        &quot;&quot;&quot;</span>)
+        <span class="hljs-variable language_">self</span>.send_btn.clicked.connect(<span class="hljs-variable language_">self</span>.on_send_button_clicked)
+        <span class="hljs-variable language_">self</span>.send_btn.setEnabled(<span class="hljs-literal">False</span>)  <span class="hljs-comment"># 初始禁用</span>
+
+        send_layout.addStretch()
+        send_layout.addWidget(<span class="hljs-variable language_">self</span>.send_btn)
+
+        <span class="hljs-comment"># 添加到输入区域布局</span>
+        input_area_layout.addWidget(tools_widget)
+        input_area_layout.addWidget(<span class="hljs-variable language_">self</span>.message_input)
+        input_area_layout.addWidget(send_widget)
+
+        <span class="hljs-comment"># 将所有部件添加到聊天区域布局</span>
+        chat_area_layout.addWidget(chat_header)
+        chat_area_layout.addWidget(<span class="hljs-variable language_">self</span>.message_area)
+        chat_area_layout.addWidget(input_area)
+
+        <span class="hljs-comment"># 将聊天区域添加到父部件</span>
+        parent.addWidget(chat_area)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">add_message</span>(<span class="hljs-params">self, text, is_self=<span class="hljs-literal">True</span>, show_avatar=<span class="hljs-literal">True</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;添加消息到聊天区域 - 微信风格&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 创建消息容器</span>
+        message_container = QWidget()
+        message_container_layout = QVBoxLayout(message_container)
+        message_container_layout.setContentsMargins(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+        message_container_layout.setSpacing(<span class="hljs-number">2</span>)
+
+        <span class="hljs-comment"># 创建消息项</span>
+        message_widget = QWidget()
+        message_layout = QHBoxLayout(message_widget)
+        message_layout.setContentsMargins(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+        message_layout.setSpacing(<span class="hljs-number">8</span>)
+
+        <span class="hljs-keyword">if</span> is_self:
+            <span class="hljs-comment"># 自己发送的消息 - 微信绿色气泡</span>
+            message_layout.setAlignment(Qt.AlignRight)
+
+            <span class="hljs-comment"># 发送时间</span>
+            time_label = QLabel(<span class="hljs-variable language_">self</span>.get_current_time())
+            time_label.setFont(QFont(<span class="hljs-string">&#x27;SimHei&#x27;</span>, <span class="hljs-number">11</span>))
+            time_label.setStyleSheet(<span class="hljs-string">&quot;color: #999;&quot;</span>)
+            message_container_layout.addWidget(time_label, <span class="hljs-number">0</span>, Qt.AlignCenter)
+
+            <span class="hljs-comment"># 消息气泡 - 微信绿色主题</span>
+            message_label = QLabel(text)
+            message_label.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+                QLabel {
+                    background-color: #07c160;
+                    color: white;
+                    border-radius: 10px;
+                    border-bottom-right-radius: 4px;
+                    padding: 8px 12px;
+                    max-width: 60%;
+                    white-space: pre-wrap;
+                    font-family: SimHei, Microsoft YaHei;
+                    font-size: 14px;
+                    line-height: 1.4;
+                }
+            &quot;&quot;&quot;</span>)
+            message_label.setWordWrap(<span class="hljs-literal">True</span>)
+            message_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+
+            message_layout.addWidget(message_label)
+
+            <span class="hljs-comment"># 检查是否包含表情</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">any</span>(emoji <span class="hljs-keyword">in</span> text <span class="hljs-keyword">for</span> emoji <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;😀&#x27;</span>, <span class="hljs-string">&#x27;😂&#x27;</span>, <span class="hljs-string">&#x27;😊&#x27;</span>, <span class="hljs-string">&#x27;😁&#x27;</span>, <span class="hljs-string">&#x27;😆&#x27;</span>, <span class="hljs-string">&#x27;😅&#x27;</span>, <span class="hljs-string">&#x27;😉&#x27;</span>, <span class="hljs-string">&#x27;😘&#x27;</span>, <span class="hljs-string">&#x27;😍&#x27;</span>, <span class="hljs-string">&#x27;🤔&#x27;</span>, <span class="hljs-string">&#x27;😐&#x27;</span>, <span class="hljs-string">&#x27;😑&#x27;</span>, <span class="hljs-string">&#x27;😶&#x27;</span>, <span class="hljs-string">&#x27;🙄&#x27;</span>, <span class="hljs-string">&#x27;😏&#x27;</span>, <span class="hljs-string">&#x27;😣&#x27;</span>, <span class="hljs-string">&#x27;😥&#x27;</span>, <span class="hljs-string">&#x27;😮&#x27;</span>, <span class="hljs-string">&#x27;🤐&#x27;</span>, <span class="hljs-string">&#x27;😯&#x27;</span>, <span class="hljs-string">&#x27;😪&#x27;</span>, <span class="hljs-string">&#x27;😫&#x27;</span>, <span class="hljs-string">&#x27;😴&#x27;</span>, <span class="hljs-string">&#x27;😌&#x27;</span>, <span class="hljs-string">&#x27;😛&#x27;</span>, <span class="hljs-string">&#x27;😜&#x27;</span>, <span class="hljs-string">&#x27;😝&#x27;</span>, <span class="hljs-string">&#x27;🤤&#x27;</span>, <span class="hljs-string">&#x27;😒&#x27;</span>, <span class="hljs-string">&#x27;😓&#x27;</span>, <span class="hljs-string">&#x27;😔&#x27;</span>, <span class="hljs-string">&#x27;😕&#x27;</span>, <span class="hljs-string">&#x27;🙃&#x27;</span>, <span class="hljs-string">&#x27;🤑&#x27;</span>, <span class="hljs-string">&#x27;😲&#x27;</span>, <span class="hljs-string">&#x27;☹️&#x27;</span>, <span class="hljs-string">&#x27;🙁&#x27;</span>, <span class="hljs-string">&#x27;😖&#x27;</span>, <span class="hljs-string">&#x27;😞&#x27;</span>, <span class="hljs-string">&#x27;😟&#x27;</span>, <span class="hljs-string">&#x27;😤&#x27;</span>, <span class="hljs-string">&#x27;😭&#x27;</span>, <span class="hljs-string">&#x27;😦&#x27;</span>, <span class="hljs-string">&#x27;🐱&#x27;</span>]):
+                status_label = QLabel(<span class="hljs-string">&#x27;😊&#x27;</span>)
+                status_label.setStyleSheet(<span class="hljs-string">&quot;font-size: 16px;&quot;</span>)
+                message_layout.addWidget(status_label)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 对方发送的消息 - 微信白色气泡</span>
+            message_layout.setAlignment(Qt.AlignLeft)
+
+            <span class="hljs-comment"># 发送时间</span>
+            time_label = QLabel(<span class="hljs-variable language_">self</span>.get_current_time())
+            time_label.setFont(QFont(<span class="hljs-string">&#x27;SimHei&#x27;</span>, <span class="hljs-number">11</span>))
+            time_label.setStyleSheet(<span class="hljs-string">&quot;color: #999;&quot;</span>)
+            message_container_layout.addWidget(time_label, <span class="hljs-number">0</span>, Qt.AlignCenter)
+
+            <span class="hljs-comment"># 头像</span>
+            <span class="hljs-keyword">if</span> show_avatar:
+                avatar_label = QLabel()
+                avatar_pixmap = QPixmap(<span class="hljs-number">36</span>, <span class="hljs-number">36</span>)
+                <span class="hljs-comment"># 创建圆形头像 - 微信风格</span>
+                painter = QPainter(avatar_pixmap)
+                painter.setRenderHint(QPainter.Antialiasing)
+
+                painter.setBrush(QBrush(QColor(<span class="hljs-number">100</span>, <span class="hljs-number">181</span>, <span class="hljs-number">246</span>)))  <span class="hljs-comment"># 个人聊天使用蓝色</span>
+                painter.setPen(Qt.NoPen)
+                painter.drawEllipse(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">36</span>, <span class="hljs-number">36</span>)
+                painter.end()
+
+                avatar_label.setPixmap(avatar_pixmap)
+                avatar_label.setFixedSize(<span class="hljs-number">36</span>, <span class="hljs-number">36</span>)
+                avatar_label.setScaledContents(<span class="hljs-literal">True</span>)
+                message_layout.addWidget(avatar_label)
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-comment"># 如果不显示头像，添加一个占位符</span>
+                placeholder = QWidget()
+                placeholder.setFixedWidth(<span class="hljs-number">36</span>)
+                message_layout.addWidget(placeholder)
+
+            <span class="hljs-comment"># 消息气泡 - 微信白色主题</span>
+            message_label = QLabel(text)
+            message_label.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+                QLabel {
+                    background-color: white;
+                    color: #333;
+                    border-radius: 10px;
+                    border-bottom-left-radius: 4px;
+                    padding: 8px 12px;
+                    max-width: 60%;
+                    white-space: pre-wrap;
+                    font-family: SimHei, Microsoft YaHei;
+                    font-size: 14px;
+                    line-height: 1.4;
+                }
+            &quot;&quot;&quot;</span>)
+            message_label.setWordWrap(<span class="hljs-literal">True</span>)
+            message_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+
+            message_layout.addWidget(message_label)
+
+        message_container_layout.addWidget(message_widget)
+
+        <span class="hljs-comment"># 添加到消息区域</span>
+        <span class="hljs-variable language_">self</span>.message_layout.addWidget(message_container)
+
+        <span class="hljs-comment"># 滚动到底部</span>
+        <span class="hljs-variable language_">self</span>.message_area.verticalScrollBar().setValue(
+            <span class="hljs-variable language_">self</span>.message_area.verticalScrollBar().maximum())
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_current_time</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;获取当前时间，格式为HH:MM&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">from</span> datetime <span class="hljs-keyword">import</span> datetime
+        <span class="hljs-keyword">return</span> datetime.now().strftime(<span class="hljs-string">&quot;%H:%M&quot;</span>)
+
+        <span class="hljs-comment"># 添加到消息区域</span>
+        <span class="hljs-variable language_">self</span>.message_layout.addWidget(message_widget)
+
+        <span class="hljs-comment"># 滚动到底部</span>
+        <span class="hljs-variable language_">self</span>.message_area.verticalScrollBar().setValue(
+            <span class="hljs-variable language_">self</span>.message_area.verticalScrollBar().maximum())
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_chat_item_clicked</span>(<span class="hljs-params">self, item</span>):
+        <span class="hljs-string">&quot;&quot;&quot;处理聊天项点击事件&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 获取聊天数据</span>
+        chat_data = item.data(Qt.UserRole)
+        <span class="hljs-keyword">if</span> chat_data:
+            <span class="hljs-comment"># 更新当前聊天名称</span>
+            <span class="hljs-variable language_">self</span>.current_chat_name.setText(chat_data[<span class="hljs-string">&#x27;name&#x27;</span>])
+
+            <span class="hljs-comment"># 更新在线状态（模拟）</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-string">&#x27;group&#x27;</span> <span class="hljs-keyword">in</span> chat_data[<span class="hljs-string">&#x27;avatar_file&#x27;</span>]:
+                <span class="hljs-variable language_">self</span>.online_status.setText(<span class="hljs-string">f&#x27;群聊 · <span class="hljs-subst">{chat_data[<span class="hljs-string">&quot;name&quot;</span>]}</span>&#x27;</span>)
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-comment"># 随机设置在线状态</span>
+                <span class="hljs-keyword">import</span> random
+                statuses = [<span class="hljs-string">&#x27;在线&#x27;</span>, <span class="hljs-string">&#x27;最近在线&#x27;</span>, <span class="hljs-string">&#x27;正在输入...&#x27;</span>, <span class="hljs-string">&#x27;已读&#x27;</span>]
+                <span class="hljs-variable language_">self</span>.online_status.setText(random.choice(statuses))
+
+            <span class="hljs-comment"># 清空现有消息</span>
+            <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">reversed</span>(<span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.message_layout.count())):
+                widget = <span class="hljs-variable language_">self</span>.message_layout.itemAt(i).widget()
+                <span class="hljs-keyword">if</span> widget:
+                    widget.deleteLater()
+
+            <span class="hljs-comment"># 添加示例消息（模拟聊天记录）</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-string">&#x27;group&#x27;</span> <span class="hljs-keyword">in</span> chat_data[<span class="hljs-string">&#x27;avatar_file&#x27;</span>]:
+                <span class="hljs-variable language_">self</span>.add_message(<span class="hljs-string">f&#x27;欢迎来到<span class="hljs-subst">{chat_data[<span class="hljs-string">&quot;name&quot;</span>]}</span>&#x27;</span>, <span class="hljs-literal">False</span>)
+                <span class="hljs-variable language_">self</span>.add_message(<span class="hljs-string">&#x27;大家好！&#x27;</span>, <span class="hljs-literal">True</span>)
+                <span class="hljs-variable language_">self</span>.add_message(<span class="hljs-string">&#x27;这是一个群聊示例&#x27;</span>, <span class="hljs-literal">False</span>)
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-variable language_">self</span>.add_message(<span class="hljs-string">f&#x27;你好，我是<span class="hljs-subst">{chat_data[<span class="hljs-string">&quot;name&quot;</span>]}</span>&#x27;</span>, <span class="hljs-literal">False</span>)
+                <span class="hljs-variable language_">self</span>.add_message(<span class="hljs-string">&#x27;你好！&#x27;</span>, <span class="hljs-literal">True</span>)
+                <span class="hljs-variable language_">self</span>.add_message(<span class="hljs-string">&#x27;今天过得怎么样？&#x27;</span>, <span class="hljs-literal">False</span>)
+
+        <span class="hljs-comment"># 更新选中状态的样式</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.chat_list.count()):
+            list_item = <span class="hljs-variable language_">self</span>.chat_list.item(i)
+            widget = <span class="hljs-variable language_">self</span>.chat_list.itemWidget(list_item)
+            <span class="hljs-keyword">if</span> widget:
+                <span class="hljs-comment"># 重置所有项的样式</span>
+                widget.setStyleSheet(<span class="hljs-string">&quot;&quot;</span>)
+
+        <span class="hljs-comment"># 设置选中项的样式</span>
+        selected_widget = <span class="hljs-variable language_">self</span>.chat_list.itemWidget(item)
+        <span class="hljs-keyword">if</span> selected_widget:
+            selected_widget.setStyleSheet(<span class="hljs-string">&quot;background-color: #e8f0fe;&quot;</span>)
+
+            <span class="hljs-comment"># 更新聊天列表中的消息（模拟）</span>
+            <span class="hljs-keyword">import</span> random
+            statuses = [<span class="hljs-string">&#x27;已读&#x27;</span>, <span class="hljs-string">&#x27;未读&#x27;</span>, <span class="hljs-string">&#x27;正在输入...&#x27;</span>]
+            <span class="hljs-keyword">for</span> child <span class="hljs-keyword">in</span> selected_widget.findChildren(QLabel):
+                <span class="hljs-keyword">if</span> child.objectName() == <span class="hljs-string">&#x27;chatNameLabel&#x27;</span>:
+                    <span class="hljs-comment"># 更新名称（保持不变）</span>
+                    <span class="hljs-keyword">pass</span>
+                <span class="hljs-keyword">elif</span> child.text() <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> child.text().isdigit() <span class="hljs-keyword">and</span> <span class="hljs-string">&#x27;:&#x27;</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> child.text() <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> <span class="hljs-built_in">any</span>(c <span class="hljs-keyword">in</span> child.text() <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-string">&#x27;0123456789&#x27;</span>):
+                    <span class="hljs-comment"># 找到消息标签并更新</span>
+                    child.setText(random.choice([<span class="hljs-string">&#x27;收到&#x27;</span>, <span class="hljs-string">&#x27;好的&#x27;</span>, <span class="hljs-string">&#x27;明白了&#x27;</span>, <span class="hljs-string">&#x27;👍&#x27;</span>, <span class="hljs-string">&#x27;😊&#x27;</span>]))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_search_text_changed</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;处理搜索文本变化事件&quot;&quot;&quot;</span>
+        search_text = <span class="hljs-variable language_">self</span>.search_edit.text().lower()
+
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.chat_list.count()):
+            item = <span class="hljs-variable language_">self</span>.chat_list.item(i)
+            chat_data = item.data(Qt.UserRole)
+
+            <span class="hljs-keyword">if</span> chat_data:
+                <span class="hljs-comment"># 检查名称或消息是否包含搜索文本</span>
+                match_name = search_text <span class="hljs-keyword">in</span> chat_data[<span class="hljs-string">&#x27;name&#x27;</span>].lower()
+                match_message = search_text <span class="hljs-keyword">in</span> chat_data[<span class="hljs-string">&#x27;message&#x27;</span>].lower()
+
+                <span class="hljs-comment"># 显示或隐藏项目</span>
+                item.setHidden(<span class="hljs-keyword">not</span> (match_name <span class="hljs-keyword">or</span> match_message))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_feature_button_clicked</span>(<span class="hljs-params">self, button_type</span>):
+        <span class="hljs-string">&quot;&quot;&quot;处理功能按钮点击事件&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 重置所有按钮样式</span>
+        <span class="hljs-keyword">for</span> btn <span class="hljs-keyword">in</span> [<span class="hljs-variable language_">self</span>.chat_btn, <span class="hljs-variable language_">self</span>.contact_btn, <span class="hljs-variable language_">self</span>.favorite_btn]:
+            btn.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+                QPushButton {
+                    border: none;
+                    background-color: transparent;
+                    font-family: SimHei, Microsoft YaHei;
+                    font-size: 14px;
+                    color: #666;
+                    padding: 0 20px;
+                }
+                QPushButton:hover {
+                    background-color: #f5f5f5;
+                }
+            &quot;&quot;&quot;</span>)
+
+        <span class="hljs-comment"># 设置选中按钮的样式</span>
+        <span class="hljs-keyword">if</span> button_type == <span class="hljs-string">&#x27;chat&#x27;</span>:
+            <span class="hljs-variable language_">self</span>.chat_btn.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+                QPushButton {
+                    border: none;
+                    background-color: #e8f0fe;
+                    font-family: SimHei, Microsoft YaHei;
+                    font-size: 14px;
+                    color: #07c160;
+                    font-weight: bold;
+                    padding: 0 20px;
+                }
+                QPushButton:hover {
+                    background-color: #e8f0fe;
+                }
+            &quot;&quot;&quot;</span>)
+            <span class="hljs-comment"># 显示聊天列表逻辑</span>
+            <span class="hljs-variable language_">self</span>.chat_list.show()
+        <span class="hljs-keyword">elif</span> button_type == <span class="hljs-string">&#x27;contact&#x27;</span>:
+            <span class="hljs-variable language_">self</span>.contact_btn.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+                QPushButton {
+                    border: none;
+                    background-color: #e8f0fe;
+                    font-family: SimHei, Microsoft YaHei;
+                    font-size: 14px;
+                    color: #07c160;
+                    font-weight: bold;
+                    padding: 0 20px;
+                }
+                QPushButton:hover {
+                    background-color: #e8f0fe;
+                }
+            &quot;&quot;&quot;</span>)
+            <span class="hljs-comment"># 这里可以实现显示联系人列表的逻辑</span>
+        <span class="hljs-keyword">elif</span> button_type == <span class="hljs-string">&#x27;favorite&#x27;</span>:
+            <span class="hljs-variable language_">self</span>.favorite_btn.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+                QPushButton {
+                    border: none;
+                    background-color: #e8f0fe;
+                    font-family: SimHei, Microsoft YaHei;
+                    font-size: 14px;
+                    color: #07c160;
+                    font-weight: bold;
+                    padding: 0 20px;
+                }
+                QPushButton:hover {
+                    background-color: #e8f0fe;
+                }
+            &quot;&quot;&quot;</span>)
+            <span class="hljs-comment"># 这里可以实现显示收藏列表的逻辑</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_back_button_clicked</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;处理返回按钮点击事件&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 这里可以实现返回上一级或切换视图的功能</span>
+        <span class="hljs-keyword">pass</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_message_text_changed</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;处理消息文本变化事件&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 启用或禁用发送按钮</span>
+        text = <span class="hljs-variable language_">self</span>.message_input.toPlainText().strip()
+        <span class="hljs-variable language_">self</span>.send_btn.setEnabled(<span class="hljs-built_in">bool</span>(text))
+
+        <span class="hljs-comment"># 更新在线状态为&quot;正在输入...&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-string">&quot;群聊&quot;</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.online_status.text() <span class="hljs-keyword">and</span> <span class="hljs-built_in">bool</span>(text):
+            <span class="hljs-variable language_">self</span>.online_status.setText(<span class="hljs-string">&quot;对方正在输入...&quot;</span>)
+            <span class="hljs-comment"># 设置定时器，一段时间后恢复状态</span>
+            <span class="hljs-variable language_">self</span>.input_timer = QTimer()
+            <span class="hljs-variable language_">self</span>.input_timer.timeout.connect(<span class="hljs-variable language_">self</span>.reset_online_status)
+            <span class="hljs-variable language_">self</span>.input_timer.setSingleShot(<span class="hljs-literal">True</span>)
+            <span class="hljs-variable language_">self</span>.input_timer.start(<span class="hljs-number">2000</span>)  <span class="hljs-comment"># 2秒后恢复</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">reset_online_status</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;重置在线状态&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.message_input.toPlainText().strip():
+            <span class="hljs-keyword">import</span> random
+            statuses = [<span class="hljs-string">&#x27;在线&#x27;</span>, <span class="hljs-string">&#x27;最近在线&#x27;</span>, <span class="hljs-string">&#x27;已读&#x27;</span>]
+            <span class="hljs-variable language_">self</span>.online_status.setText(random.choice(statuses))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">add_reply</span>(<span class="hljs-params">self, reply_text</span>):
+        <span class="hljs-string">&quot;&quot;&quot;添加回复消息&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.add_message(reply_text, is_self=<span class="hljs-literal">False</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update_chat_list_latest_message</span>(<span class="hljs-params">self, latest_message</span>):
+        <span class="hljs-string">&quot;&quot;&quot;更新聊天列表中的最新消息&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.chat_list.count()):
+            list_item = <span class="hljs-variable language_">self</span>.chat_list.item(i)
+            chat_data = list_item.data(Qt.UserRole)
+
+            <span class="hljs-comment"># 找到当前选中的聊天项</span>
+            selected_widget = <span class="hljs-variable language_">self</span>.chat_list.itemWidget(list_item)
+            <span class="hljs-keyword">if</span> selected_widget <span class="hljs-keyword">and</span> selected_widget.styleSheet() == <span class="hljs-string">&quot;background-color: #e8f0fe;&quot;</span>:
+                <span class="hljs-comment"># 更新时间</span>
+                current_time = <span class="hljs-variable language_">self</span>.get_current_time()
+                <span class="hljs-keyword">for</span> child <span class="hljs-keyword">in</span> selected_widget.findChildren(QLabel):
+                    <span class="hljs-keyword">if</span> <span class="hljs-string">&#x27;:&#x27;</span> <span class="hljs-keyword">in</span> child.text() <span class="hljs-keyword">and</span> <span class="hljs-built_in">any</span>(c <span class="hljs-keyword">in</span> child.text() <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-string">&#x27;0123456789&#x27;</span>):
+                        child.setText(current_time)
+
+                <span class="hljs-comment"># 更新消息预览</span>
+                <span class="hljs-keyword">for</span> child <span class="hljs-keyword">in</span> selected_widget.findChildren(QLabel):
+                    <span class="hljs-keyword">if</span> child.objectName() != <span class="hljs-string">&#x27;chatNameLabel&#x27;</span> <span class="hljs-keyword">and</span> <span class="hljs-string">&#x27;:&#x27;</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> child.text() <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> <span class="hljs-built_in">any</span>(c <span class="hljs-keyword">in</span> child.text() <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-string">&#x27;0123456789&#x27;</span>):
+                        <span class="hljs-comment"># 截取消息预览</span>
+                        preview = latest_message[:<span class="hljs-number">20</span>] + <span class="hljs-string">&#x27;...&#x27;</span> <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(latest_message) &gt; <span class="hljs-number">20</span> <span class="hljs-keyword">else</span> latest_message
+                        child.setText(preview)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_send_button_clicked</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;处理发送按钮点击事件&quot;&quot;&quot;</span>
+        text = <span class="hljs-variable language_">self</span>.message_input.toPlainText().strip()
+        <span class="hljs-keyword">if</span> text:
+            <span class="hljs-comment"># 添加消息到聊天区域</span>
+            <span class="hljs-variable language_">self</span>.add_message(text, is_self=<span class="hljs-literal">True</span>)
+
+            <span class="hljs-comment"># 更新聊天列表中的最新消息</span>
+            <span class="hljs-variable language_">self</span>.update_chat_list_latest_message(text)
+
+            <span class="hljs-comment"># 清空输入框</span>
+            <span class="hljs-variable language_">self</span>.message_input.clear()
+
+            <span class="hljs-comment"># 禁用发送按钮</span>
+            <span class="hljs-variable language_">self</span>.send_btn.setEnabled(<span class="hljs-literal">False</span>)
+
+            <span class="hljs-comment"># 重置在线状态</span>
+            <span class="hljs-keyword">import</span> random
+            statuses = [<span class="hljs-string">&#x27;在线&#x27;</span>, <span class="hljs-string">&#x27;最近在线&#x27;</span>, <span class="hljs-string">&#x27;已读&#x27;</span>]
+            <span class="hljs-variable language_">self</span>.online_status.setText(random.choice(statuses))
+
+            <span class="hljs-comment"># 模拟回复（随机延迟后自动回复）</span>
+            <span class="hljs-variable language_">self</span>.simulate_reply(text)
+
+            <span class="hljs-comment"># 这里可以添加发送消息到服务器的逻辑</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">simulate_reply</span>(<span class="hljs-params">self, message_text</span>):
+        <span class="hljs-string">&quot;&quot;&quot;模拟自动回复功能&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 定义一些简单的回复模式</span>
+        replies = {
+            <span class="hljs-string">&#x27;你好&#x27;</span>: <span class="hljs-string">&#x27;你好！很高兴见到你！&#x27;</span>,
+            <span class="hljs-string">&#x27;在吗&#x27;</span>: <span class="hljs-string">&#x27;我在呢，有什么可以帮你的？&#x27;</span>,
+            <span class="hljs-string">&#x27;早上好&#x27;</span>: <span class="hljs-string">&#x27;早上好！祝你有美好的一天！&#x27;</span>,
+            <span class="hljs-string">&#x27;晚上好&#x27;</span>: <span class="hljs-string">&#x27;晚上好！今天过得怎么样？&#x27;</span>,
+            <span class="hljs-string">&#x27;谢谢&#x27;</span>: <span class="hljs-string">&#x27;不客气！&#x27;</span>,
+            <span class="hljs-string">&#x27;再见&#x27;</span>: <span class="hljs-string">&#x27;再见！下次再聊！&#x27;</span>
+        }
+
+        <span class="hljs-comment"># 检查是否有匹配的回复</span>
+        reply_text = <span class="hljs-literal">None</span>
+        <span class="hljs-keyword">for</span> keyword, reply <span class="hljs-keyword">in</span> replies.items():
+            <span class="hljs-keyword">if</span> keyword <span class="hljs-keyword">in</span> message_text:
+                reply_text = reply
+                <span class="hljs-keyword">break</span>
+
+        <span class="hljs-comment"># 如果没有匹配的回复，生成随机回复</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> reply_text:
+            <span class="hljs-keyword">import</span> random
+            random_replies = [
+                <span class="hljs-string">&#x27;好的，我知道了。&#x27;</span>,
+                <span class="hljs-string">&#x27;明白，我会处理的。&#x27;</span>,
+                <span class="hljs-string">&#x27;这个问题很有趣，能详细说说吗？&#x27;</span>,
+                <span class="hljs-string">&#x27;我理解你的意思。&#x27;</span>,
+                <span class="hljs-string">&#x27;让我想想...&#x27;</span>,
+                <span class="hljs-string">&#x27;收到！&#x27;</span>
+            ]
+            reply_text = random.choice(random_replies)
+
+        <span class="hljs-comment"># 设置定时器，模拟延迟回复</span>
+        <span class="hljs-variable language_">self</span>.reply_timer = QTimer()
+        <span class="hljs-variable language_">self</span>.reply_timer.timeout.connect(<span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.add_reply(reply_text))
+        <span class="hljs-variable language_">self</span>.reply_timer.setSingleShot(<span class="hljs-literal">True</span>)
+
+        <span class="hljs-keyword">import</span> random
+        delay = random.randint(<span class="hljs-number">1000</span>, <span class="hljs-number">3000</span>)  <span class="hljs-comment"># 1-3秒的随机延迟</span>
+        <span class="hljs-variable language_">self</span>.reply_timer.start(delay)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_file_button_clicked</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;处理文件按钮点击事件&quot;&quot;&quot;</span>
+        options = QFileDialog.Options()
+        file_path, _ = QFileDialog.getOpenFileName(
+            <span class="hljs-variable language_">self</span>, <span class="hljs-string">&quot;选择文件&quot;</span>, <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-string">&quot;所有文件 (*);;文档 (*.doc *.docx *.pdf *.txt);;图片 (*.png *.jpg *.jpeg)&quot;</span>, options=options)
+        <span class="hljs-keyword">if</span> file_path:
+            <span class="hljs-comment"># 显示文件路径作为消息</span>
+            file_name = os.path.basename(file_path)
+            <span class="hljs-variable language_">self</span>.add_message(<span class="hljs-string">f&#x27;📎 <span class="hljs-subst">{file_name}</span>&#x27;</span>, is_self=<span class="hljs-literal">True</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_emoji_button_clicked</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;处理表情按钮点击事件&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 显示表情面板</span>
+        <span class="hljs-variable language_">self</span>.show_emoji_panel()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_image_button_clicked</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;图片按钮点击事件&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 简单实现，实际项目中可能需要打开文件选择器</span>
+        <span class="hljs-keyword">pass</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_voice_button_clicked</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;语音按钮点击事件&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 简单实现，实际项目中可能需要录音功能</span>
+        <span class="hljs-keyword">pass</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_video_button_clicked</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;视频按钮点击事件&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 简单实现，实际项目中可能需要视频录制功能</span>
+        <span class="hljs-keyword">pass</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_search_button_clicked</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;处理搜索按钮点击事件&quot;&quot;&quot;</span>
+        QMessageBox.information(<span class="hljs-variable language_">self</span>, <span class="hljs-string">&quot;搜索&quot;</span>, <span class="hljs-string">&quot;聊天记录搜索功能暂未实现&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">search_emojis</span>(<span class="hljs-params">self, search_text</span>):
+        <span class="hljs-string">&quot;&quot;&quot;搜索表情功能&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 这里只是简单的实现，实际应用中可以根据表情名称或描述进行搜索</span>
+        <span class="hljs-comment"># 由于我们只有表情符号，这里只是为了演示搜索框的功能</span>
+        search_text = search_text.strip().lower()
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> search_text:
+            <span class="hljs-comment"># 如果搜索框为空，恢复所有表情</span>
+            <span class="hljs-variable language_">self</span>.reset_emoji_view()
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-comment"># 这里可以实现更复杂的搜索逻辑</span>
+        <span class="hljs-comment"># 简单的实现：显示常用表情或提示&quot;未找到&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(<span class="hljs-variable language_">self</span>.emoji_search_box, <span class="hljs-string">&#x27;last_search&#x27;</span>) <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.emoji_search_box.last_search == search_text:
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-variable language_">self</span>.emoji_search_box.last_search = search_text
+
+        <span class="hljs-comment"># 这里可以添加实际的搜索逻辑</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">reset_emoji_view</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;重置表情视图&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 重置搜索框</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(<span class="hljs-variable language_">self</span>.emoji_search_box, <span class="hljs-string">&#x27;last_search&#x27;</span>):
+            <span class="hljs-built_in">delattr</span>(<span class="hljs-variable language_">self</span>.emoji_search_box, <span class="hljs-string">&#x27;last_search&#x27;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">eventFilter</span>(<span class="hljs-params">self, obj, event</span>):
+        <span class="hljs-string">&quot;&quot;&quot;事件过滤器，用于处理表情面板的点击事件&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 处理全局点击事件以关闭表情面板</span>
+        <span class="hljs-keyword">if</span> event.<span class="hljs-built_in">type</span>() == QEvent.MouseButtonPress:
+            <span class="hljs-comment"># 如果点击的不是表情面板或表情按钮，关闭表情面板</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(<span class="hljs-variable language_">self</span>, <span class="hljs-string">&#x27;emoji_panel&#x27;</span>) <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.emoji_panel.isVisible():
+                <span class="hljs-comment"># 检查是否点击了表情面板</span>
+                <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.emoji_panel.rect().contains(<span class="hljs-variable language_">self</span>.emoji_panel.mapFromGlobal(event.globalPos())):
+                    <span class="hljs-comment"># 检查是否点击了表情按钮</span>
+                    <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(<span class="hljs-variable language_">self</span>, <span class="hljs-string">&#x27;emoji_btn&#x27;</span>):
+                        btn_rect = <span class="hljs-variable language_">self</span>.emoji_btn.rect()
+                        btn_global_pos = <span class="hljs-variable language_">self</span>.emoji_btn.mapToGlobal(QPoint(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>))
+                        btn_global_rect = QRect(btn_global_pos, btn_rect.size())
+                        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> btn_global_rect.contains(event.globalPos()):
+                            <span class="hljs-variable language_">self</span>.emoji_panel.close()
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">super</span>().eventFilter(obj, event)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">show_emoji_panel</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;显示表情面板&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 如果表情面板不存在，创建它</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-built_in">hasattr</span>(<span class="hljs-variable language_">self</span>, <span class="hljs-string">&#x27;emoji_panel&#x27;</span>):
+            <span class="hljs-variable language_">self</span>.emoji_panel = QWidget(<span class="hljs-variable language_">self</span>)
+            <span class="hljs-variable language_">self</span>.emoji_panel.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+            <span class="hljs-variable language_">self</span>.emoji_panel.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+                QWidget {
+                    background-color: white;
+                    border: 1px solid #ddd;
+                    border-radius: 6px;
+                }
+            &quot;&quot;&quot;</span>)
+
+            <span class="hljs-comment"># 创建表情面板布局</span>
+            emoji_layout = QGridLayout(<span class="hljs-variable language_">self</span>.emoji_panel)
+            emoji_layout.setSpacing(<span class="hljs-number">8</span>)
+            emoji_layout.setContentsMargins(<span class="hljs-number">12</span>, <span class="hljs-number">12</span>, <span class="hljs-number">12</span>, <span class="hljs-number">12</span>)
+
+            <span class="hljs-comment"># 常用表情列表</span>
+            emojis = [
+                <span class="hljs-string">&#x27;😊&#x27;</span>, <span class="hljs-string">&#x27;😂&#x27;</span>, <span class="hljs-string">&#x27;🤣&#x27;</span>, <span class="hljs-string">&#x27;😍&#x27;</span>, <span class="hljs-string">&#x27;🤔&#x27;</span>, <span class="hljs-string">&#x27;😅&#x27;</span>, <span class="hljs-string">&#x27;🙄&#x27;</span>, <span class="hljs-string">&#x27;😁&#x27;</span>,
+                <span class="hljs-string">&#x27;😆&#x27;</span>, <span class="hljs-string">&#x27;😉&#x27;</span>, <span class="hljs-string">&#x27;😘&#x27;</span>, <span class="hljs-string">&#x27;🥰&#x27;</span>, <span class="hljs-string">&#x27;😎&#x27;</span>, <span class="hljs-string">&#x27;🤩&#x27;</span>, <span class="hljs-string">&#x27;😏&#x27;</span>, <span class="hljs-string">&#x27;😢&#x27;</span>,
+                <span class="hljs-string">&#x27;😭&#x27;</span>, <span class="hljs-string">&#x27;😡&#x27;</span>, <span class="hljs-string">&#x27;🤬&#x27;</span>, <span class="hljs-string">&#x27;😱&#x27;</span>, <span class="hljs-string">&#x27;😨&#x27;</span>, <span class="hljs-string">&#x27;😰&#x27;</span>, <span class="hljs-string">&#x27;😥&#x27;</span>, <span class="hljs-string">&#x27;😓&#x27;</span>,
+                <span class="hljs-string">&#x27;🤗&#x27;</span>, <span class="hljs-string">&#x27;🤭&#x27;</span>, <span class="hljs-string">&#x27;🤫&#x27;</span>, <span class="hljs-string">&#x27;🤔&#x27;</span>, <span class="hljs-string">&#x27;🤐&#x27;</span>, <span class="hljs-string">&#x27;🤨&#x27;</span>, <span class="hljs-string">&#x27;😐&#x27;</span>, <span class="hljs-string">&#x27;😑&#x27;</span>,
+                <span class="hljs-string">&#x27;😶&#x27;</span>, <span class="hljs-string">&#x27;🙄&#x27;</span>, <span class="hljs-string">&#x27;😏&#x27;</span>, <span class="hljs-string">&#x27;😣&#x27;</span>, <span class="hljs-string">&#x27;😥&#x27;</span>, <span class="hljs-string">&#x27;😮&#x27;</span>, <span class="hljs-string">&#x27;🤐&#x27;</span>, <span class="hljs-string">&#x27;😯&#x27;</span>,
+                <span class="hljs-string">&#x27;😪&#x27;</span>, <span class="hljs-string">&#x27;😫&#x27;</span>, <span class="hljs-string">&#x27;😴&#x27;</span>, <span class="hljs-string">&#x27;😌&#x27;</span>, <span class="hljs-string">&#x27;😛&#x27;</span>, <span class="hljs-string">&#x27;😜&#x27;</span>, <span class="hljs-string">&#x27;😝&#x27;</span>, <span class="hljs-string">&#x27;🤤&#x27;</span>,
+                <span class="hljs-string">&#x27;😒&#x27;</span>, <span class="hljs-string">&#x27;😓&#x27;</span>, <span class="hljs-string">&#x27;😔&#x27;</span>, <span class="hljs-string">&#x27;😕&#x27;</span>, <span class="hljs-string">&#x27;🙃&#x27;</span>, <span class="hljs-string">&#x27;🤑&#x27;</span>, <span class="hljs-string">&#x27;😲&#x27;</span>, <span class="hljs-string">&#x27;☹️&#x27;</span>,
+                <span class="hljs-string">&#x27;🙁&#x27;</span>, <span class="hljs-string">&#x27;😖&#x27;</span>, <span class="hljs-string">&#x27;😞&#x27;</span>, <span class="hljs-string">&#x27;😟&#x27;</span>, <span class="hljs-string">&#x27;😤&#x27;</span>, <span class="hljs-string">&#x27;😢&#x27;</span>, <span class="hljs-string">&#x27;😭&#x27;</span>, <span class="hljs-string">&#x27;😦&#x27;</span>
+            ]
+
+            <span class="hljs-comment"># 添加表情按钮</span>
+            row, col = <span class="hljs-number">0</span>, <span class="hljs-number">0</span>
+            <span class="hljs-keyword">for</span> emoji <span class="hljs-keyword">in</span> emojis:
+                btn = QPushButton(emoji)
+                btn.setFixedSize(<span class="hljs-number">36</span>, <span class="hljs-number">36</span>)
+                btn.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+                    QPushButton {
+                        border: none;
+                        background-color: transparent;
+                        font-size: 20px;
+                    }
+                    QPushButton:hover {
+                        background-color: #f0f0f0;
+                        border-radius: 4px;
+                    }
+                &quot;&quot;&quot;</span>)
+                btn.clicked.connect(<span class="hljs-keyword">lambda</span> checked, e=emoji: <span class="hljs-variable language_">self</span>.add_emoji_to_input(e))
+                emoji_layout.addWidget(btn, row, col)
+
+                col += <span class="hljs-number">1</span>
+                <span class="hljs-keyword">if</span> col &gt;= <span class="hljs-number">8</span>:
+                    col = <span class="hljs-number">0</span>
+                    row += <span class="hljs-number">1</span>
+
+            <span class="hljs-comment"># 调整面板大小</span>
+            <span class="hljs-variable language_">self</span>.emoji_panel.adjustSize()
+
+            <span class="hljs-comment"># 确保事件过滤器被正确安装</span>
+            QApplication.instance().installEventFilter(<span class="hljs-variable language_">self</span>)
+
+        <span class="hljs-comment"># 计算面板位置（在输入框上方）</span>
+        input_pos = <span class="hljs-variable language_">self</span>.message_input.mapToGlobal(QPoint(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>))
+        panel_x = input_pos.x()
+        panel_y = input_pos.y() - <span class="hljs-variable language_">self</span>.emoji_panel.height() - <span class="hljs-number">10</span>
+
+        <span class="hljs-comment"># 确保面板不会超出屏幕边界</span>
+        screen_geometry = QApplication.desktop().availableGeometry()
+        <span class="hljs-keyword">if</span> panel_y &lt; screen_geometry.top():
+            panel_y = input_pos.y() + <span class="hljs-variable language_">self</span>.message_input.height() + <span class="hljs-number">10</span>
+        <span class="hljs-keyword">if</span> panel_x + <span class="hljs-variable language_">self</span>.emoji_panel.width() &gt; screen_geometry.right():
+            panel_x = screen_geometry.right() - <span class="hljs-variable language_">self</span>.emoji_panel.width() - <span class="hljs-number">10</span>
+
+        <span class="hljs-comment"># 显示面板</span>
+        <span class="hljs-variable language_">self</span>.emoji_panel.move(panel_x, panel_y)
+        <span class="hljs-variable language_">self</span>.emoji_panel.raise_()
+        <span class="hljs-variable language_">self</span>.emoji_panel.setFocus()
+        <span class="hljs-variable language_">self</span>.emoji_panel.show()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">add_emoji_to_input</span>(<span class="hljs-params">self, emoji</span>):
+        <span class="hljs-string">&quot;&quot;&quot;添加表情到输入框&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 获取当前光标位置</span>
+        cursor = <span class="hljs-variable language_">self</span>.message_input.textCursor()
+        cursor.insertText(emoji)
+        <span class="hljs-variable language_">self</span>.message_input.setTextCursor(cursor)
+        <span class="hljs-variable language_">self</span>.message_input.setFocus()
+
+        <span class="hljs-comment"># 更新发送按钮状态</span>
+        <span class="hljs-variable language_">self</span>.send_btn.setEnabled(<span class="hljs-built_in">bool</span>(<span class="hljs-variable language_">self</span>.message_input.toPlainText().strip()))
+
+        <span class="hljs-comment"># 关闭表情面板</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(<span class="hljs-variable language_">self</span>, <span class="hljs-string">&#x27;emoji_panel&#x27;</span>) <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.emoji_panel.isVisible():
+            <span class="hljs-variable language_">self</span>.emoji_panel.close()
+
+<span class="hljs-comment"># 主函数</span>
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&#x27;__main__&#x27;</span>:
+    app = QApplication(sys.argv)
+    <span class="hljs-comment"># 设置应用程序样式</span>
+    app.setStyle(<span class="hljs-string">&#x27;Fusion&#x27;</span>)
+
+    <span class="hljs-comment"># 设置全局样式</span>
+    app.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+        QApplication {
+            font-family: SimHei, Microsoft YaHei, Arial, sans-serif;
+        }
+    &quot;&quot;&quot;</span>)
+
+    <span class="hljs-comment"># 创建并显示主窗口</span>
+    window = WeChatClone()
+    window.show()
+
+    <span class="hljs-comment"># 运行应用程序</span>
+    sys.exit(app.exec_())
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/python模拟单楼层双电梯运行仿真.html">
+      <span>上一篇</span>
+      <strong>Python模拟单楼层双电梯运行仿真</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/python桌球游戏.html">
+      <span>下一篇</span>
+      <strong>Python桌球游戏</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

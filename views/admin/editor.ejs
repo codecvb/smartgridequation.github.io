@@ -29,6 +29,10 @@
         <span>标签</span>
         <input id="post-tags" name="tags" value="<%= post.tags.join(', ') %>" placeholder="逗号分隔">
       </label>
+      <label class="field">
+        <span>分类</span>
+        <input id="post-category" name="category" value="<%= post.category || '' %>" placeholder="如：数学笔记、Python 编程">
+      </label>
     </div>
     <label class="field">
       <span>摘要</span>

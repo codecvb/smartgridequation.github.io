@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Rust编程语言代码详细运行编译方法 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/c-c-与-rust.html">C/C++ 与 Rust</a>
+        </nav>
+        <h1 class="post-title">Rust编程语言代码详细运行编译方法</h1>
+        <p class="post-deck">以下是针对不同类型的 Rust 代码（以常见的命令行程序为例）详细的运行方法：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.911Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>6 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-7.html">C/C++</a>
+          
+            <a class="tag-chip" href="../tags/tag-8.html">Rust</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>以下是针对不同类型的 Rust 代码（以常见的命令行程序为例）详细的运行方法：</p>
+<h4 id="前提条件" class="prose-heading">前提条件</h4>
+<p>在运行 Rust 代码之前，确保你已经在系统上安装了 Rust 编程语言环境。如果尚未安装，可以通过以下步骤进行安装：</p>
+<ol>
+<li>访问 Rust 官方网站：<a href="https://www.rust-lang.org/tools/install" title="Install Rust - Rust Programming Language">Install Rust - Rust Programming Language</a>。</li>
+<li>根据你所使用的操作系统（如 Windows、Linux、macOS），按照官方提供的安装指南进行操作。通常，在大多数系统上，安装过程会自动配置好 Rust 编译器（<code>rustc</code>）以及包管理器（<code>cargo</code>）等必要工具。</li>
+</ol>
+<h4 id="运行简单的-rust-代码文件-不使用-cargo-项目" class="prose-heading">运行简单的 Rust 代码文件（不使用 Cargo 项目）</h4>
+<p>假设你有一个简单的 Rust 代码文件，例如名为 <code>hello.rs</code> 的文件，内容如下：</p>
+<p>rust</p>
+<pre class="hljs"><code class="language-rust"><span class="hljs-keyword">fn</span> <span class="hljs-title function_">main</span>() {
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;Hello, World!&quot;</span>);
+}
+</code></pre>
+<p>以下是运行它的步骤：</p>
+<ol>
+<li>打开终端（在 Windows 上可以是命令提示符或 PowerShell，在 Linux 和 macOS 上就是终端应用程序）。</li>
+<li>使用 <code>cd</code> 命令导航到包含 <code>hello.rs</code> 文件的目录。例如，如果文件在你的桌面上，在终端中输入相应的 <code>cd</code> 命令切换到桌面目录（如在 Linux/macOS 上可能是 <code>cd ~/Desktop</code>，在 Windows 上可能是 <code>cd %USERPROFILE%\Desktop</code>）。</li>
+<li>编译代码：在终端中输入 <code>rustc hello.rs</code>。这会调用 Rust 编译器将 <code>hello.rs</code> 文件编译成可执行文件。如果代码没有语法错误等问题，编译器会在当前目录下生成一个名为 <code>hello</code>（在 Windows 上可能是 <code>hello.exe</code>）的可执行文件。</li>
+<li>运行可执行文件：在终端中输入 <code>./hello</code>（在 Windows 上直接输入 <code>hello.exe</code>），即可看到输出结果 <code>Hello, World!</code>。</li>
+</ol>
+<h4 id="运行使用-cargo-管理的-rust-项目" class="prose-heading">运行使用 Cargo 管理的 Rust 项目</h4>
+<p>大多数实际的 Rust 项目会使用 Cargo 进行管理，Cargo 是 Rust 的包管理器和构建工具，它可以更方便地处理项目的依赖关系、构建过程等。</p>
+<p>假设你已经从 GitHub 等地方克隆了一个使用 Cargo 管理的 Rust 项目到本地，例如一个名为 <code>my_tetris_project</code> 的俄罗斯方块游戏项目，以下是运行它的一般步骤：</p>
+<ol>
+<li>打开终端并导航到克隆下来的项目目录（例如 <code>cd my_tetris_project</code>）。</li>
+<li>首次运行项目时，通常需要先下载并安装项目所依赖的外部库（也称为 “crate”）。在终端中输入 <code>cargo build</code>。这会根据项目的 <code>Cargo.toml</code> 文件（Cargo 项目的配置文件，其中列出了项目所依赖的库等信息）下载并安装所需的依赖项，然后编译项目代码。这个过程可能需要一些时间，尤其是在第一次运行或者项目依赖较多库的时候。</li>
+<li>运行项目：在终端中输入 <code>cargo run</code>。这会首先检查是否需要重新编译项目（如果代码有修改等情况），然后运行生成的可执行文件，展示项目的实际运行效果。</li>
+</ol>
+<p>如果项目在运行过程中出现错误，终端会显示相应的错误信息，你可以根据这些错误信息来排查问题，可能涉及到代码逻辑错误、依赖项安装失败等情况。</p>
+<h4 id="运行特定环境下的-rust-代码-如-webassembly-等" class="prose-heading">运行特定环境下的 Rust 代码（如 WebAssembly 等）</h4>
+<p>如果 Rust 代码是用于特定环境，比如要在浏览器中通过 WebAssembly 运行，还需要进行额外的步骤：</p>
+<ol>
+<li>对于 WebAssembly 项目，通常需要先将 Rust 代码编译成 WebAssembly 模块。这可能涉及到使用特定的工具链或配置，例如 <code>wasm-pack</code>。你需要按照相关项目的文档要求进行操作，一般步骤可能包括安装 <code>wasm-pack</code>（如通过 <code>cargo install wasm-pack</code>），然后在项目目录下运行类似 <code>wasm-pack build</code> 的命令将 Rust 代码编译成 WebAssembly 格式。</li>
+<li>将生成的 WebAssembly 模块与相应的 JavaScript 等前端代码进行集成，以便在浏览器等环境中加载和运行。这一步骤也需要根据具体项目的集成方式进行操作，通常会涉及到在 HTML 文件中引入 JavaScript 文件以及正确配置加载 WebAssembly 模块的方式等。</li>
+</ol>
+<p>不同的 Rust 项目可能因为其用途、依赖关系等因素而有不同的运行方式，但上述步骤涵盖了常见的情况，可以作为你运行 Rust 代码的基本参考。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#前提条件">前提条件</a>
+          
+            <a class="toc-level-4" href="#运行简单的-rust-代码文件-不使用-cargo-项目">运行简单的 Rust 代码文件（不使用 Cargo 项目）</a>
+          
+            <a class="toc-level-4" href="#运行使用-cargo-管理的-rust-项目">运行使用 Cargo 管理的 Rust 项目</a>
+          
+            <a class="toc-level-4" href="#运行特定环境下的-rust-代码-如-webassembly-等">运行特定环境下的 Rust 代码（如 WebAssembly 等）</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/rust语言俄罗斯方块漂亮的界面案例详细的代码解说完美运行.html">
+      <span>上一篇</span>
+      <strong>Rust语言俄罗斯方块漂亮的界面案例详细的代码解说完美运行</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/qt6androidc自制美观闹钟.html">
+      <span>下一篇</span>
+      <strong>QT6AndroidC自制美观闹钟</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/编写有内存漏洞的c代码并实现内存注入的示例一个程序注入另一个程序.html">编写有内存漏洞的C代码并实现内存注入的示例一个程序注入另一个程序</a></h3>
+        <p class="post-excerpt">实现思路</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.956Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/用c语言实现的回调函数案例涵盖基础用法及不同消息机制gui模拟网络请求模拟状态机消息队列.html">用C语言实现的回调函数案例涵盖基础用法及不同消息机制GUI模拟网络请求模拟状态机消息队列</a></h3>
+        <p class="post-excerpt">以下是用 C 语言实现的回调函数案例，涵盖基础用法及不同消息机制（GUI 模拟、网络请求模拟、状态机、消息队列），包含详细注释和解释。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.946Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/推荐比mini-stl更好的c实现项目代码.html">推荐比mini stl更好的C实现项目代码</a></h3>
+        <p class="post-excerpt">代码来源 -- STL模拟: STL模拟 的各类实现 - Gitee.com</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.937Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

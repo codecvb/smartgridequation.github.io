@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>C二进制字符串与十六进制字符串相互转换 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/c-c-与-rust.html">C/C++ 与 Rust</a>
+        </nav>
+        <h1 class="post-title">C二进制字符串与十六进制字符串相互转换</h1>
+        <p class="post-deck">以下是一个将二进制字符串转换为十六进制字符串的C++函数：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.846Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>16 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-7.html">C/C++</a>
+          
+            <a class="tag-chip" href="../tags/tag-8.html">Rust</a>
+          
+            <a class="tag-chip" href="../tags/tag-9.html">C</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>以下是一个将二进制字符串转换为十六进制字符串的C++函数：</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;unordered_map&gt;</span></span>
+
+<span class="hljs-function">std::string <span class="hljs-title">binaryToHex</span><span class="hljs-params">(<span class="hljs-type">const</span> std::string&amp; binaryStr)</span> </span>{
+    <span class="hljs-comment">// 预定义的二进制到十六进制映射</span>
+    std::unordered_map&lt;std::string, <span class="hljs-type">char</span>&gt; binToHex = {
+        {<span class="hljs-string">&quot;0000&quot;</span>, <span class="hljs-string">&#x27;0&#x27;</span>}, {<span class="hljs-string">&quot;0001&quot;</span>, <span class="hljs-string">&#x27;1&#x27;</span>}, {<span class="hljs-string">&quot;0010&quot;</span>, <span class="hljs-string">&#x27;2&#x27;</span>}, {<span class="hljs-string">&quot;0011&quot;</span>, <span class="hljs-string">&#x27;3&#x27;</span>},
+        {<span class="hljs-string">&quot;0100&quot;</span>, <span class="hljs-string">&#x27;4&#x27;</span>}, {<span class="hljs-string">&quot;0101&quot;</span>, <span class="hljs-string">&#x27;5&#x27;</span>}, {<span class="hljs-string">&quot;0110&quot;</span>, <span class="hljs-string">&#x27;6&#x27;</span>}, {<span class="hljs-string">&quot;0111&quot;</span>, <span class="hljs-string">&#x27;7&#x27;</span>},
+        {<span class="hljs-string">&quot;1000&quot;</span>, <span class="hljs-string">&#x27;8&#x27;</span>}, {<span class="hljs-string">&quot;1001&quot;</span>, <span class="hljs-string">&#x27;9&#x27;</span>}, {<span class="hljs-string">&quot;1010&quot;</span>, <span class="hljs-string">&#x27;A&#x27;</span>}, {<span class="hljs-string">&quot;1011&quot;</span>, <span class="hljs-string">&#x27;B&#x27;</span>},
+        {<span class="hljs-string">&quot;1100&quot;</span>, <span class="hljs-string">&#x27;C&#x27;</span>}, {<span class="hljs-string">&quot;1101&quot;</span>, <span class="hljs-string">&#x27;D&#x27;</span>}, {<span class="hljs-string">&quot;1110&quot;</span>, <span class="hljs-string">&#x27;E&#x27;</span>}, {<span class="hljs-string">&quot;1111&quot;</span>, <span class="hljs-string">&#x27;F&#x27;</span>}
+    };
+
+    std::string result;
+    std::string paddedBinary = binaryStr;
+
+    <span class="hljs-comment">// 在二进制字符串前面补0，使其长度成为4的倍数</span>
+    <span class="hljs-type">int</span> remainder = paddedBinary.<span class="hljs-built_in">length</span>() % <span class="hljs-number">4</span>;
+    <span class="hljs-keyword">if</span> (remainder != <span class="hljs-number">0</span>) {
+        paddedBinary = std::<span class="hljs-built_in">string</span>(<span class="hljs-number">4</span> - remainder, <span class="hljs-string">&#x27;0&#x27;</span>) + paddedBinary;
+    }
+
+    <span class="hljs-comment">// 每4位一组进行转换</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">size_t</span> i = <span class="hljs-number">0</span>; i &lt; paddedBinary.<span class="hljs-built_in">length</span>(); i += <span class="hljs-number">4</span>) {
+        std::string group = paddedBinary.<span class="hljs-built_in">substr</span>(i, <span class="hljs-number">4</span>);
+        result += binToHex[group];
+    }
+
+    <span class="hljs-keyword">return</span> result;
+}
+</code></pre>
+<p>使用示例：</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    std::string binary1 = <span class="hljs-string">&quot;1101&quot;</span>;           <span class="hljs-comment">// 二进制 1101</span>
+    std::string binary2 = <span class="hljs-string">&quot;101011&quot;</span>;         <span class="hljs-comment">// 二进制 101011</span>
+    std::string binary3 = <span class="hljs-string">&quot;111100001010&quot;</span>;   <span class="hljs-comment">// 二进制 111100001010</span>
+
+    std::cout &lt;&lt; binary1 &lt;&lt; <span class="hljs-string">&quot; -&gt; &quot;</span> &lt;&lt; <span class="hljs-built_in">binaryToHex</span>(binary1) &lt;&lt; std::endl;  <span class="hljs-comment">// 输出: D</span>
+    std::cout &lt;&lt; binary2 &lt;&lt; <span class="hljs-string">&quot; -&gt; &quot;</span> &lt;&lt; <span class="hljs-built_in">binaryToHex</span>(binary2) &lt;&lt; std::endl;  <span class="hljs-comment">// 输出: 2B</span>
+    std::cout &lt;&lt; binary3 &lt;&lt; <span class="hljs-string">&quot; -&gt; &quot;</span> &lt;&lt; <span class="hljs-built_in">binaryToHex</span>(binary3) &lt;&lt; std::endl;  <span class="hljs-comment">// 输出: F0A</span>
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<p>如果你想要一个更简洁的版本，也可以使用位运算的方法：</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;sstream&gt;</span></span>
+
+<span class="hljs-function">std::string <span class="hljs-title">binaryToHexBitwise</span><span class="hljs-params">(<span class="hljs-type">const</span> std::string&amp; binaryStr)</span> </span>{
+    <span class="hljs-comment">// 先将二进制字符串转换为整数</span>
+    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> <span class="hljs-type">long</span> decimal = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">char</span> c : binaryStr) {
+        decimal = (decimal &lt;&lt; <span class="hljs-number">1</span>) | (c - <span class="hljs-string">&#x27;0&#x27;</span>);
+    }
+
+    <span class="hljs-comment">// 再将整数转换为十六进制字符串</span>
+    std::stringstream ss;
+    ss &lt;&lt; std::hex &lt;&lt; std::uppercase &lt;&lt; decimal;
+
+    <span class="hljs-keyword">return</span> ss.<span class="hljs-built_in">str</span>();
+}
+</code></pre>
+<p><strong>注意事项：</strong></p>
+<ol>
+<li></li>
+</ol>
+<pre><code>第一个方法使用查表法，适合处理任意长度的二进制字符串
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>第二个方法使用位运算，更简洁但可能受限于整数类型的最大长度
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>两个函数都会自动处理前导零的情况
+</code></pre>
+<ol start="4">
+<li></li>
+</ol>
+<pre><code>输出使用大写字母（A-F），如果需要小写字母，可以将映射中的字母改为小写
+</code></pre>
+<p>选择哪种方法取决于你的具体需求：</p>
+<ul>
+<li></li>
+</ul>
+<pre><code>如果需要处理很长的二进制字符串，建议使用第一种方法
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>如果二进制字符串长度在64位以内，第二种方法更简洁高效
+</code></pre>
+<p>以下是一个将十六进制字符串转换为二进制字符串的C++函数：</p>
+<p>cpp</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;unordered_map&gt;</span></span>
+
+<span class="hljs-function">std::string <span class="hljs-title">hexToBinary</span><span class="hljs-params">(<span class="hljs-type">const</span> std::string&amp; hexStr)</span> </span>{
+    <span class="hljs-comment">// 预定义的十六进制到二进制映射</span>
+    std::unordered_map&lt;<span class="hljs-type">char</span>, std::string&gt; hexToBin = {
+        {<span class="hljs-string">&#x27;0&#x27;</span>, <span class="hljs-string">&quot;0000&quot;</span>}, {<span class="hljs-string">&#x27;1&#x27;</span>, <span class="hljs-string">&quot;0001&quot;</span>}, {<span class="hljs-string">&#x27;2&#x27;</span>, <span class="hljs-string">&quot;0010&quot;</span>}, {<span class="hljs-string">&#x27;3&#x27;</span>, <span class="hljs-string">&quot;0011&quot;</span>},
+        {<span class="hljs-string">&#x27;4&#x27;</span>, <span class="hljs-string">&quot;0100&quot;</span>}, {<span class="hljs-string">&#x27;5&#x27;</span>, <span class="hljs-string">&quot;0101&quot;</span>}, {<span class="hljs-string">&#x27;6&#x27;</span>, <span class="hljs-string">&quot;0110&quot;</span>}, {<span class="hljs-string">&#x27;7&#x27;</span>, <span class="hljs-string">&quot;0111&quot;</span>},
+        {<span class="hljs-string">&#x27;8&#x27;</span>, <span class="hljs-string">&quot;1000&quot;</span>}, {<span class="hljs-string">&#x27;9&#x27;</span>, <span class="hljs-string">&quot;1001&quot;</span>}, {<span class="hljs-string">&#x27;A&#x27;</span>, <span class="hljs-string">&quot;1010&quot;</span>}, {<span class="hljs-string">&#x27;B&#x27;</span>, <span class="hljs-string">&quot;1011&quot;</span>},
+        {<span class="hljs-string">&#x27;C&#x27;</span>, <span class="hljs-string">&quot;1100&quot;</span>}, {<span class="hljs-string">&#x27;D&#x27;</span>, <span class="hljs-string">&quot;1101&quot;</span>}, {<span class="hljs-string">&#x27;E&#x27;</span>, <span class="hljs-string">&quot;1110&quot;</span>}, {<span class="hljs-string">&#x27;F&#x27;</span>, <span class="hljs-string">&quot;1111&quot;</span>},
+        {<span class="hljs-string">&#x27;a&#x27;</span>, <span class="hljs-string">&quot;1010&quot;</span>}, {<span class="hljs-string">&#x27;b&#x27;</span>, <span class="hljs-string">&quot;1011&quot;</span>}, {<span class="hljs-string">&#x27;c&#x27;</span>, <span class="hljs-string">&quot;1100&quot;</span>}, {<span class="hljs-string">&#x27;d&#x27;</span>, <span class="hljs-string">&quot;1101&quot;</span>},
+        {<span class="hljs-string">&#x27;e&#x27;</span>, <span class="hljs-string">&quot;1110&quot;</span>}, {<span class="hljs-string">&#x27;f&#x27;</span>, <span class="hljs-string">&quot;1111&quot;</span>}
+    };
+
+    std::string result;
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">char</span> c : hexStr) {
+        <span class="hljs-comment">// 跳过空格等无关字符</span>
+        <span class="hljs-keyword">if</span> (c == <span class="hljs-string">&#x27; &#x27;</span> || c == <span class="hljs-string">&#x27;\t&#x27;</span> || c == <span class="hljs-string">&#x27;\n&#x27;</span>) {
+            <span class="hljs-keyword">continue</span>;
+        }
+
+        <span class="hljs-comment">// 检查是否为有效的十六进制字符</span>
+        <span class="hljs-keyword">if</span> (hexToBin.<span class="hljs-built_in">find</span>(c) != hexToBin.<span class="hljs-built_in">end</span>()) {
+            result += hexToBin[c];
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-comment">// 如果遇到无效字符，可以抛出异常或返回空字符串</span>
+            <span class="hljs-keyword">throw</span> std::<span class="hljs-built_in">invalid_argument</span>(<span class="hljs-string">&quot;Invalid hexadecimal character: &quot;</span> + std::<span class="hljs-built_in">string</span>(<span class="hljs-number">1</span>, c));
+            <span class="hljs-comment">// 或者返回空字符串：return &quot;&quot;;</span>
+        }
+    }
+
+    <span class="hljs-comment">// 移除前导零（可选）</span>
+    <span class="hljs-type">size_t</span> firstOne = result.<span class="hljs-built_in">find_first_not_of</span>(<span class="hljs-string">&#x27;0&#x27;</span>);
+    <span class="hljs-keyword">if</span> (firstOne != std::string::npos) {
+        result = result.<span class="hljs-built_in">substr</span>(firstOne);
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-comment">// 如果全是零，返回&quot;0&quot;</span>
+        result = <span class="hljs-string">&quot;0&quot;</span>;
+    }
+
+    <span class="hljs-keyword">return</span> result;
+}
+</code></pre>
+<p>使用示例：</p>
+<p>cpp</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdexcept&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">try</span> {
+        std::string hex1 = <span class="hljs-string">&quot;D&quot;</span>;      <span class="hljs-comment">// 十六进制 D</span>
+        std::string hex2 = <span class="hljs-string">&quot;2B&quot;</span>;     <span class="hljs-comment">// 十六进制 2B</span>
+        std::string hex3 = <span class="hljs-string">&quot;F0A&quot;</span>;    <span class="hljs-comment">// 十六进制 F0A</span>
+        std::string hex4 = <span class="hljs-string">&quot;1F&quot;</span>;     <span class="hljs-comment">// 十六进制 1F</span>
+
+        std::cout &lt;&lt; hex1 &lt;&lt; <span class="hljs-string">&quot; -&gt; &quot;</span> &lt;&lt; <span class="hljs-built_in">hexToBinary</span>(hex1) &lt;&lt; std::endl;  <span class="hljs-comment">// 输出: 1101</span>
+        std::cout &lt;&lt; hex2 &lt;&lt; <span class="hljs-string">&quot; -&gt; &quot;</span> &lt;&lt; <span class="hljs-built_in">hexToBinary</span>(hex2) &lt;&lt; std::endl;  <span class="hljs-comment">// 输出: 101011</span>
+        std::cout &lt;&lt; hex3 &lt;&lt; <span class="hljs-string">&quot; -&gt; &quot;</span> &lt;&lt; <span class="hljs-built_in">hexToBinary</span>(hex3) &lt;&lt; std::endl;  <span class="hljs-comment">// 输出: 111100001010</span>
+        std::cout &lt;&lt; hex4 &lt;&lt; <span class="hljs-string">&quot; -&gt; &quot;</span> &lt;&lt; <span class="hljs-built_in">hexToBinary</span>(hex4) &lt;&lt; std::endl;  <span class="hljs-comment">// 输出: 11111</span>
+
+        <span class="hljs-comment">// 测试小写字母</span>
+        std::cout &lt;&lt; <span class="hljs-string">&quot;a&quot;</span> &lt;&lt; <span class="hljs-string">&quot; -&gt; &quot;</span> &lt;&lt; <span class="hljs-built_in">hexToBinary</span>(<span class="hljs-string">&quot;a&quot;</span>) &lt;&lt; std::endl;    <span class="hljs-comment">// 输出: 1010</span>
+
+    } <span class="hljs-built_in">catch</span> (<span class="hljs-type">const</span> std::exception&amp; e) {
+        std::cout &lt;&lt; <span class="hljs-string">&quot;Error: &quot;</span> &lt;&lt; e.<span class="hljs-built_in">what</span>() &lt;&lt; std::endl;
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<p>如果你想要一个不使用异常处理的版本：</p>
+<p>cpp</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;unordered_map&gt;</span></span>
+
+<span class="hljs-function">std::string <span class="hljs-title">hexToBinarySafe</span><span class="hljs-params">(<span class="hljs-type">const</span> std::string&amp; hexStr)</span> </span>{
+    std::unordered_map&lt;<span class="hljs-type">char</span>, std::string&gt; hexToBin = {
+        {<span class="hljs-string">&#x27;0&#x27;</span>, <span class="hljs-string">&quot;0000&quot;</span>}, {<span class="hljs-string">&#x27;1&#x27;</span>, <span class="hljs-string">&quot;0001&quot;</span>}, {<span class="hljs-string">&#x27;2&#x27;</span>, <span class="hljs-string">&quot;0010&quot;</span>}, {<span class="hljs-string">&#x27;3&#x27;</span>, <span class="hljs-string">&quot;0011&quot;</span>},
+        {<span class="hljs-string">&#x27;4&#x27;</span>, <span class="hljs-string">&quot;0100&quot;</span>}, {<span class="hljs-string">&#x27;5&#x27;</span>, <span class="hljs-string">&quot;0101&quot;</span>}, {<span class="hljs-string">&#x27;6&#x27;</span>, <span class="hljs-string">&quot;0110&quot;</span>}, {<span class="hljs-string">&#x27;7&#x27;</span>, <span class="hljs-string">&quot;0111&quot;</span>},
+        {<span class="hljs-string">&#x27;8&#x27;</span>, <span class="hljs-string">&quot;1000&quot;</span>}, {<span class="hljs-string">&#x27;9&#x27;</span>, <span class="hljs-string">&quot;1001&quot;</span>}, {<span class="hljs-string">&#x27;A&#x27;</span>, <span class="hljs-string">&quot;1010&quot;</span>}, {<span class="hljs-string">&#x27;B&#x27;</span>, <span class="hljs-string">&quot;1011&quot;</span>},
+        {<span class="hljs-string">&#x27;C&#x27;</span>, <span class="hljs-string">&quot;1100&quot;</span>}, {<span class="hljs-string">&#x27;D&#x27;</span>, <span class="hljs-string">&quot;1101&quot;</span>}, {<span class="hljs-string">&#x27;E&#x27;</span>, <span class="hljs-string">&quot;1110&quot;</span>}, {<span class="hljs-string">&#x27;F&#x27;</span>, <span class="hljs-string">&quot;1111&quot;</span>},
+        {<span class="hljs-string">&#x27;a&#x27;</span>, <span class="hljs-string">&quot;1010&quot;</span>}, {<span class="hljs-string">&#x27;b&#x27;</span>, <span class="hljs-string">&quot;1011&quot;</span>}, {<span class="hljs-string">&#x27;c&#x27;</span>, <span class="hljs-string">&quot;1100&quot;</span>}, {<span class="hljs-string">&#x27;d&#x27;</span>, <span class="hljs-string">&quot;1101&quot;</span>},
+        {<span class="hljs-string">&#x27;e&#x27;</span>, <span class="hljs-string">&quot;1110&quot;</span>}, {<span class="hljs-string">&#x27;f&#x27;</span>, <span class="hljs-string">&quot;1111&quot;</span>}
+    };
+
+    std::string result;
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">char</span> c : hexStr) {
+        <span class="hljs-keyword">if</span> (c == <span class="hljs-string">&#x27; &#x27;</span> || c == <span class="hljs-string">&#x27;\t&#x27;</span> || c == <span class="hljs-string">&#x27;\n&#x27;</span>) {
+            <span class="hljs-keyword">continue</span>;
+        }
+
+        <span class="hljs-keyword">auto</span> it = hexToBin.<span class="hljs-built_in">find</span>(c);
+        <span class="hljs-keyword">if</span> (it != hexToBin.<span class="hljs-built_in">end</span>()) {
+            result += it-&gt;second;
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-comment">// 遇到无效字符时返回空字符串</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;&quot;</span>;
+        }
+    }
+
+    <span class="hljs-comment">// 处理全零的情况</span>
+    <span class="hljs-keyword">if</span> (result.<span class="hljs-built_in">empty</span>()) {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;0&quot;</span>;
+    }
+
+    <span class="hljs-comment">// 移除前导零</span>
+    <span class="hljs-type">size_t</span> firstOne = result.<span class="hljs-built_in">find_first_not_of</span>(<span class="hljs-string">&#x27;0&#x27;</span>);
+    <span class="hljs-keyword">if</span> (firstOne != std::string::npos) {
+        result = result.<span class="hljs-built_in">substr</span>(firstOne);
+    } <span class="hljs-keyword">else</span> {
+        result = <span class="hljs-string">&quot;0&quot;</span>;
+    }
+
+    <span class="hljs-keyword">return</span> result;
+}
+</code></pre>
+<p><strong>函数特点：</strong></p>
+<ol>
+<li></li>
+</ol>
+<pre><code>**大小写支持**：同时支持大写和小写十六进制字符
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>**空格处理**：自动跳过空格、制表符和换行符
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>**错误处理**：提供异常处理和安全返回两种方式
+</code></pre>
+<ol start="4">
+<li></li>
+</ol>
+<pre><code>**前导零处理**：可选是否移除前导零
+</code></pre>
+<ol start="5">
+<li></li>
+</ol>
+<pre><code>**完整性**：每个十六进制字符转换为4位二进制
+</code></pre>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li></li>
+</ul>
+<pre><code>如果需要保留前导零，可以注释掉移除前导零的代码部分
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>可以根据需要调整错误处理策略（抛出异常或返回特定值）
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>函数会验证输入的有效性，确保只处理合法的十六进制字符
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/c多继承一个子类继承多个父类的情况.html">
+      <span>上一篇</span>
+      <strong>C多继承一个子类继承多个父类的情况</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/c与rust的语言区别rust的主要难点并举一些例子.html">
+      <span>下一篇</span>
+      <strong>c与rust的语言区别rust的主要难点并举一些例子</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/编写有内存漏洞的c代码并实现内存注入的示例一个程序注入另一个程序.html">编写有内存漏洞的C代码并实现内存注入的示例一个程序注入另一个程序</a></h3>
+        <p class="post-excerpt">实现思路</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.956Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/用c语言实现的回调函数案例涵盖基础用法及不同消息机制gui模拟网络请求模拟状态机消息队列.html">用C语言实现的回调函数案例涵盖基础用法及不同消息机制GUI模拟网络请求模拟状态机消息队列</a></h3>
+        <p class="post-excerpt">以下是用 C 语言实现的回调函数案例，涵盖基础用法及不同消息机制（GUI 模拟、网络请求模拟、状态机、消息队列），包含详细注释和解释。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.946Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/推荐比mini-stl更好的c实现项目代码.html">推荐比mini stl更好的C实现项目代码</a></h3>
+        <p class="post-excerpt">代码来源 -- STL模拟: STL模拟 的各类实现 - Gitee.com</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.937Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

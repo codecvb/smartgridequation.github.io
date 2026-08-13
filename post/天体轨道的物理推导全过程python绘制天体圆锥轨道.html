@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>天体轨道的物理推导全过程Python绘制天体圆锥轨道 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">天体轨道的物理推导全过程Python绘制天体圆锥轨道</h1>
+        <p class="post-deck">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>7 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+            <a class="tag-chip" href="../tags/tag-15.html">卫星</a>
+          
+            <a class="tag-chip" href="../tags/tag-20.html">物理仿真</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p><img src="../uploads/csdn/%E5%A4%A9%E4%BD%93%E8%BD%A8%E9%81%93%E7%9A%84%E7%89%A9%E7%90%86%E6%8E%A8%E5%AF%BC%E5%85%A8%E8%BF%87%E7%A8%8Bpython%E7%BB%98%E5%88%B6%E5%A4%A9%E4%BD%93%E5%9C%86%E9%94%A5%E8%BD%A8%E9%81%93/img-01.png" alt=""><img src="../uploads/csdn/%E5%A4%A9%E4%BD%93%E8%BD%A8%E9%81%93%E7%9A%84%E7%89%A9%E7%90%86%E6%8E%A8%E5%AF%BC%E5%85%A8%E8%BF%87%E7%A8%8Bpython%E7%BB%98%E5%88%B6%E5%A4%A9%E4%BD%93%E5%9C%86%E9%94%A5%E8%BD%A8%E9%81%93/img-02.png" alt=""><img src="../uploads/csdn/%E5%A4%A9%E4%BD%93%E8%BD%A8%E9%81%93%E7%9A%84%E7%89%A9%E7%90%86%E6%8E%A8%E5%AF%BC%E5%85%A8%E8%BF%87%E7%A8%8Bpython%E7%BB%98%E5%88%B6%E5%A4%A9%E4%BD%93%E5%9C%86%E9%94%A5%E8%BD%A8%E9%81%93/img-03.png" alt=""><img src="../uploads/csdn/%E5%A4%A9%E4%BD%93%E8%BD%A8%E9%81%93%E7%9A%84%E7%89%A9%E7%90%86%E6%8E%A8%E5%AF%BC%E5%85%A8%E8%BF%87%E7%A8%8Bpython%E7%BB%98%E5%88%B6%E5%A4%A9%E4%BD%93%E5%9C%86%E9%94%A5%E8%BD%A8%E9%81%93/img-04.png" alt=""><img src="../uploads/csdn/%E5%A4%A9%E4%BD%93%E8%BD%A8%E9%81%93%E7%9A%84%E7%89%A9%E7%90%86%E6%8E%A8%E5%AF%BC%E5%85%A8%E8%BF%87%E7%A8%8Bpython%E7%BB%98%E5%88%B6%E5%A4%A9%E4%BD%93%E5%9C%86%E9%94%A5%E8%BD%A8%E9%81%93/img-05.png" alt=""><img src="../uploads/csdn/%E5%A4%A9%E4%BD%93%E8%BD%A8%E9%81%93%E7%9A%84%E7%89%A9%E7%90%86%E6%8E%A8%E5%AF%BC%E5%85%A8%E8%BF%87%E7%A8%8Bpython%E7%BB%98%E5%88%B6%E5%A4%A9%E4%BD%93%E5%9C%86%E9%94%A5%E8%BD%A8%E9%81%93/img-06.png" alt=""></p>
+<p>以下是使用 Python 的<code>matplotlib</code>库结合<code>numpy</code>库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+<p>python</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+
+<span class="hljs-comment"># 绘制圆锥曲线的函数</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">draw_conic</span>(<span class="hljs-params">e, p, num_points=<span class="hljs-number">1000</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    根据离心率e和焦准距p绘制圆锥曲线
+
+    参数:
+    e: 离心率，对于椭圆 0 &lt; e &lt; 1，对于抛物线 e = 1，对于双曲线 e &gt; 1
+    p: 焦准距
+    num_points: 绘制曲线的点数，默认为1000
+    &quot;&quot;&quot;</span>
+    theta = np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">2</span> * np.pi, num_points)
+    r = (e * p) / (<span class="hljs-number">1</span> - e * np.cos(theta))
+    plt.polar(theta, r)
+    plt.title(<span class="hljs-string">&quot;Conic Section with e={}&quot;</span>.<span class="hljs-built_in">format</span>(e))
+    plt.show()
+
+<span class="hljs-comment"># 示例用法</span>
+<span class="hljs-comment"># 绘制椭圆</span>
+e_ellipse = <span class="hljs-number">0.5</span>
+p_ellipse = <span class="hljs-number">2</span>
+draw_conic(e_ellipse, p_ellipse)
+
+<span class="hljs-comment"># 绘制抛物线</span>
+e_parabola = <span class="hljs-number">1</span>
+p_parabola = <span class="hljs-number">1</span>
+draw_conic(e_parabola, p_parabola)
+
+<span class="hljs-comment"># 绘制双曲线</span>
+e_hyperbola = <span class="hljs-number">1.5</span>
+p_hyperbola = <span class="hljs-number">2</span>
+draw_conic(e_hyperbola, p_hyperbola)
+</code></pre>
+<p>在上述代码中：</p>
+<ol>
+<li>首先定义了<code>draw_conic</code>函数，它接受离心率<code>e</code>和焦准距<code>p</code>作为参数，同时可以指定绘制曲线的点数<code>num_points</code>（默认 1000 个点）。</li>
+<li>在函数内部，使用<code>numpy</code>的<code>linspace</code>函数生成了从<code>0</code>到<code>2 * np.pi</code>的等间隔角度值数组<code>theta</code>，表示极坐标中的极角。</li>
+<li>然后根据圆锥曲线的极坐标方程<code>r = (e * p) / (1 - e * np.cos(theta))</code>计算出对应极角下的极径<code>r</code>数组。</li>
+<li>最后使用<code>matplotlib</code>的<code>polar</code>函数按照极坐标的形式绘制曲线，并展示出来。通过分别设定不同的离心率和焦准距的值，来绘制椭圆、抛物线和双曲线这三种不同类型的圆锥曲线。</li>
+</ol>
+<p>你可以根据实际需求，调整<code>e</code>（离心率）和<code>p</code>（焦准距）等参数来观察不同形状的圆锥曲线。</p>
+<p>如果你希望进一步美化图形、添加更多元素（比如坐标轴标签、图例等），可以在代码基础上继续扩展，例如：</p>
+<p>python</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+
+<span class="hljs-comment"># 绘制圆锥曲线的函数</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">draw_conic</span>(<span class="hljs-params">e, p, num_points=<span class="hljs-number">1000</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    根据离心率e和焦准距p绘制圆锥曲线
+
+    参数:
+    e: 离心率，对于椭圆 0 &lt; e &lt; 1，对于抛物线 e = 1，对于双曲线 e &gt; 1
+    p: 焦准距
+    num_points: 绘制曲线的点数，默认为1000
+    &quot;&quot;&quot;</span>
+    theta = np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">2</span> * np.pi, num_points)
+    r = (e * p) / (<span class="hljs-number">1</span> - e * np.cos(theta))
+    ax = plt.subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;polar&#x27;</span>)
+    ax.plot(theta, r)
+    ax.set_title(<span class="hljs-string">&quot;Conic Section with e={}&quot;</span>.<span class="hljs-built_in">format</span>(e))
+    ax.set_rmax(np.<span class="hljs-built_in">max</span>(r) * <span class="hljs-number">1.2</span>)  <span class="hljs-comment"># 适当放大极径范围，让曲线显示更完整</span>
+    ax.set_rticks([])  <span class="hljs-comment"># 隐藏极径刻度</span>
+    ax.set_thetagrids([])  <span class="hljs-comment"># 隐藏极角刻度</span>
+    plt.show()
+
+<span class="hljs-comment"># 示例用法</span>
+<span class="hljs-comment"># 绘制椭圆</span>
+e_ellipse = <span class="hljs-number">0.5</span>
+p_ellipse = <span class="hljs-number">2</span>
+draw_conic(e_ellipse, p_ellipse)
+
+<span class="hljs-comment"># 绘制抛物线</span>
+e_parabola = <span class="hljs-number">1</span>
+p_parabola = <span class="hljs-number">1</span>
+draw_conic(e_parabola,  p_parabola)
+
+<span class="hljs-comment"># 绘制双曲线</span>
+e_hyperbola = <span class="hljs-number">1.5</span>
+p_hyperbola = <span class="hljs-number">2</span>
+draw_conic(e_hyperbola, p_hyperbola)
+</code></pre>
+<p>这段扩展后的代码对图形展示做了一些优化，例如将图形在极坐标投影下绘制，设置了合适的极径显示范围、隐藏了极径和极角的刻度等，让图形看起来更加简洁美观。 你可以根据自己的喜好进一步修改图形的外观设置。</p>
+<p>效果如下</p>
+<p><img src="../uploads/csdn/%E5%A4%A9%E4%BD%93%E8%BD%A8%E9%81%93%E7%9A%84%E7%89%A9%E7%90%86%E6%8E%A8%E5%AF%BC%E5%85%A8%E8%BF%87%E7%A8%8Bpython%E7%BB%98%E5%88%B6%E5%A4%A9%E4%BD%93%E5%9C%86%E9%94%A5%E8%BD%A8%E9%81%93/img-07.webp" alt=""></p>
+<p><img src="../uploads/csdn/%E5%A4%A9%E4%BD%93%E8%BD%A8%E9%81%93%E7%9A%84%E7%89%A9%E7%90%86%E6%8E%A8%E5%AF%BC%E5%85%A8%E8%BF%87%E7%A8%8Bpython%E7%BB%98%E5%88%B6%E5%A4%A9%E4%BD%93%E5%9C%86%E9%94%A5%E8%BD%A8%E9%81%93/img-08.webp" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/嫦娥号地月轨道环月一个月matlab仿真.html">
+      <span>上一篇</span>
+      <strong>嫦娥号地月轨道环月一个月MATLAB仿真</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/基于真实火星探测任务的实际轨道设计python版.html">
+      <span>下一篇</span>
+      <strong>基于真实火星探测任务的实际轨道设计Python版</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/卫星轨道matlab动力学仿真.html">卫星轨道MATLAB动力学仿真</a></h3>
+        <p class="post-excerpt">本文介绍了一个基于MATLAB的卫星轨道动力学仿真程序。该程序采用国际空间站(ISS)近似轨道参数(400km高度、51.6°倾角)，通过数值积分方法求解包含地球引力和J2摄动项的轨道运动方程。仿真结果包括3D轨道可视化、位置/速度分量变化、轨道高度和速度大小变化等图表，并进行了能量守恒验证和轨道参数分析。程序实现了从轨道要素到ECI坐标系状态的转换，采用ode45求解器进行积分，最终分析了半长轴…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.374Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>QT6AndroidCTensorFlowlite人脸识别程序 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">QT6AndroidCTensorFlowlite人脸识别程序</h1>
+        <p class="post-deck">本文聚焦于在QT6框架下，面向Android平台，利用C++与TensorFlow Lite（TFLite）实现的人脸识别程序开发。研究目的在于探索一种跨平台、高性能的移动端人脸识别解决方案，突破传统Java或Python方案在实时性与资源管控上的局限。方法上，程序以QT6的Android JNI接口为桥梁，实现C++业务逻辑与Android系统服务的交互；核心推理引擎采用TFLite的C++ A…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.807Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>78 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-5.html">人工智能</a>
+          
+            <a class="tag-chip" href="../tags/tag-17.html">QT6</a>
+          
+            <a class="tag-chip" href="../tags/tag-22.html">Android</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文聚焦于在QT6框架下，面向Android平台，利用C++与TensorFlow Lite（TFLite）实现的人脸识别程序开发。研究目的在于探索一种跨平台、高性能的移动端人脸识别解决方案，突破传统Java或Python方案在实时性与资源管控上的局限。方法上，程序以QT6的Android JNI接口为桥梁，实现C++业务逻辑与Android系统服务的交互；核心推理引擎采用TFLite的C++ API，加载预训练的轻量化人脸检测与特征提取模型（如MobileNet-SSD或FaceNet变体）。在架构设计中，通过QT的信号槽机制处理摄像头帧数据，并利用OpenCV进行图像预处理与后处理，显著提升了数据流转效率。项目重点解决了Android平台下内存管理、模型量化（INT8/FP16）对精度的影响以及多线程推理等关键问题。实验结果表明，该程序在主流Android设备上能够实现实时（&gt;30 FPS）且准确的人脸定位与识别，验证了QT6与TFLite在移动端C++生态下联合开发的可行性。本文为后续在嵌入式或移动设备上开发高性能、低延迟的视觉AI应用提供了可复用的技术框架与实践参考，具有重要的工程应用价值。</p>
+<p><img src="../uploads/csdn/qt6androidctensorflowlite%E4%BA%BA%E8%84%B8%E8%AF%86%E5%88%AB%E7%A8%8B%E5%BA%8F/img-01.jpeg" alt=""></p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;mainwindow.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;ui_mainwindow.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;tfliteengine.h&quot;</span></span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QFileDialog&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QMessageBox&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QStandardPaths&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QDir&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QElapsedTimer&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QDebug&gt;</span></span>
+
+MainWindow::<span class="hljs-built_in">MainWindow</span>(QWidget *parent)
+    : <span class="hljs-built_in">QMainWindow</span>(parent)
+    , <span class="hljs-built_in">ui</span>(<span class="hljs-keyword">new</span> Ui::MainWindow)
+    , <span class="hljs-built_in">m_engine</span>(<span class="hljs-keyword">new</span> <span class="hljs-built_in">TfLiteEngine</span>(<span class="hljs-keyword">this</span>))
+{
+    ui-&gt;<span class="hljs-built_in">setupUi</span>(<span class="hljs-keyword">this</span>);
+
+    QString modelPath = <span class="hljs-built_in">getModelPath</span>();
+    <span class="hljs-keyword">if</span> (!m_engine-&gt;<span class="hljs-built_in">loadModel</span>(modelPath)) {
+        QMessageBox::<span class="hljs-built_in">warning</span>(<span class="hljs-keyword">this</span>, <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Error&quot;</span>),
+            <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Failed to load model from:\n%1&quot;</span>).<span class="hljs-built_in">arg</span>(modelPath));
+    }
+
+    <span class="hljs-built_in">connect</span>(ui-&gt;selectBtn, &amp;QPushButton::clicked, <span class="hljs-keyword">this</span>, &amp;MainWindow::onSelectImage);
+    <span class="hljs-built_in">connect</span>(ui-&gt;inferBtn, &amp;QPushButton::clicked, <span class="hljs-keyword">this</span>, &amp;MainWindow::onRunInference);
+    <span class="hljs-built_in">connect</span>(m_engine, &amp;TfLiteEngine::inferenceFinished,
+            <span class="hljs-keyword">this</span>, &amp;MainWindow::onInferenceFinished);
+    <span class="hljs-built_in">connect</span>(m_engine, &amp;TfLiteEngine::errorOccurred,
+            <span class="hljs-keyword">this</span>, &amp;MainWindow::onError);
+}
+
+MainWindow::~<span class="hljs-built_in">MainWindow</span>()
+{
+    <span class="hljs-keyword">delete</span> ui;
+}
+
+<span class="hljs-function">QString <span class="hljs-title">MainWindow::getModelPath</span><span class="hljs-params">()</span> <span class="hljs-type">const</span>
+</span>{
+<span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> Q_OS_ANDROID</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">QStringLiteral</span>(<span class="hljs-string">&quot;assets:/model.tflite&quot;</span>);
+<span class="hljs-meta">#<span class="hljs-keyword">else</span></span>
+    <span class="hljs-function">QDir <span class="hljs-title">dir</span><span class="hljs-params">(QCoreApplication::applicationDirPath())</span></span>;
+    QString modelPath = dir.<span class="hljs-built_in">filePath</span>(<span class="hljs-built_in">QStringLiteral</span>(<span class="hljs-string">&quot;../tflite_cpp/model/model.tflite&quot;</span>));
+    <span class="hljs-keyword">if</span> (QFile::<span class="hljs-built_in">exists</span>(modelPath)) {
+        <span class="hljs-keyword">return</span> modelPath;
+    }
+    modelPath = dir.<span class="hljs-built_in">filePath</span>(<span class="hljs-built_in">QStringLiteral</span>(<span class="hljs-string">&quot;model.tflite&quot;</span>));
+    <span class="hljs-keyword">return</span> modelPath;
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span></span>
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::onSelectImage</span><span class="hljs-params">()</span>
+</span>{
+    QStringList picturesLocations = QStandardPaths::<span class="hljs-built_in">standardLocations</span>(QStandardPaths::PicturesLocation);
+    QString startDir = picturesLocations.<span class="hljs-built_in">isEmpty</span>() ? <span class="hljs-built_in">QString</span>() : picturesLocations.<span class="hljs-built_in">first</span>();
+
+    QString fileName = QFileDialog::<span class="hljs-built_in">getOpenFileName</span>(<span class="hljs-keyword">this</span>,
+        <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Select Image&quot;</span>), startDir,
+        <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Images (*.png *.jpg *.jpeg *.bmp *.gif)&quot;</span>));
+
+    <span class="hljs-keyword">if</span> (fileName.<span class="hljs-built_in">isEmpty</span>())
+        <span class="hljs-keyword">return</span>;
+
+    <span class="hljs-function">QImage <span class="hljs-title">image</span><span class="hljs-params">(fileName)</span></span>;
+    <span class="hljs-keyword">if</span> (image.<span class="hljs-built_in">isNull</span>()) {
+        QMessageBox::<span class="hljs-built_in">warning</span>(<span class="hljs-keyword">this</span>, <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Error&quot;</span>), <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Failed to load image&quot;</span>));
+        <span class="hljs-keyword">return</span>;
+    }
+
+    m_currentImage = image;
+
+    QPixmap pixmap = QPixmap::<span class="hljs-built_in">fromImage</span>(image);
+    QSize labelSize = ui-&gt;imageLabel-&gt;<span class="hljs-built_in">size</span>();
+    ui-&gt;imageLabel-&gt;<span class="hljs-built_in">setPixmap</span>(pixmap.<span class="hljs-built_in">scaled</span>(labelSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+    ui-&gt;inferBtn-&gt;<span class="hljs-built_in">setEnabled</span>(m_engine-&gt;<span class="hljs-built_in">isLoaded</span>());
+    ui-&gt;resultText-&gt;<span class="hljs-built_in">clear</span>();
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::onRunInference</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-keyword">if</span> (m_currentImage.<span class="hljs-built_in">isNull</span>() || !m_engine-&gt;<span class="hljs-built_in">isLoaded</span>())
+        <span class="hljs-keyword">return</span>;
+
+    ui-&gt;inferBtn-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">false</span>);
+    ui-&gt;resultText-&gt;<span class="hljs-built_in">setText</span>(<span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Running face detection...&quot;</span>));
+
+    QElapsedTimer timer;
+    timer.<span class="hljs-built_in">start</span>();
+
+    <span class="hljs-comment">// Run face detection with bounding box visualization</span>
+    QImage annotated = m_engine-&gt;<span class="hljs-built_in">runInferenceWithBoxes</span>(m_currentImage);
+
+    qint64 elapsed = timer.<span class="hljs-built_in">elapsed</span>();
+    <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;Face detection took&quot;</span> &lt;&lt; elapsed &lt;&lt; <span class="hljs-string">&quot;ms&quot;</span>;
+
+    <span class="hljs-comment">// Display the annotated image</span>
+    <span class="hljs-keyword">if</span> (!annotated.<span class="hljs-built_in">isNull</span>() &amp;&amp; annotated != m_currentImage) {
+        QPixmap pixmap = QPixmap::<span class="hljs-built_in">fromImage</span>(annotated);
+        QSize labelSize = ui-&gt;imageLabel-&gt;<span class="hljs-built_in">size</span>();
+        ui-&gt;imageLabel-&gt;<span class="hljs-built_in">setPixmap</span>(pixmap.<span class="hljs-built_in">scaled</span>(labelSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    }
+
+    <span class="hljs-comment">// Show results text</span>
+    QString output = <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Face Detection Results\n&quot;</span>);
+    output += <span class="hljs-built_in">QStringLiteral</span>(<span class="hljs-string">&quot;========================================\n&quot;</span>);
+    output += <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Inference time: %1 ms\n\n&quot;</span>).<span class="hljs-built_in">arg</span>(elapsed);
+
+    <span class="hljs-keyword">if</span> (!annotated.<span class="hljs-built_in">isNull</span>() &amp;&amp; annotated != m_currentImage) {
+        output += <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Faces detected and highlighted on image.\n&quot;</span>);
+        output += <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Green corners mark detected face regions.\n&quot;</span>);
+    } <span class="hljs-keyword">else</span> {
+        output += <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;No faces detected in the image.\n&quot;</span>);
+        output += <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Try a different image with visible faces.\n&quot;</span>);
+    }
+    ui-&gt;resultText-&gt;<span class="hljs-built_in">setText</span>(output);
+
+    ui-&gt;inferBtn-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">true</span>);
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::onInferenceFinished</span><span class="hljs-params">(<span class="hljs-type">const</span> QVector&lt;<span class="hljs-type">float</span>&gt; &amp;results)</span>
+</span>{
+    <span class="hljs-built_in">Q_UNUSED</span>(results);
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::onError</span><span class="hljs-params">(<span class="hljs-type">const</span> QString &amp;error)</span>
+</span>{
+    QMessageBox::<span class="hljs-built_in">warning</span>(<span class="hljs-keyword">this</span>, <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Error&quot;</span>), error);
+}
+
+<span class="hljs-function">QString <span class="hljs-title">MainWindow::formatResults</span><span class="hljs-params">(<span class="hljs-type">const</span> QVector&lt;<span class="hljs-type">float</span>&gt; &amp;results)</span> <span class="hljs-type">const</span>
+</span>{
+    QString output;
+    output += <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Face Detection Results\n&quot;</span>);
+    output += <span class="hljs-built_in">QStringLiteral</span>(<span class="hljs-string">&quot;========================================\n&quot;</span>);
+
+    <span class="hljs-keyword">if</span> (results.<span class="hljs-built_in">isEmpty</span>()) {
+        output += <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;No results.\n&quot;</span>);
+        <span class="hljs-keyword">return</span> output;
+    }
+
+    <span class="hljs-type">int</span> numDetections = <span class="hljs-built_in">static_cast</span>&lt;<span class="hljs-type">int</span>&gt;(results[<span class="hljs-number">0</span>]);
+    output += <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Faces detected: %1\n\n&quot;</span>).<span class="hljs-built_in">arg</span>(numDetections);
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; numDetections; ++i) {
+        <span class="hljs-type">int</span> offset = <span class="hljs-number">1</span> + i * <span class="hljs-number">5</span>;
+        <span class="hljs-keyword">if</span> (offset + <span class="hljs-number">4</span> &gt;= results.<span class="hljs-built_in">size</span>()) <span class="hljs-keyword">break</span>;
+
+        <span class="hljs-type">float</span> ymin = results[offset + <span class="hljs-number">0</span>];
+        <span class="hljs-type">float</span> xmin = results[offset + <span class="hljs-number">1</span>];
+        <span class="hljs-type">float</span> ymax = results[offset + <span class="hljs-number">2</span>];
+        <span class="hljs-type">float</span> xmax = results[offset + <span class="hljs-number">3</span>];
+        <span class="hljs-type">float</span> score = results[offset + <span class="hljs-number">4</span>];
+
+        output += <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;Face #%1: confidence=%2%\n&quot;</span>)
+            .<span class="hljs-built_in">arg</span>(i + <span class="hljs-number">1</span>)
+            .<span class="hljs-built_in">arg</span>(score * <span class="hljs-number">100</span>, <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;f&#x27;</span>, <span class="hljs-number">1</span>);
+        output += <span class="hljs-built_in">tr</span>(<span class="hljs-string">&quot;  Box: [ymin=%1, xmin=%2, ymax=%3, xmax=%4]\n\n&quot;</span>)
+            .<span class="hljs-built_in">arg</span>(ymin, <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;f&#x27;</span>, <span class="hljs-number">3</span>)
+            .<span class="hljs-built_in">arg</span>(xmin, <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;f&#x27;</span>, <span class="hljs-number">3</span>)
+            .<span class="hljs-built_in">arg</span>(ymax, <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;f&#x27;</span>, <span class="hljs-number">3</span>)
+            .<span class="hljs-built_in">arg</span>(xmax, <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;f&#x27;</span>, <span class="hljs-number">3</span>);
+    }
+
+    <span class="hljs-keyword">return</span> output;
+}
+</code></pre>
+<pre class="hljs"><code class="language-java"><span class="hljs-keyword">package</span> com.tf.d;
+
+<span class="hljs-keyword">import</span> android.app.Activity;
+<span class="hljs-keyword">import</span> android.content.res.AssetManager;
+<span class="hljs-keyword">import</span> org.tensorflow.lite.Interpreter;
+<span class="hljs-keyword">import</span> org.tensorflow.lite.Tensor;
+<span class="hljs-keyword">import</span> java.io.File;
+<span class="hljs-keyword">import</span> java.io.FileInputStream;
+<span class="hljs-keyword">import</span> java.io.FileOutputStream;
+<span class="hljs-keyword">import</span> java.io.IOException;
+<span class="hljs-keyword">import</span> java.io.InputStream;
+<span class="hljs-keyword">import</span> java.io.OutputStream;
+<span class="hljs-keyword">import</span> java.nio.MappedByteBuffer;
+<span class="hljs-keyword">import</span> java.nio.ByteBuffer;
+<span class="hljs-keyword">import</span> java.nio.ByteOrder;
+<span class="hljs-keyword">import</span> java.util.ArrayList;
+<span class="hljs-keyword">import</span> java.util.Arrays;
+<span class="hljs-keyword">import</span> android.util.Log;
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">TFHelper</span> {
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">String</span> <span class="hljs-variable">TAG</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;TFHelper&quot;</span>;
+    <span class="hljs-keyword">private</span> Interpreter interpreter;
+    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> <span class="hljs-variable">inputHeight</span> <span class="hljs-operator">=</span> <span class="hljs-number">128</span>;
+    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> <span class="hljs-variable">inputWidth</span> <span class="hljs-operator">=</span> <span class="hljs-number">128</span>;
+    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> <span class="hljs-variable">inputChannels</span> <span class="hljs-operator">=</span> <span class="hljs-number">3</span>;
+    <span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> <span class="hljs-variable">isFloatInput</span> <span class="hljs-operator">=</span> <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> <span class="hljs-variable">isFloatOutput</span> <span class="hljs-operator">=</span> <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">private</span> Activity activity;
+
+    <span class="hljs-comment">// BlazeFace Short Range anchor config</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> <span class="hljs-variable">numAnchors</span> <span class="hljs-operator">=</span> <span class="hljs-number">896</span>;
+    <span class="hljs-keyword">private</span> <span class="hljs-type">float</span>[] anchorCx;
+    <span class="hljs-keyword">private</span> <span class="hljs-type">float</span>[] anchorCy;
+    <span class="hljs-keyword">private</span> <span class="hljs-type">float</span>[] anchorW;
+    <span class="hljs-keyword">private</span> <span class="hljs-type">float</span>[] anchorH;
+
+    <span class="hljs-comment">// Face detection result</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-type">float</span>[] detectionBoxes;   <span class="hljs-comment">// [numDetections][4] flattened: ymin,xmin,ymax,xmax</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-type">float</span>[] detectionScores;  <span class="hljs-comment">// [numDetections]</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> <span class="hljs-variable">numDetections</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;
+
+    <span class="hljs-comment">// Output tensor index mapping (auto-detected from model shapes)</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> <span class="hljs-variable">regressorOutputIdx</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;   <span class="hljs-comment">// output index for regressors (16 values per anchor)</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> <span class="hljs-variable">classifierOutputIdx</span> <span class="hljs-operator">=</span> <span class="hljs-number">1</span>;  <span class="hljs-comment">// output index for classifiers (1 value per anchor)</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setActivity</span><span class="hljs-params">(Activity activity)</span> {
+        <span class="hljs-built_in">this</span>.activity = activity;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">loadModel</span><span class="hljs-params">(String modelPath)</span> {
+        <span class="hljs-keyword">try</span> {
+            <span class="hljs-type">MappedByteBuffer</span> <span class="hljs-variable">modelBuffer</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;
+            <span class="hljs-type">File</span> <span class="hljs-variable">modelFile</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">File</span>(modelPath);
+            <span class="hljs-keyword">if</span> (modelFile.exists()) {
+                modelBuffer = loadModelFile(modelFile.getAbsolutePath());
+            }
+            <span class="hljs-keyword">if</span> (modelBuffer == <span class="hljs-literal">null</span> &amp;&amp; activity != <span class="hljs-literal">null</span>) {
+                <span class="hljs-type">String</span> <span class="hljs-variable">assetName</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;model.tflite&quot;</span>;
+                <span class="hljs-type">File</span> <span class="hljs-variable">extractedFile</span> <span class="hljs-operator">=</span> extractAssetToCache(activity, assetName);
+                <span class="hljs-keyword">if</span> (extractedFile != <span class="hljs-literal">null</span>) {
+                    modelBuffer = loadModelFile(extractedFile.getAbsolutePath());
+                }
+            }
+            <span class="hljs-keyword">if</span> (modelBuffer == <span class="hljs-literal">null</span>) {
+                Log.e(TAG, <span class="hljs-string">&quot;Failed to load model buffer&quot;</span>);
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+            }
+            Interpreter.<span class="hljs-type">Options</span> <span class="hljs-variable">options</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Interpreter</span>.Options();
+            options.setNumThreads(<span class="hljs-number">4</span>);
+            interpreter = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Interpreter</span>(modelBuffer, options);
+
+            <span class="hljs-comment">// Parse input tensor</span>
+            <span class="hljs-type">Tensor</span> <span class="hljs-variable">inputTensor</span> <span class="hljs-operator">=</span> interpreter.getInputTensor(<span class="hljs-number">0</span>);
+            <span class="hljs-type">int</span>[] inputShape = inputTensor.shape();
+            Log.d(TAG, <span class="hljs-string">&quot;Input shape: &quot;</span> + Arrays.toString(inputShape));
+            Log.d(TAG, <span class="hljs-string">&quot;Input type: &quot;</span> + inputTensor.dataType());
+
+            <span class="hljs-keyword">if</span> (inputShape.length == <span class="hljs-number">4</span>) {
+                inputHeight = inputShape[<span class="hljs-number">1</span>];
+                inputWidth = inputShape[<span class="hljs-number">2</span>];
+                inputChannels = inputShape[<span class="hljs-number">3</span>];
+            } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (inputShape.length == <span class="hljs-number">3</span>) {
+                inputHeight = inputShape[<span class="hljs-number">0</span>];
+                inputWidth = inputShape[<span class="hljs-number">1</span>];
+                inputChannels = inputShape[<span class="hljs-number">2</span>];
+            } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (inputShape.length == <span class="hljs-number">2</span>) {
+                <span class="hljs-type">int</span> <span class="hljs-variable">flatSize</span> <span class="hljs-operator">=</span> inputShape[<span class="hljs-number">1</span>];
+                <span class="hljs-type">int</span> <span class="hljs-variable">side</span> <span class="hljs-operator">=</span> (<span class="hljs-type">int</span>) Math.round(Math.sqrt(flatSize));
+                <span class="hljs-keyword">if</span> (side * side == flatSize) {
+                    inputHeight = side;
+                    inputWidth = side;
+                } <span class="hljs-keyword">else</span> {
+                    inputHeight = <span class="hljs-number">1</span>;
+                    inputWidth = flatSize;
+                }
+                inputChannels = <span class="hljs-number">1</span>;
+            }
+
+            <span class="hljs-type">String</span> <span class="hljs-variable">dtype</span> <span class="hljs-operator">=</span> inputTensor.dataType().toString();
+            isFloatInput = dtype.contains(<span class="hljs-string">&quot;FLOAT&quot;</span>) || dtype.contains(<span class="hljs-string">&quot;float&quot;</span>);
+
+            <span class="hljs-comment">// Parse output tensors and detect which is regressor vs classifier</span>
+            <span class="hljs-type">int</span> <span class="hljs-variable">numOutputs</span> <span class="hljs-operator">=</span> interpreter.getOutputTensorCount();
+            Log.d(TAG, <span class="hljs-string">&quot;Number of output tensors: &quot;</span> + numOutputs);
+            <span class="hljs-type">boolean</span> <span class="hljs-variable">foundRegressor</span> <span class="hljs-operator">=</span> <span class="hljs-literal">false</span>;
+            <span class="hljs-type">boolean</span> <span class="hljs-variable">foundClassifier</span> <span class="hljs-operator">=</span> <span class="hljs-literal">false</span>;
+            <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; numOutputs; i++) {
+                <span class="hljs-type">Tensor</span> <span class="hljs-variable">outTensor</span> <span class="hljs-operator">=</span> interpreter.getOutputTensor(i);
+                <span class="hljs-type">int</span>[] outShape = outTensor.shape();
+                Log.d(TAG, <span class="hljs-string">&quot;Output[&quot;</span> + i + <span class="hljs-string">&quot;]: name=&#x27;&quot;</span> + outTensor.name()
+                        + <span class="hljs-string">&quot;&#x27; shape=&quot;</span> + Arrays.toString(outShape)
+                        + <span class="hljs-string">&quot; type=&quot;</span> + outTensor.dataType());
+
+                <span class="hljs-comment">// Detect by last dimension: 16 = regressors, 1 = classifiers</span>
+                <span class="hljs-keyword">if</span> (outShape.length &gt;= <span class="hljs-number">2</span>) {
+                    <span class="hljs-type">int</span> <span class="hljs-variable">lastDim</span> <span class="hljs-operator">=</span> outShape[outShape.length - <span class="hljs-number">1</span>];
+                    <span class="hljs-keyword">if</span> (lastDim == <span class="hljs-number">16</span> &amp;&amp; !foundRegressor) {
+                        regressorOutputIdx = i;
+                        foundRegressor = <span class="hljs-literal">true</span>;
+                        Log.d(TAG, <span class="hljs-string">&quot;  -&gt; Output[&quot;</span> + i + <span class="hljs-string">&quot;] is REGRESSORS (16 channels)&quot;</span>);
+                    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (lastDim == <span class="hljs-number">1</span> &amp;&amp; !foundClassifier) {
+                        classifierOutputIdx = i;
+                        foundClassifier = <span class="hljs-literal">true</span>;
+                        Log.d(TAG, <span class="hljs-string">&quot;  -&gt; Output[&quot;</span> + i + <span class="hljs-string">&quot;] is CLASSIFIERS (1 channel)&quot;</span>);
+                    }
+                }
+            }
+            <span class="hljs-keyword">if</span> (!foundRegressor || !foundClassifier) {
+                Log.w(TAG, <span class="hljs-string">&quot;Could not auto-detect output mapping, using default: regressor=&quot;</span>
+                        + regressorOutputIdx + <span class="hljs-string">&quot;, classifier=&quot;</span> + classifierOutputIdx);
+            }
+
+            <span class="hljs-comment">// Generate anchors for BlazeFace</span>
+            generateAnchors();
+
+            <span class="hljs-type">String</span> <span class="hljs-variable">outDtype</span> <span class="hljs-operator">=</span> interpreter.getOutputTensor(<span class="hljs-number">0</span>).dataType().toString();
+            isFloatOutput = outDtype.contains(<span class="hljs-string">&quot;FLOAT&quot;</span>) || outDtype.contains(<span class="hljs-string">&quot;float&quot;</span>);
+
+            Log.d(TAG, <span class="hljs-string">&quot;Model loaded: input=&quot;</span> + inputWidth + <span class="hljs-string">&quot;x&quot;</span> + inputHeight + <span class="hljs-string">&quot;x&quot;</span> + inputChannels
+                    + <span class="hljs-string">&quot;, anchors=&quot;</span> + numAnchors);
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+        } <span class="hljs-keyword">catch</span> (Exception e) {
+            Log.e(TAG, <span class="hljs-string">&quot;loadModel failed&quot;</span>, e);
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        }
+    }
+
+    <span class="hljs-comment">/**
+     * Generate BlazeFace Short Range anchors.
+     * Config: strides=[8,16,16,16], 2 anchors per location, total=896
+     * Anchors are square (aspect ratio = 1.0) with interpolated scales.
+     */</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">generateAnchors</span><span class="hljs-params">()</span> {
+        <span class="hljs-type">int</span>[] strides = {<span class="hljs-number">8</span>, <span class="hljs-number">16</span>, <span class="hljs-number">16</span>, <span class="hljs-number">16</span>};
+        <span class="hljs-type">float</span> <span class="hljs-variable">minScale</span> <span class="hljs-operator">=</span> <span class="hljs-number">0.1484375f</span>;
+        <span class="hljs-type">float</span> <span class="hljs-variable">maxScale</span> <span class="hljs-operator">=</span> <span class="hljs-number">0.75f</span>;
+        <span class="hljs-type">int</span> <span class="hljs-variable">anchorsPerLocation</span> <span class="hljs-operator">=</span> <span class="hljs-number">2</span>;
+        <span class="hljs-type">int</span> <span class="hljs-variable">numLayers</span> <span class="hljs-operator">=</span> strides.length;
+
+        <span class="hljs-type">int</span> <span class="hljs-variable">totalAnchors</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> stride : strides) {
+            <span class="hljs-type">int</span> <span class="hljs-variable">featureH</span> <span class="hljs-operator">=</span> inputHeight / stride;
+            <span class="hljs-type">int</span> <span class="hljs-variable">featureW</span> <span class="hljs-operator">=</span> inputWidth / stride;
+            totalAnchors += featureH * featureW * anchorsPerLocation;
+        }
+        numAnchors = totalAnchors;
+        Log.d(TAG, <span class="hljs-string">&quot;Generating &quot;</span> + numAnchors + <span class="hljs-string">&quot; anchors&quot;</span>);
+
+        anchorCx = <span class="hljs-keyword">new</span> <span class="hljs-title class_">float</span>[numAnchors];
+        anchorCy = <span class="hljs-keyword">new</span> <span class="hljs-title class_">float</span>[numAnchors];
+        anchorW = <span class="hljs-keyword">new</span> <span class="hljs-title class_">float</span>[numAnchors];
+        anchorH = <span class="hljs-keyword">new</span> <span class="hljs-title class_">float</span>[numAnchors];
+
+        <span class="hljs-type">int</span> <span class="hljs-variable">idx</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">layerId</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; layerId &lt; numLayers; layerId++) {
+            <span class="hljs-type">int</span> <span class="hljs-variable">stride</span> <span class="hljs-operator">=</span> strides[layerId];
+            <span class="hljs-type">int</span> <span class="hljs-variable">featureH</span> <span class="hljs-operator">=</span> inputHeight / stride;
+            <span class="hljs-type">int</span> <span class="hljs-variable">featureW</span> <span class="hljs-operator">=</span> inputWidth / stride;
+
+            <span class="hljs-type">float</span> <span class="hljs-variable">scale</span> <span class="hljs-operator">=</span> minScale + (maxScale - minScale) * (<span class="hljs-number">2.0f</span> * layerId + <span class="hljs-number">1</span>) / (<span class="hljs-number">2.0f</span> * numLayers);
+            <span class="hljs-type">float</span> <span class="hljs-variable">scaleNext</span> <span class="hljs-operator">=</span> minScale + (maxScale - minScale) * (<span class="hljs-number">2.0f</span> * layerId + <span class="hljs-number">2</span>) / (<span class="hljs-number">2.0f</span> * numLayers);
+
+            <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">y</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; y &lt; featureH; y++) {
+                <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">x</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; x &lt; featureW; x++) {
+                    <span class="hljs-type">float</span> <span class="hljs-variable">cx</span> <span class="hljs-operator">=</span> (x + <span class="hljs-number">0.5f</span>) / featureW;
+                    <span class="hljs-type">float</span> <span class="hljs-variable">cy</span> <span class="hljs-operator">=</span> (y + <span class="hljs-number">0.5f</span>) / featureH;
+
+                    anchorCx[idx] = cx;
+                    anchorCy[idx] = cy;
+                    anchorW[idx] = scale;
+                    anchorH[idx] = scale;
+                    idx++;
+
+                    <span class="hljs-type">float</span> <span class="hljs-variable">interpolatedScale</span> <span class="hljs-operator">=</span> (<span class="hljs-type">float</span>) Math.sqrt(scale * scaleNext);
+                    anchorCx[idx] = cx;
+                    anchorCy[idx] = cy;
+                    anchorW[idx] = interpolatedScale;
+                    anchorH[idx] = interpolatedScale;
+                    idx++;
+                }
+            }
+        }
+    }
+
+    <span class="hljs-keyword">private</span> MappedByteBuffer <span class="hljs-title function_">loadModelFile</span><span class="hljs-params">(String modelPath)</span> <span class="hljs-keyword">throws</span> IOException {
+        <span class="hljs-type">File</span> <span class="hljs-variable">file</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">File</span>(modelPath);
+        <span class="hljs-type">FileInputStream</span> <span class="hljs-variable">inputStream</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileInputStream</span>(file);
+        java.nio.channels.<span class="hljs-type">FileChannel</span> <span class="hljs-variable">fileChannel</span> <span class="hljs-operator">=</span> inputStream.getChannel();
+        <span class="hljs-keyword">return</span> fileChannel.map(java.nio.channels.FileChannel.MapMode.READ_ONLY, <span class="hljs-number">0</span>, fileChannel.size());
+    }
+
+    <span class="hljs-keyword">private</span> File <span class="hljs-title function_">extractAssetToCache</span><span class="hljs-params">(Activity activity, String assetName)</span> {
+        <span class="hljs-type">AssetManager</span> <span class="hljs-variable">assetManager</span> <span class="hljs-operator">=</span> activity.getAssets();
+        <span class="hljs-type">File</span> <span class="hljs-variable">cacheDir</span> <span class="hljs-operator">=</span> activity.getCacheDir();
+        <span class="hljs-type">File</span> <span class="hljs-variable">outFile</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">File</span>(cacheDir, assetName);
+        <span class="hljs-comment">// Always overwrite to ensure latest model is used</span>
+        <span class="hljs-comment">// (remove the .exists() check so new model replaces old cached one)</span>
+        <span class="hljs-keyword">try</span> {
+            <span class="hljs-type">InputStream</span> <span class="hljs-variable">in</span> <span class="hljs-operator">=</span> assetManager.open(assetName);
+            <span class="hljs-type">OutputStream</span> <span class="hljs-variable">out</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileOutputStream</span>(outFile);
+            <span class="hljs-type">byte</span>[] buffer = <span class="hljs-keyword">new</span> <span class="hljs-title class_">byte</span>[<span class="hljs-number">4096</span>];
+            <span class="hljs-type">int</span> read;
+            <span class="hljs-keyword">while</span> ((read = in.read(buffer)) != -<span class="hljs-number">1</span>) out.write(buffer, <span class="hljs-number">0</span>, read);
+            in.close();
+            out.close();
+            Log.d(TAG, <span class="hljs-string">&quot;Model extracted to cache: &quot;</span> + outFile.getAbsolutePath()
+                    + <span class="hljs-string">&quot; (&quot;</span> + outFile.length() + <span class="hljs-string">&quot; bytes)&quot;</span>);
+            <span class="hljs-keyword">return</span> outFile;
+        } <span class="hljs-keyword">catch</span> (IOException e) {
+            Log.e(TAG, <span class="hljs-string">&quot;extractAssetToCache failed&quot;</span>, e);
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+        }
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span>[] getInputDims() {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">int</span>[]{inputHeight, inputWidth, inputChannels};
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">getOutputSize</span><span class="hljs-params">()</span> { <span class="hljs-keyword">return</span> numAnchors * <span class="hljs-number">5</span> + <span class="hljs-number">1</span>; } <span class="hljs-comment">// max possible detections * 5 + count header</span>
+
+    <span class="hljs-comment">/**
+     * Run face detection on the input image.
+     * Returns a flat float array:
+     *   [0] = number of detections
+     *   For each detection i (starting at index 1):
+     *     [1 + i*5 + 0] = ymin (normalized 0-1)
+     *     [1 + i*5 + 1] = xmin (normalized 0-1)
+     *     [1 + i*5 + 2] = ymax (normalized 0-1)
+     *     [1 + i*5 + 3] = xmax (normalized 0-1)
+     *     [1 + i*5 + 4] = score (0-1)
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-type">float</span>[] runFaceDetection(<span class="hljs-type">byte</span>[] imageData) {
+        <span class="hljs-keyword">if</span> (interpreter == <span class="hljs-literal">null</span>) {
+            Log.e(TAG, <span class="hljs-string">&quot;interpreter is null&quot;</span>);
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+        }
+
+        <span class="hljs-keyword">try</span> {
+            <span class="hljs-comment">// Prepare input buffer</span>
+            <span class="hljs-type">int</span> <span class="hljs-variable">inputPixels</span> <span class="hljs-operator">=</span> inputHeight * inputWidth * inputChannels;
+            <span class="hljs-type">int</span> <span class="hljs-variable">inputBytes</span> <span class="hljs-operator">=</span> isFloatInput ? inputPixels * <span class="hljs-number">4</span> : inputPixels;
+            Log.d(TAG, <span class="hljs-string">&quot;Input bytes needed: &quot;</span> + inputBytes + <span class="hljs-string">&quot;, received: &quot;</span> + imageData.length);
+
+            <span class="hljs-keyword">if</span> (isFloatInput) {
+                <span class="hljs-comment">// Model expects float input, convert uint8 RGB888 to float [0, 1]</span>
+                <span class="hljs-type">ByteBuffer</span> <span class="hljs-variable">floatBuffer</span> <span class="hljs-operator">=</span> ByteBuffer.allocateDirect(inputBytes);
+                floatBuffer.order(ByteOrder.nativeOrder());
+
+                <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; imageData.length; i++) {
+                    floatBuffer.putFloat((imageData[i] &amp; <span class="hljs-number">0xFF</span>) / <span class="hljs-number">255.0f</span>);
+                }
+                <span class="hljs-comment">// Pad remaining with zeros</span>
+                <span class="hljs-keyword">while</span> (floatBuffer.position() &lt; inputPixels) {
+                    floatBuffer.putFloat(<span class="hljs-number">0.0f</span>);
+                }
+                floatBuffer.rewind();
+
+                <span class="hljs-comment">// Run inference</span>
+                <span class="hljs-type">float</span>[][][] regressorsOut = <span class="hljs-keyword">new</span> <span class="hljs-title class_">float</span>[<span class="hljs-number">1</span>][numAnchors][<span class="hljs-number">16</span>];
+                <span class="hljs-type">float</span>[][][] classificatorsOut = <span class="hljs-keyword">new</span> <span class="hljs-title class_">float</span>[<span class="hljs-number">1</span>][numAnchors][<span class="hljs-number">1</span>];
+                java.util.Map&lt;Integer, Object&gt; outputs = <span class="hljs-keyword">new</span> <span class="hljs-title class_">java</span>.util.HashMap&lt;&gt;();
+                outputs.put(regressorOutputIdx, regressorsOut);
+                outputs.put(classifierOutputIdx, classificatorsOut);
+                interpreter.runForMultipleInputsOutputs(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>[]{floatBuffer}, outputs);
+
+                <span class="hljs-comment">// Process outputs</span>
+                processOutputs(regressorsOut, classificatorsOut);
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-comment">// Uint8 input: copy bytes directly</span>
+                <span class="hljs-type">ByteBuffer</span> <span class="hljs-variable">inputBuffer</span> <span class="hljs-operator">=</span> ByteBuffer.allocateDirect(inputBytes);
+                inputBuffer.order(ByteOrder.nativeOrder());
+                <span class="hljs-type">int</span> <span class="hljs-variable">copyLen</span> <span class="hljs-operator">=</span> Math.min(imageData.length, inputBytes);
+                inputBuffer.put(imageData, <span class="hljs-number">0</span>, copyLen);
+                <span class="hljs-keyword">while</span> (inputBuffer.position() &lt; inputBytes) {
+                    inputBuffer.put((<span class="hljs-type">byte</span>) <span class="hljs-number">0</span>);
+                }
+                inputBuffer.rewind();
+
+                <span class="hljs-comment">// Run inference</span>
+                <span class="hljs-type">float</span>[][][] regressorsOut = <span class="hljs-keyword">new</span> <span class="hljs-title class_">float</span>[<span class="hljs-number">1</span>][numAnchors][<span class="hljs-number">16</span>];
+                <span class="hljs-type">float</span>[][][] classificatorsOut = <span class="hljs-keyword">new</span> <span class="hljs-title class_">float</span>[<span class="hljs-number">1</span>][numAnchors][<span class="hljs-number">1</span>];
+                java.util.Map&lt;Integer, Object&gt; outputs = <span class="hljs-keyword">new</span> <span class="hljs-title class_">java</span>.util.HashMap&lt;&gt;();
+                outputs.put(regressorOutputIdx, regressorsOut);
+                outputs.put(classifierOutputIdx, classificatorsOut);
+                interpreter.runForMultipleInputsOutputs(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>[]{inputBuffer}, outputs);
+
+                <span class="hljs-comment">// Process outputs</span>
+                processOutputs(regressorsOut, classificatorsOut);
+            }
+
+            <span class="hljs-keyword">return</span> getLastResult();
+
+        } <span class="hljs-keyword">catch</span> (Exception e) {
+            Log.e(TAG, <span class="hljs-string">&quot;runFaceDetection failed&quot;</span>, e);
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+        }
+    }
+
+    <span class="hljs-comment">// Store last detection result</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-type">float</span>[] lastResult = <span class="hljs-literal">null</span>;
+
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">processOutputs</span><span class="hljs-params">(<span class="hljs-type">float</span>[][][] regressorsOut, <span class="hljs-type">float</span>[][][] classificatorsOut)</span> {
+        <span class="hljs-comment">// Flatten 3D output to 1D arrays</span>
+        <span class="hljs-type">float</span>[] regressors = <span class="hljs-keyword">new</span> <span class="hljs-title class_">float</span>[numAnchors * <span class="hljs-number">16</span>];
+        <span class="hljs-type">float</span>[] classificators = <span class="hljs-keyword">new</span> <span class="hljs-title class_">float</span>[numAnchors];
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">a</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; a &lt; numAnchors; a++) {
+            System.arraycopy(regressorsOut[<span class="hljs-number">0</span>][a], <span class="hljs-number">0</span>, regressors, a * <span class="hljs-number">16</span>, <span class="hljs-number">16</span>);
+            classificators[a] = classificatorsOut[<span class="hljs-number">0</span>][a][<span class="hljs-number">0</span>];
+        }
+
+        Log.d(TAG, <span class="hljs-string">&quot;Regressors: &quot;</span> + regressors.length + <span class="hljs-string">&quot;, Classificators: &quot;</span> + classificators.length);
+
+        <span class="hljs-comment">// Debug: log classification score distribution</span>
+        <span class="hljs-type">float</span> <span class="hljs-variable">minLogit</span> <span class="hljs-operator">=</span> Float.MAX_VALUE, maxLogit = -Float.MAX_VALUE;
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">float</span> c : classificators) {
+            <span class="hljs-keyword">if</span> (c &lt; minLogit) minLogit = c;
+            <span class="hljs-keyword">if</span> (c &gt; maxLogit) maxLogit = c;
+        }
+        <span class="hljs-type">float</span> <span class="hljs-variable">minScore</span> <span class="hljs-operator">=</span> <span class="hljs-number">1.0f</span> / (<span class="hljs-number">1.0f</span> + (<span class="hljs-type">float</span>) Math.exp(-minLogit));
+        <span class="hljs-type">float</span> <span class="hljs-variable">maxScore</span> <span class="hljs-operator">=</span> <span class="hljs-number">1.0f</span> / (<span class="hljs-number">1.0f</span> + (<span class="hljs-type">float</span>) Math.exp(-maxLogit));
+        Log.d(TAG, <span class="hljs-string">&quot;Classification logit range: [&quot;</span> + minLogit + <span class="hljs-string">&quot;, &quot;</span> + maxLogit + <span class="hljs-string">&quot;]&quot;</span>);
+        Log.d(TAG, <span class="hljs-string">&quot;Score range (sigmoid): [&quot;</span> + minScore + <span class="hljs-string">&quot;, &quot;</span> + maxScore + <span class="hljs-string">&quot;]&quot;</span>);
+
+        <span class="hljs-comment">// Debug: log raw regressor values for top-scoring anchors</span>
+        <span class="hljs-type">int</span> <span class="hljs-variable">debugCount</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; numAnchors &amp;&amp; debugCount &lt; <span class="hljs-number">3</span>; i++) {
+            <span class="hljs-type">float</span> <span class="hljs-variable">s</span> <span class="hljs-operator">=</span> <span class="hljs-number">1.0f</span> / (<span class="hljs-number">1.0f</span> + (<span class="hljs-type">float</span>) Math.exp(-classificators[i]));
+            <span class="hljs-keyword">if</span> (s &gt; <span class="hljs-number">0.3f</span>) {
+                <span class="hljs-type">int</span> <span class="hljs-variable">base</span> <span class="hljs-operator">=</span> i * <span class="hljs-number">16</span>;
+                Log.d(TAG, <span class="hljs-string">&quot;Top anchor #&quot;</span> + i + <span class="hljs-string">&quot; score=&quot;</span> + s
+                        + <span class="hljs-string">&quot; reg=[y0=&quot;</span> + String.format(<span class="hljs-string">&quot;%.4f&quot;</span>, regressors[base])
+                        + <span class="hljs-string">&quot;, x0=&quot;</span> + String.format(<span class="hljs-string">&quot;%.4f&quot;</span>, regressors[base+<span class="hljs-number">1</span>])
+                        + <span class="hljs-string">&quot;, y1=&quot;</span> + String.format(<span class="hljs-string">&quot;%.4f&quot;</span>, regressors[base+<span class="hljs-number">2</span>])
+                        + <span class="hljs-string">&quot;, x1=&quot;</span> + String.format(<span class="hljs-string">&quot;%.4f&quot;</span>, regressors[base+<span class="hljs-number">3</span>])
+                        + <span class="hljs-string">&quot;] anchor=(&quot;</span> + anchorCx[i] + <span class="hljs-string">&quot;,&quot;</span> + anchorCy[i] + <span class="hljs-string">&quot;)&quot;</span>);
+                debugCount++;
+            }
+        }
+
+        <span class="hljs-comment">// Decode detections</span>
+        lastResult = decodeDetections(regressors, classificators, <span class="hljs-number">0.3f</span>, <span class="hljs-number">0.3f</span>);
+    }
+
+    <span class="hljs-keyword">private</span> <span class="hljs-type">float</span>[] getLastResult() {
+        <span class="hljs-keyword">return</span> lastResult != <span class="hljs-literal">null</span> ? lastResult : <span class="hljs-keyword">new</span> <span class="hljs-title class_">float</span>[]{<span class="hljs-number">0</span>};
+    }
+
+    <span class="hljs-comment">/**
+     * Decode BlazeFace detections.
+     * The 16 regression values per anchor are:
+     *   [0..3] = bounding box: cy, cx, h, w as pixel offsets from anchor center
+     *          normalized by dividing by input dimensions
+     *   [4..15] = 6 face keypoints as (y, x) pairs, same encoding
+     * All output in normalized [0, 1] coordinate space.
+     */</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-type">float</span>[] decodeDetections(<span class="hljs-type">float</span>[] regressors, <span class="hljs-type">float</span>[] classificators,
+                                      <span class="hljs-type">float</span> scoreThreshold, <span class="hljs-type">float</span> iouThreshold) {
+        ArrayList&lt;<span class="hljs-type">float</span>[]&gt; detections = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;(); <span class="hljs-comment">// [ymin, xmin, ymax, xmax, score]</span>
+        <span class="hljs-type">float</span> <span class="hljs-variable">invInputH</span> <span class="hljs-operator">=</span> <span class="hljs-number">1.0f</span> / inputHeight;
+        <span class="hljs-type">float</span> <span class="hljs-variable">invInputW</span> <span class="hljs-operator">=</span> <span class="hljs-number">1.0f</span> / inputWidth;
+
+        <span class="hljs-comment">// Step 1: Decode all anchors</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; numAnchors; i++) {
+            <span class="hljs-type">float</span> <span class="hljs-variable">score</span> <span class="hljs-operator">=</span> <span class="hljs-number">1.0f</span> / (<span class="hljs-number">1.0f</span> + (<span class="hljs-type">float</span>) Math.exp(-classificators[i]));
+            <span class="hljs-keyword">if</span> (score &lt; scoreThreshold) <span class="hljs-keyword">continue</span>;
+
+            <span class="hljs-type">int</span> <span class="hljs-variable">base</span> <span class="hljs-operator">=</span> i * <span class="hljs-number">16</span>;
+
+            <span class="hljs-comment">// Get anchor position</span>
+            <span class="hljs-type">float</span> <span class="hljs-variable">acx</span> <span class="hljs-operator">=</span> <span class="hljs-built_in">this</span>.anchorCx[i];
+            <span class="hljs-type">float</span> <span class="hljs-variable">acy</span> <span class="hljs-operator">=</span> <span class="hljs-built_in">this</span>.anchorCy[i];
+
+            <span class="hljs-comment">// Decode bounding box from first 4 regression values</span>
+            <span class="hljs-comment">// All values are pixel offsets from anchor center, normalized by input size</span>
+            <span class="hljs-type">float</span> <span class="hljs-variable">boxCy</span> <span class="hljs-operator">=</span> acy + regressors[base] * invInputH;
+            <span class="hljs-type">float</span> <span class="hljs-variable">boxCx</span> <span class="hljs-operator">=</span> acx + regressors[base + <span class="hljs-number">1</span>] * invInputW;
+            <span class="hljs-type">float</span> <span class="hljs-variable">boxH</span> <span class="hljs-operator">=</span> regressors[base + <span class="hljs-number">2</span>] * invInputH;
+            <span class="hljs-type">float</span> <span class="hljs-variable">boxW</span> <span class="hljs-operator">=</span> regressors[base + <span class="hljs-number">3</span>] * invInputW;
+
+            <span class="hljs-comment">// Convert center+size to corners (normalized [0,1])</span>
+            <span class="hljs-type">float</span> <span class="hljs-variable">ymin</span> <span class="hljs-operator">=</span> boxCy - boxH / <span class="hljs-number">2.0f</span>;
+            <span class="hljs-type">float</span> <span class="hljs-variable">xmin</span> <span class="hljs-operator">=</span> boxCx - boxW / <span class="hljs-number">2.0f</span>;
+            <span class="hljs-type">float</span> <span class="hljs-variable">ymax</span> <span class="hljs-operator">=</span> boxCy + boxH / <span class="hljs-number">2.0f</span>;
+            <span class="hljs-type">float</span> <span class="hljs-variable">xmax</span> <span class="hljs-operator">=</span> boxCx + boxW / <span class="hljs-number">2.0f</span>;
+
+            <span class="hljs-comment">// Validate box center is in reasonable range</span>
+            <span class="hljs-keyword">if</span> (boxCy &lt; -<span class="hljs-number">0.2f</span> || boxCy &gt; <span class="hljs-number">1.2f</span> || boxCx &lt; -<span class="hljs-number">0.2f</span> || boxCx &gt; <span class="hljs-number">1.2f</span>) <span class="hljs-keyword">continue</span>;
+            <span class="hljs-keyword">if</span> (boxW &lt;= <span class="hljs-number">0</span> || boxH &lt;= <span class="hljs-number">0</span>) <span class="hljs-keyword">continue</span>;
+
+            <span class="hljs-comment">// Optionally refine box using keypoints (values 4..15)</span>
+            <span class="hljs-comment">// Keypoints use same pixel-offset / inputSize encoding</span>
+            <span class="hljs-type">float</span> <span class="hljs-variable">kpMinY</span> <span class="hljs-operator">=</span> ymin, kpMaxY = ymax;
+            <span class="hljs-type">float</span> <span class="hljs-variable">kpMinX</span> <span class="hljs-operator">=</span> xmin, kpMaxX = xmax;
+            <span class="hljs-type">int</span> <span class="hljs-variable">validKps</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;
+
+            <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">k</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; k &lt; <span class="hljs-number">6</span>; k++) {
+                <span class="hljs-type">float</span> <span class="hljs-variable">kpY</span> <span class="hljs-operator">=</span> acy + regressors[base + <span class="hljs-number">4</span> + k * <span class="hljs-number">2</span>] * invInputH;
+                <span class="hljs-type">float</span> <span class="hljs-variable">kpX</span> <span class="hljs-operator">=</span> acx + regressors[base + <span class="hljs-number">4</span> + k * <span class="hljs-number">2</span> + <span class="hljs-number">1</span>] * invInputW;
+
+                <span class="hljs-keyword">if</span> (kpX &gt;= -<span class="hljs-number">0.2f</span> &amp;&amp; kpX &lt;= <span class="hljs-number">1.2f</span> &amp;&amp; kpY &gt;= -<span class="hljs-number">0.2f</span> &amp;&amp; kpY &lt;= <span class="hljs-number">1.2f</span>) {
+                    kpMinY = Math.min(kpMinY, kpY);
+                    kpMaxY = Math.max(kpMaxY, kpY);
+                    kpMinX = Math.min(kpMinX, kpX);
+                    kpMaxX = Math.max(kpMaxX, kpX);
+                    validKps++;
+                }
+            }
+
+            <span class="hljs-comment">// Use union of box and keypoint bounds if we have enough valid keypoints</span>
+            <span class="hljs-type">float</span> finalYmin, finalXmin, finalYmax, finalXmax;
+            <span class="hljs-keyword">if</span> (validKps &gt;= <span class="hljs-number">3</span>) {
+                finalYmin = Math.min(ymin, kpMinY);
+                finalXmin = Math.min(xmin, kpMinX);
+                finalYmax = Math.max(ymax, kpMaxY);
+                finalXmax = Math.max(xmax, kpMaxX);
+            } <span class="hljs-keyword">else</span> {
+                finalYmin = ymin;
+                finalXmin = xmin;
+                finalYmax = ymax;
+                finalXmax = xmax;
+            }
+
+            <span class="hljs-comment">// Add margin (15%)</span>
+            <span class="hljs-type">float</span> <span class="hljs-variable">bW</span> <span class="hljs-operator">=</span> finalXmax - finalXmin;
+            <span class="hljs-type">float</span> <span class="hljs-variable">bH</span> <span class="hljs-operator">=</span> finalYmax - finalYmin;
+            <span class="hljs-type">float</span> <span class="hljs-variable">margin</span> <span class="hljs-operator">=</span> Math.max(bW, bH) * <span class="hljs-number">0.15f</span>;
+
+            <span class="hljs-type">float</span> <span class="hljs-variable">outYmin</span> <span class="hljs-operator">=</span> clamp01(finalYmin - margin);
+            <span class="hljs-type">float</span> <span class="hljs-variable">outXmin</span> <span class="hljs-operator">=</span> clamp01(finalXmin - margin);
+            <span class="hljs-type">float</span> <span class="hljs-variable">outYmax</span> <span class="hljs-operator">=</span> clamp01(finalYmax + margin);
+            <span class="hljs-type">float</span> <span class="hljs-variable">outXmax</span> <span class="hljs-operator">=</span> clamp01(finalXmax + margin);
+
+            <span class="hljs-comment">// Validate box size</span>
+            <span class="hljs-type">float</span> <span class="hljs-variable">finalW</span> <span class="hljs-operator">=</span> outXmax - outXmin;
+            <span class="hljs-type">float</span> <span class="hljs-variable">finalH</span> <span class="hljs-operator">=</span> outYmax - outYmin;
+            <span class="hljs-keyword">if</span> (finalW &lt; <span class="hljs-number">0.02f</span> || finalH &lt; <span class="hljs-number">0.02f</span>) <span class="hljs-keyword">continue</span>;
+            <span class="hljs-keyword">if</span> (finalW &gt; <span class="hljs-number">0.98f</span> || finalH &gt; <span class="hljs-number">0.98f</span>) <span class="hljs-keyword">continue</span>;
+
+            detections.add(<span class="hljs-keyword">new</span> <span class="hljs-title class_">float</span>[]{outYmin, outXmin, outYmax, outXmax, score});
+
+            <span class="hljs-comment">// Debug</span>
+            <span class="hljs-keyword">if</span> (score &gt; <span class="hljs-number">0.5f</span>) {
+                Log.d(TAG, <span class="hljs-string">&quot;Face #&quot;</span> + i + <span class="hljs-string">&quot; score=&quot;</span> + score
+                        + <span class="hljs-string">&quot; anchor=(&quot;</span> + String.format(<span class="hljs-string">&quot;%.3f&quot;</span>, acx) + <span class="hljs-string">&quot;,&quot;</span> + String.format(<span class="hljs-string">&quot;%.3f&quot;</span>, acy) + <span class="hljs-string">&quot;)&quot;</span>
+                        + <span class="hljs-string">&quot; kps=[&quot;</span> + validKps + <span class="hljs-string">&quot;]&quot;</span>
+                        + <span class="hljs-string">&quot; box=[&quot;</span> + String.format(<span class="hljs-string">&quot;%.3f&quot;</span>, outYmin) + <span class="hljs-string">&quot;,&quot;</span> + String.format(<span class="hljs-string">&quot;%.3f&quot;</span>, outXmin)
+                        + <span class="hljs-string">&quot;,&quot;</span> + String.format(<span class="hljs-string">&quot;%.3f&quot;</span>, outYmax) + <span class="hljs-string">&quot;,&quot;</span> + String.format(<span class="hljs-string">&quot;%.3f&quot;</span>, outXmax) + <span class="hljs-string">&quot;]&quot;</span>
+                        + <span class="hljs-string">&quot; raw=(&quot;</span> + String.format(<span class="hljs-string">&quot;%.2f&quot;</span>, regressors[base])
+                        + <span class="hljs-string">&quot;,&quot;</span> + String.format(<span class="hljs-string">&quot;%.2f&quot;</span>, regressors[base+<span class="hljs-number">1</span>])
+                        + <span class="hljs-string">&quot;,&quot;</span> + String.format(<span class="hljs-string">&quot;%.2f&quot;</span>, regressors[base+<span class="hljs-number">2</span>])
+                        + <span class="hljs-string">&quot;,&quot;</span> + String.format(<span class="hljs-string">&quot;%.2f&quot;</span>, regressors[base+<span class="hljs-number">3</span>]) + <span class="hljs-string">&quot;)&quot;</span>
+                        + <span class="hljs-string">&quot; decoded_c=(&quot;</span> + String.format(<span class="hljs-string">&quot;%.3f&quot;</span>, boxCy) + <span class="hljs-string">&quot;,&quot;</span> + String.format(<span class="hljs-string">&quot;%.3f&quot;</span>, boxCx) + <span class="hljs-string">&quot;)&quot;</span>);
+            }
+        }
+
+        Log.d(TAG, <span class="hljs-string">&quot;Anchors above threshold (&quot;</span> + scoreThreshold + <span class="hljs-string">&quot;): &quot;</span> + detections.size());
+
+        <span class="hljs-keyword">if</span> (detections.isEmpty()) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">float</span>[]{<span class="hljs-number">0</span>};
+        }
+
+        <span class="hljs-comment">// Step 2: Sort by score descending</span>
+        <span class="hljs-type">int</span> <span class="hljs-variable">n</span> <span class="hljs-operator">=</span> detections.size();
+        Integer[] order = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Integer</span>[n];
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; n; i++) order[i] = i;
+        Arrays.sort(order, (a, b) -&gt; Float.compare(detections.get(b)[<span class="hljs-number">4</span>], detections.get(a)[<span class="hljs-number">4</span>]));
+
+        <span class="hljs-comment">// Step 3: NMS deduplication</span>
+        <span class="hljs-type">boolean</span>[] suppressed = <span class="hljs-keyword">new</span> <span class="hljs-title class_">boolean</span>[n];
+        ArrayList&lt;Integer&gt; kept = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();
+
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; n; i++) {
+            <span class="hljs-type">int</span> <span class="hljs-variable">ci</span> <span class="hljs-operator">=</span> order[i];
+            <span class="hljs-keyword">if</span> (suppressed[ci]) <span class="hljs-keyword">continue</span>;
+            kept.add(ci);
+            <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">j</span> <span class="hljs-operator">=</span> i + <span class="hljs-number">1</span>; j &lt; n; j++) {
+                <span class="hljs-type">int</span> <span class="hljs-variable">cj</span> <span class="hljs-operator">=</span> order[j];
+                <span class="hljs-keyword">if</span> (suppressed[cj]) <span class="hljs-keyword">continue</span>;
+                <span class="hljs-type">float</span> <span class="hljs-variable">iou</span> <span class="hljs-operator">=</span> computeIoU(detections.get(ci), detections.get(cj));
+                <span class="hljs-keyword">if</span> (iou &gt; iouThreshold) {
+                    suppressed[cj] = <span class="hljs-literal">true</span>;
+                }
+            }
+        }
+
+        Log.d(TAG, <span class="hljs-string">&quot;After NMS: &quot;</span> + kept.size() + <span class="hljs-string">&quot; detections&quot;</span>);
+
+        <span class="hljs-keyword">if</span> (kept.isEmpty()) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">float</span>[]{<span class="hljs-number">0</span>};
+        }
+
+        <span class="hljs-comment">// Step 4: Keep only the detection with the largest area</span>
+        <span class="hljs-type">int</span> <span class="hljs-variable">bestIdx</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;
+        <span class="hljs-type">float</span> <span class="hljs-variable">bestArea</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">k</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; k &lt; kept.size(); k++) {
+            <span class="hljs-type">float</span>[] d = detections.get(kept.get(k));
+            <span class="hljs-type">float</span> <span class="hljs-variable">area</span> <span class="hljs-operator">=</span> (d[<span class="hljs-number">2</span>] - d[<span class="hljs-number">0</span>]) * (d[<span class="hljs-number">3</span>] - d[<span class="hljs-number">1</span>]);
+            <span class="hljs-keyword">if</span> (area &gt; bestArea) {
+                bestArea = area;
+                bestIdx = k;
+            }
+        }
+
+        numDetections = <span class="hljs-number">1</span>;
+        <span class="hljs-type">float</span>[] result = <span class="hljs-keyword">new</span> <span class="hljs-title class_">float</span>[<span class="hljs-number">6</span>];
+        result[<span class="hljs-number">0</span>] = <span class="hljs-number">1</span>;
+        <span class="hljs-type">float</span>[] det = detections.get(kept.get(bestIdx));
+
+        <span class="hljs-comment">// Shift box: down by 1/6 height, left by 1/6 width</span>
+        <span class="hljs-type">float</span> <span class="hljs-variable">boxH</span> <span class="hljs-operator">=</span> det[<span class="hljs-number">2</span>] - det[<span class="hljs-number">0</span>];
+        <span class="hljs-type">float</span> <span class="hljs-variable">boxW</span> <span class="hljs-operator">=</span> det[<span class="hljs-number">3</span>] - det[<span class="hljs-number">1</span>];
+        <span class="hljs-type">float</span> <span class="hljs-variable">shiftY</span> <span class="hljs-operator">=</span> boxH / <span class="hljs-number">6.0f</span>;
+        <span class="hljs-type">float</span> <span class="hljs-variable">shiftX</span> <span class="hljs-operator">=</span> boxW / <span class="hljs-number">6.0f</span>;
+        result[<span class="hljs-number">1</span>] = clamp01(det[<span class="hljs-number">0</span>] + shiftY); <span class="hljs-comment">// ymin down</span>
+        result[<span class="hljs-number">2</span>] = clamp01(det[<span class="hljs-number">1</span>] - shiftX); <span class="hljs-comment">// xmin left</span>
+        result[<span class="hljs-number">3</span>] = clamp01(det[<span class="hljs-number">2</span>] + shiftY); <span class="hljs-comment">// ymax down</span>
+        result[<span class="hljs-number">4</span>] = clamp01(det[<span class="hljs-number">3</span>] - shiftX); <span class="hljs-comment">// xmax left</span>
+        result[<span class="hljs-number">5</span>] = det[<span class="hljs-number">4</span>];
+
+        Log.d(TAG, <span class="hljs-string">&quot;Best face (largest area): score=&quot;</span> + det[<span class="hljs-number">4</span>]
+                + <span class="hljs-string">&quot; area=&quot;</span> + String.format(<span class="hljs-string">&quot;%.4f&quot;</span>, bestArea)
+                + <span class="hljs-string">&quot; box=[&quot;</span> + det[<span class="hljs-number">0</span>] + <span class="hljs-string">&quot;,&quot;</span> + det[<span class="hljs-number">1</span>] + <span class="hljs-string">&quot;,&quot;</span> + det[<span class="hljs-number">2</span>] + <span class="hljs-string">&quot;,&quot;</span> + det[<span class="hljs-number">3</span>] + <span class="hljs-string">&quot;]&quot;</span>);
+
+        <span class="hljs-keyword">return</span> result;
+    }
+
+    <span class="hljs-keyword">private</span> <span class="hljs-type">float</span> <span class="hljs-title function_">clamp01</span><span class="hljs-params">(<span class="hljs-type">float</span> v)</span> {
+        <span class="hljs-keyword">return</span> Math.max(<span class="hljs-number">0</span>, Math.min(<span class="hljs-number">1</span>, v));
+    }
+
+    <span class="hljs-keyword">private</span> <span class="hljs-type">float</span> <span class="hljs-title function_">computeIoU</span><span class="hljs-params">(<span class="hljs-type">float</span>[] boxA, <span class="hljs-type">float</span>[] boxB)</span> {
+        <span class="hljs-type">float</span> <span class="hljs-variable">ymin</span> <span class="hljs-operator">=</span> Math.max(boxA[<span class="hljs-number">0</span>], boxB[<span class="hljs-number">0</span>]);
+        <span class="hljs-type">float</span> <span class="hljs-variable">xmin</span> <span class="hljs-operator">=</span> Math.max(boxA[<span class="hljs-number">1</span>], boxB[<span class="hljs-number">1</span>]);
+        <span class="hljs-type">float</span> <span class="hljs-variable">ymax</span> <span class="hljs-operator">=</span> Math.min(boxA[<span class="hljs-number">2</span>], boxB[<span class="hljs-number">2</span>]);
+        <span class="hljs-type">float</span> <span class="hljs-variable">xmax</span> <span class="hljs-operator">=</span> Math.min(boxA[<span class="hljs-number">3</span>], boxB[<span class="hljs-number">3</span>]);
+
+        <span class="hljs-type">float</span> <span class="hljs-variable">interW</span> <span class="hljs-operator">=</span> Math.max(<span class="hljs-number">0</span>, xmax - xmin);
+        <span class="hljs-type">float</span> <span class="hljs-variable">interH</span> <span class="hljs-operator">=</span> Math.max(<span class="hljs-number">0</span>, ymax - ymin);
+        <span class="hljs-type">float</span> <span class="hljs-variable">interArea</span> <span class="hljs-operator">=</span> interW * interH;
+
+        <span class="hljs-type">float</span> <span class="hljs-variable">areaA</span> <span class="hljs-operator">=</span> (boxA[<span class="hljs-number">2</span>] - boxA[<span class="hljs-number">0</span>]) * (boxA[<span class="hljs-number">3</span>] - boxA[<span class="hljs-number">1</span>]);
+        <span class="hljs-type">float</span> <span class="hljs-variable">areaB</span> <span class="hljs-operator">=</span> (boxB[<span class="hljs-number">2</span>] - boxB[<span class="hljs-number">0</span>]) * (boxB[<span class="hljs-number">3</span>] - boxB[<span class="hljs-number">1</span>]);
+        <span class="hljs-type">float</span> <span class="hljs-variable">unionArea</span> <span class="hljs-operator">=</span> areaA + areaB - interArea;
+
+        <span class="hljs-keyword">return</span> unionArea &gt; <span class="hljs-number">0</span> ? interArea / unionArea : <span class="hljs-number">0</span>;
+    }
+
+    <span class="hljs-comment">/**
+     * Legacy method for backward compatibility.
+     * Returns raw detection results as flat array.
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-type">float</span>[] runInference(<span class="hljs-type">byte</span>[] imageData) {
+        <span class="hljs-keyword">return</span> runFaceDetection(imageData);
+    }
+}
+</code></pre>
+<p>需要完整程序请私信或者留邮箱。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/yolopython实现多种物体识别时钟水杯小熊路人车辆.html">
+      <span>上一篇</span>
+      <strong>YOLOpython实现多种物体识别时钟水杯小熊路人车辆</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/python实现视频目标检测与轨迹跟踪流程详解转载.html">
+      <span>下一篇</span>
+      <strong>Python实现视频目标检测与轨迹跟踪流程详解转载</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/qt6androidc自制美观闹钟.html">QT6AndroidC自制美观闹钟</a></h3>
+        <p class="post-excerpt">该代码实现了一个基于Qt的闹钟应用，主要功能包括：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.902Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/qt6androidc拍照程序.html">QT6AndroidC拍照程序</a></h3>
+        <p class="post-excerpt">该代码实现了一个基于Qt框架的摄像头拍照应用程序。主要功能包括：1) 检查并请求相机权限；2) 初始化摄像头设备，优先选择后置摄像头；3) 提供实时摄像头预览；4) 点击按钮拍照并保存图片。图片会尝试保存到多个可能的位置（如DCIM/Camera、Pictures目录等）。程序还包含状态提示功能，会显示权限请求、摄像头状态、拍照结果等信息。当摄像头错误或保存失败时，会输出相应的错误信息。整个程序通…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.893Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/模仿微信发送消息界面traecn版qt6.html">模仿微信发送消息界面traecn版QT6</a></h3>
+        <p class="post-excerpt">本文介绍了一个基于Qt框架的微信克隆应用主窗口实现。该应用采用左右布局设计，左侧为聊天列表（包含搜索栏和联系人列表），右侧为聊天窗口堆栈。通过QListWidget管理联系人列表，QStackedWidget实现多聊天窗口切换，并支持点击联系人切换对应聊天界面。代码展示了UI初始化、示例联系人创建和信号槽连接等核心功能实现，为开发类微信应用提供了基础框架参考。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.779Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

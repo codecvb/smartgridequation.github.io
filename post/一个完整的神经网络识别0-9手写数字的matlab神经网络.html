@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>一个完整的神经网络识别0 9手写数字的MATLAB神经网络 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">一个完整的神经网络识别0 9手写数字的MATLAB神经网络</h1>
+        <p class="post-deck">本文介绍了一个基于简单神经网络的手写数字识别系统MATLAB实现。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.877Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>21 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-5.html">人工智能</a>
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+            <a class="tag-chip" href="../tags/tag-21.html">神经网络</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文介绍了一个基于简单神经网络的手写数字识别系统MATLAB实现。</p>
+<p>该系统能够识别0-9的手写数字，主要包含四个功能模块：</p>
+<ol>
+<li>
+<p>数据生成模块，模拟16×16像素的手写数字图像；</p>
+</li>
+<li>
+<p>神经网络训练模块，采用单隐藏层结构，使用Sigmoid激活函数和Softmax输出；</p>
+</li>
+<li>
+<p>预测模块，对测试数据进行分类；</p>
+</li>
+<li>
+<p>演示模块，可视化识别过程。</p>
+</li>
+</ol>
+<p>系统实现了完整的工作流程，包括数据预处理、网络训练和性能评估，测试准确率可达较高水平。该实现特别考虑了数值稳定性和实际应用场景，加入了噪声模拟和正则化处理。</p>
+<p><img src="../uploads/csdn/%E4%B8%80%E4%B8%AA%E5%AE%8C%E6%95%B4%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%AF%86%E5%88%AB0-9%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E7%9A%84matlab%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/%E4%B8%80%E4%B8%AA%E5%AE%8C%E6%95%B4%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%AF%86%E5%88%AB0-9%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E7%9A%84matlab%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/img-02.png" alt=""></p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% 手写数字识别系统 - 可完整运行版本</span>
+<span class="hljs-comment">% 使用简单神经网络识别0-9的手写数字</span>
+
+<span class="hljs-comment">% 主函数：演示手写数字识别流程</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handwriting_recognition_demo</span><span class="hljs-params">()</span></span>
+    <span class="hljs-comment">% 1. 生成训练和测试数据</span>
+    [X_train, y_train, X_test, y_test] = generate_handwriting_data(<span class="hljs-number">500</span>, <span class="hljs-number">100</span>);
+
+    <span class="hljs-comment">% 2. 训练神经网络</span>
+    hidden_size = <span class="hljs-number">32</span>;      <span class="hljs-comment">% 隐藏层神经元数量</span>
+    learning_rate = <span class="hljs-number">0.05</span>;  <span class="hljs-comment">% 学习率</span>
+    epochs = <span class="hljs-number">20000</span>;        <span class="hljs-comment">% 训练轮数</span>
+    model = train_handwriting_network(X_train, y_train, hidden_size, learning_rate, epochs);
+
+    <span class="hljs-comment">% 3. 在测试集上评估</span>
+    [y_pred, ~] = predict_handwriting(model, X_test);
+    accuracy = <span class="hljs-built_in">mean</span>(y_pred == y_test);
+    fprintf(<span class="hljs-string">&#x27;测试集准确率: %.2f%%\n&#x27;</span>, accuracy * <span class="hljs-number">100</span>);
+
+    <span class="hljs-comment">% 4. 演示单个数字识别</span>
+    demo_recognition(model);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 生成模拟手写数字数据（16x16像素）</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">[X_train, y_train, X_test, y_test]</span> = <span class="hljs-title">generate_handwriting_data</span><span class="hljs-params">(train_size, test_size)</span></span>
+    <span class="hljs-comment">% 每个数字图像为16x16像素（256个特征）</span>
+    img_size = <span class="hljs-number">16</span>;
+    input_size = img_size * img_size;
+    num_classes = <span class="hljs-number">10</span>;  <span class="hljs-comment">% 0-9</span>
+
+    <span class="hljs-comment">% 确保输入参数有效</span>
+    <span class="hljs-keyword">if</span> train_size &lt;= <span class="hljs-number">0</span> || test_size &lt;= <span class="hljs-number">0</span>
+        error(<span class="hljs-string">&#x27;样本数量必须为正数&#x27;</span>);
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 生成训练数据</span>
+    X_train = <span class="hljs-built_in">zeros</span>(train_size, input_size);
+    y_train = <span class="hljs-built_in">zeros</span>(train_size, <span class="hljs-number">1</span>);
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:train_size
+        digit = randi([<span class="hljs-number">0</span>, <span class="hljs-number">9</span>]);
+        y_train(<span class="hljs-built_in">i</span>) = digit;
+        X_train(<span class="hljs-built_in">i</span>, :) = generate_digit_image(digit, img_size);
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 生成测试数据</span>
+    X_test = <span class="hljs-built_in">zeros</span>(test_size, input_size);
+    y_test = <span class="hljs-built_in">zeros</span>(test_size, <span class="hljs-number">1</span>);
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:test_size
+        digit = randi([<span class="hljs-number">0</span>, <span class="hljs-number">9</span>]);
+        y_test(<span class="hljs-built_in">i</span>) = digit;
+        X_test(<span class="hljs-built_in">i</span>, :) = generate_digit_image(digit, img_size);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 生成单个数字的图像数据（改进版，更稳定）</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">img_vec</span> = <span class="hljs-title">generate_digit_image</span><span class="hljs-params">(digit, img_size)</span></span>
+    <span class="hljs-comment">% 创建空白图像</span>
+    img = <span class="hljs-built_in">zeros</span>(img_size);
+    pad = <span class="hljs-number">2</span>;  <span class="hljs-comment">% 边距</span>
+    inner_size = img_size - <span class="hljs-number">2</span>*pad;
+    <span class="hljs-keyword">if</span> inner_size &lt; <span class="hljs-number">5</span>
+        error(<span class="hljs-string">&#x27;图像尺寸太小，无法生成有效数字&#x27;</span>);
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 在内部区域绘制数字</span>
+    [x, y] = <span class="hljs-built_in">meshgrid</span>(<span class="hljs-number">1</span>:inner_size);
+    x = x + pad;
+    y = y + pad;
+    mid = <span class="hljs-built_in">round</span>(img_size / <span class="hljs-number">2</span>);
+
+    <span class="hljs-comment">% 绘制不同数字</span>
+    <span class="hljs-keyword">switch</span> digit
+        <span class="hljs-keyword">case</span> <span class="hljs-number">0</span>  <span class="hljs-comment">% 圆形</span>
+            r = <span class="hljs-built_in">round</span>(inner_size/<span class="hljs-number">2</span>) - <span class="hljs-number">1</span>;
+            img( ((x - mid).^<span class="hljs-number">2</span> + (y - mid).^<span class="hljs-number">2</span>) &lt;= r^<span class="hljs-number">2</span> ) = <span class="hljs-number">1</span>;
+            img( ((x - mid).^<span class="hljs-number">2</span> + (y - mid).^<span class="hljs-number">2</span>) &lt;= (r<span class="hljs-number">-2</span>)^<span class="hljs-number">2</span> ) = <span class="hljs-number">0</span>;
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">1</span>  <span class="hljs-comment">% 竖线</span>
+            img(:, mid<span class="hljs-number">-1</span>:mid) = <span class="hljs-number">1</span>;
+            img(<span class="hljs-number">1</span>:pad, :) = <span class="hljs-number">0</span>;  <span class="hljs-comment">% 顶部留空</span>
+            img(<span class="hljs-keyword">end</span>-pad+<span class="hljs-number">1</span>:<span class="hljs-keyword">end</span>, :) = <span class="hljs-number">0</span>;  <span class="hljs-comment">% 底部留空</span>
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">2</span>  <span class="hljs-comment">% 数字2</span>
+            img(pad, pad:mid) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 上横线</span>
+            img(pad:mid, mid) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 右竖线</span>
+            img(mid, pad:mid) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 中横线</span>
+            img(mid:<span class="hljs-keyword">end</span>-pad, pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 左竖线</span>
+            img(<span class="hljs-keyword">end</span>-pad, pad:<span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 下横线</span>
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">3</span>  <span class="hljs-comment">% 数字3</span>
+            img(pad, pad:<span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 上横线</span>
+            img(pad:mid, <span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 右上竖线</span>
+            img(mid, pad:<span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 中横线</span>
+            img(mid:<span class="hljs-keyword">end</span>-pad, <span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 右下竖线</span>
+            img(<span class="hljs-keyword">end</span>-pad, pad:<span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 下横线</span>
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">4</span>  <span class="hljs-comment">% 数字4</span>
+            img(pad:mid, pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 左竖线</span>
+            img(pad:mid, mid) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 中竖线</span>
+            img(mid, pad:mid) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 中横线</span>
+            img(:, mid) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 右竖线</span>
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">5</span>  <span class="hljs-comment">% 数字5</span>
+            img(pad, pad:<span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 上横线</span>
+            img(pad:mid, pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 左上竖线</span>
+            img(mid, pad:mid) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 中横线</span>
+            img(mid:<span class="hljs-keyword">end</span>-pad, <span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 右下竖线</span>
+            img(<span class="hljs-keyword">end</span>-pad, pad:<span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 下横线</span>
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">6</span>  <span class="hljs-comment">% 数字6</span>
+            img(pad:<span class="hljs-keyword">end</span>-pad, pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 左竖线</span>
+            img(pad, pad:<span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 上横线</span>
+            img(<span class="hljs-keyword">end</span>-pad, pad:<span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 下横线</span>
+            img(mid:<span class="hljs-keyword">end</span>-pad, <span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 右下竖线</span>
+            img(pad:mid, <span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 右上竖线</span>
+            img(mid, pad:mid) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 中横线</span>
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">7</span>  <span class="hljs-comment">% 数字7</span>
+            img(pad, pad:<span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 上横线</span>
+            img(pad:<span class="hljs-keyword">end</span>-pad, <span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 右竖线</span>
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">8</span>  <span class="hljs-comment">% 数字8</span>
+            img(pad:<span class="hljs-keyword">end</span>-pad, pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 左竖线</span>
+            img(pad:<span class="hljs-keyword">end</span>-pad, <span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 右竖线</span>
+            img(pad, pad:<span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 上横线</span>
+            img(<span class="hljs-keyword">end</span>-pad, pad:<span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 下横线</span>
+            img(mid, pad:<span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 中横线</span>
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">9</span>  <span class="hljs-comment">% 数字9</span>
+            img(pad:mid, pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 左竖线</span>
+            img(pad:<span class="hljs-keyword">end</span>-pad, <span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 右竖线</span>
+            img(pad, pad:<span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 上横线</span>
+            img(mid, pad:<span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 中横线</span>
+            img(<span class="hljs-keyword">end</span>-pad, mid:<span class="hljs-keyword">end</span>-pad) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 下横线</span>
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 添加随机噪声使更接近真实手写</span>
+    noise = <span class="hljs-built_in">randn</span>(<span class="hljs-built_in">size</span>(img)) * <span class="hljs-number">0.15</span>;
+    img = img + noise;
+    img = <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">min</span>(<span class="hljs-number">1</span>, img));  <span class="hljs-comment">% 归一化到0-1范围</span>
+
+    <span class="hljs-comment">% 转换为向量</span>
+    img_vec = img(:)&#x27;;
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 训练手写识别神经网络（多分类版本）</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">model</span> = <span class="hljs-title">train_handwriting_network</span><span class="hljs-params">(X, y, hidden_size, learning_rate, epochs)</span></span>
+    [num_samples, input_size] = <span class="hljs-built_in">size</span>(X);
+    num_classes = <span class="hljs-number">10</span>;  <span class="hljs-comment">% 0-9共10个数字</span>
+
+    <span class="hljs-comment">% 检查输入有效性</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">size</span>(y, <span class="hljs-number">1</span>) ~= num_samples
+        error(<span class="hljs-string">&#x27;标签数量与样本数量不匹配&#x27;</span>);
+    <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">if</span> any(y &lt; <span class="hljs-number">0</span> | y &gt; <span class="hljs-number">9</span>)
+        error(<span class="hljs-string">&#x27;标签必须是0-9之间的整数&#x27;</span>);
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 将标签转换为独热编码</span>
+    y_onehot = <span class="hljs-built_in">zeros</span>(num_samples, num_classes);
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:num_samples
+        y_onehot(<span class="hljs-built_in">i</span>, y(<span class="hljs-built_in">i</span>) + <span class="hljs-number">1</span>) = <span class="hljs-number">1</span>;  <span class="hljs-comment">% +1因为MATLAB索引从1开始</span>
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 初始化权重和偏置</span>
+    rng(<span class="hljs-number">42</span>);  <span class="hljs-comment">% 设置随机种子，确保结果可重复</span>
+    W1 = <span class="hljs-built_in">randn</span>(input_size, hidden_size) * <span class="hljs-number">0.01</span>;
+    b1 = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">1</span>, hidden_size);
+    W2 = <span class="hljs-built_in">randn</span>(hidden_size, num_classes) * <span class="hljs-number">0.01</span>;
+    b2 = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">1</span>, num_classes);
+
+    <span class="hljs-comment">% 训练网络</span>
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:epochs
+        <span class="hljs-comment">% 前向传播</span>
+        Z1 = X * W1 + <span class="hljs-built_in">repmat</span>(b1, num_samples, <span class="hljs-number">1</span>);
+        A1 = sigmoid(Z1);
+        Z2 = A1 * W2 + <span class="hljs-built_in">repmat</span>(b2, num_samples, <span class="hljs-number">1</span>);
+        A2 = softmax(Z2);  <span class="hljs-comment">% 多分类使用softmax</span>
+
+        <span class="hljs-comment">% 计算损失</span>
+        loss = -<span class="hljs-built_in">mean</span>(sum(y_onehot .* <span class="hljs-built_in">log</span>(A2 + <span class="hljs-number">1e-10</span>), <span class="hljs-number">2</span>));  <span class="hljs-comment">% 加小值防止log(0)</span>
+
+        <span class="hljs-comment">% 每2000轮打印一次损失</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">mod</span>(<span class="hljs-built_in">i</span>, <span class="hljs-number">2000</span>) == <span class="hljs-number">0</span>
+            fprintf(<span class="hljs-string">&#x27;Epoch %d, Loss: %.4f\n&#x27;</span>, <span class="hljs-built_in">i</span>, loss);
+        <span class="hljs-keyword">end</span>
+
+        <span class="hljs-comment">% 反向传播</span>
+        dZ2 = A2 - y_onehot;
+        dW2 = (A1&#x27; * dZ2) / num_samples;
+        db2 = <span class="hljs-built_in">mean</span>(dZ2);
+
+        dZ1 = (dZ2 * W2&#x27;) .* sigmoid_derivative(Z1);
+        dW1 = (X&#x27; * dZ1) / num_samples;
+        db1 = <span class="hljs-built_in">mean</span>(dZ1);
+
+        <span class="hljs-comment">% 更新参数</span>
+        W1 = W1 - learning_rate * dW1;
+        b1 = b1 - learning_rate * db1;
+        W2 = W2 - learning_rate * dW2;
+        b2 = b2 - learning_rate * db2;
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 保存模型</span>
+    model.W1 = W1;
+    model.b1 = b1;
+    model.W2 = W2;
+    model.b2 = b2;
+    model.num_classes = num_classes;
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 预测手写数字</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">[y_pred, probabilities]</span> = <span class="hljs-title">predict_handwriting</span><span class="hljs-params">(model, X)</span></span>
+    num_samples = <span class="hljs-built_in">size</span>(X, <span class="hljs-number">1</span>);
+
+    <span class="hljs-comment">% 前向传播</span>
+    Z1 = X * model.W1 + <span class="hljs-built_in">repmat</span>(model.b1, num_samples, <span class="hljs-number">1</span>);
+    A1 = sigmoid(Z1);
+    Z2 = A1 * model.W2 + <span class="hljs-built_in">repmat</span>(model.b2, num_samples, <span class="hljs-number">1</span>);
+    probabilities = softmax(Z2);
+
+    <span class="hljs-comment">% 找到概率最大的类别</span>
+    [~, indices] = <span class="hljs-built_in">max</span>(probabilities, [], <span class="hljs-number">2</span>);
+    y_pred = indices - <span class="hljs-number">1</span>;  <span class="hljs-comment">% 转换回0-9的数字</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 演示单个手写数字识别</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">demo_recognition</span><span class="hljs-params">(model)</span></span>
+    img_size = <span class="hljs-number">16</span>;
+    <span class="hljs-comment">% 选择几个典型数字进行演示</span>
+    test_digits = [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">7</span>, <span class="hljs-number">9</span>];
+    test_idx = randi(<span class="hljs-built_in">length</span>(test_digits));
+    test_digit = test_digits(test_idx);
+    fprintf(<span class="hljs-string">&#x27;\n演示识别数字 %d...\n&#x27;</span>, test_digit);
+
+    <span class="hljs-comment">% 生成该数字的图像</span>
+    img_vec = generate_digit_image(test_digit, img_size);
+    img = <span class="hljs-built_in">reshape</span>(img_vec, [img_size, img_size]);
+
+    <span class="hljs-comment">% 显示图像</span>
+    <span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Name&#x27;</span>, <span class="hljs-string">&#x27;手写数字识别演示&#x27;</span>);
+    imshow(img, []);
+    title([<span class="hljs-string">&#x27;待识别数字图像 (实际是 &#x27;</span>, num2str(test_digit), <span class="hljs-string">&#x27;)&#x27;</span>]);
+
+    <span class="hljs-comment">% 进行识别</span>
+    [predicted_digit, probs] = predict_handwriting(model, img_vec);
+    fprintf(<span class="hljs-string">&#x27;神经网络识别结果: %d\n&#x27;</span>, predicted_digit);
+    fprintf(<span class="hljs-string">&#x27;识别置信度: %.2f%%\n&#x27;</span>, <span class="hljs-built_in">max</span>(probs) * <span class="hljs-number">100</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% Sigmoid激活函数</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">s</span> = <span class="hljs-title">sigmoid</span><span class="hljs-params">(x)</span></span>
+    s = <span class="hljs-number">1</span> ./ (<span class="hljs-number">1</span> + <span class="hljs-built_in">exp</span>(-x));
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% Sigmoid导数</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ds</span> = <span class="hljs-title">sigmoid_derivative</span><span class="hljs-params">(x)</span></span>
+    s = sigmoid(x);
+    ds = s .* (<span class="hljs-number">1</span> - s);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% Softmax函数（用于多分类输出）</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sm</span> = <span class="hljs-title">softmax</span><span class="hljs-params">(x)</span></span>
+    <span class="hljs-comment">% 减去每行最大值防止数值溢出</span>
+    exp_x = <span class="hljs-built_in">exp</span>(x - <span class="hljs-built_in">max</span>(x, [], <span class="hljs-number">2</span>));
+    sm = exp_x ./ sum(exp_x, <span class="hljs-number">2</span>);
+<span class="hljs-keyword">end</span>
+
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/人工智能大模型是怎样喂数据的.html">
+      <span>上一篇</span>
+      <strong>人工智能大模型是怎样喂数据的</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/yolop车道检测.html">
+      <span>下一篇</span>
+      <strong>YOLOP车道检测</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/神经网络解决图论中最优路径的问题matlab代码.html">神经网络解决图论中最优路径的问题MATLAB代码</a></h3>
+        <p class="post-excerpt">解决思路</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.288Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/matlab实现神经网络的ocr识别.html">MATLAB实现神经网络的OCR识别</a></h3>
+        <p class="post-excerpt">使用说明：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.694Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于改进标准映射的图像加密算法matlab代码版本.html">基于改进标准映射的图像加密算法MATLAB代码版本</a></h3>
+        <p class="post-excerpt">!在这里插入图片描述代码运行结果如上图</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.037Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

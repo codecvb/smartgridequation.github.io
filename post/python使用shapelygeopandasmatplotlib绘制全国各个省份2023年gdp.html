@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Python使用shapelygeopandasmatplotlib绘制全国各个省份2023年GDP · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">Python使用shapelygeopandasmatplotlib绘制全国各个省份2023年GDP</h1>
+        <p class="post-deck">以下是一个示例代码，用于在使用matplotlib和geopandas绘制地图并设置区域后，当鼠标点击地图上的某个区域时，返回该区域的名称。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.210Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>13 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>以下是一个示例代码，用于在使用<code>matplotlib</code>和<code>geopandas</code>绘制地图并设置区域后，当鼠标点击地图上的某个区域时，返回该区域的名称。</p>
+<p>首先，确保你已经安装了<code>matplotlib</code>、<code>geopandas</code>和<code>descartes</code>库（<code>descartes</code>库用于在<code>matplotlib</code>中绘制地理空间数据）。如果没有安装，可以通过<code>pip install matplotlib geopandas descartes</code>进行安装。</p>
+<p>另外，你需要一份中国省级行政区划的地理空间数据文件（比如 Shapefile 格式），这里假设已经有了一个名为<code>china_provinces.shp</code>的文件，它包含了中国各省份的几何边界信息。你可以从相关地理数据平台获取这样的文件。</p>
+<p><a href="https://pan.baidu.com/s/1JuX6nUjbSzsf5DgU13HMtQ" title="省份数据地图获取——提取码：7clz">省份数据地图获取——提取码：7clz</a></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> geopandas <span class="hljs-keyword">as</span> gpd
+<span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+<span class="hljs-keyword">from</span> plotly.subplots <span class="hljs-keyword">import</span> make_subplots
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> shapely.geometry <span class="hljs-keyword">import</span> Point
+
+<span class="hljs-keyword">from</span> pypinyin <span class="hljs-keyword">import</span> pinyin, Style
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">to_pinyin</span>(<span class="hljs-params">text, style=Style.TONE</span>):
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;&#x27;</span>.join([i[<span class="hljs-number">0</span>] <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> pinyin(text, style=style)])
+
+<span class="hljs-comment"># 读取中国省份的GeoJSON数据</span>
+china_geojson = gpd.read_file(<span class="hljs-string">&#x27;省.shp&#x27;</span>)  <span class="hljs-comment"># 请确保路径正确，且文件是GeoJSON格式</span>
+gdp_data_t = {
+    <span class="hljs-string">&quot;广东&quot;</span>: <span class="hljs-number">130518.8</span>,
+    <span class="hljs-string">&quot;江苏&quot;</span>: <span class="hljs-number">92595.4</span>,
+    <span class="hljs-string">&quot;山东&quot;</span>: <span class="hljs-number">92069.0</span>,
+    <span class="hljs-string">&quot;浙江&quot;</span>: <span class="hljs-number">83467.3</span>,
+    <span class="hljs-string">&quot;河南&quot;</span>: <span class="hljs-number">48056.0</span>,
+    <span class="hljs-string">&quot;四川&quot;</span>: <span class="hljs-number">60132.9</span>,
+    <span class="hljs-string">&quot;湖北&quot;</span>: <span class="hljs-number">39367.0</span>,
+    <span class="hljs-string">&quot;湖南&quot;</span>: <span class="hljs-number">36426.0</span>,
+    <span class="hljs-string">&quot;河北&quot;</span>: <span class="hljs-number">36010.0</span>,
+    <span class="hljs-string">&quot;福建&quot;</span>: <span class="hljs-number">35804.0</span>,
+    <span class="hljs-string">&quot;上海&quot;</span>: <span class="hljs-number">32680.0</span>,
+    <span class="hljs-string">&quot;北京&quot;</span>: <span class="hljs-number">30320.0</span>,
+    <span class="hljs-string">&quot;安徽&quot;</span>: <span class="hljs-number">30007.0</span>,
+    <span class="hljs-string">&quot;辽宁&quot;</span>: <span class="hljs-number">25315.0</span>,
+    <span class="hljs-string">&quot;陕西&quot;</span>: <span class="hljs-number">24438.0</span>,
+    <span class="hljs-string">&quot;江西&quot;</span>: <span class="hljs-number">21985.0</span>,
+    <span class="hljs-string">&quot;重庆&quot;</span>: <span class="hljs-number">20363.0</span>,
+    <span class="hljs-string">&quot;广西&quot;</span>: <span class="hljs-number">20353.0</span>,
+    <span class="hljs-string">&quot;天津&quot;</span>: <span class="hljs-number">18810.0</span>,
+    <span class="hljs-string">&quot;云南&quot;</span>: <span class="hljs-number">17881.0</span>,
+    <span class="hljs-string">&quot;内蒙古&quot;</span>: <span class="hljs-number">17289.0</span>,
+    <span class="hljs-string">&quot;山西&quot;</span>: <span class="hljs-number">16818.0</span>,
+    <span class="hljs-string">&quot;黑龙江&quot;</span>: <span class="hljs-number">16362.0</span>,
+    <span class="hljs-string">&quot;吉林&quot;</span>: <span class="hljs-number">15075.0</span>,
+    <span class="hljs-string">&quot;贵州&quot;</span>: <span class="hljs-number">14806.0</span>,
+    <span class="hljs-string">&quot;新疆&quot;</span>: <span class="hljs-number">12199.0</span>,
+    <span class="hljs-string">&quot;甘肃&quot;</span>: <span class="hljs-number">8246.0</span>,
+    <span class="hljs-string">&quot;海南&quot;</span>: <span class="hljs-number">4832.0</span>,
+    <span class="hljs-string">&quot;宁夏&quot;</span>: <span class="hljs-number">3705.0</span>,
+    <span class="hljs-string">&quot;青海&quot;</span>: <span class="hljs-number">2865.0</span>,
+    <span class="hljs-string">&quot;西藏&quot;</span>: <span class="hljs-number">1478.0</span>
+}
+<span class="hljs-comment"># 示例数据：假设我们有一些省份的2023年GDP总量数据</span>
+gdp_data = {
+    <span class="hljs-string">&#x27;Province&#x27;</span>: [
+    <span class="hljs-string">&quot;北京市&quot;</span>, <span class="hljs-string">&quot;天津市&quot;</span>, <span class="hljs-string">&quot;河北省&quot;</span>, <span class="hljs-string">&quot;山西省&quot;</span>, <span class="hljs-string">&quot;内蒙古自治区&quot;</span>,
+    <span class="hljs-string">&quot;辽宁省&quot;</span>, <span class="hljs-string">&quot;吉林省&quot;</span>, <span class="hljs-string">&quot;黑龙江省&quot;</span>, <span class="hljs-string">&quot;上海市&quot;</span>, <span class="hljs-string">&quot;江苏省&quot;</span>,
+    <span class="hljs-string">&quot;浙江省&quot;</span>, <span class="hljs-string">&quot;安徽省&quot;</span>, <span class="hljs-string">&quot;福建省&quot;</span>, <span class="hljs-string">&quot;江西省&quot;</span>, <span class="hljs-string">&quot;山东省&quot;</span>,
+    <span class="hljs-string">&quot;河南省&quot;</span>, <span class="hljs-string">&quot;湖北省&quot;</span>, <span class="hljs-string">&quot;湖南省&quot;</span>, <span class="hljs-string">&quot;广东省&quot;</span>, <span class="hljs-string">&quot;广西壮族自治区&quot;</span>,
+    <span class="hljs-string">&quot;海南省&quot;</span>, <span class="hljs-string">&quot;重庆市&quot;</span>, <span class="hljs-string">&quot;四川省&quot;</span>, <span class="hljs-string">&quot;贵州省&quot;</span>, <span class="hljs-string">&quot;云南省&quot;</span>,
+    <span class="hljs-string">&quot;西藏自治区&quot;</span>, <span class="hljs-string">&quot;陕西省&quot;</span>, <span class="hljs-string">&quot;甘肃省&quot;</span>, <span class="hljs-string">&quot;青海省&quot;</span>, <span class="hljs-string">&quot;宁夏回族自治区&quot;</span>,
+    <span class="hljs-string">&quot;新疆维吾尔自治区&quot;</span>, <span class="hljs-string">&quot;台湾省&quot;</span>, <span class="hljs-string">&quot;香港特别行政区&quot;</span>, <span class="hljs-string">&quot;澳门特别行政区&quot;</span>
+    ],
+    <span class="hljs-string">&#x27;value&#x27;</span>:  [
+    <span class="hljs-number">30320.0</span>, <span class="hljs-number">18810.0</span>, <span class="hljs-number">36010.0</span>, <span class="hljs-number">16818.0</span>, <span class="hljs-number">17289.0</span>,
+    <span class="hljs-number">25315.0</span>, <span class="hljs-number">15075.0</span>, <span class="hljs-number">16362.0</span>, <span class="hljs-number">32680.0</span>, <span class="hljs-number">92595.4</span>,
+    <span class="hljs-number">83467.3</span>, <span class="hljs-number">30007.0</span>, <span class="hljs-number">35804.0</span>, <span class="hljs-number">21985.0</span>, <span class="hljs-number">92069.0</span>,
+    <span class="hljs-number">48056.0</span>, <span class="hljs-number">39367.0</span>, <span class="hljs-number">36426.0</span>, <span class="hljs-number">130518.8</span>, <span class="hljs-number">20353.0</span>,
+    <span class="hljs-number">4832.0</span>, <span class="hljs-number">20363.0</span>, <span class="hljs-number">60132.9</span>, <span class="hljs-number">14806.0</span>, <span class="hljs-number">17881.0</span>,
+    <span class="hljs-number">1478.0</span>, <span class="hljs-number">24438.0</span>, <span class="hljs-number">8246.0</span>, <span class="hljs-number">2865.0</span>, <span class="hljs-number">3705.0</span>,
+    <span class="hljs-number">12199.0</span>, <span class="hljs-number">11000</span>, <span class="hljs-number">11000</span>, <span class="hljs-number">11000</span>  <span class="hljs-comment"># 台湾省、香港特别行政区、澳门特别行政区暂无示例数据，实际可补充准确数据</span>
+    ]
+}
+
+gdp_df = pd.DataFrame(gdp_data)
+
+merged = china_geojson.set_index(<span class="hljs-string">&#x27;省&#x27;</span>).join(gdp_df.set_index(<span class="hljs-string">&#x27;Province&#x27;</span>))
+
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">20</span>, <span class="hljs-number">36</span>))
+
+<span class="hljs-comment"># 定义鼠标点击事件处理函数</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">on_click</span>(<span class="hljs-params">event</span>):
+    <span class="hljs-keyword">if</span> event.inaxes == ax:
+        <span class="hljs-keyword">for</span> index, row <span class="hljs-keyword">in</span> china_geojson.iterrows():
+            poly = row[<span class="hljs-string">&#x27;geometry&#x27;</span>]
+            point = Point(event.xdata,  event.ydata)
+            <span class="hljs-keyword">if</span> poly.contains(point):
+                <span class="hljs-keyword">for</span> key, value <span class="hljs-keyword">in</span> gdp_data_t.items():
+                    <span class="hljs-comment">#print(key, value)</span>
+                    <span class="hljs-keyword">if</span> key <span class="hljs-keyword">in</span> row[<span class="hljs-string">&#x27;省&#x27;</span>]:
+                        <span class="hljs-built_in">print</span>(key, value)
+                        value = gdp_data_t[key]
+                        <span class="hljs-built_in">print</span>(value)
+                        <span class="hljs-keyword">break</span>
+                name = to_pinyin(row[<span class="hljs-string">&#x27;省&#x27;</span>])
+                <span class="hljs-built_in">print</span>(name)
+                plt.annotate(<span class="hljs-string">f&quot;<span class="hljs-subst">{name}</span>: <span class="hljs-subst">{value}</span>&quot;</span>, xy=(event.xdata, event.ydata), xytext=(<span class="hljs-number">10</span>, <span class="hljs-number">10</span>),
+                            textcoords=<span class="hljs-string">&#x27;offset points&#x27;</span>, bbox=<span class="hljs-built_in">dict</span>(boxstyle=<span class="hljs-string">&#x27;round,pad=0.5&#x27;</span>, fc=<span class="hljs-string">&#x27;yellow&#x27;</span>, alpha=<span class="hljs-number">0.5</span>),
+                            arrowprops=<span class="hljs-built_in">dict</span>(arrowstyle=<span class="hljs-string">&#x27;-&gt;&#x27;</span>, connectionstyle=<span class="hljs-string">&#x27;arc3,rad=0&#x27;</span>))
+                fig.canvas.draw_idle()
+                <span class="hljs-keyword">break</span>
+
+
+<span class="hljs-comment"># 连接鼠标点击事件到处理函数</span>
+cid = fig.canvas.mpl_connect(<span class="hljs-string">&#x27;button_press_event&#x27;</span>, on_click)
+
+plt.title(to_pinyin(<span class="hljs-string">&#x27;全国热力图&#x27;</span>))
+
+merged.plot(column=<span class="hljs-string">&#x27;value&#x27;</span>, cmap=<span class="hljs-string">&#x27;OrRd&#x27;</span>, linewidth=<span class="hljs-number">0.8</span>, ax=ax, edgecolor=<span class="hljs-string">&#x27;0.8&#x27;</span>, legend=<span class="hljs-literal">True</span>)
+
+plt.show()
+</code></pre>
+<h4 id="数据准备" class="prose-heading">数据准备</h4>
+<ol>
+<li>首先使用<code>geopandas</code>的<code>read_file</code>方法读取了包含中国各省份几何边界信息的地理空间数据文件（<code>china_provinces.shp</code>），得到一个<code>GeoDataFrame</code>对象<code>china_map</code>。</li>
+<li>然后为每个省份生成了一个示例数值，这里假设是虚构的人口数量，并将其添加到<code>china_map</code>的新列<code>population</code>中。</li>
+</ol>
+<h4 id="地图绘制" class="prose-heading">地图绘制</h4>
+<ol>
+<li>创建了一个<code>matplotlib</code>的图形和坐标轴对象<code>fig</code>和<code>ax</code>，并设置了合适的图形大小。</li>
+<li>通过遍历<code>china_map</code>的每一行，对于每个省份的几何边界信息：
+<ul>
+<li>使用<code>descartes</code>库的<code>PolygonPatch</code>将其转换为可以在<code>matplotlib</code>中绘制的多边形补丁对象，并设置其填充颜色为<code>none</code>，边框颜色为<code>black</code>，然后添加到坐标轴<code>ax</code>上。</li>
+<li>计算省份几何形状的质心坐标，并在质心位置添加省份名称作为标签，设置了合适的字体大小和对齐方式。</li>
+</ul>
+</li>
+</ol>
+<h4 id="鼠标点击事件处理" class="prose-heading">鼠标点击事件处理</h4>
+<ol>
+<li>定义了<code>on_click</code>函数作为鼠标点击事件的处理函数：
+<ul>
+<li>首先判断点击事件是否发生在当前坐标轴<code>ax</code>内。</li>
+<li>如果在坐标轴内，通过遍历<code>china_map</code>的每一行，检查每个省份的几何边界是否包含点击的坐标点（<code>event.xdata</code>和<code>event.ydata</code>）。</li>
+<li>一旦找到包含点击点的省份，获取该省份的名称和对应的数值，然后使用<code>plt.annotate</code>在点击点附近添加一个注释，显示省份名称和数值，并设置了注释框的样式（如圆角、填充颜色、透明度等）以及箭头的样式，最后通过<code>fig.canvas.draw_idle()</code>重新绘制图形，使注释显示出来。</li>
+</ul>
+</li>
+</ol>
+<h4 id="事件连接与显示" class="prose-heading">事件连接与显示</h4>
+<ol>
+<li>通过<code>fig.canvas.mpl_connect</code>将鼠标点击事件与处理函数<code>on_click</code>连接起来。</li>
+<li>最后使用<code>plt.show()</code>显示绘制好的中国省级行政区划地图，当鼠标点击某个省份区域时，就会弹出一个提示框显示该省份的名称和对应的数值。</li>
+</ol>
+<p>请注意，在实际应用中，你可以根据自己的需求替换示例中的数值，比如各省份的 GDP 总量等。同时，确保地理空间数据文件的准确性和完整性，以及数据与地图区域的正确匹配。</p>
+<p>运行效果，我已经运行测试通过，如下图</p>
+<p><img src="../uploads/csdn/python%E4%BD%BF%E7%94%A8shapelygeopandasmatplotlib%E7%BB%98%E5%88%B6%E5%85%A8%E5%9B%BD%E5%90%84%E4%B8%AA%E7%9C%81%E4%BB%BD2023%E5%B9%B4gdp/img-01.png" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#数据准备">数据准备</a>
+          
+            <a class="toc-level-4" href="#地图绘制">地图绘制</a>
+          
+            <a class="toc-level-4" href="#鼠标点击事件处理">鼠标点击事件处理</a>
+          
+            <a class="toc-level-4" href="#事件连接与显示">事件连接与显示</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/python写一个标准版和程序员版计算器.html">
+      <span>上一篇</span>
+      <strong>Python写一个标准版和程序员版计算器</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/python使用opencv将mp4转换为gif图.html">
+      <span>下一篇</span>
+      <strong>Python使用OpenCV将MP4转换为GIF图</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>手搓一个QT6CANDROID版本的TCP调试软件 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/嵌入式与硬件.html">嵌入式与硬件</a>
+        </nav>
+        <h1 class="post-title">手搓一个QT6CANDROID版本的TCP调试软件</h1>
+        <p class="post-deck">文章摘要： 这是一个基于Qt框架开发的TCP调试工具程序，包含MainWindow类和TCP通信功能。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.723Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>18 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-12.html">嵌入式</a>
+          
+            <a class="tag-chip" href="../tags/tag-13.html">物联网</a>
+          
+            <a class="tag-chip" href="../tags/tag-17.html">QT6</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>文章摘要： 这是一个基于Qt框架开发的TCP调试工具程序，包含MainWindow类和TCP通信功能。</p>
+<p>程序实现了TCP客户端功能，支持连接/断开服务器、发送/接收数据，并显示通信状态和消息日志。</p>
+<p>关键功能包括：</p>
+<p>通过QTcpSocket建立TCP连接、处理连接状态变化、数据收发、错误处理以及界面状态更新。</p>
+<p>接收和发送的消息会附带时间戳并以不同颜色区分显示。</p>
+<p>程序默认使用127.0.0.1:8080作为连接地址，并包含输入验证功能。</p>
+<p>效果如下</p>
+<p><img src="../uploads/csdn/%E6%89%8B%E6%90%93%E4%B8%80%E4%B8%AAqt6candroid%E7%89%88%E6%9C%AC%E7%9A%84tcp%E8%B0%83%E8%AF%95%E8%BD%AF%E4%BB%B6/img-01.png" alt=""></p>
+<p>mainwindow.h</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> MAINWINDOW_H</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> MAINWINDOW_H</span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QMainWindow&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QTcpSocket&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QHostAddress&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QTimer&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QDateTime&gt;</span></span>
+
+QT_BEGIN_NAMESPACE
+<span class="hljs-keyword">namespace</span> Ui { <span class="hljs-keyword">class</span> <span class="hljs-title class_">MainWindow</span>; }
+QT_END_NAMESPACE
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MainWindow</span> : <span class="hljs-keyword">public</span> QMainWindow
+{
+    Q_OBJECT
+
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-built_in">MainWindow</span>(QWidget *parent = <span class="hljs-literal">nullptr</span>);
+    ~<span class="hljs-built_in">MainWindow</span>();
+
+<span class="hljs-keyword">private</span> slots:
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">on_connectButton_clicked</span><span class="hljs-params">()</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">on_sendButton_clicked</span><span class="hljs-params">()</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">on_clearButton_clicked</span><span class="hljs-params">()</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">on_disconnectButton_clicked</span><span class="hljs-params">()</span></span>;
+
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">onConnected</span><span class="hljs-params">()</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">onDisconnected</span><span class="hljs-params">()</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">onReadyRead</span><span class="hljs-params">()</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">onErrorOccurred</span><span class="hljs-params">(QAbstractSocket::SocketError socketError)</span></span>;
+
+<span class="hljs-keyword">private</span>:
+    Ui::MainWindow *ui;
+    QTcpSocket *tcpSocket;
+    <span class="hljs-type">bool</span> isConnected;
+
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">updateConnectionStatus</span><span class="hljs-params">()</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">appendMessage</span><span class="hljs-params">(<span class="hljs-type">const</span> QString &amp;message, <span class="hljs-type">bool</span> isReceived = <span class="hljs-literal">true</span>)</span></span>;
+};
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span> <span class="hljs-comment">// MAINWINDOW_H</span></span>
+</code></pre>
+<p>mainwindow.cpp</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;mainwindow.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;ui_mainwindow.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QMessageBox&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QHostAddress&gt;</span></span>
+
+MainWindow::<span class="hljs-built_in">MainWindow</span>(QWidget *parent)
+    : <span class="hljs-built_in">QMainWindow</span>(parent)
+    , <span class="hljs-built_in">ui</span>(<span class="hljs-keyword">new</span> Ui::MainWindow)
+    , <span class="hljs-built_in">tcpSocket</span>(<span class="hljs-literal">nullptr</span>)
+    , <span class="hljs-built_in">isConnected</span>(<span class="hljs-literal">false</span>)
+{
+    ui-&gt;<span class="hljs-built_in">setupUi</span>(<span class="hljs-keyword">this</span>);
+    <span class="hljs-built_in">setWindowTitle</span>(<span class="hljs-string">&quot;TCP调试工具&quot;</span>);
+
+    <span class="hljs-comment">// 初始化UI状态</span>
+    ui-&gt;disconnectButton-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">false</span>);
+    ui-&gt;sendButton-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">false</span>);
+
+    <span class="hljs-comment">// 设置默认值</span>
+    ui-&gt;ipEdit-&gt;<span class="hljs-built_in">setText</span>(<span class="hljs-string">&quot;127.0.0.1&quot;</span>);
+    ui-&gt;portEdit-&gt;<span class="hljs-built_in">setText</span>(<span class="hljs-string">&quot;8080&quot;</span>);
+
+    <span class="hljs-comment">// 创建TCP socket</span>
+    tcpSocket = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QTcpSocket</span>(<span class="hljs-keyword">this</span>);
+
+    <span class="hljs-comment">// 连接信号槽</span>
+    <span class="hljs-built_in">connect</span>(tcpSocket, &amp;QTcpSocket::connected, <span class="hljs-keyword">this</span>, &amp;MainWindow::onConnected);
+    <span class="hljs-built_in">connect</span>(tcpSocket, &amp;QTcpSocket::disconnected, <span class="hljs-keyword">this</span>, &amp;MainWindow::onDisconnected);
+    <span class="hljs-built_in">connect</span>(tcpSocket, &amp;QTcpSocket::readyRead, <span class="hljs-keyword">this</span>, &amp;MainWindow::onReadyRead);
+    <span class="hljs-built_in">connect</span>(tcpSocket, &amp;QTcpSocket::errorOccurred, <span class="hljs-keyword">this</span>, &amp;MainWindow::onErrorOccurred);
+}
+
+MainWindow::~<span class="hljs-built_in">MainWindow</span>()
+{
+    <span class="hljs-keyword">if</span> (tcpSocket &amp;&amp; tcpSocket-&gt;<span class="hljs-built_in">state</span>() == QAbstractSocket::ConnectedState) {
+        tcpSocket-&gt;<span class="hljs-built_in">disconnectFromHost</span>();
+    }
+    <span class="hljs-keyword">delete</span> ui;
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::on_connectButton_clicked</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-keyword">if</span> (isConnected) {
+        <span class="hljs-keyword">return</span>;
+    }
+
+    QString ip = ui-&gt;ipEdit-&gt;<span class="hljs-built_in">text</span>();
+    QString portStr = ui-&gt;portEdit-&gt;<span class="hljs-built_in">text</span>();
+
+    <span class="hljs-keyword">if</span> (ip.<span class="hljs-built_in">isEmpty</span>() || portStr.<span class="hljs-built_in">isEmpty</span>()) {
+        QMessageBox::<span class="hljs-built_in">warning</span>(<span class="hljs-keyword">this</span>, <span class="hljs-string">&quot;警告&quot;</span>, <span class="hljs-string">&quot;请输入IP地址和端口号&quot;</span>);
+        <span class="hljs-keyword">return</span>;
+    }
+
+    <span class="hljs-type">bool</span> ok;
+    quint16 port = portStr.<span class="hljs-built_in">toUInt</span>(&amp;ok);
+    <span class="hljs-keyword">if</span> (!ok || port &lt;= <span class="hljs-number">0</span> || port &gt; <span class="hljs-number">65535</span>) {
+        QMessageBox::<span class="hljs-built_in">warning</span>(<span class="hljs-keyword">this</span>, <span class="hljs-string">&quot;警告&quot;</span>, <span class="hljs-string">&quot;请输入有效的端口号(1-65535)&quot;</span>);
+        <span class="hljs-keyword">return</span>;
+    }
+
+    <span class="hljs-comment">// 连接到服务器</span>
+    tcpSocket-&gt;<span class="hljs-built_in">connectToHost</span>(<span class="hljs-built_in">QHostAddress</span>(ip), port);
+    <span class="hljs-built_in">appendMessage</span>(<span class="hljs-string">&quot;正在连接到 &quot;</span> + ip + <span class="hljs-string">&quot;:&quot;</span> + portStr + <span class="hljs-string">&quot;...&quot;</span>);
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::on_sendButton_clicked</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-keyword">if</span> (!isConnected) {
+        <span class="hljs-keyword">return</span>;
+    }
+
+    QString message = ui-&gt;sendEdit-&gt;<span class="hljs-built_in">text</span>();
+    <span class="hljs-keyword">if</span> (message.<span class="hljs-built_in">isEmpty</span>()) {
+        <span class="hljs-keyword">return</span>;
+    }
+
+    <span class="hljs-comment">// 发送数据</span>
+    qint64 bytesSent = tcpSocket-&gt;<span class="hljs-built_in">write</span>(message.<span class="hljs-built_in">toUtf8</span>());
+    <span class="hljs-keyword">if</span> (bytesSent != <span class="hljs-number">-1</span>) {
+        <span class="hljs-built_in">appendMessage</span>(<span class="hljs-string">&quot;发送: &quot;</span> + message, <span class="hljs-literal">false</span>);
+        ui-&gt;sendEdit-&gt;<span class="hljs-built_in">clear</span>();
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-built_in">appendMessage</span>(<span class="hljs-string">&quot;发送失败: &quot;</span> + tcpSocket-&gt;<span class="hljs-built_in">errorString</span>());
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::on_clearButton_clicked</span><span class="hljs-params">()</span>
+</span>{
+    ui-&gt;receiveText-&gt;<span class="hljs-built_in">clear</span>();
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::on_disconnectButton_clicked</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-keyword">if</span> (isConnected) {
+        tcpSocket-&gt;<span class="hljs-built_in">disconnectFromHost</span>();
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::onConnected</span><span class="hljs-params">()</span>
+</span>{
+    isConnected = <span class="hljs-literal">true</span>;
+    <span class="hljs-built_in">updateConnectionStatus</span>();
+    <span class="hljs-built_in">appendMessage</span>(<span class="hljs-string">&quot;已连接到 &quot;</span> + tcpSocket-&gt;<span class="hljs-built_in">peerAddress</span>().<span class="hljs-built_in">toString</span>() +
+                 <span class="hljs-string">&quot;:&quot;</span> + QString::<span class="hljs-built_in">number</span>(tcpSocket-&gt;<span class="hljs-built_in">peerPort</span>()));
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::onDisconnected</span><span class="hljs-params">()</span>
+</span>{
+    isConnected = <span class="hljs-literal">false</span>;
+    <span class="hljs-built_in">updateConnectionStatus</span>();
+    <span class="hljs-built_in">appendMessage</span>(<span class="hljs-string">&quot;已断开连接&quot;</span>);
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::onReadyRead</span><span class="hljs-params">()</span>
+</span>{
+    QByteArray data = tcpSocket-&gt;<span class="hljs-built_in">readAll</span>();
+    <span class="hljs-built_in">appendMessage</span>(<span class="hljs-string">&quot;接收: &quot;</span> + QString::<span class="hljs-built_in">fromUtf8</span>(data));
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::onErrorOccurred</span><span class="hljs-params">(QAbstractSocket::SocketError socketError)</span>
+</span>{
+    <span class="hljs-built_in">Q_UNUSED</span>(socketError);
+    <span class="hljs-built_in">appendMessage</span>(<span class="hljs-string">&quot;错误: &quot;</span> + tcpSocket-&gt;<span class="hljs-built_in">errorString</span>());
+    isConnected = <span class="hljs-literal">false</span>;
+    <span class="hljs-built_in">updateConnectionStatus</span>();
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::updateConnectionStatus</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-keyword">if</span> (isConnected) {
+        ui-&gt;statusLabel-&gt;<span class="hljs-built_in">setText</span>(<span class="hljs-string">&quot;状态: 已连接到 &quot;</span> +
+                               tcpSocket-&gt;<span class="hljs-built_in">peerAddress</span>().<span class="hljs-built_in">toString</span>() +
+                               <span class="hljs-string">&quot;:&quot;</span> + QString::<span class="hljs-built_in">number</span>(tcpSocket-&gt;<span class="hljs-built_in">peerPort</span>()));
+        ui-&gt;connectButton-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">false</span>);
+        ui-&gt;disconnectButton-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">true</span>);
+        ui-&gt;sendButton-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">true</span>);
+        ui-&gt;ipEdit-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">false</span>);
+        ui-&gt;portEdit-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">false</span>);
+    } <span class="hljs-keyword">else</span> {
+        ui-&gt;statusLabel-&gt;<span class="hljs-built_in">setText</span>(<span class="hljs-string">&quot;状态: 未连接&quot;</span>);
+        ui-&gt;connectButton-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">true</span>);
+        ui-&gt;disconnectButton-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">false</span>);
+        ui-&gt;sendButton-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">false</span>);
+        ui-&gt;ipEdit-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">true</span>);
+        ui-&gt;portEdit-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">true</span>);
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::appendMessage</span><span class="hljs-params">(<span class="hljs-type">const</span> QString &amp;message, <span class="hljs-type">bool</span> isReceived)</span>
+</span>{
+    QString timeStr = QDateTime::<span class="hljs-built_in">currentDateTime</span>().<span class="hljs-built_in">toString</span>(<span class="hljs-string">&quot;HH:mm:ss&quot;</span>);
+    QString logMessage = <span class="hljs-string">&quot;[&quot;</span> + timeStr + <span class="hljs-string">&quot;] &quot;</span> + message + <span class="hljs-string">&quot;\n&quot;</span>;
+
+    <span class="hljs-comment">// 保存当前光标位置</span>
+    QTextCursor cursor = ui-&gt;receiveText-&gt;<span class="hljs-built_in">textCursor</span>();
+    <span class="hljs-type">bool</span> atEnd = cursor.<span class="hljs-built_in">atEnd</span>();
+
+    <span class="hljs-comment">// 添加文本</span>
+    <span class="hljs-keyword">if</span> (isReceived) {
+        ui-&gt;receiveText-&gt;<span class="hljs-built_in">setTextColor</span>(Qt::blue);
+    } <span class="hljs-keyword">else</span> {
+        ui-&gt;receiveText-&gt;<span class="hljs-built_in">setTextColor</span>(Qt::darkGreen);
+    }
+    ui-&gt;receiveText-&gt;<span class="hljs-built_in">insertPlainText</span>(logMessage);
+    ui-&gt;receiveText-&gt;<span class="hljs-built_in">setTextColor</span>(Qt::black);
+
+    <span class="hljs-comment">// 如果之前在末尾，则自动滚动到末尾</span>
+    <span class="hljs-keyword">if</span> (atEnd) {
+        ui-&gt;receiveText-&gt;<span class="hljs-built_in">moveCursor</span>(QTextCursor::End);
+    }
+}
+</code></pre>
+<p>main.cpp</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;mainwindow.h&quot;</span></span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QApplication&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QFont&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QFontDatabase&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> *argv[])</span>
+</span>{
+    <span class="hljs-function">QApplication <span class="hljs-title">a</span><span class="hljs-params">(argc, argv)</span></span>;
+
+    <span class="hljs-comment">// 为Android设置合适的字体大小</span>
+    QFont font = a.<span class="hljs-built_in">font</span>();
+    font.<span class="hljs-built_in">setPointSize</span>(<span class="hljs-number">14</span>);
+    a.<span class="hljs-built_in">setFont</span>(font);
+
+    MainWindow w;
+    w.<span class="hljs-built_in">show</span>();
+
+    <span class="hljs-keyword">return</span> a.<span class="hljs-built_in">exec</span>();
+}
+</code></pre>
+<p>tcp_test.pro</p>
+<pre class="hljs"><code class="language-cpp">QT       += core gui network  # 确保这里包含了 network
+
+<span class="hljs-built_in">greaterThan</span>(QT_MAJOR_VERSION, <span class="hljs-number">4</span>): QT += widgets
+
+CONFIG += c+<span class="hljs-number">+17</span>
+
+# You can make your code fail to compile <span class="hljs-keyword">if</span> it uses deprecated APIs.
+# In order to <span class="hljs-keyword">do</span> so, uncomment the following line.
+#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=<span class="hljs-number">0x060000</span>    <span class="hljs-meta"># disables all the APIs deprecated before Qt 6.0.0</span>
+
+SOURCES += \
+    main.cpp \
+    mainwindow.cpp
+
+HEADERS += \
+    mainwindow.h
+
+FORMS += \
+    mainwindow.ui
+
+# Default rules <span class="hljs-keyword">for</span> deployment.
+qnx: target.path = /tmp/$${TARGET}/bin
+<span class="hljs-keyword">else</span>: unix:!android: target.path = /opt/$${TARGET}/bin
+!<span class="hljs-built_in">isEmpty</span>(target.path): INSTALLS += target
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/智慧农业与物联网.html">
+      <span>上一篇</span>
+      <strong>智慧农业与物联网</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/基于arduino的冰导热系数智能测量装置及影响因素研究.html">
+      <span>下一篇</span>
+      <strong>基于Arduino的冰导热系数智能测量装置及影响因素研究</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/模仿微信发送消息界面traecn版qt6.html">模仿微信发送消息界面traecn版QT6</a></h3>
+        <p class="post-excerpt">本文介绍了一个基于Qt框架的微信克隆应用主窗口实现。该应用采用左右布局设计，左侧为聊天列表（包含搜索栏和联系人列表），右侧为聊天窗口堆栈。通过QListWidget管理联系人列表，QStackedWidget实现多聊天窗口切换，并支持点击联系人切换对应聊天界面。代码展示了UI初始化、示例联系人创建和信号槽连接等核心功能实现，为开发类微信应用提供了基础框架参考。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.779Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/qt6使用opengl库画两个不同外形的立方体1.html">QT6使用OpenGL库画两个不同外形的立方体1</a></h3>
+        <p class="post-excerpt">QT6 使用OpenGL库画两个不同外形的立方体</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.389Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于arduino的冰导热系数智能测量装置及影响因素研究.html">基于Arduino的冰导热系数智能测量装置及影响因素研究</a></h3>
+        <p class="post-excerpt">![](/uploads/csdn/基于arduino的冰导热系数智能测量装置及影响因素研究/img-01.jpeg)![](/uploads/csdn/基于arduino的冰导热系数智能测量装置及影响因素研究/img-02.jpeg)![](/uploads/csdn/基于arduino的冰导热系数智能测量装置及影响因素研究/img-03.jpeg)![]…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.690Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

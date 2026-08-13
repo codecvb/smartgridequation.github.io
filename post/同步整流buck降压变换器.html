@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>同步整流Buck降压变换器 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/嵌入式与硬件.html">嵌入式与硬件</a>
+        </nav>
+        <h1 class="post-title">同步整流Buck降压变换器</h1>
+        <p class="post-deck">1\. 电路拓扑识别</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.662Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>3 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-19.html">随笔</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p><img src="../uploads/csdn/%E5%90%8C%E6%AD%A5%E6%95%B4%E6%B5%81buck%E9%99%8D%E5%8E%8B%E5%8F%98%E6%8D%A2%E5%99%A8/img-01.jpeg" alt=""></p>
+<h4 id="1-电路拓扑识别" class="prose-heading">1. 电路拓扑识别</h4>
+<p>这是一个<strong>同步整流 Buck 降压变换器</strong>的平均模型仿真，核心是通过 PWM 控制开关，实现直流降压输出。</p>
+<ul>
+<li><strong>开关管</strong>：<code>Switch_State</code> 控制主开关，<code>Not_Sw2</code> 控制同步整流管（互补导通，避免直通）。</li>
+<li><strong>电感电流</strong>：由 <code>IL_Integrator</code> 积分得到，反映电感充放电过程。</li>
+<li><strong>输出电压</strong>：由 <code>VC_Integrator</code> 积分得到，反映电容充放电过程。</li>
+</ul>
+<hr>
+<h4 id="2-工作原理-状态方程推导" class="prose-heading">2. 工作原理（状态方程推导）</h4>
+<h5 id="电感电流方程" class="prose-heading">电感电流方程</h5>
+<p><img src="../uploads/csdn/%E5%90%8C%E6%AD%A5%E6%95%B4%E6%B5%81buck%E9%99%8D%E5%8E%8B%E5%8F%98%E6%8D%A2%E5%99%A8/img-02.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%90%8C%E6%AD%A5%E6%95%B4%E6%B5%81buck%E9%99%8D%E5%8E%8B%E5%8F%98%E6%8D%A2%E5%99%A8/img-03.png" alt=""></p>
+<h5 id="输出电压方程" class="prose-heading">输出电压方程</h5>
+<p><img src="../uploads/csdn/%E5%90%8C%E6%AD%A5%E6%95%B4%E6%B5%81buck%E9%99%8D%E5%8E%8B%E5%8F%98%E6%8D%A2%E5%99%A8/img-04.png" alt=""></p>
+<hr>
+<h4 id="3-稳态输入输出关系-直流传递函数" class="prose-heading">3. 稳态输入输出关系（直流传递函数）</h4>
+<p><img src="../uploads/csdn/%E5%90%8C%E6%AD%A5%E6%95%B4%E6%B5%81buck%E9%99%8D%E5%8E%8B%E5%8F%98%E6%8D%A2%E5%99%A8/img-05.png" alt=""></p>
+<hr>
+<h4 id="4-仿真模块对应关系" class="prose-heading">4. 仿真模块对应关系</h4>
+<p>模块</p>
+<p>作用</p>
+<p>对应物理量</p>
+<p><code>Switch_State</code></p>
+<p>PWM 占空比控制信号</p>
+<p>D(t)</p>
+<p><code>IL_Integrator</code></p>
+<p>电感电流积分器</p>
+<p>∫LDVin​−Vout​​dt</p>
+<p><code>VC_Integrator</code></p>
+<p>输出电压积分器</p>
+<p>∫CiL​−Vout​/Rload​​dt</p>
+<p><code>All_Signals</code></p>
+<p>观测端口</p>
+<p>iL​,Vout​,Vin​,D</p>
+<p><code>Vout_Workspace</code> / <code>IL_Workspace</code></p>
+<p>数据导出</p>
+<p>将仿真结果写入工作区</p>
+<hr>
+<h4 id="5-总结" class="prose-heading">5. 总结</h4>
+<p><img src="../uploads/csdn/%E5%90%8C%E6%AD%A5%E6%95%B4%E6%B5%81buck%E9%99%8D%E5%8E%8B%E5%8F%98%E6%8D%A2%E5%99%A8/img-06.png" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#1-电路拓扑识别">1\. 电路拓扑识别</a>
+          
+            <a class="toc-level-4" href="#2-工作原理-状态方程推导">2\. 工作原理（状态方程推导）</a>
+          
+            <a class="toc-level-5" href="#电感电流方程">电感电流方程</a>
+          
+            <a class="toc-level-5" href="#输出电压方程">输出电压方程</a>
+          
+            <a class="toc-level-4" href="#3-稳态输入输出关系-直流传递函数">3\. 稳态输入输出关系（直流传递函数）</a>
+          
+            <a class="toc-level-4" href="#4-仿真模块对应关系">4\. 仿真模块对应关系</a>
+          
+            <a class="toc-level-4" href="#5-总结">5\. 总结</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/基于arduino的冰导热系数智能测量装置及影响因素研究.html">
+      <span>上一篇</span>
+      <strong>基于Arduino的冰导热系数智能测量装置及影响因素研究</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/使用androidstudio写一个android的远程通信软件app有通讯的发送和接收消息界面.html">
+      <span>下一篇</span>
+      <strong>使用androidstudio写一个Android的远程通信软件APP有通讯的发送和接收消息界面</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/一个月的阴晴圆缺变化回弹html仿真.html">一个月的阴晴圆缺变化回弹HTML仿真</a></h3>
+        <p class="post-excerpt">这篇文章介绍了一个交互式的3D月球光照演变演示工具，通过可视化方式展示月相变化的完整周期（约29.5天）。该网页应用采用Three.js构建三维场景，包含以下核心功能：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.698Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/最小子序和应该怎么求解.html">最小子序和应该怎么求解</a></h3>
+        <p class="post-excerpt">最小子序和问题指的是在一个整数数组里找出一个连续的子数组，让该子数组的和达到最小。下面为你介绍两种常见的解决办法：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.565Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/阿尔忒弥斯二号任务的核心轨迹.html">阿尔忒弥斯二号任务的核心轨迹</a></h3>
+        <p class="post-excerpt">阿尔忒弥斯二号任务的核心轨迹特点在于采用了自由返回轨道——这是一种在地月空间中利用引力设计的天然安全走廊，即便飞船动力完全失效，也能被月球引力“甩”回地球。以下从轨迹特点和涉及的物理计算两方面展开：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.907Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>如何使用Python的Matplotlib绘制3D立方体转载 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">如何使用Python的Matplotlib绘制3D立方体转载</h1>
+        <p class="post-deck">[本文是转载，侵权必删​​​​​​​​​​​​​​</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.583Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>63 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <h2 id="本文是转载-侵权必删" class="prose-heading">**[本文是转载，侵权必删​​​​​​​​​​​​​​</h2>
+<p>如何使用Python的Matplotlib绘制3D立方体](<a href="https://geek-docs.com/matplotlib/matplotlib-ask-answer/how-to-draw-3d-cube-using-matplotlib-in-python_z1.html">https://geek-docs.com/matplotlib/matplotlib-ask-answer/how-to-draw-3d-cube-using-matplotlib-in-python_z1.html</a> “本文是转载，侵权必删​​​​​​​​​​​​​​如何使用Python的Matplotlib绘制3D立方体”)**</p>
+<p>参考：<a href="https://how2matplotlib.com/how-to-draw-3d-cube-using-matplotlib-in-python.html" title="How to Draw 3D Cube using Matplotlib in Python">How to Draw 3D Cube using Matplotlib in Python</a></p>
+<p>来源网址</p>
+<p><a href="https://geek-docs.com/matplotlib/matplotlib-ask-answer/how-to-draw-3d-cube-using-matplotlib-in-python_z1.html" title="转载原网址">转载原网址<img src="../uploads/csdn/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8python%E7%9A%84matplotlib%E7%BB%98%E5%88%B63d%E7%AB%8B%E6%96%B9%E4%BD%93%E8%BD%AC%E8%BD%BD/img-01.png" alt="icon-default.png?t=O83A">https://geek-docs.com/matplotlib/matplotlib-ask-answer/how-to-draw-3d-cube-using-matplotlib-in-python_z1.html</a></p>
+<p>Matplotlib是Python中强大的数据可视化库，它不仅可以绘制2D图形，还能创建复杂的3D图形。本文将详细介绍如何使用Matplotlib绘制3D立方体，包括基本的立方体绘制、自定义颜色和透明度、添加标签和标题、旋转和缩放视图等高级技巧。通过学习这些技巧，你将能够创建出令人印象深刻的3D立方体可视化效果。</p>
+<h3 id="1-基础环境设置" class="prose-heading"><strong><strong><strong>1. 基础环境设置</strong></strong></strong></h3>
+<p>在开始绘制3D立方体之前，我们需要确保已经安装了必要的库并正确导入它们。首先，确保你已经安装了Matplotlib库。如果没有，可以使用以下命令安装：</p>
+<pre class="hljs"><code class="language-python">​
+pip install matplotlib
+
+​
+</code></pre>
+<p>安装完成后，我们需要导入必要的模块：</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> pltfrom mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3Dimport numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Welcome to how2matplotlib.com&quot;</span>)
+
+<span class="hljs-comment"># 创建一个新的图形</span>
+
+fig = plt.figure()<span class="hljs-comment"># 添加一个3D子图</span>
+
+ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+<span class="hljs-comment"># 后续的绘图代码将在这里添加</span>
+
+
+plt.show()
+</code></pre>
+<p>Output:</p>
+<p><img src="../uploads/csdn/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8python%E7%9A%84matplotlib%E7%BB%98%E5%88%B63d%E7%AB%8B%E6%96%B9%E4%BD%93%E8%BD%AC%E8%BD%BD/img-02.png" alt=""></p>
+<p>这段代码设置了基本的绘图环境。我们创建了一个新的图形对象，并添加了一个3D子图。projection='3d’参数告诉Matplotlib我们要创建一个3D图形。</p>
+<h3 id="2-绘制基本的3d立方体" class="prose-heading"><strong><strong><strong>2. 绘制基本的3D立方体</strong></strong></strong></h3>
+<p>现在我们已经设置好了环境，让我们开始绘制一个基本的3D立方体：</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> pltfrom mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3Dimport numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Welcome to how2matplotlib.com&quot;</span>)
+
+
+fig = plt.figure()
+
+ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+<span class="hljs-comment"># 定义立方体的顶点</span>
+
+vertices = np.array([[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]])
+
+<span class="hljs-comment"># 定义立方体的边</span>
+
+edges = [
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+    [vertices[<span class="hljs-number">4</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">7</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">6</span>]],
+
+    [vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">7</span>]]]
+
+<span class="hljs-comment"># 绘制立方体的边for edge in edges:</span>
+
+    ax.plot(*<span class="hljs-built_in">zip</span>(*edge), color=<span class="hljs-string">&#x27;b&#x27;</span>)
+
+
+ax.set_xlabel(<span class="hljs-string">&#x27;X axis&#x27;</span>)
+
+ax.set_ylabel(<span class="hljs-string">&#x27;Y axis&#x27;</span>)
+
+ax.set_zlabel(<span class="hljs-string">&#x27;Z axis&#x27;</span>)
+
+
+plt.title(<span class="hljs-string">&#x27;Basic 3D Cube - how2matplotlib.com&#x27;</span>)
+
+plt.show()
+</code></pre>
+<p>Output:</p>
+<p><img src="../uploads/csdn/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8python%E7%9A%84matplotlib%E7%BB%98%E5%88%B63d%E7%AB%8B%E6%96%B9%E4%BD%93%E8%BD%AC%E8%BD%BD/img-03.png" alt=""></p>
+<p>这段代码首先定义了立方体的8个顶点，然后定义了连接这些顶点的边。我们使用ax.plot()函数来绘制每条边。*zip(*edge)语法用于解包边的坐标，使其可以直接传递给plot()函数。</p>
+<h3 id="3-自定义立方体颜色" class="prose-heading"><strong><strong><strong>3. 自定义立方体颜色</strong></strong></strong></h3>
+<p>我们可以通过修改边的颜色来自定义立方体的外观：</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> pltfrom mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3Dimport numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Welcome to how2matplotlib.com&quot;</span>)
+
+
+fig = plt.figure()
+
+ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+
+vertices = np.array([[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]])
+
+
+edges = [
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+    [vertices[<span class="hljs-number">4</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">7</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">6</span>]],
+
+    [vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">7</span>]]]
+
+
+colors = [<span class="hljs-string">&#x27;r&#x27;</span>, <span class="hljs-string">&#x27;g&#x27;</span>, <span class="hljs-string">&#x27;b&#x27;</span>, <span class="hljs-string">&#x27;y&#x27;</span>, <span class="hljs-string">&#x27;c&#x27;</span>, <span class="hljs-string">&#x27;m&#x27;</span>]
+
+<span class="hljs-keyword">for</span> i, edge <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(edges):
+
+    ax.plot(*<span class="hljs-built_in">zip</span>(*edge), color=colors[i % <span class="hljs-built_in">len</span>(colors)])
+
+
+ax.set_xlabel(<span class="hljs-string">&#x27;X axis&#x27;</span>)
+
+ax.set_ylabel(<span class="hljs-string">&#x27;Y axis&#x27;</span>)
+
+ax.set_zlabel(<span class="hljs-string">&#x27;Z axis&#x27;</span>)
+
+
+plt.title(<span class="hljs-string">&#x27;Colorful 3D Cube - how2matplotlib.com&#x27;</span>)
+
+plt.show()
+</code></pre>
+<p>Output:</p>
+<p><img src="../uploads/csdn/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8python%E7%9A%84matplotlib%E7%BB%98%E5%88%B63d%E7%AB%8B%E6%96%B9%E4%BD%93%E8%BD%AC%E8%BD%BD/img-04.png" alt=""></p>
+<p>在这个例子中，我们定义了一个颜色列表，并在绘制每条边时循环使用这些颜色。这样可以创建一个更加丰富多彩的立方体。</p>
+<h3 id="4-添加透明度" class="prose-heading"><strong><strong><strong>4. 添加透明度</strong></strong></strong></h3>
+<p>为了使立方体看起来更加立体，我们可以添加透明度：</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> pltfrom mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3Dimport numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Welcome to how2matplotlib.com&quot;</span>)
+
+
+fig = plt.figure()
+
+ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+
+vertices = np.array([[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]])
+
+<span class="hljs-comment"># 定义立方体的面</span>
+
+faces = [
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+    [vertices[<span class="hljs-number">4</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">7</span>]]]
+
+<span class="hljs-comment"># 绘制立方体的面for face in faces:</span>
+
+    x, y, z = <span class="hljs-built_in">zip</span>(*face)
+
+    ax.plot_surface(np.array([x]), np.array([y]), np.array([z]), alpha=<span class="hljs-number">0.5</span>)
+
+
+ax.set_xlabel(<span class="hljs-string">&#x27;X axis&#x27;</span>)
+
+ax.set_ylabel(<span class="hljs-string">&#x27;Y axis&#x27;</span>)
+
+ax.set_zlabel(<span class="hljs-string">&#x27;Z axis&#x27;</span>)
+
+
+plt.title(<span class="hljs-string">&#x27;Transparent 3D Cube - how2matplotlib.com&#x27;</span>)
+
+plt.show()
+</code></pre>
+<p>Output:</p>
+<p><img src="../uploads/csdn/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8python%E7%9A%84matplotlib%E7%BB%98%E5%88%B63d%E7%AB%8B%E6%96%B9%E4%BD%93%E8%BD%AC%E8%BD%BD/img-05.png" alt=""></p>
+<p>在这个例子中，我们使用ax.plot_surface()函数来绘制立方体的每个面。alpha=0.5参数设置了面的透明度，使得我们可以看到立方体的内部结构。</p>
+<h3 id="5-添加纹理" class="prose-heading"><strong><strong><strong>5. 添加纹理</strong></strong></strong></h3>
+<p>我们可以通过添加纹理来增加立方体的视觉效果：</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> pltfrom mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3Dimport numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Welcome to how2matplotlib.com&quot;</span>)
+
+
+fig = plt.figure()
+
+ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+
+vertices = np.array([[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]])
+
+
+faces = [
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+    [vertices[<span class="hljs-number">4</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">7</span>]]]
+
+
+colors = [<span class="hljs-string">&#x27;r&#x27;</span>, <span class="hljs-string">&#x27;g&#x27;</span>, <span class="hljs-string">&#x27;b&#x27;</span>, <span class="hljs-string">&#x27;y&#x27;</span>, <span class="hljs-string">&#x27;c&#x27;</span>, <span class="hljs-string">&#x27;m&#x27;</span>]
+
+<span class="hljs-keyword">for</span> i, face <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(faces):
+
+    x, y, z = <span class="hljs-built_in">zip</span>(*face)
+
+    ax.plot_surface(np.array([x]), np.array([y]), np.array([z]),
+
+                    color=colors[i], alpha=<span class="hljs-number">0.8</span>,
+
+                    rstride=<span class="hljs-number">1</span>, cstride=<span class="hljs-number">1</span>,
+
+                    linewidth=<span class="hljs-number">1</span>, edgecolors=<span class="hljs-string">&#x27;k&#x27;</span>)
+
+
+ax.set_xlabel(<span class="hljs-string">&#x27;X axis&#x27;</span>)
+
+ax.set_ylabel(<span class="hljs-string">&#x27;Y axis&#x27;</span>)
+
+ax.set_zlabel(<span class="hljs-string">&#x27;Z axis&#x27;</span>)
+
+
+plt.title(<span class="hljs-string">&#x27;Textured 3D Cube - how2matplotlib.com&#x27;</span>)
+
+plt.show()
+</code></pre>
+<p>在这个例子中，我们为每个面设置了不同的颜色，并添加了边框（edgecolors=‘k’）来增加纹理效果。rstride和cstride参数控制了面的网格密度。</p>
+<h3 id="6-旋转立方体" class="prose-heading"><strong><strong><strong>6. 旋转立方体</strong></strong></strong></h3>
+<p>为了更好地展示3D效果，我们可以让立方体旋转：</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> pltfrom mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3Dimport numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Welcome to how2matplotlib.com&quot;</span>)
+
+
+fig = plt.figure()
+
+ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+
+vertices = np.array([[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]])
+
+
+edges = [
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">0</span>]],
+
+    [vertices[<span class="hljs-number">4</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">6</span>]],
+
+    [vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">7</span>]]]
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">rotate_cube</span>(<span class="hljs-params">angle</span>):
+
+    ax.clear()
+
+    rotation_matrix = np.array([
+
+        [np.cos(angle), -np.sin(angle), <span class="hljs-number">0</span>],
+
+        [np.sin(angle), np.cos(angle), <span class="hljs-number">0</span>],
+
+        [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>]
+
+    ])
+
+    rotated_vertices = np.dot(vertices, rotation_matrix)
+
+
+    <span class="hljs-keyword">for</span> edge <span class="hljs-keyword">in</span> edges:
+
+        x, y, z = <span class="hljs-built_in">zip</span>(*[rotated_vertices[<span class="hljs-built_in">list</span>(vertices).index(v)] <span class="hljs-keyword">for</span> v <span class="hljs-keyword">in</span> edge])
+
+        ax.plot(x, y, z, color=<span class="hljs-string">&#x27;b&#x27;</span>)
+
+
+    ax.set_xlabel(<span class="hljs-string">&#x27;X axis&#x27;</span>)
+
+    ax.set_ylabel(<span class="hljs-string">&#x27;Y axis&#x27;</span>)
+
+    ax.set_zlabel(<span class="hljs-string">&#x27;Z axis&#x27;</span>)
+
+    ax.set_title(<span class="hljs-string">&#x27;Rotating 3D Cube - how2matplotlib.com&#x27;</span>)
+
+<span class="hljs-keyword">for</span> angle <span class="hljs-keyword">in</span> np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>*np.pi, <span class="hljs-number">100</span>):
+
+    rotate_cube(angle)
+
+    plt.pause(<span class="hljs-number">0.01</span>)
+
+
+plt.show()
+</code></pre>
+<p>这个例子创建了一个旋转的立方体动画。我们定义了一个rotate_cube函数，它根据给定的角度旋转立方体并重新绘制。然后，我们使用一个循环来不断更新旋转角度，创建旋转效果。</p>
+<h3 id="7-添加标签和标题" class="prose-heading"><strong><strong><strong>7. 添加标签和标题</strong></strong></strong></h3>
+<p>为了使图形更加信息丰富，我们可以添加标签和标题：</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> pltfrom mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3Dimport numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Welcome to how2matplotlib.com&quot;</span>)
+
+
+fig = plt.figure(figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">8</span>))
+
+ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+
+vertices = np.array([[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]])
+
+
+edges = [
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">0</span>]],
+
+    [vertices[<span class="hljs-number">4</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">6</span>]],
+
+    [vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">7</span>]]]
+
+<span class="hljs-keyword">for</span> edge <span class="hljs-keyword">in</span> edges:
+
+    ax.plot(*<span class="hljs-built_in">zip</span>(*edge), color=<span class="hljs-string">&#x27;b&#x27;</span>)
+
+
+ax.set_xlabel(<span class="hljs-string">&#x27;X axis&#x27;</span>, fontsize=<span class="hljs-number">12</span>, labelpad=<span class="hljs-number">10</span>)
+
+ax.set_ylabel(<span class="hljs-string">&#x27;Y axis&#x27;</span>, fontsize=<span class="hljs-number">12</span>, labelpad=<span class="hljs-number">10</span>)
+
+ax.set_zlabel(<span class="hljs-string">&#x27;Z axis&#x27;</span>, fontsize=<span class="hljs-number">12</span>, labelpad=<span class="hljs-number">10</span>)
+
+
+ax.set_title(<span class="hljs-string">&#x27;3D Cube with Labels - how2matplotlib.com&#x27;</span>, fontsize=<span class="hljs-number">16</span>, pad=<span class="hljs-number">20</span>)
+
+<span class="hljs-comment"># 添加顶点标签for i, v in enumerate(vertices):</span>
+
+    ax.text(v[<span class="hljs-number">0</span>], v[<span class="hljs-number">1</span>], v[<span class="hljs-number">2</span>], <span class="hljs-string">f&#x27;V<span class="hljs-subst">{i}</span>&#x27;</span>, fontsize=<span class="hljs-number">10</span>)
+
+
+plt.show()
+</code></pre>
+<p>Output:</p>
+<p><img src="../uploads/csdn/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8python%E7%9A%84matplotlib%E7%BB%98%E5%88%B63d%E7%AB%8B%E6%96%B9%E4%BD%93%E8%BD%AC%E8%BD%BD/img-06.png" alt=""></p>
+<p>在这个例子中，我们为坐标轴添加了标签，设置了图形标题，并为立方体的每个顶点添加了标签。fontsize参数控制文本大小，labelpad和pad参数调整标签和标题的位置。</p>
+<h3 id="8-绘制多个立方体" class="prose-heading"><strong><strong><strong>8. 绘制多个立方体</strong></strong></strong></h3>
+<p>我们可以在同一个图形中绘制多个立方体：</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> pltfrom mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3Dimport numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Welcome to how2matplotlib.com&quot;</span>)
+
+
+fig = plt.figure(figsize=(<span class="hljs-number">12</span>, <span class="hljs-number">8</span>))
+
+ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">create_cube</span>(<span class="hljs-params">offset</span>):
+
+    <span class="hljs-keyword">return</span> np.array([[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]]) + offset
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">plot_cube</span>(<span class="hljs-params">vertices, color</span>):
+
+    edges = [
+
+        [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">0</span>]],
+
+        [vertices[<span class="hljs-number">4</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">4</span>]],
+
+        [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">4</span>]],
+
+        [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">5</span>]],
+
+        [vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">6</span>]],
+
+        [vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">7</span>]]
+
+    ]
+
+    <span class="hljs-keyword">for</span> edge <span class="hljs-keyword">in</span> edges:
+
+        ax.plot(*<span class="hljs-built_in">zip</span>(*edge), color=color)
+
+<span class="hljs-comment"># 创建并绘制三个立方体</span>
+
+cube1 = create_cube([<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>])
+
+cube2 = create_cube([<span class="hljs-number">2</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>])
+
+cube3 = create_cube([<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>])
+
+
+plot_cube(cube1, <span class="hljs-string">&#x27;r&#x27;</span>)
+
+plot_cube(cube2, <span class="hljs-string">&#x27;g&#x27;</span>)
+
+plot_cube(cube3, <span class="hljs-string">&#x27;b&#x27;</span>)
+
+
+ax.set_xlabel(<span class="hljs-string">&#x27;X axis&#x27;</span>)
+
+ax.set_ylabel(<span class="hljs-string">&#x27;Y axis&#x27;</span>)
+
+ax.set_zlabel(<span class="hljs-string">&#x27;Z axis&#x27;</span>)
+
+
+plt.title(<span class="hljs-string">&#x27;Multiple 3D Cubes - how2matplotlib.com&#x27;</span>)
+
+plt.show()
+</code></pre>
+<p>Output:</p>
+<p><img src="../uploads/csdn/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8python%E7%9A%84matplotlib%E7%BB%98%E5%88%B63d%E7%AB%8B%E6%96%B9%E4%BD%93%E8%BD%AC%E8%BD%BD/img-07.png" alt=""></p>
+<p>这个例子定义了两个辅助函数：create_cube用于创建带偏移的立方体顶点，plot_cube用于绘制立方体。我们使用这些函数创建并绘制了三个不同位置和颜色的立方体。</p>
+<h3 id="9-添加阴影效果" class="prose-heading"><strong><strong><strong>9. 添加阴影效果</strong></strong></strong></h3>
+<p>为了增强3D效果，我们可以为立方体添加阴影：</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> pltfrom mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3Dimport numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Welcome to how2matplotlib.com&quot;</span>)
+
+
+fig = plt.figure(figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">8</span>))
+
+ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+
+vertices = np.array([[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]])
+
+
+faces = [
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+    [vertices[<span class="hljs-number">4</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">7</span>]]]
+
+<span class="hljs-comment"># 绘制立方体的面for face in faces:</span>
+
+    x, y, z = <span class="hljs-built_in">zip</span>(*face)
+
+    ax.plot_surface(np.array([x]), np.array([y]), np.array([z]),
+
+                    color=<span class="hljs-string">&#x27;b&#x27;</span>, alpha=<span class="hljs-number">0.6</span>, shade=<span class="hljs-literal">True</span>)
+
+<span class="hljs-comment"># 添加阴影</span>
+
+ax.plot_surface([[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>]], [[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>], [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>]], [[-<span class="hljs-number">0.1</span>, -<span class="hljs-number">0.1</span>], [-<span class="hljs-number">0.1</span>, -<span class="hljs-number">0.1</span>]],
+
+                color=<span class="hljs-string">&#x27;gray&#x27;</span>, alpha=<span class="hljs-number">0.3</span>)
+
+
+ax.set_xlabel(<span class="hljs-string">&#x27;X axis&#x27;</span>)
+
+ax.set_ylabel(<span class="hljs-string">&#x27;Y axis&#x27;</span>)
+
+ax.set_zlabel(<span class="hljs-string">&#x27;Z axis&#x27;</span>)
+
+
+plt.title(<span class="hljs-string">&#x27;3D Cube with Shadow - how2matplotlib.com&#x27;</span>)
+
+ax.set_zlim(-<span class="hljs-number">0.5</span>, <span class="hljs-number">1.5</span>)  <span class="hljs-comment"># 调整Z轴范围以显示阴影</span>
+
+plt.show()
+</code></pre>
+<p>在这个例子中，我们使用plot_surface函数绘制了立方体的面，并设置shade=True来添加简单的阴影效果。此外，我们在立方体下方绘制了一个灰色的平面作为阴影。</p>
+<h3 id="10-创建交互式3d立方体" class="prose-heading"><strong><strong><strong>10. 创建交互式3D立方体</strong></strong></strong></h3>
+<p>我们可以创建一个交互式的3D立方体，允许用户通过鼠标旋转和缩放：</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> pltfrom mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3Dimport numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Welcome to how2matplotlib.com&quot;</span>)
+
+
+fig = plt.figure(figsize=(<span class="hljs-number">8</span>, <span class="hljs-number">6</span>))
+
+ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+
+vertices = np.array([[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]])
+
+
+edges = [
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">0</span>]],
+
+    [vertices[<span class="hljs-number">4</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">6</span>]],
+
+    [vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">7</span>]]]
+
+<span class="hljs-keyword">for</span> edge <span class="hljs-keyword">in</span> edges:
+
+    ax.plot(*<span class="hljs-built_in">zip</span>(*edge), color=<span class="hljs-string">&#x27;b&#x27;</span>)
+
+
+ax.set_xlabel(<span class="hljs-string">&#x27;X axis&#x27;</span>)
+
+ax.set_ylabel(<span class="hljs-string">&#x27;Y axis&#x27;</span>)
+
+ax.set_zlabel(<span class="hljs-string">&#x27;Z axis&#x27;</span>)
+
+
+plt.title(<span class="hljs-string">&#x27;Interactive 3D Cube - how2matplotlib.com&#x27;</span>)
+
+<span class="hljs-comment"># 设置视角</span>
+
+ax.view_init(elev=<span class="hljs-number">20</span>, azim=<span class="hljs-number">45</span>)
+
+<span class="hljs-comment"># 添加交互性def on_move(event):</span>
+
+    <span class="hljs-keyword">if</span> event.inaxes == ax:
+
+        ax.view_init(elev=ax.elev, azim=ax.azim)
+
+        fig.canvas.draw_idle()
+
+
+fig.canvas.mpl_connect(<span class="hljs-string">&#x27;motion_notify_event&#x27;</span>, on_move)
+
+
+plt.show()
+</code></pre>
+<p>Output:</p>
+<p><img src="../uploads/csdn/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8python%E7%9A%84matplotlib%E7%BB%98%E5%88%B63d%E7%AB%8B%E6%96%B9%E4%BD%93%E8%BD%AC%E8%BD%BD/img-08.png" alt=""></p>
+<p>这个例子创建了一个可以通过鼠标交互的3D立方体。用户可以通过移动鼠标来旋转立方体，从不同角度查看它。</p>
+<h3 id="11-绘制带有纹理的立方体" class="prose-heading"><strong><strong><strong>11. 绘制带有纹理的立方体</strong></strong></strong></h3>
+<pre class="hljs"><code class="language-python">我们可以为立方体的每个面添加不同的纹理：
+
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> pltfrom mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3Dimport numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Welcome to how2matplotlib.com&quot;</span>)
+
+
+fig = plt.figure(figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">8</span>))
+
+ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+
+vertices = np.array([[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]])
+
+
+faces = [
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+    [vertices[<span class="hljs-number">4</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">7</span>]]]
+
+<span class="hljs-comment"># 创建纹理</span>
+
+textures = [plt.cm.viridis, plt.cm.plasma, plt.cm.inferno,
+
+            plt.cm.magma, plt.cm.cividis, plt.cm.twilight]
+
+<span class="hljs-keyword">for</span> face, texture <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(faces, textures):
+
+    x, y, z = <span class="hljs-built_in">zip</span>(*face)
+
+    xx, yy = np.meshgrid(np.linspace(<span class="hljs-built_in">min</span>(x), <span class="hljs-built_in">max</span>(x), <span class="hljs-number">10</span>),
+
+                         np.linspace(<span class="hljs-built_in">min</span>(y), <span class="hljs-built_in">max</span>(y), <span class="hljs-number">10</span>))
+
+    zz = np.full_like(xx, np.mean(z))
+
+
+    ax.plot_surface(xx, yy, zz, facecolors=texture(zz), shade=<span class="hljs-literal">True</span>)
+
+
+ax.set_xlabel(<span class="hljs-string">&#x27;X axis&#x27;</span>)
+
+ax.set_ylabel(<span class="hljs-string">&#x27;Y axis&#x27;</span>)
+
+ax.set_zlabel(<span class="hljs-string">&#x27;Z axis&#x27;</span>)
+
+
+plt.title(<span class="hljs-string">&#x27;Textured 3D Cube - how2matplotlib.com&#x27;</span>)
+
+ax.set_box_aspect((<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>))  <span class="hljs-comment"># 设置纵横比为1:1:1</span>
+
+plt.show()
+</code></pre>
+<p>Output:</p>
+<p><img src="../uploads/csdn/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8python%E7%9A%84matplotlib%E7%BB%98%E5%88%B63d%E7%AB%8B%E6%96%B9%E4%BD%93%E8%BD%AC%E8%BD%BD/img-09.png" alt=""></p>
+<p>这个例子为立方体的每个面使用了不同的颜色映射作为纹理。我们使用plot_surface函数绘制每个面，并使用facecolors参数应用颜色映射。</p>
+<h3 id="12-绘制透明立方体" class="prose-heading"><strong><strong><strong>12. 绘制透明立方体</strong></strong></strong></h3>
+<p>我们可以创建一个透明的立方体，让内部结构可见：</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> pltfrom mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3Dimport numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Welcome to how2matplotlib.com&quot;</span>)
+
+
+fig = plt.figure(figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">8</span>))
+
+ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+
+vertices = np.array([[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]])
+
+
+faces = [
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+    [vertices[<span class="hljs-number">4</span>], vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">7</span>]]]
+
+
+colors = [<span class="hljs-string">&#x27;r&#x27;</span>, <span class="hljs-string">&#x27;g&#x27;</span>, <span class="hljs-string">&#x27;b&#x27;</span>, <span class="hljs-string">&#x27;y&#x27;</span>, <span class="hljs-string">&#x27;c&#x27;</span>, <span class="hljs-string">&#x27;m&#x27;</span>]
+
+<span class="hljs-keyword">for</span> face, color <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(faces, colors):
+
+    x, y, z = <span class="hljs-built_in">zip</span>(*face)
+
+    ax.add_collection3d(plt.fill_polygon(<span class="hljs-built_in">list</span>(<span class="hljs-built_in">zip</span>(x, y)), color=color, alpha=<span class="hljs-number">0.3</span>), zs=z, zdir=<span class="hljs-string">&#x27;z&#x27;</span>)
+
+<span class="hljs-comment"># 绘制边框</span>
+
+edges = [
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>]],
+
+    [vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+    [vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">0</span>]],
+
+    [vertices[<span class="hljs-number">4</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">6</span>]],
+
+    [vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">7</span>]],
+
+    [vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">6</span>]],
+
+    [vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">7</span>]]]
+
+<span class="hljs-keyword">for</span> edge <span class="hljs-keyword">in</span> edges:
+
+    ax.plot(*<span class="hljs-built_in">zip</span>(*edge), color=<span class="hljs-string">&#x27;black&#x27;</span>)
+
+
+ax.set_xlabel(<span class="hljs-string">&#x27;X axis&#x27;</span>)
+
+ax.set_ylabel(<span class="hljs-string">&#x27;Y axis&#x27;</span>)
+
+ax.set_zlabel(<span class="hljs-string">&#x27;Z axis&#x27;</span>)
+
+
+plt.title(<span class="hljs-string">&#x27;Transparent 3D Cube - how2matplotlib.com&#x27;</span>)
+
+ax.set_box_aspect((<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>))  <span class="hljs-comment"># 设置纵横比为1:1:1</span>
+
+plt.show()
+</code></pre>
+<p>这个例子创建了一个透明的立方体，每个面都有不同的颜色。我们使用fill_polygon函数绘制每个面，并设置alpha值来控制透明度。边框使用黑色线条绘制，以突出立方体的结构。</p>
+<h3 id="13-绘制带有内部结构的立方体" class="prose-heading"><strong><strong><strong>13. 绘制带有内部结构的立方体</strong></strong></strong></h3>
+<p>我们可以在立方体内部添加一些结构，以展示更复杂的3D效果：</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> pltfrom mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3Dimport numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Welcome to how2matplotlib.com&quot;</span>)
+
+
+fig = plt.figure(figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">8</span>))
+
+ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+
+vertices = np.array([[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]])
+
+
+edges = [
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>]],
+
+    [vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+    [vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">0</span>]],
+
+    [vertices[<span class="hljs-number">4</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">6</span>]],
+
+    [vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">7</span>]],
+
+    [vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">6</span>]],
+
+    [vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">7</span>]]]
+
+<span class="hljs-comment"># 绘制立方体边框for edge in edges:</span>
+
+    ax.plot(*<span class="hljs-built_in">zip</span>(*edge), color=<span class="hljs-string">&#x27;black&#x27;</span>)
+
+<span class="hljs-comment"># 添加内部结构</span>
+
+internal_points = np.random.rand(<span class="hljs-number">20</span>, <span class="hljs-number">3</span>)
+
+ax.scatter(internal_points[:, <span class="hljs-number">0</span>], internal_points[:, <span class="hljs-number">1</span>], internal_points[:, <span class="hljs-number">2</span>], c=<span class="hljs-string">&#x27;r&#x27;</span>, s=<span class="hljs-number">50</span>)
+
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(internal_points)):
+
+    <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(i+<span class="hljs-number">1</span>, <span class="hljs-built_in">len</span>(internal_points)):
+
+        <span class="hljs-keyword">if</span> np.linalg.norm(internal_points[i] - internal_points[j]) &lt; <span class="hljs-number">0.3</span>:
+
+            ax.plot(*<span class="hljs-built_in">zip</span>(internal_points[i], internal_points[j]), color=<span class="hljs-string">&#x27;b&#x27;</span>, alpha=<span class="hljs-number">0.5</span>)
+
+
+ax.set_xlabel(<span class="hljs-string">&#x27;X axis&#x27;</span>)
+
+ax.set_ylabel(<span class="hljs-string">&#x27;Y axis&#x27;</span>)
+
+ax.set_zlabel(<span class="hljs-string">&#x27;Z axis&#x27;</span>)
+
+
+plt.title(<span class="hljs-string">&#x27;3D Cube with Internal Structure - how2matplotlib.com&#x27;</span>)
+
+ax.set_box_aspect((<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>))  <span class="hljs-comment"># 设置纵横比为1:1:1</span>
+
+plt.show()
+</code></pre>
+<p>Output:</p>
+<p><img src="../uploads/csdn/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8python%E7%9A%84matplotlib%E7%BB%98%E5%88%B63d%E7%AB%8B%E6%96%B9%E4%BD%93%E8%BD%AC%E8%BD%BD/img-10.png" alt=""></p>
+<p>这个例子在立方体内部添加了随机点和连接线，创造了一个复杂的内部结构。我们使用scatter函数绘制点，并用线条连接距离较近的点。</p>
+<h3 id="14-创建动画效果" class="prose-heading"><strong><strong><strong>14. 创建动画效果</strong></strong></strong></h3>
+<p>我们可以创建一个动画，展示立方体的旋转和内部结构的变化：</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> pltfrom mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3Dimport numpy <span class="hljs-keyword">as</span> npfrom matplotlib.animation <span class="hljs-keyword">import</span> FuncAnimation
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Welcome to how2matplotlib.com&quot;</span>)
+
+
+fig = plt.figure(figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">8</span>))
+
+ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+
+vertices = np.array([[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+
+                     [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]])
+
+
+edges = [
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>]],
+
+    [vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+    [vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">0</span>]],
+
+    [vertices[<span class="hljs-number">4</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">6</span>]],
+
+    [vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">7</span>]],
+
+    [vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">4</span>]],
+
+    [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">5</span>]],
+
+    [vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">6</span>]],
+
+    [vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">7</span>]]]
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">frame</span>):
+
+    ax.clear()
+
+
+    <span class="hljs-comment"># 旋转立方体</span>
+
+    rotation_matrix = np.array([
+
+        [np.cos(frame/<span class="hljs-number">10</span>), -np.sin(frame/<span class="hljs-number">10</span>), <span class="hljs-number">0</span>],
+
+        [np.sin(frame/<span class="hljs-number">10</span>), np.cos(frame/<span class="hljs-number">10</span>), <span class="hljs-number">0</span>],
+
+        [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>]
+
+    ])
+
+    rotated_vertices = np.dot(vertices, rotation_matrix)
+
+
+    <span class="hljs-comment"># 绘制立方体边框</span>
+
+    <span class="hljs-keyword">for</span> edge <span class="hljs-keyword">in</span> edges:
+
+        start, end = edge
+
+        start_rotated = np.dot(start, rotation_matrix)
+
+        end_rotated = np.dot(end, rotation_matrix)
+
+        ax.plot(*<span class="hljs-built_in">zip</span>(start_rotated, end_rotated), color=<span class="hljs-string">&#x27;black&#x27;</span>)
+
+
+    <span class="hljs-comment"># 添加内部结构</span>
+
+    internal_points = np.random.rand(<span class="hljs-number">20</span>, <span class="hljs-number">3</span>)
+
+    ax.scatter(internal_points[:, <span class="hljs-number">0</span>], internal_points[:, <span class="hljs-number">1</span>], internal_points[:, <span class="hljs-number">2</span>], c=<span class="hljs-string">&#x27;r&#x27;</span>, s=<span class="hljs-number">50</span>)
+
+
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(internal_points)):
+
+        <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(i+<span class="hljs-number">1</span>, <span class="hljs-built_in">len</span>(internal_points)):
+
+            <span class="hljs-keyword">if</span> np.linalg.norm(internal_points[i] - internal_points[j]) &lt; <span class="hljs-number">0.3</span>:
+
+                ax.plot(*<span class="hljs-built_in">zip</span>(internal_points[i], internal_points[j]), color=<span class="hljs-string">&#x27;b&#x27;</span>, alpha=<span class="hljs-number">0.5</span>)
+
+
+    ax.set_xlabel(<span class="hljs-string">&#x27;X axis&#x27;</span>)
+
+    ax.set_ylabel(<span class="hljs-string">&#x27;Y axis&#x27;</span>)
+
+    ax.set_zlabel(<span class="hljs-string">&#x27;Z axis&#x27;</span>)
+
+    ax.set_title(<span class="hljs-string">&#x27;Animated 3D Cube - how2matplotlib.com&#x27;</span>)
+
+    ax.set_xlim(-<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+
+    ax.set_ylim(-<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+
+    ax.set_zlim(-<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+
+
+ani = FuncAnimation(fig, update, frames=np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>*np.pi, <span class="hljs-number">100</span>), interval=<span class="hljs-number">50</span>)
+
+plt.show()
+</code></pre>
+<p>Output:</p>
+<p><img src="../uploads/csdn/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8python%E7%9A%84matplotlib%E7%BB%98%E5%88%B63d%E7%AB%8B%E6%96%B9%E4%BD%93%E8%BD%AC%E8%BD%BD/img-11.png" alt=""></p>
+<p>这个例子创建了一个动画，展示了旋转的立方体和不断变化的内部结构。我们使用FuncAnimation函数来创建动画，update函数在每一帧更新立方体的旋转和内部结构。</p>
+<h3 id="15-绘制多个嵌套的立方体" class="prose-heading"><strong><strong><strong>15. 绘制多个嵌套的立方体</strong></strong></strong></h3>
+<p>我们可以创建多个嵌套的立方体，展示更复杂的3D结构：</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> pltfrom mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3Dimport numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Welcome to how2matplotlib.com&quot;</span>)
+
+
+fig = plt.figure(figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">8</span>))
+
+ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">create_cube</span>(<span class="hljs-params">size, offset</span>):
+
+    vertices = np.array([
+
+        [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+        [size, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+
+        [size, size, <span class="hljs-number">0</span>],
+
+        [<span class="hljs-number">0</span>, size, <span class="hljs-number">0</span>],
+
+        [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, size],
+
+        [size, <span class="hljs-number">0</span>, size],
+
+        [size, size, size],
+
+        [<span class="hljs-number">0</span>, size, size]
+
+    ]) + offset
+
+
+    edges = [
+
+        [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">1</span>]],
+
+        [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">2</span>]],
+
+        [vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">3</span>]],
+
+        [vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">0</span>]],
+
+        [vertices[<span class="hljs-number">4</span>], vertices[<span class="hljs-number">5</span>]],
+
+        [vertices[<span class="hljs-number">5</span>], vertices[<span class="hljs-number">6</span>]],
+
+        [vertices[<span class="hljs-number">6</span>], vertices[<span class="hljs-number">7</span>]],
+
+        [vertices[<span class="hljs-number">7</span>], vertices[<span class="hljs-number">4</span>]],
+
+        [vertices[<span class="hljs-number">0</span>], vertices[<span class="hljs-number">4</span>]],
+
+        [vertices[<span class="hljs-number">1</span>], vertices[<span class="hljs-number">5</span>]],
+
+        [vertices[<span class="hljs-number">2</span>], vertices[<span class="hljs-number">6</span>]],
+
+        [vertices[<span class="hljs-number">3</span>], vertices[<span class="hljs-number">7</span>]]
+
+    ]
+
+
+    <span class="hljs-keyword">return</span> edges
+
+<span class="hljs-comment"># 创建三个嵌套的立方体</span>
+
+cubes = [
+
+    create_cube(<span class="hljs-number">1</span>, [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>]),
+
+    create_cube(<span class="hljs-number">0.6</span>, [<span class="hljs-number">0.2</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">0.2</span>]),
+
+    create_cube(<span class="hljs-number">0.3</span>, [<span class="hljs-number">0.35</span>, <span class="hljs-number">0.35</span>, <span class="hljs-number">0.35</span>])]
+
+
+colors = [<span class="hljs-string">&#x27;r&#x27;</span>, <span class="hljs-string">&#x27;g&#x27;</span>, <span class="hljs-string">&#x27;b&#x27;</span>]
+
+<span class="hljs-keyword">for</span> cube, color <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(cubes, colors):
+
+    <span class="hljs-keyword">for</span> edge <span class="hljs-keyword">in</span> cube:
+
+        ax.plot(*<span class="hljs-built_in">zip</span>(*edge), color=color)
+
+
+ax.set_xlabel(<span class="hljs-string">&#x27;X axis&#x27;</span>)
+
+ax.set_ylabel(<span class="hljs-string">&#x27;Y axis&#x27;</span>)
+
+ax.set_zlabel(<span class="hljs-string">&#x27;Z axis&#x27;</span>)
+
+
+plt.title(<span class="hljs-string">&#x27;Nested 3D Cubes - how2matplotlib.com&#x27;</span>)
+
+ax.set_box_aspect((<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>))  <span class="hljs-comment"># 设置纵横比为1:1:1</span>
+
+plt.show()
+</code></pre>
+<p>Output:</p>
+<p><img src="../uploads/csdn/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8python%E7%9A%84matplotlib%E7%BB%98%E5%88%B63d%E7%AB%8B%E6%96%B9%E4%BD%93%E8%BD%AC%E8%BD%BD/img-12.png" alt=""></p>
+<p>这个例子创建了三个不同大小的嵌套立方体，每个立方体使用不同的颜色。我们定义了一个create_cube函数来生成不同大小和位置的立方体。</p>
+<h3 id="结论" class="prose-heading"><strong><strong><strong>结论</strong></strong></strong></h3>
+<p>通过这些示例，我们展示了使用Matplotlib绘制3D立方体的多种方法和技巧。从基本的立方体绘制到添加复杂的纹理、透明度和动画效果，Matplotlib提供了丰富的工具来创建引人注目的3D可视化。这些技术不仅可以用于绘制立方体，还可以扩展到其他3D形状和结构的可视化。</p>
+<p>在实际应用中，这些3D可视化技术可以用于科学数据的展示、建筑设计的预览、游戏开发中的物体建模等多个领域。通过掌握这些技巧，你可以创建出更加生动、直观的数据可视化，帮助观众更好地理解复杂的3D结构和数据关系。</p>
+<p>记住，3D可视化虽然吸引人，但也要注意不要过度使用。在某些情况下，简单的2D图表可能更有效地传达信息。选择合适的可视化方法应该基于你的数据特性和目标受众。</p>
+<p>最后，Matplotlib的3D绘图功能还有很多我们没有涉及的高级特性，如复杂的光照效果、材质渲染等。如果你对这些感兴趣，可以进一步探索Matplotlib的文档和其他高级3D绘图库，如Mayavi或VTK。继续实践和探索，你将能够创建出更加令人印象深刻的3D可视化效果。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-2" href="#本文是转载-侵权必删">**[本文是转载，侵权必删​​​​​​​​​​​​​​</a>
+          
+            <a class="toc-level-3" href="#1-基础环境设置">******1\. 基础环境设置******</a>
+          
+            <a class="toc-level-3" href="#2-绘制基本的3d立方体">******2\. 绘制基本的3D立方体******</a>
+          
+            <a class="toc-level-3" href="#3-自定义立方体颜色">******3\. 自定义立方体颜色******</a>
+          
+            <a class="toc-level-3" href="#4-添加透明度">******4\. 添加透明度******</a>
+          
+            <a class="toc-level-3" href="#5-添加纹理">******5\. 添加纹理******</a>
+          
+            <a class="toc-level-3" href="#6-旋转立方体">******6\. 旋转立方体******</a>
+          
+            <a class="toc-level-3" href="#7-添加标签和标题">******7\. 添加标签和标题******</a>
+          
+            <a class="toc-level-3" href="#8-绘制多个立方体">******8\. 绘制多个立方体******</a>
+          
+            <a class="toc-level-3" href="#9-添加阴影效果">******9\. 添加阴影效果******</a>
+          
+            <a class="toc-level-3" href="#10-创建交互式3d立方体">******10\. 创建交互式3D立方体******</a>
+          
+            <a class="toc-level-3" href="#11-绘制带有纹理的立方体">******11\. 绘制带有纹理的立方体******</a>
+          
+            <a class="toc-level-3" href="#12-绘制透明立方体">******12\. 绘制透明立方体******</a>
+          
+            <a class="toc-level-3" href="#13-绘制带有内部结构的立方体">******13\. 绘制带有内部结构的立方体******</a>
+          
+            <a class="toc-level-3" href="#14-创建动画效果">******14\. 创建动画效果******</a>
+          
+            <a class="toc-level-3" href="#15-绘制多个嵌套的立方体">******15\. 绘制多个嵌套的立方体******</a>
+          
+            <a class="toc-level-3" href="#结论">******结论******</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/物联网数据检测pythongui代码编写.html">
+      <span>上一篇</span>
+      <strong>物联网数据检测PythonGUI代码编写</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/回调函数的作用与举例python版.html">
+      <span>下一篇</span>
+      <strong>回调函数的作用与举例Python版</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

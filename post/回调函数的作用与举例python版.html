@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>回调函数的作用与举例Python版 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">回调函数的作用与举例Python版</h1>
+        <p class="post-deck">函数回调的作用</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.566Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>10 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <h4 id="函数回调的作用" class="prose-heading">函数回调的作用</h4>
+<p>函数回调（Callback）是指将一个函数作为参数传递给另一个函数，当特定事件或条件满足时，被传递的函数会被调用。其核心作用包括：</p>
+<ol>
+<li><strong>解耦逻辑</strong>：将 “事件触发” 与 “事件处理” 分离，使代码更灵活、可复用。</li>
+<li><strong>异步处理</strong>：在异步操作（如网络请求、定时器）完成后，通过回调通知结果。</li>
+<li><strong>事件驱动</strong>：响应特定事件（如用户点击、数据到达）时执行自定义逻辑。</li>
+</ol>
+<h4 id="回调函数基础举例" class="prose-heading">回调函数基础举例</h4>
+<p>以 “计算器” 为例，将运算逻辑（加、减）作为回调函数传递给主函数：</p>
+<p>python</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-comment"># 回调函数：加法</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">a, b</span>):
+    <span class="hljs-keyword">return</span> a + b
+
+<span class="hljs-comment"># 回调函数：减法</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">subtract</span>(<span class="hljs-params">a, b</span>):
+    <span class="hljs-keyword">return</span> a - b
+
+<span class="hljs-comment"># 主函数：接收回调函数并执行</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">calculate</span>(<span class="hljs-params">a, b, callback</span>):
+    <span class="hljs-keyword">return</span> callback(a, b)
+
+<span class="hljs-comment"># 使用回调</span>
+<span class="hljs-built_in">print</span>(calculate(<span class="hljs-number">5</span>, <span class="hljs-number">3</span>, add))      <span class="hljs-comment"># 输出：8</span>
+<span class="hljs-built_in">print</span>(calculate(<span class="hljs-number">5</span>, <span class="hljs-number">3</span>, subtract)) <span class="hljs-comment"># 输出：2</span>
+</code></pre>
+<h4 id="回调函数处理不同消息机制的写法与实例" class="prose-heading">回调函数处理不同消息机制的写法与实例</h4>
+<p>消息机制通常指 “事件源产生消息，回调函数处理消息” 的模式，常见场景包括 GUI 事件、网络消息、状态通知等。</p>
+<h5 id="1-gui-事件消息-以-python-tkinter-为例" class="prose-heading">1. GUI 事件消息（以 Python Tkinter 为例）</h5>
+<p><strong>机制</strong>：用户操作（点击按钮、输入文本）产生事件消息，回调函数响应事件。</p>
+<p>python</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> tkinter <span class="hljs-keyword">as</span> tk
+<span class="hljs-keyword">from</span> tkinter <span class="hljs-keyword">import</span> messagebox
+
+<span class="hljs-comment"># 回调函数：处理按钮点击消息</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">on_button_click</span>():
+    messagebox.showinfo(<span class="hljs-string">&quot;消息&quot;</span>, <span class="hljs-string">&quot;按钮被点击了！&quot;</span>)
+
+<span class="hljs-comment"># 回调函数：处理文本输入消息</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">on_text_change</span>(<span class="hljs-params">event</span>):
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;输入内容：<span class="hljs-subst">{event.widget.get()}</span>&quot;</span>)
+
+<span class="hljs-comment"># 创建GUI</span>
+root = tk.Tk()
+root.title(<span class="hljs-string">&quot;消息机制示例&quot;</span>)
+
+<span class="hljs-comment"># 绑定按钮点击消息到回调</span>
+btn = tk.Button(root, text=<span class="hljs-string">&quot;点击我&quot;</span>, command=on_button_click)
+btn.pack(pady=<span class="hljs-number">10</span>)
+
+<span class="hljs-comment"># 绑定文本输入消息到回调（带事件参数）</span>
+entry = tk.Entry(root)
+entry.pack(pady=<span class="hljs-number">10</span>)
+entry.bind(<span class="hljs-string">&quot;&lt;KeyRelease&gt;&quot;</span>, on_text_change)  <span class="hljs-comment"># 键盘释放时触发</span>
+
+root.mainloop()
+</code></pre>
+<h5 id="2-网络消息-以-http-请求回调为例" class="prose-heading">2. 网络消息（以 HTTP 请求回调为例）</h5>
+<p><strong>机制</strong>：网络请求完成后，通过回调处理响应消息（同步 / 异步均可，异步更常见）。</p>
+<p>python</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> requests
+<span class="hljs-keyword">from</span> threading <span class="hljs-keyword">import</span> Thread
+
+<span class="hljs-comment"># 回调函数：处理网络响应消息</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">handle_response</span>(<span class="hljs-params">response</span>):
+    <span class="hljs-keyword">if</span> response.status_code == <span class="hljs-number">200</span>:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;响应内容：<span class="hljs-subst">{response.text[:<span class="hljs-number">50</span>]}</span>...&quot;</span>)
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;请求失败，状态码：<span class="hljs-subst">{response.status_code}</span>&quot;</span>)
+
+<span class="hljs-comment"># 异步发送请求，完成后调用回调</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">async_request</span>(<span class="hljs-params">url, callback</span>):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_request</span>():
+        response = requests.get(url)
+        callback(response)  <span class="hljs-comment"># 网络消息处理</span>
+    Thread(target=_request).start()
+
+<span class="hljs-comment"># 发送请求并指定回调</span>
+async_request(<span class="hljs-string">&quot;https://api.github.com&quot;</span>, handle_response)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;请求已发送，等待响应...&quot;</span>)  <span class="hljs-comment"># 主线程不阻塞</span>
+</code></pre>
+<h5 id="3-状态机消息-以设备状态变更为例" class="prose-heading">3. 状态机消息（以设备状态变更为例）</h5>
+<p><strong>机制</strong>：设备状态（如 “启动”“运行”“故障”）变更时，通过回调通知状态消息。</p>
+<p>python</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-comment"># 状态回调函数：处理不同状态消息</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">on_start</span>():
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;设备启动：初始化传感器...&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">on_running</span>(<span class="hljs-params">speed</span>):
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;设备运行：当前速度 <span class="hljs-subst">{speed}</span> rpm&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">on_error</span>(<span class="hljs-params">code</span>):
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;设备故障：错误码 <span class="hljs-subst">{code}</span>，请检修！&quot;</span>)
+
+<span class="hljs-comment"># 设备状态机：根据状态触发对应回调</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Device</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.callbacks = {
+            <span class="hljs-string">&quot;start&quot;</span>: on_start,
+            <span class="hljs-string">&quot;running&quot;</span>: on_running,
+            <span class="hljs-string">&quot;error&quot;</span>: on_error
+        }
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">set_state</span>(<span class="hljs-params">self, state, *args</span>):
+        <span class="hljs-keyword">if</span> state <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.callbacks:
+            <span class="hljs-variable language_">self</span>.callbacks[state](*args)  <span class="hljs-comment"># 传递状态参数</span>
+
+<span class="hljs-comment"># 模拟设备状态变更</span>
+device = Device()
+device.set_state(<span class="hljs-string">&quot;start&quot;</span>)         <span class="hljs-comment"># 触发on_start</span>
+device.set_state(<span class="hljs-string">&quot;running&quot;</span>, <span class="hljs-number">3000</span>) <span class="hljs-comment"># 触发on_running(3000)</span>
+device.set_state(<span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-number">502</span>)    <span class="hljs-comment"># 触发on_error(502)</span>
+</code></pre>
+<h5 id="4-消息队列-以生产者-消费者模型为例" class="prose-heading">4. 消息队列（以生产者 - 消费者模型为例）</h5>
+<p><strong>机制</strong>：生产者发送消息到队列，消费者通过回调函数处理队列中的消息。</p>
+<p>python</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">from</span> queue <span class="hljs-keyword">import</span> Queue
+<span class="hljs-keyword">import</span> time
+<span class="hljs-keyword">import</span> threading
+
+<span class="hljs-comment"># 回调函数：处理队列消息</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">process_message</span>(<span class="hljs-params">msg</span>):
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;处理消息：<span class="hljs-subst">{msg}</span>，耗时1秒&quot;</span>)
+    time.sleep(<span class="hljs-number">1</span>)  <span class="hljs-comment"># 模拟处理耗时</span>
+
+<span class="hljs-comment"># 消费者：循环从队列取消息并调用回调</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">consumer</span>(<span class="hljs-params">queue, callback</span>):
+    <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+        msg = queue.get()
+        <span class="hljs-keyword">if</span> msg == <span class="hljs-string">&quot;exit&quot;</span>:
+            <span class="hljs-keyword">break</span>
+        callback(msg)
+        queue.task_done()
+
+<span class="hljs-comment"># 生产者：向队列发送消息</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">producer</span>(<span class="hljs-params">queue</span>):
+    messages = [<span class="hljs-string">&quot;消息1&quot;</span>, <span class="hljs-string">&quot;消息2&quot;</span>, <span class="hljs-string">&quot;消息3&quot;</span>, <span class="hljs-string">&quot;exit&quot;</span>]
+    <span class="hljs-keyword">for</span> msg <span class="hljs-keyword">in</span> messages:
+        queue.put(msg)
+        time.sleep(<span class="hljs-number">0.5</span>)  <span class="hljs-comment"># 模拟间隔发送</span>
+
+<span class="hljs-comment"># 启动队列和线程</span>
+q = Queue()
+threading.Thread(target=consumer, args=(q, process_message), daemon=<span class="hljs-literal">True</span>).start()
+producer(q)
+q.join()  <span class="hljs-comment"># 等待所有消息处理完成</span>
+</code></pre>
+<h4 id="总结" class="prose-heading">总结</h4>
+<p>回调函数通过 “将处理逻辑作为参数传递”，高效适配了不同消息机制的需求：</p>
+<ul>
+<li><strong>GUI 事件</strong>：绑定用户操作与响应逻辑；</li>
+<li><strong>网络消息</strong>：异步处理请求结果；</li>
+<li><strong>状态机</strong>：根据状态动态执行不同逻辑；</li>
+<li><strong>消息队列</strong>：解耦生产与消费，灵活处理消息。</li>
+</ul>
+<p>其核心价值在于 “延迟执行” 和 “逻辑分离”，是事件驱动编程的基础。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#函数回调的作用">函数回调的作用</a>
+          
+            <a class="toc-level-4" href="#回调函数基础举例">回调函数基础举例</a>
+          
+            <a class="toc-level-4" href="#回调函数处理不同消息机制的写法与实例">回调函数处理不同消息机制的写法与实例</a>
+          
+            <a class="toc-level-5" href="#1-gui-事件消息-以-python-tkinter-为例">1\. GUI 事件消息（以 Python Tkinter 为例）</a>
+          
+            <a class="toc-level-5" href="#2-网络消息-以-http-请求回调为例">2\. 网络消息（以 HTTP 请求回调为例）</a>
+          
+            <a class="toc-level-5" href="#3-状态机消息-以设备状态变更为例">3\. 状态机消息（以设备状态变更为例）</a>
+          
+            <a class="toc-level-5" href="#4-消息队列-以生产者-消费者模型为例">4\. 消息队列（以生产者 - 消费者模型为例）</a>
+          
+            <a class="toc-level-4" href="#总结">总结</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/如何使用python的matplotlib绘制3d立方体转载.html">
+      <span>上一篇</span>
+      <strong>如何使用Python的Matplotlib绘制3D立方体转载</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/利用pythonqt6制作会移动的字体动画.html">
+      <span>下一篇</span>
+      <strong>利用PythonQt6制作会移动的字体动画</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

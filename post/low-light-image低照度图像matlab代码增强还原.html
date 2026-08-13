@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>low light image低照度图像MATLAB代码增强还原 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/matlab-仿真.html">MATLAB 仿真</a>
+        </nav>
+        <h1 class="post-title">low light image低照度图像MATLAB代码增强还原</h1>
+        <p class="post-deck">Matlab</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.965Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>8 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+            <a class="tag-chip" href="../tags/tag-14.html">图像处理</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% 读取低照度图像</span>
+image = imread(<span class="hljs-string">&#x27;low_light_image.jpg&#x27;</span>);
+
+<span class="hljs-comment">% 转换为灰度图像</span>
+gray_image = rgb2gray(image);
+
+<span class="hljs-comment">% 直方图均衡化</span>
+hist_eq_image = histeq(gray_image);
+
+<span class="hljs-comment">% 自适应直方图均衡化</span>
+adapthisteq_image = adapthisteq(gray_image);
+
+<span class="hljs-comment">% 显示原始图像和增强后的图像</span>
+subplot(<span class="hljs-number">1</span>,<span class="hljs-number">3</span>,<span class="hljs-number">1</span>);
+imshow(gray_image);
+title(<span class="hljs-string">&#x27;原始图像&#x27;</span>);
+
+subplot(<span class="hljs-number">1</span>,<span class="hljs-number">3</span>,<span class="hljs-number">2</span>);
+imshow(hist_eq_image);
+title(<span class="hljs-string">&#x27;直方图均衡化后的图像&#x27;</span>);
+
+subplot(<span class="hljs-number">1</span>,<span class="hljs-number">3</span>,<span class="hljs-number">3</span>);
+imshow(adapthisteq_image);
+title(<span class="hljs-string">&#x27;自适应直方图均衡化后的图像&#x27;</span>);
+</code></pre>
+<p>修复效果如此，真心不错</p>
+<p><img src="../uploads/csdn/low-light-image%E4%BD%8E%E7%85%A7%E5%BA%A6%E5%9B%BE%E5%83%8Fmatlab%E4%BB%A3%E7%A0%81%E5%A2%9E%E5%BC%BA%E8%BF%98%E5%8E%9F/img-01.png" alt=""></p>
+<p>在 MATLAB 里，可借助多种方法来增强低照度图像。下面给出两种常用的方法：直方图均衡化和自适应直方图均衡化。</p>
+<h4 id="1-直方图均衡化" class="prose-heading">1. 直方图均衡化</h4>
+<p>直方图均衡化是一种把图像的灰度直方图均匀分布的图像增强技术，能够提升图像的对比度。</p>
+<h4 id="2-自适应直方图均衡化" class="prose-heading">2. 自适应直方图均衡化</h4>
+<p>自适应直方图均衡化（AHE）是直方图均衡化的改进版本，它会把图像划分成多个小块，然后对每个小块分别进行直方图均衡化，从而避免全局直方图均衡化可能产生的过度增强问题。</p>
+<p>下面是使用这两种方法进行低照度图像增强的 MATLAB 代码：</p>
+<p>low-light-image-enhancementMATLAB低照度图像增强代码</p>
+<p>生成 low_light_image_enhancement.m</p>
+<p>在上述代码中，你需要把<code>low_light_image.jpg</code>替换成你实际的低照度图像文件名。运行此代码后，你会看到原始图像、直方图均衡化后的图像以及自适应直方图均衡化后的图像。</p>
+<p>低照度图像MATLAB代码增强还原的原理</p>
+<p>以下为你详细介绍在 MATLAB 里对低照度图像进行增强还原所常用的几种方法及其原理：</p>
+<h4 id="1-直方图均衡化" class="prose-heading">1. 直方图均衡化</h4>
+<h5 id="原理" class="prose-heading">原理</h5>
+<p>直方图均衡化是一种借助改变图像的灰度分布，来增强图像对比度的方法。它的核心思想是把原始图像的灰度直方图变换为均匀分布的形式，让图像的灰度值在整个灰度级范围内均匀分布，进而提升图像的全局对比度。</p>
+<p>具体步骤如下：</p>
+<ul>
+<li><strong>统计灰度分布</strong>：统计原始图像中每个灰度级出现的频数。</li>
+<li><strong>计算累积分布函数（CDF）</strong>：对灰度分布的频数进行累加，得到累积分布函数。</li>
+<li><strong>灰度映射</strong>：按照累积分布函数把原始图像的每个灰度级映射到新的灰度级上，使得新的灰度分布更加均匀。</li>
+</ul>
+<h5 id="matlab-代码示例及解释" class="prose-heading">MATLAB 代码示例及解释</h5>
+<p>matlab</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% 读取低照度图像</span>
+image = imread(<span class="hljs-string">&#x27;low_light_image.jpg&#x27;</span>);
+<span class="hljs-comment">% 转换为灰度图像</span>
+gray_image = rgb2gray(image);
+<span class="hljs-comment">% 直方图均衡化</span>
+hist_eq_image = histeq(gray_image);
+</code></pre>
+<p>在这段代码中，<code>histeq</code>函数会自动完成上述步骤，把输入的灰度图像进行直方图均衡化处理。</p>
+<h4 id="2-自适应直方图均衡化-adaptive-histogram-equalization-ahe" class="prose-heading">2. 自适应直方图均衡化（Adaptive Histogram Equalization, AHE）</h4>
+<h5 id="原理" class="prose-heading">原理</h5>
+<p>自适应直方图均衡化是直方图均衡化的改进版本。直方图均衡化是对整幅图像进行全局处理，可能会造成图像某些区域过度增强。而自适应直方图均衡化会把图像划分成多个不重叠的小块（tile），对每个小块分别进行直方图均衡化，然后使用双线性插值在小块之间进行平滑过渡，从而避免全局直方图均衡化的不足。</p>
+<h5 id="matlab-代码示例及解释" class="prose-heading">MATLAB 代码示例及解释</h5>
+<p>matlab</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% 读取低照度图像</span>
+image = imread(<span class="hljs-string">&#x27;low_light_image.jpg&#x27;</span>);
+<span class="hljs-comment">% 转换为灰度图像</span>
+gray_image = rgb2gray(image);
+<span class="hljs-comment">% 自适应直方图均衡化</span>
+adapthisteq_image = adapthisteq(gray_image);
+</code></pre>
+<p>在这段代码中，<code>adapthisteq</code>函数会自动将图像分割成小块，对每个小块进行直方图均衡化，并进行平滑过渡。</p>
+<h4 id="3-基于-retinex-理论的方法" class="prose-heading">3. 基于 Retinex 理论的方法</h4>
+<h5 id="原理" class="prose-heading">原理</h5>
+<p>Retinex 理论认为，图像是由反射图像和光照图像相乘得到的，即 I(x,y)=R(x,y)×L(x,y)，其中 I(x,y) 是原始图像，R(x,y) 是反射图像，L(x,y) 是光照图像。低照度图像增强的目标是估计出光照图像 L(x,y)，然后去除光照的影响，从而得到增强后的反射图像。</p>
+<p>常见的基于 Retinex 理论的方法有单尺度 Retinex（SSR）、多尺度 Retinex（MSR）和多尺度 Retinex 颜色恢复（MSRCR）等。</p>
+<h5 id="matlab-代码示例-以单尺度-retinex-为例" class="prose-heading">MATLAB 代码示例（以单尺度 Retinex 为例）</h5>
+<p>matlab</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">enhanced_image</span> = <span class="hljs-title">SSR</span><span class="hljs-params">(image, sigma)</span></span>
+    <span class="hljs-comment">% 转换为双精度类型</span>
+    image = im2double(image);
+    <span class="hljs-comment">% 高斯滤波估计光照图像</span>
+    L = imgaussfilt(image, sigma);
+    <span class="hljs-comment">% 计算反射图像</span>
+    R = <span class="hljs-built_in">log</span>(image + <span class="hljs-built_in">eps</span>) - <span class="hljs-built_in">log</span>(L + <span class="hljs-built_in">eps</span>);
+    <span class="hljs-comment">% 归一化</span>
+    enhanced_image = mat2gray(R);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 读取低照度图像</span>
+image = imread(<span class="hljs-string">&#x27;low_light_image.jpg&#x27;</span>);
+<span class="hljs-comment">% 转换为灰度图像</span>
+gray_image = rgb2gray(image);
+<span class="hljs-comment">% 单尺度Retinex增强</span>
+sigma = <span class="hljs-number">30</span>;
+enhanced_image = SSR(gray_image, sigma);
+</code></pre>
+<p>在这段代码中，<code>SSR</code>函数实现了单尺度 Retinex 算法。首先使用高斯滤波估计光照图像，然后通过对数运算去除光照的影响，最后进行归一化处理得到增强后的图像。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#1-直方图均衡化">1\. 直方图均衡化</a>
+          
+            <a class="toc-level-4" href="#2-自适应直方图均衡化">2\. 自适应直方图均衡化</a>
+          
+            <a class="toc-level-4" href="#1-直方图均衡化">1\. 直方图均衡化</a>
+          
+            <a class="toc-level-5" href="#原理">原理</a>
+          
+            <a class="toc-level-5" href="#matlab-代码示例及解释">MATLAB 代码示例及解释</a>
+          
+            <a class="toc-level-4" href="#2-自适应直方图均衡化-adaptive-histogram-equalization-ahe">2\. 自适应直方图均衡化（Adaptive Histogram Equalization, AHE）</a>
+          
+            <a class="toc-level-5" href="#原理">原理</a>
+          
+            <a class="toc-level-5" href="#matlab-代码示例及解释">MATLAB 代码示例及解释</a>
+          
+            <a class="toc-level-4" href="#3-基于-retinex-理论的方法">3\. 基于 Retinex 理论的方法</a>
+          
+            <a class="toc-level-5" href="#原理">原理</a>
+          
+            <a class="toc-level-5" href="#matlab-代码示例-以单尺度-retinex-为例">MATLAB 代码示例（以单尺度 Retinex 为例）</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/matlab3d画图画一把雨伞之雨伞的顶部一.html">
+      <span>上一篇</span>
+      <strong>MATLAB3D画图画一把雨伞之雨伞的顶部一</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/编写有内存漏洞的c代码并实现内存注入的示例一个程序注入另一个程序.html">
+      <span>下一篇</span>
+      <strong>编写有内存漏洞的C代码并实现内存注入的示例一个程序注入另一个程序</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/基于改进标准映射的图像加密算法matlab代码版本.html">基于改进标准映射的图像加密算法MATLAB代码版本</a></h3>
+        <p class="post-excerpt">!在这里插入图片描述代码运行结果如上图</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.037Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/基于二维小波变换的图像增强matlab代码.html">基于二维小波变换的图像增强MATLAB代码</a></h3>
+        <p class="post-excerpt">Matlab</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.991Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/matlab实现神经网络的ocr识别.html">MATLAB实现神经网络的OCR识别</a></h3>
+        <p class="post-excerpt">使用说明：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.694Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

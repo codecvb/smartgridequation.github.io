@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>2的100次方mod5用代码怎么计算 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/编程技术.html">编程技术</a>
+        </nav>
+        <h1 class="post-title">2的100次方mod5用代码怎么计算</h1>
+        <p class="post-deck">在 Python 中，你可以使用内置的 pow() 函数来高效地计算幂运算和取模运算。以下是计算 2 的 100 次方对 5 取模的代码：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.666Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>9 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-26.html">编程</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>在 Python 中，你可以使用内置的 <code>pow()</code> 函数来高效地计算幂运算和取模运算。以下是计算 2 的 100 次方对 5 取模的代码：</p>
+<pre class="hljs"><code class="language-python">result = <span class="hljs-built_in">pow</span>(<span class="hljs-number">2</span>, <span class="hljs-number">100</span>, <span class="hljs-number">5</span>)
+<span class="hljs-built_in">print</span>(result)
+</code></pre>
+<p>上述代码中，<code>pow()</code> 函数的第一个参数是底数，第二个参数是指数，第三个参数是模数。它会直接计算出幂运算结果对模数取模的值。运行代码后，会打印出最终结果。</p>
+<p>在数字没有超出int大小范围时，可以用以下代码计算</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span>
+
+<span class="hljs-comment">// 函数用于计算 base 的 exponent 次方对 modulus 取模的结果</span>
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">powerMod</span><span class="hljs-params">(<span class="hljs-type">int</span> base, <span class="hljs-type">int</span> exponent, <span class="hljs-type">int</span> modulus)</span> </span>{
+    <span class="hljs-type">int</span> result = <span class="hljs-number">1</span>;
+    base = base % modulus;
+    <span class="hljs-keyword">while</span> (exponent &gt; <span class="hljs-number">0</span>) {
+        <span class="hljs-keyword">if</span> (exponent % <span class="hljs-number">2</span> == <span class="hljs-number">1</span>) {
+            result = (result * base) % modulus;
+        }
+        exponent = exponent &gt;&gt; <span class="hljs-number">1</span>;
+        base = (base * base) % modulus;
+    }
+    <span class="hljs-keyword">return</span> result;
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-type">int</span> base = <span class="hljs-number">2</span>;
+    <span class="hljs-type">int</span> exponent = <span class="hljs-number">100</span>;
+    <span class="hljs-type">int</span> modulus = <span class="hljs-number">5</span>;
+    <span class="hljs-type">int</span> result = <span class="hljs-built_in">powerMod</span>(base, exponent, modulus);
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d\n&quot;</span>, result);
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+
+</code></pre>
+<p>在考虑变量大小的情况下，我们有如下代码</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span>
+
+<span class="hljs-comment">// 函数用于计算 base 的 exponent 次方对 modulus 取模的结果</span>
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">powerMod</span><span class="hljs-params">(<span class="hljs-type">int</span> base, <span class="hljs-type">int</span> exponent, <span class="hljs-type">int</span> modulus)</span> </span>{
+    <span class="hljs-type">int</span> result = <span class="hljs-number">1</span>;
+    <span class="hljs-comment">// 在每次乘法操作后进行取模，防止溢出</span>
+    <span class="hljs-keyword">while</span> (exponent &gt; <span class="hljs-number">0</span>) {
+        <span class="hljs-keyword">if</span> (exponent % <span class="hljs-number">2</span> == <span class="hljs-number">1</span>) {
+            result = (result * base) % modulus;
+        }
+        exponent = exponent / <span class="hljs-number">2</span>;
+        base = (base * base) % modulus;
+    }
+    <span class="hljs-keyword">return</span> result;
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-type">int</span> base = <span class="hljs-number">2</span>;
+    <span class="hljs-type">int</span> exponent = <span class="hljs-number">100</span>;
+    <span class="hljs-type">int</span> modulus = <span class="hljs-number">5</span>;
+    <span class="hljs-type">int</span> result = <span class="hljs-built_in">powerMod</span>(base, exponent, modulus);
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d\n&quot;</span>, result);
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+
+</code></pre>
+<p>在 <code>powerMod</code> 函数里，每一次进行乘法运算后都进行取模操作，这样中间结果就不会超出 <code>int</code> 类型的表示范围。同时，运用快速幂算法能有效减少乘法运算的次数，提高计算效率。</p>
+<p><code>exponent</code> 相关计算，其实是在快速幂算法里的操作，目的是高效地算出一个数的幂次。下面详细解释下 <code>exponent</code> 在代码里是如何被计算的，以及这么做的原因。</p>
+<h4 id="快速幂算法原理" class="prose-heading">快速幂算法原理</h4>
+<p>快速幂算法的核心思路是把指数 <code>exponent</code> 用二进制形式来表示，进而把幂运算转化成一系列的平方和乘法操作。这可以显著减少乘法运算的次数，让时间复杂度从常规幂运算的 (O(n)) 降低到 (O(log n))。</p>
+<h4 id="代码中-exponent-的计算步骤" class="prose-heading">代码中 <code>exponent</code> 的计算步骤</h4>
+<p>下面是代码片段：</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-keyword">while</span> (exponent &gt; <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">if</span> (exponent % <span class="hljs-number">2</span> == <span class="hljs-number">1</span>) {
+        result = (result * base) % modulus;
+    }
+    exponent = exponent / <span class="hljs-number">2</span>;
+    base = (base * base) % modulus;
+}
+</code></pre>
+<h5 id="1-判断-exponent-是否为奇数" class="prose-heading">1. 判断 <code>exponent</code> 是否为奇数</h5>
+<p>c</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-keyword">if</span> (exponent % <span class="hljs-number">2</span> == <span class="hljs-number">1</span>) {
+    result = (result * base) % modulus;
+}
+</code></pre>
+<ul>
+<li><code>exponent % 2 == 1</code> 用于判断 <code>exponent</code> 是否为奇数。在二进制表示中，奇数的最低位是 1，偶数的最低位是 0。</li>
+<li>若 <code>exponent</code> 为奇数，就意味着当前二进制位是 1，需要把当前的 <code>base</code> 乘到结果 <code>result</code> 里，并且取模以避免溢出。</li>
+</ul>
+<h5 id="2-指数右移-除以-2" class="prose-heading">2. 指数右移（除以 2）</h5>
+<p>c</p>
+<pre class="hljs"><code class="language-cpp">exponent = exponent / <span class="hljs-number">2</span>;
+</code></pre>
+<ul>
+<li>这行代码把 <code>exponent</code> 除以 2，等同于将 <code>exponent</code> 的二进制表示向右移一位。这样做是为了处理下一个二进制位。</li>
+</ul>
+<h5 id="3-底数平方" class="prose-heading">3. 底数平方</h5>
+<p>c</p>
+<pre class="hljs"><code class="language-cs"><span class="hljs-keyword">base</span> = (<span class="hljs-keyword">base</span> * <span class="hljs-keyword">base</span>) % modulus;
+</code></pre>
+<ul>
+<li>每次循环时，<code>base</code> 都会平方。这是因为随着指数右移，每一位对应的幂次都是前一位的平方。例如，(2^2 = 4)，(2^4 = 16)，(2^8 = 256) 等。</li>
+<li>同样要进行取模操作，防止溢出。</li>
+</ul>
+<h4 id="示例" class="prose-heading">示例</h4>
+<p>假设要计算 (2^{10})，10 的二进制表示是 <code>1010</code>。</p>
+<ul>
+<li>初始时，<code>base = 2</code>，<code>exponent = 10</code>，<code>result = 1</code>。</li>
+<li>第一次循环：
+<ul>
+<li><code>exponent = 10</code> 是偶数，不更新 <code>result</code>。</li>
+<li><code>exponent</code> 除以 2 后变为 5。</li>
+<li><code>base</code> 平方变为 (2^2 = 4)。</li>
+</ul>
+</li>
+<li>第二次循环：
+<ul>
+<li><code>exponent = 5</code> 是奇数，<code>result = result * base = 1 * 4 = 4</code>。</li>
+<li><code>exponent</code> 除以 2 后变为 2。</li>
+<li><code>base</code> 平方变为 (4^2 = 16)。</li>
+</ul>
+</li>
+<li>第三次循环：
+<ul>
+<li><code>exponent = 2</code> 是偶数，不更新 <code>result</code>。</li>
+<li><code>exponent</code> 除以 2 后变为 1。</li>
+<li><code>base</code> 平方变为 (16^2 = 256)。</li>
+</ul>
+</li>
+<li>第四次循环：
+<ul>
+<li><code>exponent = 1</code> 是奇数，<code>result = result * base = 4 * 256 = 1024</code>。</li>
+<li><code>exponent</code> 除以 2 后变为 0，循环结束。</li>
+</ul>
+</li>
+</ul>
+<p>最终结果就是 (2^{10} = 1024)。</p>
+<p>通过这种方式，快速幂算法能够高效地计算幂次，尤其是在指数很大的情况下。</p>
+<p><img src="../uploads/csdn/2%E7%9A%84100%E6%AC%A1%E6%96%B9mod5%E7%94%A8%E4%BB%A3%E7%A0%81%E6%80%8E%E4%B9%88%E8%AE%A1%E7%AE%97/img-01.jpeg" alt=""></p>
+<p>循环最小单元</p>
+<p><img src="../uploads/csdn/2%E7%9A%84100%E6%AC%A1%E6%96%B9mod5%E7%94%A8%E4%BB%A3%E7%A0%81%E6%80%8E%E4%B9%88%E8%AE%A1%E7%AE%97/img-02.jpeg" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#快速幂算法原理">快速幂算法原理</a>
+          
+            <a class="toc-level-4" href="#代码中-exponent-的计算步骤">代码中 `exponent` 的计算步骤</a>
+          
+            <a class="toc-level-5" href="#1-判断-exponent-是否为奇数">1\. 判断 `exponent` 是否为奇数</a>
+          
+            <a class="toc-level-5" href="#2-指数右移-除以-2">2\. 指数右移（除以 2）</a>
+          
+            <a class="toc-level-5" href="#3-底数平方">3\. 底数平方</a>
+          
+            <a class="toc-level-4" href="#示例">示例</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/一个月的阴晴圆缺变化回弹html仿真.html">
+      <span>上一篇</span>
+      <strong>一个月的阴晴圆缺变化回弹HTML仿真</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/蚁群算法是一种模拟蚂蚁觅食行为的优化算法适合用于解决旅行商问题tsp.html">
+      <span>下一篇</span>
+      <strong>蚁群算法是一种模拟蚂蚁觅食行为的优化算法适合用于解决旅行商问题TSP</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/使用pandapower计算ieee33模型潮流计算并给出ui界面展示.html">使用pandapower计算ieee33模型潮流计算并给出ui界面展示</a></h3>
+        <p class="post-excerpt">本文介绍了一个基于Python的IEEE33节点潮流计算系统，使用pandapower进行电力网络分析，并结合Tkinter开发图形用户界面。系统主要功能包括：加载IEEE33标准测试模型、执行潮流计算、显示网络拓扑结构、查看计算结果表格和电压分布曲线。程序采用模块化设计，包含网络信息展示、拓扑可视化、结果表格和电压曲线四个主要功能模块。拓扑图采用圆形布局，通过颜色和线宽直观反映线路负载率和节点电…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.732Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

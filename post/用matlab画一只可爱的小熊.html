@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>用MATLAB画一只可爱的小熊 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/matlab-仿真.html">MATLAB 仿真</a>
+        </nav>
+        <h1 class="post-title">用MATLAB画一只可爱的小熊</h1>
+        <p class="post-deck">本文介绍了一个使用MATLAB绘制可爱小熊的代码实现。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.153Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>12 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文介绍了一个使用MATLAB绘制可爱小熊的代码实现。</p>
+<p>通过定义身体各部分的参数（如头部半径、耳朵位置、四肢尺寸等），利用rectangle函数绘制圆形和圆角矩形，组合成完整的小熊形象。代码设置了不同颜色区分身体（深灰）、脸部（浅灰）、眼睛（黑）和鼻子（棕），并添加微笑曲线作为嘴巴。程序包含缩放比例调整功能，可整体改变小熊大小。最终生成一个600×600像素的白色背景图形，隐藏坐标轴，呈现出一个比例协调的卡通小熊形象。</p>
+<p>可爱的小熊</p>
+<p><img src="../uploads/csdn/%E7%94%A8matlab%E7%94%BB%E4%B8%80%E5%8F%AA%E5%8F%AF%E7%88%B1%E7%9A%84%E5%B0%8F%E7%86%8A/img-01.png" alt=""></p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">%% MATLAB绘制可爱小熊</span>
+
+<span class="hljs-comment">% 清理工作区</span>
+clear; clc; close all;
+
+<span class="hljs-comment">% --- 1. 定义小熊身体各部分的参数 ---</span>
+<span class="hljs-comment">% 这些参数可以调整，以改变小熊的大小和比例</span>
+body_scale = <span class="hljs-number">1</span>; <span class="hljs-comment">% 整体缩放比例</span>
+
+<span class="hljs-comment">% 头部</span>
+head_center = [<span class="hljs-number">0</span>, <span class="hljs-number">5</span>]; <span class="hljs-comment">% 头部中心坐标</span>
+head_radius = <span class="hljs-number">2.5</span> * body_scale; <span class="hljs-comment">% 头部半径</span>
+
+<span class="hljs-comment">% 耳朵</span>
+ear_radius = <span class="hljs-number">0.8</span> * body_scale; <span class="hljs-comment">% 耳朵半径</span>
+ear_offset_x = <span class="hljs-number">1.8</span> * body_scale; <span class="hljs-comment">% 耳朵在x方向上的偏移</span>
+ear_offset_y = <span class="hljs-number">1.8</span> * body_scale; <span class="hljs-comment">% 耳朵在y方向上的偏移</span>
+
+<span class="hljs-comment">% 眼睛</span>
+eye_radius = <span class="hljs-number">0.3</span> * body_scale; <span class="hljs-comment">% 眼睛半径</span>
+eye_offset_x = <span class="hljs-number">1.0</span> * body_scale; <span class="hljs-comment">% 眼睛在x方向上的偏移</span>
+eye_offset_y = <span class="hljs-number">0.5</span> * body_scale; <span class="hljs-comment">% 眼睛在y方向上的偏移</span>
+
+<span class="hljs-comment">% 鼻子</span>
+nose_width = <span class="hljs-number">0.6</span> * body_scale; <span class="hljs-comment">% 鼻子宽度</span>
+nose_height = <span class="hljs-number">0.4</span> * body_scale; <span class="hljs-comment">% 鼻子高度</span>
+
+<span class="hljs-comment">% 嘴巴</span>
+mouth_width = <span class="hljs-number">1.2</span> * body_scale; <span class="hljs-comment">% 嘴巴宽度</span>
+mouth_height = <span class="hljs-number">0.5</span> * body_scale; <span class="hljs-comment">% 嘴巴高度</span>
+
+<span class="hljs-comment">% 身体</span>
+body_width = <span class="hljs-number">3.5</span> * body_scale; <span class="hljs-comment">% 身体宽度</span>
+body_height = <span class="hljs-number">3.0</span> * body_scale; <span class="hljs-comment">% 身体高度</span>
+
+<span class="hljs-comment">% 四肢</span>
+limb_width = <span class="hljs-number">0.6</span> * body_scale; <span class="hljs-comment">% 四肢宽度</span>
+limb_height = <span class="hljs-number">2.0</span> * body_scale; <span class="hljs-comment">% 四肢长度</span>
+
+<span class="hljs-comment">% --- 2. 绘制小熊 ---</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;w&#x27;</span>, <span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">100</span>, <span class="hljs-number">100</span>, <span class="hljs-number">600</span>, <span class="hljs-number">600</span>]);
+<span class="hljs-built_in">hold</span> on;
+axis equal;
+axis off; <span class="hljs-comment">% 隐藏坐标轴</span>
+
+<span class="hljs-comment">% 定义颜色</span>
+bear_color = [<span class="hljs-number">0.3</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">0.3</span>]; <span class="hljs-comment">% 小熊身体颜色 (深灰色)</span>
+face_color = [<span class="hljs-number">0.9</span>, <span class="hljs-number">0.9</span>, <span class="hljs-number">0.9</span>]; <span class="hljs-comment">% 小熊脸部颜色 (浅灰色)</span>
+eye_color = [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>];        <span class="hljs-comment">% 眼睛颜色 (黑色)</span>
+nose_color = [<span class="hljs-number">0.7</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">0.2</span>]; <span class="hljs-comment">% 鼻子颜色 (棕色)</span>
+
+<span class="hljs-comment">% --- 开始绘制 ---</span>
+
+<span class="hljs-comment">% 绘制身体 (使用rectangle函数绘制圆角矩形)</span>
+rectangle(<span class="hljs-string">&#x27;Position&#x27;</span>, [-body_width/<span class="hljs-number">2</span>, <span class="hljs-number">0</span>, body_width, body_height], ...
+          <span class="hljs-string">&#x27;Curvature&#x27;</span>, [<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>], <span class="hljs-string">&#x27;FaceColor&#x27;</span>, bear_color, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+
+<span class="hljs-comment">% 绘制头部 (使用rectangle函数绘制一个圆形)</span>
+rectangle(<span class="hljs-string">&#x27;Position&#x27;</span>, [head_center(<span class="hljs-number">1</span>)-head_radius, head_center(<span class="hljs-number">2</span>)-head_radius, ...
+                       <span class="hljs-number">2</span>*head_radius, <span class="hljs-number">2</span>*head_radius], ...
+          <span class="hljs-string">&#x27;Curvature&#x27;</span>, [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>], <span class="hljs-string">&#x27;FaceColor&#x27;</span>, bear_color, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+
+<span class="hljs-comment">% 绘制脸部 (一个稍小的圆形)</span>
+rectangle(<span class="hljs-string">&#x27;Position&#x27;</span>, [head_center(<span class="hljs-number">1</span>)-head_radius+<span class="hljs-number">0.5</span>, head_center(<span class="hljs-number">2</span>)-head_radius+<span class="hljs-number">0.5</span>, ...
+                       <span class="hljs-number">2</span>*head_radius<span class="hljs-number">-1</span>, <span class="hljs-number">2</span>*head_radius<span class="hljs-number">-1</span>], ...
+          <span class="hljs-string">&#x27;Curvature&#x27;</span>, [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>], <span class="hljs-string">&#x27;FaceColor&#x27;</span>, face_color, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+
+<span class="hljs-comment">% 绘制耳朵</span>
+<span class="hljs-comment">% 左耳</span>
+rectangle(<span class="hljs-string">&#x27;Position&#x27;</span>, [head_center(<span class="hljs-number">1</span>)-ear_offset_x-ear_radius, head_center(<span class="hljs-number">2</span>)+ear_offset_y-ear_radius, ...
+                       <span class="hljs-number">2</span>*ear_radius, <span class="hljs-number">2</span>*ear_radius], ...
+          <span class="hljs-string">&#x27;Curvature&#x27;</span>, [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>], <span class="hljs-string">&#x27;FaceColor&#x27;</span>, bear_color, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+<span class="hljs-comment">% 右耳</span>
+rectangle(<span class="hljs-string">&#x27;Position&#x27;</span>, [head_center(<span class="hljs-number">1</span>)+ear_offset_x-ear_radius, head_center(<span class="hljs-number">2</span>)+ear_offset_y-ear_radius, ...
+                       <span class="hljs-number">2</span>*ear_radius, <span class="hljs-number">2</span>*ear_radius], ...
+          <span class="hljs-string">&#x27;Curvature&#x27;</span>, [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>], <span class="hljs-string">&#x27;FaceColor&#x27;</span>, bear_color, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+
+<span class="hljs-comment">% 绘制眼睛</span>
+<span class="hljs-comment">% 左眼</span>
+rectangle(<span class="hljs-string">&#x27;Position&#x27;</span>, [head_center(<span class="hljs-number">1</span>)-eye_offset_x-eye_radius, head_center(<span class="hljs-number">2</span>)+eye_offset_y-eye_radius, ...
+                       <span class="hljs-number">2</span>*eye_radius, <span class="hljs-number">2</span>*eye_radius], ...
+          <span class="hljs-string">&#x27;Curvature&#x27;</span>, [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>], <span class="hljs-string">&#x27;FaceColor&#x27;</span>, eye_color, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+<span class="hljs-comment">% 右眼</span>
+rectangle(<span class="hljs-string">&#x27;Position&#x27;</span>, [head_center(<span class="hljs-number">1</span>)+eye_offset_x-eye_radius, head_center(<span class="hljs-number">2</span>)+eye_offset_y-eye_radius, ...
+                       <span class="hljs-number">2</span>*eye_radius, <span class="hljs-number">2</span>*eye_radius], ...
+          <span class="hljs-string">&#x27;Curvature&#x27;</span>, [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>], <span class="hljs-string">&#x27;FaceColor&#x27;</span>, eye_color, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+
+<span class="hljs-comment">% 绘制鼻子 (一个椭圆形)</span>
+rectangle(<span class="hljs-string">&#x27;Position&#x27;</span>, [-nose_width/<span class="hljs-number">2</span>, head_center(<span class="hljs-number">2</span>)-nose_height/<span class="hljs-number">2</span>, nose_width, nose_height], ...
+          <span class="hljs-string">&#x27;Curvature&#x27;</span>, [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>], <span class="hljs-string">&#x27;FaceColor&#x27;</span>, nose_color, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+
+<span class="hljs-comment">% 绘制嘴巴 (一个微笑的弧线)</span>
+theta = <span class="hljs-built_in">linspace</span>(<span class="hljs-built_in">pi</span>, <span class="hljs-number">2</span>*<span class="hljs-built_in">pi</span>, <span class="hljs-number">100</span>); <span class="hljs-comment">% 角度从180度到360度</span>
+mouth_x = (mouth_width/<span class="hljs-number">2</span>) * <span class="hljs-built_in">cos</span>(theta);
+mouth_y = <span class="hljs-number">-0.2</span> + (mouth_height/<span class="hljs-number">2</span>) * <span class="hljs-built_in">sin</span>(theta); <span class="hljs-comment">% -0.2是为了让嘴巴位置下移一点</span>
+<span class="hljs-built_in">plot</span>(mouth_x, mouth_y, <span class="hljs-string">&#x27;k&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>);
+
+<span class="hljs-comment">% 绘制四肢</span>
+<span class="hljs-comment">% 左手臂</span>
+rectangle(<span class="hljs-string">&#x27;Position&#x27;</span>, [-body_width/<span class="hljs-number">2</span>-limb_width, body_height/<span class="hljs-number">2</span>, limb_width, limb_height], ...
+          <span class="hljs-string">&#x27;Curvature&#x27;</span>, [<span class="hljs-number">0.3</span>, <span class="hljs-number">0.3</span>], <span class="hljs-string">&#x27;FaceColor&#x27;</span>, bear_color, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+<span class="hljs-comment">% 右手臂</span>
+rectangle(<span class="hljs-string">&#x27;Position&#x27;</span>, [body_width/<span class="hljs-number">2</span>, body_height/<span class="hljs-number">2</span>, limb_width, limb_height], ...
+          <span class="hljs-string">&#x27;Curvature&#x27;</span>, [<span class="hljs-number">0.3</span>, <span class="hljs-number">0.3</span>], <span class="hljs-string">&#x27;FaceColor&#x27;</span>, bear_color, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+<span class="hljs-comment">% 左腿部</span>
+rectangle(<span class="hljs-string">&#x27;Position&#x27;</span>, [-body_width/<span class="hljs-number">4</span>-limb_width/<span class="hljs-number">2</span>, -limb_height, limb_width, limb_height], ...
+          <span class="hljs-string">&#x27;Curvature&#x27;</span>, [<span class="hljs-number">0.3</span>, <span class="hljs-number">0.3</span>], <span class="hljs-string">&#x27;FaceColor&#x27;</span>, bear_color, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+<span class="hljs-comment">% 右腿部</span>
+rectangle(<span class="hljs-string">&#x27;Position&#x27;</span>, [body_width/<span class="hljs-number">4</span>-limb_width/<span class="hljs-number">2</span>, -limb_height, limb_width, limb_height], ...
+          <span class="hljs-string">&#x27;Curvature&#x27;</span>, [<span class="hljs-number">0.3</span>, <span class="hljs-number">0.3</span>], <span class="hljs-string">&#x27;FaceColor&#x27;</span>, bear_color, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+
+<span class="hljs-comment">% 添加标题</span>
+title(<span class="hljs-string">&#x27;MATLAB 小熊&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">16</span>, <span class="hljs-string">&#x27;FontWeight&#x27;</span>, <span class="hljs-string">&#x27;bold&#x27;</span>);
+
+<span class="hljs-built_in">hold</span> off;
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/韦伯望远镜的拉格朗日点计算推导过程包含matlab和python运动轨迹仿真代码.html">
+      <span>上一篇</span>
+      <strong>韦伯望远镜的拉格朗日点计算推导过程包含MATLAB和python运动轨迹仿真代码</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/求过椭圆上一定点的诸弦的中点的轨迹并讨论用matlab画出来轨迹图高考试题.html">
+      <span>下一篇</span>
+      <strong>求过椭圆上一定点的诸弦的中点的轨迹并讨论用MATLAB画出来轨迹图高考试题</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/凸包问题graham扫描算法matlab.html">凸包问题Graham扫描算法MATLAB</a></h3>
+        <p class="post-excerpt">算法要解决的问题</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.498Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

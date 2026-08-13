@@ -15,12 +15,13 @@
   <header class="site-header">
     <div class="wrap header-inner">
       <a class="brand" href="/">
-        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
         <span class="brand-text"><%= site.siteTitle %></span>
       </a>
       <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
       <nav class="site-nav" id="site-nav" aria-label="主导航">
         <a href="/" class="<%= path === '/' ? 'is-active' : '' %>">首页</a>
+        <a href="/categories" class="<%= path === '/categories' || (typeof selected !== 'undefined' && selected.slug) ? 'is-active' : '' %>">分类</a>
         <a href="/archive" class="<%= path === '/archive' ? 'is-active' : '' %>">归档</a>
         <a href="/tags" class="<%= path === '/tags' ? 'is-active' : '' %>">标签</a>
         <a href="/about" class="<%= path === '/about' ? 'is-active' : '' %>">关于</a>
@@ -46,6 +47,8 @@
         <p class="footer-note"><%= site.footerText %></p>
       </div>
       <div class="footer-links">
+        <a href="/archive">全部文章</a>
+        <a href="/categories">分类</a>
         <% if (site.github) { %><a href="<%= site.github %>" rel="me noopener" target="_blank">GitHub</a><% } %>
         <% if (site.email) { %><a href="mailto:<%= site.email %>">来信</a><% } %>
         <% if (!staticSite) { %>

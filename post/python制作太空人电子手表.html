@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Python制作太空人电子手表 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">Python制作太空人电子手表</h1>
+        <p class="post-deck">这段代码实现了一个缩放版的太空人智能手表表盘界面，具有以下特点：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.246Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>33 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>这段代码实现了一个缩放版的太空人智能手表表盘界面，具有以下特点：</p>
+<ol>
+<li>界面设计采用960x960圆形表盘，所有内容按80%比例缩放</li>
+<li>包含静态元素：表盘框架、刻度线、天气信息（温湿度/空气质量）、健康数据（血压/心率/步数/睡眠）、农历日期等</li>
+<li>动态显示当前时间（时分秒）并每秒更新</li>
+<li>中央太空人形象实现上下漂浮动画效果，伴有随机分布的星空背景</li>
+<li>使用Tkinter的Canvas绘图，通过图层管理实现动态刷新</li>
+<li>提供图片加载失败时的简单手绘太空人兜底方案</li>
+</ol>
+<p>代码结构清晰，分为静态背景绘制、动态时间更新和太空人动画三个主要部分，通过定时器实现40ms刷新率的动画效果。</p>
+<p><img src="../uploads/csdn/python%E5%88%B6%E4%BD%9C%E5%A4%AA%E7%A9%BA%E4%BA%BA%E7%94%B5%E5%AD%90%E6%89%8B%E8%A1%A8/img-01.png" alt=""></p>
+<p>代码</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> tkinter <span class="hljs-keyword">as</span> tk
+<span class="hljs-keyword">from</span> tkinter <span class="hljs-keyword">import</span> Canvas
+<span class="hljs-keyword">import</span> math
+<span class="hljs-keyword">import</span> random
+<span class="hljs-keyword">from</span> datetime <span class="hljs-keyword">import</span> datetime
+<span class="hljs-keyword">from</span> PIL <span class="hljs-keyword">import</span> Image, ImageTk
+
+<span class="hljs-comment"># ====================== 全局常量配置 ======================</span>
+WINDOW_SIZE = <span class="hljs-number">960</span>
+CENTER = WINDOW_SIZE // <span class="hljs-number">2</span>
+DIAL_RADIUS = <span class="hljs-number">440</span>       <span class="hljs-comment"># 表盘白色大圆半径</span>
+SCALE = <span class="hljs-number">0.8</span>             <span class="hljs-comment"># 内容压缩1/5，缩放至原80%</span>
+SAFE_MARGIN = <span class="hljs-number">30</span>
+BG_WHITE = <span class="hljs-string">&quot;#ffffff&quot;</span>
+BLACK = <span class="hljs-string">&quot;#000000&quot;</span>
+RED_KEY = <span class="hljs-string">&quot;#e62222&quot;</span>
+
+<span class="hljs-comment"># 表盘静态数据（和原图保持一致）</span>
+static_data = {
+    <span class="hljs-string">&quot;humidity&quot;</span>: <span class="hljs-string">&quot;80%&quot;</span>,
+    <span class="hljs-string">&quot;air_quality&quot;</span>: <span class="hljs-string">&quot;空气(优质)&quot;</span>,
+    <span class="hljs-string">&quot;temp_now&quot;</span>: <span class="hljs-number">24</span>,
+    <span class="hljs-string">&quot;temp_high&quot;</span>: <span class="hljs-number">26</span>,
+    <span class="hljs-string">&quot;temp_low&quot;</span>: <span class="hljs-number">20</span>,
+    <span class="hljs-string">&quot;bp_low&quot;</span>: <span class="hljs-number">80</span>,
+    <span class="hljs-string">&quot;bp_high&quot;</span>: <span class="hljs-number">128</span>,
+    <span class="hljs-string">&quot;heart_rate&quot;</span>: <span class="hljs-number">97</span>,
+    <span class="hljs-string">&quot;steps&quot;</span>: <span class="hljs-number">7645</span>,
+    <span class="hljs-string">&quot;sleep_h&quot;</span>: <span class="hljs-number">7</span>,
+    <span class="hljs-string">&quot;sleep_m&quot;</span>: <span class="hljs-number">30</span>,
+    <span class="hljs-string">&quot;distance&quot;</span>: <span class="hljs-number">3.66</span>,
+    <span class="hljs-string">&quot;lunar&quot;</span>: <span class="hljs-string">&quot;正月初五&quot;</span>,
+    <span class="hljs-string">&quot;week_date&quot;</span>: <span class="hljs-string">&quot;周五 10-18&quot;</span>,
+    <span class="hljs-string">&quot;solar_term&quot;</span>: <span class="hljs-string">&quot;冬至&quot;</span>
+}
+
+<span class="hljs-comment"># 动画参数</span>
+astro_float_offset = <span class="hljs-number">0</span>
+float_dir = <span class="hljs-number">1</span>
+star_list = []
+<span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">8</span>):
+    star_list.append({
+        <span class="hljs-string">&quot;dx&quot;</span>: random.randint(-<span class="hljs-number">160</span>, <span class="hljs-number">160</span>),
+        <span class="hljs-string">&quot;dy&quot;</span>: random.randint(-<span class="hljs-number">100</span>, <span class="hljs-number">120</span>),
+        <span class="hljs-string">&quot;size&quot;</span>: random.randint(<span class="hljs-number">2</span>, <span class="hljs-number">5</span>),
+    })
+
+<span class="hljs-comment"># ====================== 初始化窗口 ======================</span>
+root = tk.Tk()
+root.title(<span class="hljs-string">&quot;太空人表盘 - 内部内容压缩1/5版&quot;</span>)
+canvas = Canvas(root, width=WINDOW_SIZE, height=WINDOW_SIZE, bg=<span class="hljs-string">&quot;#222222&quot;</span>)
+canvas.pack()
+
+<span class="hljs-comment"># 图层标签</span>
+TAG_STATIC = <span class="hljs-string">&quot;static&quot;</span>
+TAG_DYNAMIC_TIME = <span class="hljs-string">&quot;time&quot;</span>
+TAG_DYNAMIC_ASTRO = <span class="hljs-string">&quot;astro&quot;</span>
+TAG_DYNAMIC_STAR = <span class="hljs-string">&quot;star&quot;</span>
+
+<span class="hljs-comment"># 加载太空人图片，同步缩放</span>
+astro_tk_img = <span class="hljs-literal">None</span>
+<span class="hljs-keyword">try</span>:
+    astro_img_raw = Image.<span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;person.png&quot;</span>).convert(<span class="hljs-string">&quot;RGBA&quot;</span>)
+    base_w, base_h = <span class="hljs-number">160</span>, <span class="hljs-number">160</span>
+    new_w, new_h = <span class="hljs-built_in">int</span>(base_w * SCALE), <span class="hljs-built_in">int</span>(base_h * SCALE)
+    astro_img_raw = astro_img_raw.resize((new_w, new_h), Image.Resampling.LANCZOS)
+    astro_tk_img = ImageTk.PhotoImage(astro_img_raw)
+<span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;未找到person.png，使用手绘替代：<span class="hljs-subst">{e}</span>&quot;</span>)
+
+<span class="hljs-comment"># 坐标缩放工具函数：以屏幕中心为基准缩放</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">scale_pos</span>(<span class="hljs-params">x, y</span>):
+    dx = x - CENTER
+    dy = y - CENTER
+    <span class="hljs-keyword">return</span> CENTER + dx * SCALE, CENTER + dy * SCALE
+
+<span class="hljs-comment"># 字号缩放工具</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">scale_font</span>(<span class="hljs-params">size</span>):
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">int</span>(size * SCALE)
+
+<span class="hljs-comment"># ====================== 绘制静态背景 ======================</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">draw_static_background</span>():
+    c = CENTER
+    outer_r = DIAL_RADIUS + SAFE_MARGIN
+    <span class="hljs-comment"># 手表黑色外框（不缩放）</span>
+    canvas.create_oval(
+        c - outer_r - <span class="hljs-number">35</span>, c - outer_r - <span class="hljs-number">35</span>,
+        c + outer_r + <span class="hljs-number">35</span>, c + outer_r + <span class="hljs-number">35</span>,
+        fill=<span class="hljs-string">&quot;#101010&quot;</span>, outline=<span class="hljs-string">&quot;#2a2a2a&quot;</span>, width=<span class="hljs-number">12</span>, tags=TAG_STATIC
+    )
+    <span class="hljs-comment"># 白色表盘大圆（不缩放）</span>
+    canvas.create_oval(
+        c - DIAL_RADIUS, c - DIAL_RADIUS,
+        c + DIAL_RADIUS, c + DIAL_RADIUS,
+        fill=BG_WHITE, outline=BLACK, width=<span class="hljs-number">5</span>, tags=TAG_STATIC
+    )
+    <span class="hljs-comment"># 顶部三角标识（缩放）</span>
+    tri_x1, tri_y1 = scale_pos(c, c - DIAL_RADIUS + <span class="hljs-number">20</span>)
+    tri_x2, tri_y2 = scale_pos(c - <span class="hljs-number">28</span>, c - DIAL_RADIUS + <span class="hljs-number">55</span>)
+    tri_x3, tri_y3 = scale_pos(c + <span class="hljs-number">28</span>, c - DIAL_RADIUS + <span class="hljs-number">55</span>)
+    canvas.create_polygon(tri_x1, tri_y1, tri_x2, tri_y2, tri_x3, tri_y3, fill=BLACK, tags=TAG_STATIC)
+
+    <span class="hljs-comment"># 侧边红色按键（不缩放，表盘边框部件）</span>
+    canvas.create_rectangle(
+        c + DIAL_RADIUS + <span class="hljs-number">18</span>, c - <span class="hljs-number">160</span>,
+        c + DIAL_RADIUS + <span class="hljs-number">68</span>, c - <span class="hljs-number">75</span>,
+        fill=RED_KEY, outline=BLACK, width=<span class="hljs-number">3</span>, tags=TAG_STATIC
+    )
+    canvas.create_rectangle(
+        c + DIAL_RADIUS + <span class="hljs-number">18</span>, c + <span class="hljs-number">75</span>,
+        c + DIAL_RADIUS + <span class="hljs-number">68</span>, c + <span class="hljs-number">160</span>,
+        fill=RED_KEY, outline=BLACK, width=<span class="hljs-number">3</span>, tags=TAG_STATIC
+    )
+
+    <span class="hljs-comment"># 表盘刻度线（缩放）</span>
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">60</span>):
+        ang = math.radians(i * <span class="hljs-number">6</span> - <span class="hljs-number">90</span>)
+        r_out = DIAL_RADIUS * SCALE
+        r_in = (DIAL_RADIUS - <span class="hljs-number">65</span>) * SCALE <span class="hljs-keyword">if</span> i % <span class="hljs-number">5</span> == <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> (DIAL_RADIUS - <span class="hljs-number">36</span>) * SCALE
+        x1 = c + r_out * math.cos(ang)
+        y1 = c + r_out * math.sin(ang)
+        x2 = c + r_in * math.cos(ang)
+        y2 = c + r_in * math.sin(ang)
+        w = <span class="hljs-number">3</span> <span class="hljs-keyword">if</span> i % <span class="hljs-number">5</span> == <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> <span class="hljs-number">1</span>
+        canvas.create_line(x1, y1, x2, y2, fill=BLACK, width=w, tags=TAG_STATIC)
+
+    <span class="hljs-comment"># ---------------------- 顶部天气区（全部缩放） ----------------------</span>
+    top_x, top_y = scale_pos(<span class="hljs-number">0</span>, c - <span class="hljs-number">330</span>)
+    <span class="hljs-comment"># 湿度</span>
+    x_hum, y_hum = scale_pos(c - <span class="hljs-number">320</span>, c - <span class="hljs-number">330</span>)
+    canvas.create_text(x_hum, y_hum, text=static_data[<span class="hljs-string">&quot;humidity&quot;</span>],
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">42</span>), <span class="hljs-string">&quot;bold&quot;</span>), fill=BLACK, tags=TAG_STATIC)
+    <span class="hljs-comment"># 空气质量</span>
+    x_air, y_air = scale_pos(c - <span class="hljs-number">100</span>, c - <span class="hljs-number">330</span> - <span class="hljs-number">38</span>)
+    canvas.create_text(x_air, y_air, text=static_data[<span class="hljs-string">&quot;air_quality&quot;</span>],
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">26</span>)), fill=BLACK, tags=TAG_STATIC)
+    x_temp, y_temp = scale_pos(c - <span class="hljs-number">100</span>, c - <span class="hljs-number">330</span>)
+    canvas.create_text(x_temp, y_temp, text=<span class="hljs-string">f&#x27;<span class="hljs-subst">{static_data[<span class="hljs-string">&quot;temp_now&quot;</span>]}</span>℃&#x27;</span>,
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">46</span>), <span class="hljs-string">&quot;bold&quot;</span>), fill=BLACK, tags=TAG_STATIC)
+    <span class="hljs-comment"># 高低温</span>
+    x_hight, y_hight = scale_pos(c + <span class="hljs-number">80</span>, c - <span class="hljs-number">330</span> - <span class="hljs-number">36</span>)
+    canvas.create_text(x_hight, y_hight, text=<span class="hljs-string">f&#x27;<span class="hljs-subst">{static_data[<span class="hljs-string">&quot;temp_high&quot;</span>]}</span>△&#x27;</span>,
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">40</span>), <span class="hljs-string">&quot;bold&quot;</span>), fill=BLACK, tags=TAG_STATIC)
+    x_lowt, y_lowt = scale_pos(c + <span class="hljs-number">80</span>, c - <span class="hljs-number">330</span> + <span class="hljs-number">32</span>)
+    canvas.create_text(x_lowt, y_lowt, text=<span class="hljs-string">f&#x27;<span class="hljs-subst">{static_data[<span class="hljs-string">&quot;temp_low&quot;</span>]}</span>▽&#x27;</span>,
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">40</span>), <span class="hljs-string">&quot;bold&quot;</span>), fill=BLACK, tags=TAG_STATIC)
+    <span class="hljs-comment"># 雷雨云朵</span>
+    cx_cloud, cy_cloud = scale_pos(c + <span class="hljs-number">240</span>, c - <span class="hljs-number">330</span>)
+    cloud_r = <span class="hljs-number">60</span> * SCALE
+    canvas.create_oval(cx_cloud - cloud_r, cy_cloud - cloud_r*<span class="hljs-number">0.43</span>,
+                       cx_cloud + cloud_r, cy_cloud + cloud_r*<span class="hljs-number">0.43</span>,
+                       fill=BG_WHITE, outline=BLACK, width=<span class="hljs-number">3</span>, tags=TAG_STATIC)
+    l1x1, l1y1 = scale_pos(c + <span class="hljs-number">240</span> - <span class="hljs-number">20</span>, c - <span class="hljs-number">330</span> + <span class="hljs-number">24</span>)
+    l1x2, l1y2 = scale_pos(c + <span class="hljs-number">240</span> - <span class="hljs-number">5</span>, c - <span class="hljs-number">330</span> + <span class="hljs-number">60</span>)
+    canvas.create_line(l1x1, l1y1, l1x2, l1y2, fill=BLACK, width=<span class="hljs-number">3</span>, tags=TAG_STATIC)
+    l2x1, l2y1 = scale_pos(c + <span class="hljs-number">240</span> + <span class="hljs-number">10</span>, c - <span class="hljs-number">330</span> + <span class="hljs-number">24</span>)
+    l2x2, l2y2 = scale_pos(c + <span class="hljs-number">240</span> + <span class="hljs-number">25</span>, c - <span class="hljs-number">330</span> + <span class="hljs-number">56</span>)
+    canvas.create_line(l2x1, l2y1, l2x2, l2y2, fill=BLACK, width=<span class="hljs-number">3</span>, tags=TAG_STATIC)
+
+    <span class="hljs-comment"># ---------------------- 左侧血压心率 ----------------------</span>
+    x_bp, y_bp = scale_pos(c - <span class="hljs-number">350</span>, c + <span class="hljs-number">160</span>)
+    canvas.create_text(x_bp, y_bp, text=<span class="hljs-string">f&#x27;<span class="hljs-subst">{static_data[<span class="hljs-string">&quot;bp_low&quot;</span>]}</span>-<span class="hljs-subst">{static_data[<span class="hljs-string">&quot;bp_high&quot;</span>]}</span>&#x27;</span>,
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">50</span>), <span class="hljs-string">&quot;bold&quot;</span>), fill=BLACK, tags=TAG_STATIC)
+    <span class="hljs-comment"># 心形图标</span>
+    h1x, h1y = scale_pos(c - <span class="hljs-number">395</span>, c + <span class="hljs-number">160</span> + <span class="hljs-number">68</span>)
+    h2x, h2y = scale_pos(c - <span class="hljs-number">422</span>, c + <span class="hljs-number">160</span> + <span class="hljs-number">110</span>)
+    h3x, h3y = scale_pos(c - <span class="hljs-number">360</span>, c + <span class="hljs-number">160</span> + <span class="hljs-number">110</span>)
+    canvas.create_polygon(h1x, h1y, h2x, h2y, h3x, h3y, fill=BLACK, tags=TAG_STATIC)
+    x_hr, y_hr = scale_pos(c - <span class="hljs-number">265</span>, c + <span class="hljs-number">160</span> + <span class="hljs-number">90</span>)
+    canvas.create_text(x_hr, y_hr, text=<span class="hljs-string">f&#x27;<span class="hljs-subst">{static_data[<span class="hljs-string">&quot;heart_rate&quot;</span>]}</span>&#x27;</span>,
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">60</span>), <span class="hljs-string">&quot;bold&quot;</span>), fill=BLACK, tags=TAG_STATIC)
+
+    <span class="hljs-comment"># ---------------------- 右侧农历步数 ----------------------</span>
+    x_lunar, y_lunar = scale_pos(c + <span class="hljs-number">250</span>, c + <span class="hljs-number">80</span>)
+    canvas.create_text(x_lunar, y_lunar, text=static_data[<span class="hljs-string">&quot;lunar&quot;</span>],
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">44</span>)), fill=BLACK, tags=TAG_STATIC)
+    x_wd, y_wd = scale_pos(c + <span class="hljs-number">250</span>, c + <span class="hljs-number">80</span> + <span class="hljs-number">70</span>)
+    canvas.create_text(x_wd, y_wd, text=static_data[<span class="hljs-string">&quot;week_date&quot;</span>],
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">44</span>)), fill=BLACK, tags=TAG_STATIC)
+    <span class="hljs-comment"># 鞋子矩形</span>
+    s_x1, s_y1 = scale_pos(c + <span class="hljs-number">90</span>, c + <span class="hljs-number">80</span> + <span class="hljs-number">120</span>)
+    s_x2, s_y2 = scale_pos(c + <span class="hljs-number">180</span>, c + <span class="hljs-number">80</span> + <span class="hljs-number">168</span>)
+    canvas.create_rectangle(s_x1, s_y1, s_x2, s_y2, fill=BLACK, tags=TAG_STATIC)
+    x_step, y_step = scale_pos(c + <span class="hljs-number">310</span>, c + <span class="hljs-number">80</span> + <span class="hljs-number">140</span>)
+    canvas.create_text(x_step, y_step, text=<span class="hljs-string">f&#x27;<span class="hljs-subst">{static_data[<span class="hljs-string">&quot;steps&quot;</span>]}</span>&#x27;</span>,
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">60</span>), <span class="hljs-string">&quot;bold&quot;</span>), fill=BLACK, tags=TAG_STATIC)
+
+    <span class="hljs-comment"># ---------------------- 底部睡眠、距离栏 ----------------------</span>
+    b_y_base = c + <span class="hljs-number">320</span>
+    <span class="hljs-comment"># 睡眠框</span>
+    sl_x1, sl_y1 = scale_pos(c - <span class="hljs-number">370</span>, b_y_base)
+    sl_x2, sl_y2 = scale_pos(c - <span class="hljs-number">30</span>, b_y_base + <span class="hljs-number">100</span>)
+    canvas.create_rectangle(sl_x1, sl_y1, sl_x2, sl_y2, outline=BLACK, width=<span class="hljs-number">3</span>, tags=TAG_STATIC)
+    x_sleep_txt, y_sleep_txt = scale_pos(c - <span class="hljs-number">290</span>, b_y_base + <span class="hljs-number">40</span>)
+    canvas.create_text(x_sleep_txt, y_sleep_txt, text=<span class="hljs-string">&quot;睡眠&quot;</span>,
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">36</span>)), fill=BLACK, tags=TAG_STATIC)
+    x_sleep_tm, y_sleep_tm = scale_pos(c - <span class="hljs-number">120</span>, b_y_base + <span class="hljs-number">40</span>)
+    canvas.create_text(x_sleep_tm, y_sleep_tm, text=<span class="hljs-string">f&#x27;<span class="hljs-subst">{static_data[<span class="hljs-string">&quot;sleep_h&quot;</span>]}</span>h<span class="hljs-subst">{static_data[<span class="hljs-string">&quot;sleep_m&quot;</span>]}</span>m&#x27;</span>,
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">44</span>), <span class="hljs-string">&quot;bold&quot;</span>), fill=BLACK, tags=TAG_STATIC)
+    <span class="hljs-comment"># 距离框</span>
+    dis_x1, dis_y1 = scale_pos(c + <span class="hljs-number">30</span>, b_y_base)
+    dis_x2, dis_y2 = scale_pos(c + <span class="hljs-number">370</span>, b_y_base + <span class="hljs-number">100</span>)
+    canvas.create_rectangle(dis_x1, dis_y1, dis_x2, dis_y2, outline=BLACK, width=<span class="hljs-number">3</span>, tags=TAG_STATIC)
+    x_dis_txt, y_dis_txt = scale_pos(c + <span class="hljs-number">250</span>, b_y_base + <span class="hljs-number">40</span>)
+    canvas.create_text(x_dis_txt, y_dis_txt, text=<span class="hljs-string">&quot;距离&quot;</span>,
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">36</span>)), fill=BLACK, tags=TAG_STATIC)
+    x_dis_val, y_dis_val = scale_pos(c, b_y_base + <span class="hljs-number">125</span>)
+    canvas.create_text(x_dis_val, y_dis_val, text=<span class="hljs-string">f&#x27;<span class="hljs-subst">{static_data[<span class="hljs-string">&quot;distance&quot;</span>]}</span> km&#x27;</span>,
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">50</span>), <span class="hljs-string">&quot;bold&quot;</span>), fill=BLACK, tags=TAG_STATIC)
+
+<span class="hljs-comment"># ====================== 动态时间绘制（缩放） ======================</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">draw_dynamic_time</span>():
+    canvas.delete(TAG_DYNAMIC_TIME)
+    c = CENTER
+    now = datetime.now()
+    h = now.hour
+    m = now.minute
+    s = now.second
+
+    time_base_y = c - <span class="hljs-number">110</span>
+    tx_h, ty_h = scale_pos(c - <span class="hljs-number">150</span>, time_base_y)
+    canvas.create_text(tx_h, ty_h, text=<span class="hljs-string">f&quot;<span class="hljs-subst">{h:02d}</span>&quot;</span>,
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">160</span>), <span class="hljs-string">&quot;bold&quot;</span>), fill=BLACK, tags=TAG_DYNAMIC_TIME)
+    tx_col, ty_col = scale_pos(c, time_base_y)
+    canvas.create_text(tx_col, ty_col, text=<span class="hljs-string">&quot;:&quot;</span>,
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">160</span>), <span class="hljs-string">&quot;bold&quot;</span>), fill=BLACK, tags=TAG_DYNAMIC_TIME)
+    tx_m, ty_m = scale_pos(c + <span class="hljs-number">140</span>, time_base_y)
+    canvas.create_text(tx_m, ty_m, text=<span class="hljs-string">f&quot;<span class="hljs-subst">{m:02d}</span>&quot;</span>,
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">160</span>), <span class="hljs-string">&quot;bold&quot;</span>), fill=BLACK, tags=TAG_DYNAMIC_TIME)
+    <span class="hljs-comment"># 节气秒数</span>
+    tx_term, ty_term = scale_pos(c + <span class="hljs-number">320</span>, time_base_y - <span class="hljs-number">40</span>)
+    canvas.create_text(tx_term, ty_term, text=static_data[<span class="hljs-string">&quot;solar_term&quot;</span>],
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">38</span>)), fill=BLACK, tags=TAG_DYNAMIC_TIME)
+    tx_sec, ty_sec = scale_pos(c + <span class="hljs-number">320</span>, time_base_y + <span class="hljs-number">32</span>)
+    canvas.create_text(tx_sec, ty_sec, text=<span class="hljs-string">f&quot;<span class="hljs-subst">{s:02d}</span>&quot;</span>,
+                       font=(<span class="hljs-string">&quot;Arial&quot;</span>, scale_font(<span class="hljs-number">110</span>), <span class="hljs-string">&quot;bold&quot;</span>), fill=BLACK, tags=TAG_DYNAMIC_TIME)
+
+<span class="hljs-comment"># ====================== 漂浮太空人动画（坐标缩放） ======================</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">draw_astro_animation</span>():
+    <span class="hljs-keyword">global</span> astro_float_offset, float_dir
+    canvas.delete(TAG_DYNAMIC_ASTRO)
+    canvas.delete(TAG_DYNAMIC_STAR)
+    c = CENTER
+    base_y = c + <span class="hljs-number">60</span>
+    float_y = base_y + astro_float_offset
+
+    <span class="hljs-comment"># 浮动逻辑</span>
+    astro_float_offset += float_dir * <span class="hljs-number">0.4</span>
+    <span class="hljs-keyword">if</span> astro_float_offset &gt; <span class="hljs-number">16</span>:
+        float_dir = -<span class="hljs-number">1</span>
+    <span class="hljs-keyword">if</span> astro_float_offset &lt; -<span class="hljs-number">16</span>:
+        float_dir = <span class="hljs-number">1</span>
+
+    astro_x, astro_y = scale_pos(c, float_y)
+    <span class="hljs-keyword">if</span> astro_tk_img <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+        canvas.create_image(astro_x, astro_y, image=astro_tk_img, tags=TAG_DYNAMIC_ASTRO)
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-comment"># 兜底手绘太空人同步缩放</span>
+        ox1, oy1 = scale_pos(c - <span class="hljs-number">80</span>, float_y - <span class="hljs-number">100</span>)
+        ox2, oy2 = scale_pos(c + <span class="hljs-number">10</span>, float_y - <span class="hljs-number">5</span>)
+        canvas.create_oval(ox1, oy1, ox2, oy2, fill=BLACK, tags=TAG_DYNAMIC_ASTRO)
+        l1x1, l1y1 = scale_pos(c - <span class="hljs-number">35</span>, float_y)
+        l1x2, l1y2 = scale_pos(c - <span class="hljs-number">55</span>, float_y + <span class="hljs-number">110</span>)
+        canvas.create_line(l1x1, l1y1, l1x2, l1y2, fill=BLACK, width=<span class="hljs-number">4</span>, tags=TAG_DYNAMIC_ASTRO)
+        l2x1, l2y1 = scale_pos(c - <span class="hljs-number">35</span>, float_y)
+        l2x2, l2y2 = scale_pos(c + <span class="hljs-number">28</span>, float_y + <span class="hljs-number">100</span>)
+        canvas.create_line(l2x1, l2y1, l2x2, l2y2, fill=BLACK, width=<span class="hljs-number">4</span>, tags=TAG_DYNAMIC_ASTRO)
+        l3x1, l3y1 = scale_pos(c - <span class="hljs-number">55</span>, float_y + <span class="hljs-number">110</span>)
+        l3x2, l3y2 = scale_pos(c + <span class="hljs-number">8</span>, float_y + <span class="hljs-number">130</span>)
+        canvas.create_line(l3x1, l3y1, l3x2, l3y2, fill=BLACK, width=<span class="hljs-number">4</span>, tags=TAG_DYNAMIC_ASTRO)
+        l4x1, l4y1 = scale_pos(c + <span class="hljs-number">28</span>, float_y + <span class="hljs-number">100</span>)
+        l4x2, l4y2 = scale_pos(c + <span class="hljs-number">8</span>, float_y + <span class="hljs-number">130</span>)
+        canvas.create_line(l4x1, l4y1, l4x2, l4y2, fill=BLACK, width=<span class="hljs-number">4</span>, tags=TAG_DYNAMIC_ASTRO)
+
+    <span class="hljs-comment"># 星空小点缩放坐标</span>
+    <span class="hljs-keyword">for</span> star <span class="hljs-keyword">in</span> star_list:
+        sx_raw = c + star[<span class="hljs-string">&quot;dx&quot;</span>]
+        sy_raw = float_y + star[<span class="hljs-string">&quot;dy&quot;</span>]
+        sx, sy = scale_pos(sx_raw, sy_raw)
+        s_size = star[<span class="hljs-string">&quot;size&quot;</span>] * SCALE
+        <span class="hljs-keyword">if</span> random.random() &gt; <span class="hljs-number">0.4</span>:
+            canvas.create_oval(sx - s_size, sy - s_size, sx + s_size, sy + s_size, fill=BLACK, tags=TAG_DYNAMIC_STAR)
+
+<span class="hljs-comment"># ====================== 主刷新循环 ======================</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main_loop</span>():
+    draw_dynamic_time()
+    draw_astro_animation()
+    root.after(<span class="hljs-number">40</span>, main_loop)
+
+<span class="hljs-comment"># 启动绘制</span>
+draw_static_background()
+main_loop()
+root.mainloop()
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/python制作斗地主纸牌游戏.html">
+      <span>上一篇</span>
+      <strong>Python制作斗地主纸牌游戏</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/python利用海龟画图turtle库做一个篮球比赛计时画面.html">
+      <span>下一篇</span>
+      <strong>Python利用海龟画图turtle库做一个篮球比赛计时画面</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

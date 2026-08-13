@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>STM32F103ZET6SDIOFATFS读写SD卡例程读写挂载错误排除 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/嵌入式与硬件.html">嵌入式与硬件</a>
+        </nav>
+        <h1 class="post-title">STM32F103ZET6SDIOFATFS读写SD卡例程读写挂载错误排除</h1>
+        <p class="post-deck">一、首先我们要对串口进行重定向（在没有屏幕或者其他提示的情况下方便调试错误），注意在flash config里面勾选microlib。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.552Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>29 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-12.html">嵌入式</a>
+          
+            <a class="tag-chip" href="../tags/tag-13.html">物联网</a>
+          
+            <a class="tag-chip" href="../tags/tag-23.html">STM32</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <h2 id="一-首先我们要对串口进行重定向-在没有屏幕或者其他提示的情况下方便调试错误-注意在flash-config里面勾选microlib" class="prose-heading">一、首先我们要对串口进行重定向（在没有屏幕或者其他提示的情况下方便调试错误），注意在flash config里面勾选microlib。</h2>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">fputc</span><span class="hljs-params">(<span class="hljs-type">int</span> ch,FILE *f)</span></span>{
+	<span class="hljs-built_in">HAL_UART_Transmit</span>(&amp;huart1,(<span class="hljs-type">uint8_t</span> *)&amp;ch,<span class="hljs-number">1</span>,<span class="hljs-number">1000</span>);
+	<span class="hljs-keyword">return</span> ch;
+}
+</code></pre>
+<p>重定向过程中遇到如下问题：编译时出现error: #20: identifier “FILE” is undefined</p>
+<p>解决方法：</p>
+<pre><code>    1、在该函数的定义中添加#include &quot;stdio.h&quot;头文件
+
+
+    2、添加了头文件依旧报错，这时候其实和头文件没有关系了，我们要在FILE的使用之前定义
+</code></pre>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">__FILE</span> FILE;
+</code></pre>
+<h2 id="二-接下来要配置sdio和fatfs" class="prose-heading">二、接下来要配置SDIO和FATFS</h2>
+<p>参考配置：<a href="https://blog.csdn.net/weixin_43996864/article/details/134485510" title="FATFS SDIO配置方法">FATFS SDIO配置方法</a></p>
+<p><a href="https://blog.csdn.net/m0_68510271/article/details/136030088" title="参考文件读写方式：FATFS 文件读写方法参考">参考文件读写方式：FATFS 文件读写方法参考</a></p>
+<p>出现的问题：</p>
+<h3 id="1-sd卡hal库初始化成功-能顾正确读取存储卡信息-可用容量与总容量-但是挂载不成功" class="prose-heading">1、SD卡HAL库初始化成功，能顾正确读取存储卡信息（可用容量与总容量），但是挂载不成功</h3>
+<p>（1）</p>
+<pre class="hljs"><code class="language-cpp">res = <span class="hljs-built_in">f_mount</span>(&amp;<span class="hljs-type">fs_t</span>, <span class="hljs-string">&quot;0:&quot;</span>, <span class="hljs-number">1</span>);       <span class="hljs-comment">/* 挂载SD卡 */</span>
+</code></pre>
+<p>返回值为1，FR_DISK_ERR,            /* (1) A hard error occurred in the low level disk I/O layer */</p>
+<p>原因是因为分配的读取速度过快，修改方式 hsd.Init.ClockDiv = 9;要根据你的SDIO实际的总线频率来修改，和时钟树有关</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MX_SDIO_SD_Init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+
+  <span class="hljs-comment">/* USER CODE BEGIN SDIO_Init 0 */</span>
+
+  <span class="hljs-comment">/* USER CODE END SDIO_Init 0 */</span>
+
+  <span class="hljs-comment">/* USER CODE BEGIN SDIO_Init 1 */</span>
+
+  <span class="hljs-comment">/* USER CODE END SDIO_Init 1 */</span>
+  hsd.Instance = SDIO;
+  hsd.Init.ClockEdge = SDIO_CLOCK_EDGE_RISING;
+  hsd.Init.ClockBypass = SDIO_CLOCK_BYPASS_DISABLE;
+  hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
+  hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
+  hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
+  hsd.Init.ClockDiv = <span class="hljs-number">9</span>;
+  <span class="hljs-comment">/* USER CODE BEGIN SDIO_Init 2 */</span>
+
+  <span class="hljs-comment">/* USER CODE END SDIO_Init 2 */</span>
+
+}
+</code></pre>
+<p>（2）返回值为3，FR_NOT_READY,            /* (3) The physical drive cannot work */</p>
+<p>原因是因为存储卡有热插拔检测，在你设置的热插拔检测IO口上，将它设置为输入，并且设置为下拉输入，可以免除没有检测连接的影响</p>
+<p><img src="../uploads/csdn/stm32f103zet6sdiofatfs%E8%AF%BB%E5%86%99sd%E5%8D%A1%E4%BE%8B%E7%A8%8B%E8%AF%BB%E5%86%99%E6%8C%82%E8%BD%BD%E9%94%99%E8%AF%AF%E6%8E%92%E9%99%A4/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/stm32f103zet6sdiofatfs%E8%AF%BB%E5%86%99sd%E5%8D%A1%E4%BE%8B%E7%A8%8B%E8%AF%BB%E5%86%99%E6%8C%82%E8%BD%BD%E9%94%99%E8%AF%AF%E6%8E%92%E9%99%A4/img-02.png" alt=""></p>
+<p>(2)、代码如下，返回值是11，FR_INVALID_DRIVE,        /* (11) The logical drive number is invalid */</p>
+<pre class="hljs"><code class="language-cpp">res = <span class="hljs-built_in">f_mount</span>(&amp;<span class="hljs-type">fs_t</span>, <span class="hljs-string">&quot;1:&quot;</span>, <span class="hljs-number">1</span>);       <span class="hljs-comment">/* 挂载SD卡 */</span>
+</code></pre>
+<p>原因是卷名不能是1，改成0就行了，和上面的代码一样。</p>
+<h3 id="2-f-open和f-write返回值为1-fr-disk-err-1-a-hard-error-occurred-in-the-low-level-disk-" class="prose-heading">2、f_open和f_write返回值为1，FR_DISK_ERR,            /* (1) A hard error occurred in the low level disk I/O layer */</h3>
+<p>代码如下：</p>
+<pre class="hljs"><code class="language-cpp">res = <span class="hljs-built_in">f_open</span>(&amp;file, <span class="hljs-string">&quot;0:TestData.txt&quot;</span>, FA_CREATE_ALWAYS | FA_WRITE);
+
+res = <span class="hljs-built_in">f_write</span>(&amp;file, temp_data, <span class="hljs-built_in">strlen</span>((<span class="hljs-type">const</span> <span class="hljs-type">char</span>*)temp_data), &amp;bytes_written);
+</code></pre>
+<p>参考1的修改，原因是一样的。</p>
+<h2 id="三-我的工程main-c代码如下" class="prose-heading">三、我的工程main.c代码如下</h2>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-comment">/* USER CODE BEGIN Header */</span>
+<span class="hljs-comment">/**
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : Main program body
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2024 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */</span>
+<span class="hljs-comment">/* USER CODE END Header */</span>
+<span class="hljs-comment">/* Includes ------------------------------------------------------------------*/</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;main.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;fatfs.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;sdio.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;usart.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;gpio.h&quot;</span></span>
+
+<span class="hljs-comment">/* Private includes ----------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN Includes */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdarg.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;sdio.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string.h&gt;</span></span>
+<span class="hljs-comment">/* USER CODE END Includes */</span>
+
+<span class="hljs-comment">/* Private typedef -----------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN PTD */</span>
+
+<span class="hljs-comment">/* USER CODE END PTD */</span>
+
+<span class="hljs-comment">/* Private define ------------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN PD */</span>
+<span class="hljs-comment">/* USER CODE END PD */</span>
+
+<span class="hljs-comment">/* Private macro -------------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN PM */</span>
+
+<span class="hljs-comment">/* USER CODE END PM */</span>
+
+<span class="hljs-comment">/* Private variables ---------------------------------------------------------*/</span>
+
+<span class="hljs-comment">/* USER CODE BEGIN PV */</span>
+
+<span class="hljs-comment">/* USER CODE END PV */</span>
+
+<span class="hljs-comment">/* Private function prototypes -----------------------------------------------*/</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">SystemClock_Config</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-comment">/* USER CODE BEGIN PFP */</span>
+
+<span class="hljs-comment">/* USER CODE END PFP */</span>
+
+<span class="hljs-comment">/* Private user code ---------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN 0 */</span>
+<span class="hljs-comment">//写fatfs 文件--写字符串数据</span>
+<span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span>
+	{
+		<span class="hljs-type">uint8_t</span> Soft_Version[<span class="hljs-number">16</span>];<span class="hljs-comment">//软件版本号</span>
+		<span class="hljs-type">uint8_t</span> Hard_Version[<span class="hljs-number">16</span>];
+	}MasterDP_t;
+
+FIL file;
+<span class="hljs-type">uint8_t</span> res;
+UINT bytes_written;
+FATFS <span class="hljs-type">fs_t</span>;
+
+<span class="hljs-keyword">extern</span> SD_HandleTypeDef hsd;
+
+<span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">__FILE</span> FILE;
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">fputc</span><span class="hljs-params">(<span class="hljs-type">int</span> ch, FILE* f)</span>
+</span>{
+	<span class="hljs-comment">//函数原型 HAL_UART_Transmit(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size, uint32_t Timeout)</span>
+	<span class="hljs-built_in">HAL_UART_Transmit</span>(&amp;huart2,(<span class="hljs-type">uint8_t</span> *)&amp;ch, <span class="hljs-number">1</span>, <span class="hljs-number">10</span>);
+	<span class="hljs-keyword">return</span> ch;
+}
+
+<span class="hljs-type">uint8_t</span> rx_data;
+
+<span class="hljs-function"><span class="hljs-type">uint8_t</span> <span class="hljs-title">exfuns_get_free</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span> *pdrv, <span class="hljs-type">uint32_t</span> *total, <span class="hljs-type">uint32_t</span> *free)</span>
+</span>{
+    FATFS *fs1;
+    <span class="hljs-type">uint8_t</span> res;
+    <span class="hljs-type">uint32_t</span> fre_clust = <span class="hljs-number">0</span>, fre_sect = <span class="hljs-number">0</span>, tot_sect = <span class="hljs-number">0</span>;
+
+    <span class="hljs-comment">/* 得到磁盘信息及空闲簇数量 */</span>
+    res = (<span class="hljs-type">uint32_t</span>)<span class="hljs-built_in">f_getfree</span>((<span class="hljs-type">const</span> TCHAR *)pdrv, (DWORD *)&amp;fre_clust, &amp;fs1);
+
+    <span class="hljs-keyword">if</span> (res == <span class="hljs-number">0</span>)
+    {
+        tot_sect = (fs1-&gt;n_fatent - <span class="hljs-number">2</span>) * fs1-&gt;csize;    <span class="hljs-comment">/* 得到总扇区数 */</span>
+        fre_sect = fre_clust * fs1-&gt;csize;              <span class="hljs-comment">/* 得到空闲扇区数 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">if</span> FF_MAX_SS!=512  <span class="hljs-comment">/* 扇区大小不是512字节,则转换为512字节 */</span></span>
+        <span class="hljs-comment">//tot_sect *= fs1-&gt;ssize / 512;</span>
+        <span class="hljs-comment">//fre_sect *= fs1-&gt;ssize / 512;</span>
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span></span>
+        *total = tot_sect &gt;&gt; <span class="hljs-number">1</span>;     <span class="hljs-comment">/* 单位为KB */</span>
+        *free = fre_sect &gt;&gt; <span class="hljs-number">1</span>;      <span class="hljs-comment">/* 单位为KB */</span>
+    }
+
+    <span class="hljs-keyword">return</span> res;
+}
+<span class="hljs-comment">/* USER CODE END 0 */</span>
+
+
+<span class="hljs-comment">/**
+  * @brief  The application entry point.
+  * @retval int
+  */</span>
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+  <span class="hljs-comment">/* USER CODE BEGIN 1 */</span>
+	<span class="hljs-type">uint32_t</span> total;
+	<span class="hljs-type">uint32_t</span> free;
+	MasterDP_t DP = {<span class="hljs-string">&quot;V1.01&quot;</span>,<span class="hljs-string">&quot;V1.01&quot;</span>};
+	<span class="hljs-type">uint8_t</span> temp_data[<span class="hljs-number">256</span>] = {<span class="hljs-number">0</span>};
+  <span class="hljs-comment">/* USER CODE END 1 */</span>
+
+  <span class="hljs-comment">/* MCU Configuration--------------------------------------------------------*/</span>
+
+  <span class="hljs-comment">/* Reset of all peripherals, Initializes the Flash interface and the Systick. */</span>
+  <span class="hljs-built_in">HAL_Init</span>();
+
+  <span class="hljs-comment">/* USER CODE BEGIN Init */</span>
+
+  <span class="hljs-comment">/* USER CODE END Init */</span>
+
+  <span class="hljs-comment">/* Configure the system clock */</span>
+  <span class="hljs-built_in">SystemClock_Config</span>();
+
+  <span class="hljs-comment">/* USER CODE BEGIN SysInit */</span>
+
+  <span class="hljs-comment">/* USER CODE END SysInit */</span>
+
+  <span class="hljs-comment">/* Initialize all configured peripherals */</span>
+  <span class="hljs-built_in">MX_GPIO_Init</span>();
+  <span class="hljs-built_in">MX_SDIO_SD_Init</span>();
+  <span class="hljs-built_in">MX_USART2_UART_Init</span>();
+  <span class="hljs-built_in">MX_FATFS_Init</span>();
+  <span class="hljs-comment">/* USER CODE BEGIN 2 */</span>
+	<span class="hljs-comment">//uint8_t state;</span>
+	<span class="hljs-type">uint8_t</span> status = <span class="hljs-built_in">HAL_SD_Init</span>(&amp;hsd); <span class="hljs-comment">/* 初始化 */</span>
+	<span class="hljs-keyword">if</span>(status != HAL_OK)
+	{
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;SD card initialize failed!\n&quot;</span>);
+		<span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>)
+		{
+			<span class="hljs-built_in">HAL_Delay</span>(<span class="hljs-number">1000</span>);
+			<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;SD card initialize failed!\n&quot;</span>);
+		}
+	}
+    HAL_SD_CardStateTypeDef state = <span class="hljs-built_in">HAL_SD_GetCardState</span>(&amp;hsd);
+
+    <span class="hljs-keyword">if</span>(state == HAL_SD_CARD_TRANSFER)
+    {
+        <span class="hljs-comment">//HAL_SD_GetCardCID(&amp;hsd, &amp;SD_CardCID);</span>
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\nInitialize SD card sucessfully!\r\n&quot;</span>);
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\nSD card information\r\n&quot;</span>);
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\nCapacity              :%llu\r\n&quot;</span>, ((<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> <span class="hljs-type">long</span>)hsd.SdCard.BlockSize*hsd.SdCard.BlockNbr));
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\nBlockSize             :%d\r\n&quot;</span>, hsd.SdCard.BlockSize);
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\nRCA                   :%d\r\n&quot;</span>, hsd.SdCard.RelCardAdd);
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\nCardType              :%d\r\n&quot;</span>, hsd.SdCard.CardType);
+        <span class="hljs-comment">//printf(&quot;\nManufacturerID        :%d\r\n&quot;, SD_CardCID.ManufacturerID);</span>
+    }
+
+	<span class="hljs-built_in">HAL_SD_InitCard</span>(&amp;hsd);
+
+	res = <span class="hljs-built_in">f_mount</span>(&amp;<span class="hljs-type">fs_t</span>, <span class="hljs-string">&quot;0:&quot;</span>, <span class="hljs-number">1</span>);       <span class="hljs-comment">/* 挂载SD卡 */</span>
+  <span class="hljs-comment">//res = f_mount(&amp;fs, &quot;1:&quot;, 1); /* 挂载FLASH.	*/</span>
+	<span class="hljs-keyword">if</span>(res!=<span class="hljs-number">0</span>){
+
+		<span class="hljs-comment">//HAL_UART_Transmit(&amp;huart2,(uint8_t*)&quot;挂载失败！\r\n&quot;,20,50);</span>
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;失败代码：%d\r\n&quot;</span>,res);
+
+	}
+	<span class="hljs-keyword">else</span>{
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;挂载成功！\r\n&quot;</span>);
+	}
+  <span class="hljs-built_in">exfuns_get_free</span>((<span class="hljs-type">uint8_t</span>*)<span class="hljs-string">&quot;0&quot;</span>, &amp;total, &amp;free);
+
+	<span class="hljs-comment">//uint8_t total_t = total&gt;&gt;10;</span>
+	<span class="hljs-comment">//uint8_t free_t = free&gt;&gt;10;</span>
+
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;总容量：%ld\r\n&quot;</span>,(<span class="hljs-type">long</span>)total);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;剩余容量：%ld\r\n&quot;</span>,(<span class="hljs-type">long</span>)free);
+
+
+	<span class="hljs-comment">// 创建文件</span>
+	res = <span class="hljs-built_in">f_open</span>(&amp;file, <span class="hljs-string">&quot;0:TestData.txt&quot;</span>, FA_CREATE_ALWAYS | FA_WRITE);
+	<span class="hljs-keyword">if</span> (res != FR_OK) {
+			<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Failed to create file\n&quot;</span>);
+			<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+	}
+	<span class="hljs-keyword">else</span>{
+
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;创建成功！\r\n&quot;</span>);
+
+	}
+
+	<span class="hljs-comment">// 待写入的数组buffer</span>
+	<span class="hljs-comment">//sprintf((char*)temp_data,&quot;HardVersion:%s,SoftVersion:%s&quot;,DP.Hard_Version,DP.Soft_Version);</span>
+	<span class="hljs-comment">// 格式化字符串数据</span>
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>;i&lt;<span class="hljs-number">256</span>;i++){
+		temp_data[i] = <span class="hljs-string">&#x27;0&#x27;</span>+i;
+	}
+	res = <span class="hljs-built_in">f_write</span>(&amp;file, temp_data, <span class="hljs-built_in">strlen</span>((<span class="hljs-type">const</span> <span class="hljs-type">char</span>*)temp_data), &amp;bytes_written);
+	<span class="hljs-keyword">if</span> (res != FR_OK) {
+			<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Failed to write data to file %d\n&quot;</span>,res);
+			<span class="hljs-built_in">f_close</span>(&amp;file);
+			<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+	}
+
+	<span class="hljs-comment">// 关闭文件</span>
+	<span class="hljs-built_in">f_close</span>(&amp;file);
+
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Data written to file successfully\n&quot;</span>);
+
+  <span class="hljs-comment">/* USER CODE END 2 */</span>
+
+  <span class="hljs-comment">/* Infinite loop */</span>
+  <span class="hljs-comment">/* USER CODE BEGIN WHILE */</span>
+  <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>)
+  {
+    <span class="hljs-comment">/* USER CODE END WHILE */</span>
+
+    <span class="hljs-comment">/* USER CODE BEGIN 3 */</span>
+  }
+  <span class="hljs-comment">/* USER CODE END 3 */</span>
+}
+
+<span class="hljs-comment">/**
+  * @brief System Clock Configuration
+  * @retval None
+  */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">SystemClock_Config</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {<span class="hljs-number">0</span>};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {<span class="hljs-number">0</span>};
+
+  <span class="hljs-comment">/** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */</span>
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">HAL_RCC_OscConfig</span>(&amp;RCC_OscInitStruct) != HAL_OK)
+  {
+    <span class="hljs-built_in">Error_Handler</span>();
+  }
+
+  <span class="hljs-comment">/** Initializes the CPU, AHB and APB buses clocks
+  */</span>
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">HAL_RCC_ClockConfig</span>(&amp;RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    <span class="hljs-built_in">Error_Handler</span>();
+  }
+}
+
+<span class="hljs-comment">/* USER CODE BEGIN 4 */</span>
+
+<span class="hljs-comment">/* USER CODE END 4 */</span>
+
+<span class="hljs-comment">/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Error_Handler</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+  <span class="hljs-comment">/* USER CODE BEGIN Error_Handler_Debug */</span>
+  <span class="hljs-comment">/* User can add his own implementation to report the HAL error return state */</span>
+  __disable_irq();
+  <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>)
+  {
+  }
+  <span class="hljs-comment">/* USER CODE END Error_Handler_Debug */</span>
+}
+
+<span class="hljs-meta">#<span class="hljs-keyword">ifdef</span>  USE_FULL_ASSERT</span>
+<span class="hljs-comment">/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">assert_failed</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span> *file, <span class="hljs-type">uint32_t</span> line)</span>
+</span>{
+  <span class="hljs-comment">/* USER CODE BEGIN 6 */</span>
+  <span class="hljs-comment">/* User can add his own implementation to report the file name and line number,
+     ex: printf(&quot;Wrong parameters value: file %s on line %d\r\n&quot;, file, line) */</span>
+  <span class="hljs-comment">/* USER CODE END 6 */</span>
+}
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span> <span class="hljs-comment">/* USE_FULL_ASSERT */</span></span>
+</code></pre>
+<h2 id="四-最后实现效果" class="prose-heading">四、最后实现效果</h2>
+<p><img src="../uploads/csdn/stm32f103zet6sdiofatfs%E8%AF%BB%E5%86%99sd%E5%8D%A1%E4%BE%8B%E7%A8%8B%E8%AF%BB%E5%86%99%E6%8C%82%E8%BD%BD%E9%94%99%E8%AF%AF%E6%8E%92%E9%99%A4/img-03.png" alt=""></p>
+<p><img src="../uploads/csdn/stm32f103zet6sdiofatfs%E8%AF%BB%E5%86%99sd%E5%8D%A1%E4%BE%8B%E7%A8%8B%E8%AF%BB%E5%86%99%E6%8C%82%E8%BD%BD%E9%94%99%E8%AF%AF%E6%8E%92%E9%99%A4/img-04.png" alt=""></p>
+<h2 id="五-如果需要源代码或者有问题-请私信我-我将把源代码发给你-或者告诉我邮箱就好" class="prose-heading">五、如果需要源代码或者有问题，请私信我，我将把源代码发给你。或者告诉我邮箱就好。</h2>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-2" href="#一-首先我们要对串口进行重定向-在没有屏幕或者其他提示的情况下方便调试错误-注意在flash-config里面勾选microlib">一、首先我们要对串口进行重定向（在没有屏幕或者其他提示的情况下方便调试错误），注意在flash config里面勾选microlib。</a>
+          
+            <a class="toc-level-2" href="#二-接下来要配置sdio和fatfs">二、接下来要配置SDIO和FATFS</a>
+          
+            <a class="toc-level-3" href="#1-sd卡hal库初始化成功-能顾正确读取存储卡信息-可用容量与总容量-但是挂载不成功">1、SD卡HAL库初始化成功，能顾正确读取存储卡信息（可用容量与总容量），但是挂载不成功</a>
+          
+            <a class="toc-level-3" href="#2-f-open和f-write返回值为1-fr-disk-err-1-a-hard-error-occurred-in-the-low-level-disk-">2、f\_open和f\_write返回值为1，FR\_DISK\_ERR,            /\* (1) A hard error occurred in the low level disk I/O layer \*/</a>
+          
+            <a class="toc-level-2" href="#三-我的工程main-c代码如下">三、我的工程main.c代码如下</a>
+          
+            <a class="toc-level-2" href="#四-最后实现效果">四、最后实现效果</a>
+          
+            <a class="toc-level-2" href="#五-如果需要源代码或者有问题-请私信我-我将把源代码发给你-或者告诉我邮箱就好">五、如果需要源代码或者有问题，请私信我，我将把源代码发给你。或者告诉我邮箱就好。</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/stm32实现按键单击双击三击长按功能的proteus8仿真.html">
+      <span>上一篇</span>
+      <strong>stm32实现按键单击双击三击长按功能的proteus8仿真</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/stm32f103zet6ili9341做一个圆形钟表时钟显示精英开发板v2.html">
+      <span>下一篇</span>
+      <strong>STM32F103ZET6ILI9341做一个圆形钟表时钟显示精英开发板V2</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/stm32f103zet6ili9341做一个圆形钟表时钟显示精英开发板v2.html">STM32F103ZET6ILI9341做一个圆形钟表时钟显示精英开发板V2</a></h3>
+        <p class="post-excerpt">摘要：本文深入探究了利用 STM32 微控制器驱动 ILI9341 显示屏绘制时钟的技术方案。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.524Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/stm32f103r6proteus9-0freertos实现双任务流水灯.html">STM32F103R6PROTEUS9.0FREERTOS实现双任务流水灯</a></h3>
+        <p class="post-excerpt">本文展示了一个基于STM32F1和FreeRTOS的双LED控制程序。主要内容包括：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.470Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/stm32f103c8t6sdcardspi驱动ili9341lcdproteus8-0仿真将存储在.html">STM32F103C8T6SDcardSPI驱动ILI9341LCDPROTEUS8.0仿真将存储在</a></h3>
+        <p class="post-excerpt">本文展示了一个基于STM32微控制器的SD卡文件读取系统。系统通过SPI接口连接SD卡，实现了FAT12文件系统的解析功能。主要功能包括：1) 读取SD卡基本信息(容量、类型)；2) 解析FAT12文件系统的引导扇区参数；3) 搜索并定位指定文件；4) 在ILI9341 LCD屏幕上显示文本文件内容。系统还包含文件列表显示功能，可查看SD卡中的文件信息。程序使用HAL库进行硬件初始化，通过状态指示…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.444Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

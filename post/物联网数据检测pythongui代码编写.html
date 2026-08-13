@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>物联网数据检测PythonGUI代码编写 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">物联网数据检测PythonGUI代码编写</h1>
+        <p class="post-deck">这是一个基于PyQt5的空气质量监测系统GUI程序。主要功能包括：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.601Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>44 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>这是一个基于PyQt5的空气质量监测系统GUI程序。主要功能包括：</p>
+<ol>
+<li>界面分为左侧设备列表和右侧数据展示区</li>
+<li>右侧展示5个圆形进度条组件，分别显示PM2.5、TVOC、二氧化碳、温度和湿度的实时数据</li>
+<li>包含一个折线图组件，动态显示PM2.5历史数据变化趋势</li>
+<li>底部表格显示历史数据记录</li>
+<li>使用定时器随机模拟数据变化，每3秒更新一次</li>
+</ol>
+<p>系统特点：</p>
+<ul>
+<li>自定义圆形进度条组件，带颜色状态指示</li>
+<li>响应式折线图组件</li>
+<li>美观的UI设计，采用深色主题</li>
+<li>支持多设备切换查看</li>
+</ul>
+<p>该程序模拟了室内空气质量监测系统的核心功能，可作为实际应用的开发基础。</p>
+<p>效果如下</p>
+<p><img src="../uploads/csdn/%E7%89%A9%E8%81%94%E7%BD%91%E6%95%B0%E6%8D%AE%E6%A3%80%E6%B5%8Bpythongui%E4%BB%A3%E7%A0%81%E7%BC%96%E5%86%99/img-01.png" alt=""></p>
+<p>源代码</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">import</span> random
+<span class="hljs-keyword">from</span> PyQt5.QtWidgets <span class="hljs-keyword">import</span> (
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+    QLabel, QListWidget, QTableWidget, QTableWidgetItem,
+    QFrame, QHeaderView, QGridLayout
+)
+<span class="hljs-keyword">from</span> PyQt5.QtCore <span class="hljs-keyword">import</span> Qt, QTimer, QPointF
+<span class="hljs-keyword">from</span> PyQt5.QtGui <span class="hljs-keyword">import</span> (
+    QFont, QColor, QPainter, QPen, QBrush, QPixmap,
+    QPainterPath
+)
+
+
+<span class="hljs-comment"># 自定义圆形进度条组件</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">CircularProgressBar</span>(<span class="hljs-title class_ inherited__">QWidget</span>):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, parent=<span class="hljs-literal">None</span></span>):
+        <span class="hljs-built_in">super</span>().__init__(parent)
+        <span class="hljs-variable language_">self</span>.value = <span class="hljs-number">0</span>
+        <span class="hljs-variable language_">self</span>.max_value = <span class="hljs-number">100</span>
+        <span class="hljs-variable language_">self</span>.label_text = <span class="hljs-string">&quot;参数&quot;</span>
+        <span class="hljs-variable language_">self</span>.unit = <span class="hljs-string">&quot;单位&quot;</span>
+        <span class="hljs-variable language_">self</span>.status = <span class="hljs-string">&quot;正常&quot;</span>
+        <span class="hljs-variable language_">self</span>.status_color = QColor(<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>)  <span class="hljs-comment"># 绿色</span>
+        <span class="hljs-variable language_">self</span>.ranges = {
+            <span class="hljs-string">&quot;优&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">35</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;良&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">75</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">215</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;轻度污染&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">115</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">165</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;中度污染&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">150</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">69</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;重度污染&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-built_in">float</span>(<span class="hljs-string">&#x27;inf&#x27;</span>), <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)}
+        }
+        <span class="hljs-comment"># 设置固定大小避免布局问题</span>
+        <span class="hljs-variable language_">self</span>.setFixedSize(<span class="hljs-number">200</span>, <span class="hljs-number">200</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">set_value</span>(<span class="hljs-params">self, value</span>):
+        <span class="hljs-variable language_">self</span>.value = value
+        <span class="hljs-variable language_">self</span>.update_status()
+        <span class="hljs-variable language_">self</span>.update()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">set_label_text</span>(<span class="hljs-params">self, text</span>):
+        <span class="hljs-variable language_">self</span>.label_text = text
+        <span class="hljs-variable language_">self</span>.update()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">set_unit</span>(<span class="hljs-params">self, unit</span>):
+        <span class="hljs-variable language_">self</span>.unit = unit
+        <span class="hljs-variable language_">self</span>.update()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">set_max_value</span>(<span class="hljs-params">self, max_val</span>):
+        <span class="hljs-variable language_">self</span>.max_value = max_val
+        <span class="hljs-variable language_">self</span>.update()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">set_ranges</span>(<span class="hljs-params">self, ranges</span>):
+        <span class="hljs-variable language_">self</span>.ranges = ranges
+        <span class="hljs-variable language_">self</span>.update()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">set_status</span>(<span class="hljs-params">self, status, color</span>):
+        <span class="hljs-variable language_">self</span>.status = status
+        <span class="hljs-variable language_">self</span>.status_color = color
+        <span class="hljs-variable language_">self</span>.update()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update_status</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 根据参数类型判断状态</span>
+        <span class="hljs-keyword">for</span> status, range_info <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.ranges.items():
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.value &lt;= range_info[<span class="hljs-string">&quot;max&quot;</span>]:
+                <span class="hljs-variable language_">self</span>.set_status(status, range_info[<span class="hljs-string">&quot;color&quot;</span>])
+                <span class="hljs-keyword">break</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">paintEvent</span>(<span class="hljs-params">self, event</span>):
+        painter = QPainter(<span class="hljs-variable language_">self</span>)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        <span class="hljs-comment"># 绘制圆形进度条</span>
+        width = <span class="hljs-built_in">min</span>(<span class="hljs-variable language_">self</span>.width(), <span class="hljs-variable language_">self</span>.height())
+        radius = width // <span class="hljs-number">2</span> - <span class="hljs-number">20</span>
+        center_x = <span class="hljs-variable language_">self</span>.width() // <span class="hljs-number">2</span>
+        center_y = <span class="hljs-variable language_">self</span>.height() // <span class="hljs-number">2</span>
+
+        <span class="hljs-comment"># 绘制背景圆环</span>
+        pen = QPen(QColor(<span class="hljs-number">100</span>, <span class="hljs-number">100</span>, <span class="hljs-number">100</span>), <span class="hljs-number">15</span>)
+        painter.setPen(pen)
+        painter.drawEllipse(center_x - radius, center_y - radius, radius * <span class="hljs-number">2</span>, radius * <span class="hljs-number">2</span>)
+
+        <span class="hljs-comment"># 绘制进度圆环</span>
+        progress_pen = QPen(<span class="hljs-variable language_">self</span>.status_color, <span class="hljs-number">15</span>)
+        progress_pen.setCapStyle(Qt.RoundCap)
+        painter.setPen(progress_pen)
+        arc_length = <span class="hljs-built_in">int</span>(<span class="hljs-number">360</span> * (<span class="hljs-built_in">min</span>(<span class="hljs-variable language_">self</span>.value, <span class="hljs-variable language_">self</span>.max_value) / <span class="hljs-variable language_">self</span>.max_value))
+        painter.drawArc(
+            center_x - radius, center_y - radius,
+            radius * <span class="hljs-number">2</span>, radius * <span class="hljs-number">2</span>,
+            <span class="hljs-number">90</span> * <span class="hljs-number">16</span>, -arc_length * <span class="hljs-number">16</span>  <span class="hljs-comment"># 从顶部开始逆时针绘制</span>
+        )
+
+        <span class="hljs-comment"># 绘制中心数值</span>
+        font = QFont()
+        font.setPointSize(<span class="hljs-number">24</span>)
+        painter.setFont(font)
+        painter.setPen(Qt.white)
+        painter.drawText(
+            center_x - radius // <span class="hljs-number">2</span>, center_y - radius // <span class="hljs-number">3</span>,
+            radius, radius, Qt.AlignCenter, <span class="hljs-built_in">str</span>(<span class="hljs-variable language_">self</span>.value)
+        )
+
+        <span class="hljs-comment"># 绘制标签和单位</span>
+        font.setPointSize(<span class="hljs-number">10</span>)
+        painter.setFont(font)
+        painter.drawText(
+            center_x - radius // <span class="hljs-number">2</span>, center_y + radius // <span class="hljs-number">3</span>,
+            radius, radius // <span class="hljs-number">2</span>, Qt.AlignCenter,
+            <span class="hljs-string">f&quot;<span class="hljs-subst">{self.label_text}</span>\n<span class="hljs-subst">{self.unit}</span>&quot;</span>
+        )
+
+        <span class="hljs-comment"># 绘制状态</span>
+        font.setPointSize(<span class="hljs-number">12</span>)
+        painter.setFont(font)
+        painter.setPen(<span class="hljs-variable language_">self</span>.status_color)
+        painter.drawText(
+            <span class="hljs-number">0</span>, center_y + radius + <span class="hljs-number">10</span>,
+            <span class="hljs-variable language_">self</span>.width(), <span class="hljs-number">30</span>, Qt.AlignCenter, <span class="hljs-variable language_">self</span>.status
+        )
+
+
+<span class="hljs-comment"># 自定义折线图组件</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">LineChart</span>(<span class="hljs-title class_ inherited__">QWidget</span>):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, parent=<span class="hljs-literal">None</span></span>):
+        <span class="hljs-built_in">super</span>().__init__(parent)
+        <span class="hljs-variable language_">self</span>.data = []  <span class="hljs-comment"># 存储历史数据</span>
+        <span class="hljs-variable language_">self</span>.max_points = <span class="hljs-number">10</span>  <span class="hljs-comment"># 最多显示10个数据点</span>
+        <span class="hljs-variable language_">self</span>.title = <span class="hljs-string">&quot;PM2.5 历史数据&quot;</span>
+        <span class="hljs-variable language_">self</span>.unit = <span class="hljs-string">&quot;μg/m³&quot;</span>
+        <span class="hljs-variable language_">self</span>.setMinimumSize(<span class="hljs-number">400</span>, <span class="hljs-number">200</span>)
+        <span class="hljs-variable language_">self</span>.setStyleSheet(<span class="hljs-string">&quot;background-color: #444444; border-radius: 5px;&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">add_data_point</span>(<span class="hljs-params">self, value</span>):
+        <span class="hljs-variable language_">self</span>.data.append(value)
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.data) &gt; <span class="hljs-variable language_">self</span>.max_points:
+            <span class="hljs-variable language_">self</span>.data.pop(<span class="hljs-number">0</span>)
+        <span class="hljs-variable language_">self</span>.update()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">set_title</span>(<span class="hljs-params">self, title</span>):
+        <span class="hljs-variable language_">self</span>.title = title
+        <span class="hljs-variable language_">self</span>.update()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">set_unit</span>(<span class="hljs-params">self, unit</span>):
+        <span class="hljs-variable language_">self</span>.unit = unit
+        <span class="hljs-variable language_">self</span>.update()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">paintEvent</span>(<span class="hljs-params">self, event</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.data:
+            <span class="hljs-keyword">return</span>
+
+        painter = QPainter(<span class="hljs-variable language_">self</span>)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        <span class="hljs-comment"># 绘制标题</span>
+        font = QFont()
+        font.setPointSize(<span class="hljs-number">12</span>)
+        font.setBold(<span class="hljs-literal">True</span>)
+        painter.setFont(font)
+        painter.setPen(QColor(<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>))
+        painter.drawText(<span class="hljs-number">10</span>, <span class="hljs-number">20</span>, <span class="hljs-variable language_">self</span>.title)
+
+        <span class="hljs-comment"># 绘制区域</span>
+        margin = <span class="hljs-number">40</span>
+        chart_width = <span class="hljs-variable language_">self</span>.width() - margin * <span class="hljs-number">2</span>
+        chart_height = <span class="hljs-variable language_">self</span>.height() - margin * <span class="hljs-number">2</span>
+
+        <span class="hljs-comment"># 绘制坐标轴</span>
+        painter.setPen(QColor(<span class="hljs-number">200</span>, <span class="hljs-number">200</span>, <span class="hljs-number">200</span>))
+        painter.drawLine(margin, margin, margin, <span class="hljs-variable language_">self</span>.height() - margin)  <span class="hljs-comment"># Y轴</span>
+        painter.drawLine(margin, <span class="hljs-variable language_">self</span>.height() - margin, <span class="hljs-variable language_">self</span>.width() - margin, <span class="hljs-variable language_">self</span>.height() - margin)  <span class="hljs-comment"># X轴</span>
+
+        <span class="hljs-comment"># 计算数据范围</span>
+        max_val = <span class="hljs-built_in">max</span>(<span class="hljs-variable language_">self</span>.data) <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.data <span class="hljs-keyword">else</span> <span class="hljs-number">0</span>
+        min_val = <span class="hljs-built_in">min</span>(<span class="hljs-variable language_">self</span>.data) <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.data <span class="hljs-keyword">else</span> <span class="hljs-number">0</span>
+        padding = (max_val - min_val) * <span class="hljs-number">0.1</span> <span class="hljs-keyword">if</span> max_val != min_val <span class="hljs-keyword">else</span> <span class="hljs-number">10</span>
+        max_val += padding
+        min_val = <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, min_val - padding)
+
+        <span class="hljs-comment"># 绘制Y轴刻度 - 修复坐标为整数的问题</span>
+        y_ticks = <span class="hljs-number">5</span>
+        font.setPointSize(<span class="hljs-number">8</span>)
+        painter.setFont(font)
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(y_ticks + <span class="hljs-number">1</span>):
+            value = min_val + (max_val - min_val) * (i / y_ticks)
+            <span class="hljs-comment"># 将y_pos转换为整数</span>
+            y_pos = <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.height() - margin - (chart_height * (i / y_ticks)))
+            painter.drawLine(margin - <span class="hljs-number">5</span>, y_pos, margin, y_pos)
+            painter.drawText(margin - <span class="hljs-number">30</span>, y_pos + <span class="hljs-number">4</span>, <span class="hljs-string">f&quot;<span class="hljs-subst">{<span class="hljs-built_in">int</span>(value)}</span>&quot;</span>)
+
+        <span class="hljs-comment"># 绘制X轴刻度和标签</span>
+        x_ticks = <span class="hljs-number">10</span> <span class="hljs-comment">#min(5, len(self.data) - 1)  # 最多显示5个刻度</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(x_ticks + <span class="hljs-number">1</span>):
+            x_pos = <span class="hljs-built_in">int</span>(margin + (chart_width * (i / x_ticks)))
+            painter.drawLine(x_pos, <span class="hljs-variable language_">self</span>.height() - margin, x_pos, <span class="hljs-variable language_">self</span>.height() - margin + <span class="hljs-number">5</span>)
+            <span class="hljs-comment"># 显示时间标签（模拟）</span>
+            time_label = <span class="hljs-string">f&quot;<span class="hljs-subst">{i*<span class="hljs-number">3</span>}</span>s前&quot;</span>  <span class="hljs-comment"># 每3秒一个数据点</span>
+            painter.drawText(x_pos - <span class="hljs-number">15</span>, <span class="hljs-variable language_">self</span>.height() - margin + <span class="hljs-number">20</span>, time_label)
+
+        <span class="hljs-comment"># 绘制单位</span>
+        painter.drawText(margin - <span class="hljs-number">40</span>, margin - <span class="hljs-number">10</span>, <span class="hljs-variable language_">self</span>.unit)
+
+        <span class="hljs-comment"># 绘制数据线</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.data) &lt; <span class="hljs-number">2</span>:
+            <span class="hljs-keyword">return</span>
+
+        path = QPainterPath()
+        <span class="hljs-keyword">for</span> i, value <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(<span class="hljs-variable language_">self</span>.data):
+            x = margin + (chart_width * (i / (<span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.data) - <span class="hljs-number">1</span>)))
+            ratio = (value - min_val) / (max_val - min_val) <span class="hljs-keyword">if</span> max_val != min_val <span class="hljs-keyword">else</span> <span class="hljs-number">0</span>
+            y = <span class="hljs-variable language_">self</span>.height() - margin - (chart_height * ratio)
+
+            <span class="hljs-keyword">if</span> i == <span class="hljs-number">0</span>:
+                path.moveTo(x, y)
+            <span class="hljs-keyword">else</span>:
+                path.lineTo(x, y)
+
+            <span class="hljs-comment"># 绘制数据点</span>
+            painter.setBrush(QBrush(QColor(<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>)))
+            painter.drawEllipse(QPointF(x, y), <span class="hljs-number">4</span>, <span class="hljs-number">4</span>)
+
+        <span class="hljs-comment"># 绘制曲线</span>
+        pen = QPen(QColor(<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>), <span class="hljs-number">2</span>)
+        painter.setPen(pen)
+        painter.drawPath(path)
+
+
+<span class="hljs-comment"># 主窗口</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MainWindow</span>(<span class="hljs-title class_ inherited__">QMainWindow</span>):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.pm25_history = []  <span class="hljs-comment"># 存储PM2.5历史数据</span>
+        <span class="hljs-variable language_">self</span>.init_ui()
+        <span class="hljs-variable language_">self</span>.setup_timer()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">init_ui</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 中央部件</span>
+        central_widget = QWidget()
+        <span class="hljs-variable language_">self</span>.setCentralWidget(central_widget)
+        main_layout = QHBoxLayout(central_widget)
+        main_layout.setContentsMargins(<span class="hljs-number">10</span>, <span class="hljs-number">10</span>, <span class="hljs-number">10</span>, <span class="hljs-number">10</span>)
+        main_layout.setSpacing(<span class="hljs-number">10</span>)
+
+        <span class="hljs-comment"># 左侧设备列表</span>
+        left_widget = QWidget()
+        left_layout = QVBoxLayout(left_widget)
+        left_widget.setStyleSheet(<span class="hljs-string">&quot;background-color: #222222; color: white;&quot;</span>)
+        left_widget.setFixedWidth(<span class="hljs-number">200</span>)  <span class="hljs-comment"># 固定左侧宽度</span>
+
+        <span class="hljs-comment"># 顶部标题</span>
+        title_label = QLabel(<span class="hljs-string">&quot;净则室内空气品质管理&quot;</span>)
+        title_label.setStyleSheet(<span class="hljs-string">&quot;font-size: 16px; font-weight: bold; padding: 10px;&quot;</span>)
+        title_label.setWordWrap(<span class="hljs-literal">True</span>)  <span class="hljs-comment"># 自动换行</span>
+        left_layout.addWidget(title_label)
+
+        <span class="hljs-comment"># 设备列表标题</span>
+        list_title = QLabel(<span class="hljs-string">&quot;设备列表&quot;</span>)
+        list_title.setStyleSheet(<span class="hljs-string">&quot;font-size: 14px; font-weight: bold; padding: 10px;&quot;</span>)
+        left_layout.addWidget(list_title)
+
+        <span class="hljs-comment"># 设备列表</span>
+        <span class="hljs-variable language_">self</span>.device_list = QListWidget()
+        <span class="hljs-variable language_">self</span>.device_list.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+            QListWidget {
+                background-color: #333333;
+                border: none;
+                padding: 5px;
+            }
+            QListWidget::item {
+                padding: 8px;
+                border-bottom: 1px solid #444444;
+            }
+            QListWidget::item:selected {
+                background-color: #444444;
+                color: white;
+            }
+        &quot;&quot;&quot;</span>)
+        devices = [
+            <span class="hljs-string">&quot;会议室 MAC:PHI214453&quot;</span>,
+            <span class="hljs-string">&quot;会议室2 MAC:PHI214453&quot;</span>,
+            <span class="hljs-string">&quot;休息室 MAC:PHI214453&quot;</span>,
+            <span class="hljs-string">&quot;会议室3 MAC:PHI214453&quot;</span>,
+            <span class="hljs-string">&quot;会议室4 MAC:PHI214453&quot;</span>,
+        ]
+        <span class="hljs-keyword">for</span> device <span class="hljs-keyword">in</span> devices:
+            <span class="hljs-variable language_">self</span>.device_list.addItem(device)
+        <span class="hljs-variable language_">self</span>.device_list.setCurrentRow(<span class="hljs-number">0</span>)
+        left_layout.addWidget(<span class="hljs-variable language_">self</span>.device_list)
+
+        <span class="hljs-comment"># 底部logo</span>
+        logo_label = QLabel(<span class="hljs-string">&quot;PUDEX\n小朴智能科技&quot;</span>)
+        logo_label.setAlignment(Qt.AlignCenter)
+        logo_label.setStyleSheet(<span class="hljs-string">&quot;color: white; font-size: 12px; margin-top: auto; padding: 10px;&quot;</span>)
+        left_layout.addWidget(logo_label)
+
+        main_layout.addWidget(left_widget)
+
+        <span class="hljs-comment"># 右侧内容区域</span>
+        right_widget = QWidget()
+        right_layout = QVBoxLayout(right_widget)
+        right_widget.setStyleSheet(<span class="hljs-string">&quot;background-color: #333333;&quot;</span>)
+
+        <span class="hljs-comment"># 顶部实时监测标签</span>
+        realtime_label = QLabel(<span class="hljs-string">&quot;实时监测数据&quot;</span>)
+        realtime_label.setStyleSheet(<span class="hljs-string">&quot;color: white; font-size: 14px; font-weight: bold; padding: 10px;&quot;</span>)
+        right_layout.addWidget(realtime_label)
+
+        <span class="hljs-comment"># 创建滚动区域以避免小屏幕下的重叠</span>
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+
+        <span class="hljs-comment"># 中间参数显示区域 - 使用网格布局放置所有圆环</span>
+        params_grid = QGridLayout()
+        params_grid.setSpacing(<span class="hljs-number">20</span>)  <span class="hljs-comment"># 增加间距避免重叠</span>
+        params_grid.setContentsMargins(<span class="hljs-number">10</span>, <span class="hljs-number">10</span>, <span class="hljs-number">10</span>, <span class="hljs-number">10</span>)
+
+        <span class="hljs-comment"># PM2.5 圆环</span>
+        <span class="hljs-variable language_">self</span>.pm_progress = CircularProgressBar()
+        <span class="hljs-variable language_">self</span>.pm_progress.set_label_text(<span class="hljs-string">&quot;PM2.5&quot;</span>)
+        <span class="hljs-variable language_">self</span>.pm_progress.set_unit(<span class="hljs-string">&quot;μg/m³&quot;</span>)
+        <span class="hljs-variable language_">self</span>.pm_progress.set_max_value(<span class="hljs-number">150</span>)  <span class="hljs-comment"># PM2.5最大150</span>
+        <span class="hljs-variable language_">self</span>.pm_progress.set_value(<span class="hljs-number">35</span>)
+        params_grid.addWidget(<span class="hljs-variable language_">self</span>.pm_progress, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+
+        <span class="hljs-comment"># TVOC 圆环</span>
+        <span class="hljs-variable language_">self</span>.tvoc_progress = CircularProgressBar()
+        <span class="hljs-variable language_">self</span>.tvoc_progress.set_label_text(<span class="hljs-string">&quot;TVOC&quot;</span>)
+        <span class="hljs-variable language_">self</span>.tvoc_progress.set_unit(<span class="hljs-string">&quot;ppb&quot;</span>)
+        <span class="hljs-variable language_">self</span>.tvoc_progress.set_max_value(<span class="hljs-number">300</span>)  <span class="hljs-comment"># TVOC最大300</span>
+        <span class="hljs-variable language_">self</span>.tvoc_progress.set_ranges({
+            <span class="hljs-string">&quot;优&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">50</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;良好&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">100</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">215</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;轻度污染&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">200</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">165</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;中度污染&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">300</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">69</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;重度污染&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-built_in">float</span>(<span class="hljs-string">&#x27;inf&#x27;</span>), <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)}
+        })
+        <span class="hljs-variable language_">self</span>.tvoc_progress.set_value(<span class="hljs-number">110</span>)
+        params_grid.addWidget(<span class="hljs-variable language_">self</span>.tvoc_progress, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 二氧化碳 圆环</span>
+        <span class="hljs-variable language_">self</span>.co2_progress = CircularProgressBar()
+        <span class="hljs-variable language_">self</span>.co2_progress.set_label_text(<span class="hljs-string">&quot;二氧化碳&quot;</span>)
+        <span class="hljs-variable language_">self</span>.co2_progress.set_unit(<span class="hljs-string">&quot;ppm&quot;</span>)
+        <span class="hljs-variable language_">self</span>.co2_progress.set_max_value(<span class="hljs-number">2000</span>)  <span class="hljs-comment"># CO2最大2000</span>
+        <span class="hljs-variable language_">self</span>.co2_progress.set_ranges({
+            <span class="hljs-string">&quot;优&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">600</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;良好&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">1000</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">215</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;轻度污染&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">1500</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">165</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;中度污染&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">2000</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">69</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;重度污染&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-built_in">float</span>(<span class="hljs-string">&#x27;inf&#x27;</span>), <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)}
+        })
+        <span class="hljs-variable language_">self</span>.co2_progress.set_value(<span class="hljs-number">151</span>)
+        params_grid.addWidget(<span class="hljs-variable language_">self</span>.co2_progress, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>)
+
+        <span class="hljs-comment"># 温度 圆环</span>
+        <span class="hljs-variable language_">self</span>.temp_progress = CircularProgressBar()
+        <span class="hljs-variable language_">self</span>.temp_progress.set_label_text(<span class="hljs-string">&quot;温度&quot;</span>)
+        <span class="hljs-variable language_">self</span>.temp_progress.set_unit(<span class="hljs-string">&quot;°C&quot;</span>)
+        <span class="hljs-variable language_">self</span>.temp_progress.set_max_value(<span class="hljs-number">35</span>)  <span class="hljs-comment"># 温度最大35</span>
+        <span class="hljs-variable language_">self</span>.temp_progress.set_ranges({
+            <span class="hljs-string">&quot;适宜&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">24</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;较舒适&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">28</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">215</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;偏热&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">32</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">165</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;热&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">35</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">69</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;过热&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-built_in">float</span>(<span class="hljs-string">&#x27;inf&#x27;</span>), <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)}
+        })
+        <span class="hljs-variable language_">self</span>.temp_progress.set_value(<span class="hljs-number">20</span>)
+        params_grid.addWidget(<span class="hljs-variable language_">self</span>.temp_progress, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 湿度 圆环</span>
+        <span class="hljs-variable language_">self</span>.humidity_progress = CircularProgressBar()
+        <span class="hljs-variable language_">self</span>.humidity_progress.set_label_text(<span class="hljs-string">&quot;湿度&quot;</span>)
+        <span class="hljs-variable language_">self</span>.humidity_progress.set_unit(<span class="hljs-string">&quot;%rh&quot;</span>)
+        <span class="hljs-variable language_">self</span>.humidity_progress.set_max_value(<span class="hljs-number">100</span>)  <span class="hljs-comment"># 湿度最大100</span>
+        <span class="hljs-variable language_">self</span>.humidity_progress.set_ranges({
+            <span class="hljs-string">&quot;适宜&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">60</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;较适宜&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">70</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">215</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;偏湿&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">80</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">165</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;潮湿&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-number">90</span>, <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">69</span>, <span class="hljs-number">0</span>)},
+            <span class="hljs-string">&quot;极潮湿&quot;</span>: {<span class="hljs-string">&quot;max&quot;</span>: <span class="hljs-built_in">float</span>(<span class="hljs-string">&#x27;inf&#x27;</span>), <span class="hljs-string">&quot;color&quot;</span>: QColor(<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)}
+        })
+        <span class="hljs-variable language_">self</span>.humidity_progress.set_value(<span class="hljs-number">50</span>)
+        params_grid.addWidget(<span class="hljs-variable language_">self</span>.humidity_progress, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>)
+
+        <span class="hljs-comment"># PM2.5历史数据折线图</span>
+        <span class="hljs-variable language_">self</span>.pm25_chart = LineChart()
+        <span class="hljs-variable language_">self</span>.pm25_chart.set_title(<span class="hljs-string">&quot;PM2.5 历史数据趋势&quot;</span>)
+        <span class="hljs-variable language_">self</span>.pm25_chart.set_unit(<span class="hljs-string">&quot;μg/m³&quot;</span>)
+        params_grid.addWidget(<span class="hljs-variable language_">self</span>.pm25_chart, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+
+        scroll_layout.addLayout(params_grid)
+
+        <span class="hljs-comment"># 添加历史数据表格</span>
+        table_label = QLabel(<span class="hljs-string">&quot;历史数据记录&quot;</span>)
+        table_label.setStyleSheet(<span class="hljs-string">&quot;color: white; font-size: 14px; font-weight: bold; padding: 10px;&quot;</span>)
+        scroll_layout.addWidget(table_label)
+
+        <span class="hljs-variable language_">self</span>.data_table = QTableWidget(<span class="hljs-number">5</span>, <span class="hljs-number">6</span>)
+        <span class="hljs-variable language_">self</span>.data_table.setHorizontalHeaderLabels([
+            <span class="hljs-string">&quot;设备号&quot;</span>, <span class="hljs-string">&quot;PM2.5 (μg/m³)&quot;</span>, <span class="hljs-string">&quot;TVOC (ppb)&quot;</span>, <span class="hljs-string">&quot;二氧化碳 (ppm)&quot;</span>, <span class="hljs-string">&quot;温度 (°C)&quot;</span>, <span class="hljs-string">&quot;湿度 (%rh)&quot;</span>
+        ])
+        <span class="hljs-variable language_">self</span>.data_table.setStyleSheet(<span class="hljs-string">&quot;&quot;&quot;
+            QTableWidget {
+                background-color: #444444;
+                color: white;
+            }
+            QHeaderView::section {
+                background-color: #555555;
+                color: white;
+                padding: 5px;
+            }
+            QTableWidget::item {
+                padding: 5px;
+            }
+        &quot;&quot;&quot;</span>)
+        <span class="hljs-variable language_">self</span>.data_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        scroll_layout.addWidget(<span class="hljs-variable language_">self</span>.data_table)
+
+        <span class="hljs-comment"># 添加滚动区域到主布局</span>
+        <span class="hljs-keyword">from</span> PyQt5.QtWidgets <span class="hljs-keyword">import</span> QScrollArea
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(<span class="hljs-literal">True</span>)
+        scroll_area.setWidget(scroll_widget)
+        right_layout.addWidget(scroll_area)
+
+        main_layout.addWidget(right_widget, stretch=<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 填充表格数据</span>
+        <span class="hljs-variable language_">self</span>.populate_table()
+
+        <span class="hljs-variable language_">self</span>.setWindowTitle(<span class="hljs-string">&quot;空气质量管理系统&quot;</span>)
+        <span class="hljs-variable language_">self</span>.resize(<span class="hljs-number">1300</span>, <span class="hljs-number">800</span>)  <span class="hljs-comment"># 增大窗口尺寸避免拥挤</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">populate_table</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">5</span>):
+            <span class="hljs-variable language_">self</span>.data_table.setItem(i, <span class="hljs-number">0</span>, QTableWidgetItem(<span class="hljs-string">f&quot;PHI112321<span class="hljs-subst">{i+<span class="hljs-number">1</span>}</span>&quot;</span>))
+            <span class="hljs-variable language_">self</span>.data_table.setItem(i, <span class="hljs-number">1</span>, QTableWidgetItem(<span class="hljs-built_in">str</span>(<span class="hljs-number">35</span> + i*<span class="hljs-number">5</span>)))
+            <span class="hljs-variable language_">self</span>.data_table.setItem(i, <span class="hljs-number">2</span>, QTableWidgetItem(<span class="hljs-built_in">str</span>(<span class="hljs-number">110</span> + i*<span class="hljs-number">10</span>)))
+            <span class="hljs-variable language_">self</span>.data_table.setItem(i, <span class="hljs-number">3</span>, QTableWidgetItem(<span class="hljs-built_in">str</span>(<span class="hljs-number">151</span> + i*<span class="hljs-number">20</span>)))
+            <span class="hljs-variable language_">self</span>.data_table.setItem(i, <span class="hljs-number">4</span>, QTableWidgetItem(<span class="hljs-built_in">str</span>(<span class="hljs-number">20</span> + i*<span class="hljs-number">1</span>)))
+            <span class="hljs-variable language_">self</span>.data_table.setItem(i, <span class="hljs-number">5</span>, QTableWidgetItem(<span class="hljs-built_in">str</span>(<span class="hljs-number">50</span> - i*<span class="hljs-number">2</span>)))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">setup_timer</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 模拟数据更新（每5秒随机变化）</span>
+        <span class="hljs-variable language_">self</span>.timer = QTimer(<span class="hljs-variable language_">self</span>)
+        <span class="hljs-variable language_">self</span>.timer.timeout.connect(<span class="hljs-variable language_">self</span>.update_data)
+        <span class="hljs-variable language_">self</span>.timer.start(<span class="hljs-number">3000</span>)  <span class="hljs-comment"># 每3秒更新一次数据</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update_data</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 随机更新各参数值</span>
+        new_pm = <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">min</span>(<span class="hljs-number">150</span>, <span class="hljs-variable language_">self</span>.pm_progress.value + random.randint(-<span class="hljs-number">5</span>, <span class="hljs-number">5</span>)))
+        new_tvoc = <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">min</span>(<span class="hljs-number">300</span>, <span class="hljs-variable language_">self</span>.tvoc_progress.value + random.randint(-<span class="hljs-number">8</span>, <span class="hljs-number">8</span>)))
+        new_co2 = <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">min</span>(<span class="hljs-number">2000</span>, <span class="hljs-variable language_">self</span>.co2_progress.value + random.randint(-<span class="hljs-number">15</span>, <span class="hljs-number">15</span>)))
+        new_temp = <span class="hljs-built_in">round</span>(<span class="hljs-built_in">max</span>(<span class="hljs-number">16</span>, <span class="hljs-built_in">min</span>(<span class="hljs-number">35</span>, <span class="hljs-variable language_">self</span>.temp_progress.value + random.uniform(-<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>))), <span class="hljs-number">1</span>)
+        new_humidity = <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">min</span>(<span class="hljs-number">100</span>, <span class="hljs-variable language_">self</span>.humidity_progress.value + random.randint(-<span class="hljs-number">3</span>, <span class="hljs-number">3</span>)))
+
+        <span class="hljs-comment"># 更新圆环数据</span>
+        <span class="hljs-variable language_">self</span>.pm_progress.set_value(new_pm)
+        <span class="hljs-variable language_">self</span>.tvoc_progress.set_value(new_tvoc)
+        <span class="hljs-variable language_">self</span>.co2_progress.set_value(new_co2)
+        <span class="hljs-variable language_">self</span>.temp_progress.set_value(new_temp)
+        <span class="hljs-variable language_">self</span>.humidity_progress.set_value(new_humidity)
+
+        <span class="hljs-comment"># 添加PM2.5数据到历史图表</span>
+        <span class="hljs-variable language_">self</span>.pm25_chart.add_data_point(new_pm)
+
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&#x27;__main__&#x27;</span>:
+    app = QApplication(sys.argv)
+    <span class="hljs-comment"># 确保中文显示正常</span>
+    font = QFont(<span class="hljs-string">&quot;SimHei&quot;</span>)
+    app.setFont(font)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec_())
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/用python写马里奥闯关游戏.html">
+      <span>上一篇</span>
+      <strong>用Python写马里奥闯关游戏</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/如何使用python的matplotlib绘制3d立方体转载.html">
+      <span>下一篇</span>
+      <strong>如何使用Python的Matplotlib绘制3D立方体转载</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

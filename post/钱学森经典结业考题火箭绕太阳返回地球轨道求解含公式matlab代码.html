@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</h1>
+        <p class="post-deck">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>10 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+            <a class="tag-chip" href="../tags/tag-15.html">卫星</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace linebreak="newline"></mspace><mi>d</mi><mi>d</mi><mi>o</mi><mi>t</mi><mrow><mspace linebreak="newline"></mspace><mi>b</mi><mi>o</mi><mi>l</mi><mi>d</mi><mi>s</mi><mi>y</mi><mi>m</mi><mi>b</mi><mi>o</mi><mi>l</mi><mi>r</mi></mrow><mo>=</mo><mo>−</mo><mspace linebreak="newline"></mspace><mi>m</mi><mi>u</mi><mspace linebreak="newline"></mspace><mi>f</mi><mi>r</mi><mi>a</mi><mi>c</mi><mrow><mspace linebreak="newline"></mspace><mi>b</mi><mi>o</mi><mi>l</mi><mi>d</mi><mi>s</mi><mi>y</mi><mi>m</mi><mi>b</mi><mi>o</mi><mi>l</mi><mi>r</mi></mrow><msup><mi>r</mi><mn>3</mn></msup></mrow><annotation encoding="application/x-tex">\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="mspace katex-newline"></span><span class="katex-base"><span class="katex-strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">dd</span><span class="mord mathnormal">o</span><span class="mord mathnormal">t</span><span class="mord"><span class="mspace katex-newline"></span><span class="mord mathnormal">b</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.0197em;">l</span><span class="mord mathnormal">d</span><span class="mord mathnormal" style="margin-right:0.0359em;">sy</span><span class="mord mathnormal">mb</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.0197em;">l</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">r</span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord">−</span></span><span class="mspace katex-newline"></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span><span class="mord mathnormal">u</span></span><span class="mspace katex-newline"></span><span class="katex-base"><span class="katex-strut" style="height:1.0085em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mord mathnormal">a</span><span class="mord mathnormal">c</span><span class="mord"><span class="mspace katex-newline"></span><span class="mord mathnormal">b</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.0197em;">l</span><span class="mord mathnormal">d</span><span class="mord mathnormal" style="margin-right:0.0359em;">sy</span><span class="mord mathnormal">mb</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.0197em;">l</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">r</span></span></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span></span>，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返回时与地球距离偏差仅数千公里。可视化展示了火箭与地球轨道的平面投影和距离变化曲线，验证了轨道返回的可行性。代码规范完整，可直接运行并导出PDF。</p>
+<p><img src="../uploads/csdn/%E9%92%B1%E5%AD%A6%E6%A3%AE%E7%BB%8F%E5%85%B8%E7%BB%93%E4%B8%9A%E8%80%83%E9%A2%98%E7%81%AB%E7%AE%AD%E7%BB%95%E5%A4%AA%E9%98%B3%E8%BF%94%E5%9B%9E%E5%9C%B0%E7%90%83%E8%BD%A8%E9%81%93%E6%B1%82%E8%A7%A3%E5%90%AB%E5%85%AC%E5%BC%8Fmatlab%E4%BB%A3%E7%A0%81/img-01.png" alt=""></p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">%% 钱学森考题：火箭绕太阳返回地球轨道求解（MATLAB完整版）</span>
+<span class="hljs-comment">% 核心对应理论公式：\ddot{\boldsymbol{r}} = -\mu \frac{\boldsymbol{r}}{r^3}</span>
+<span class="hljs-comment">% 适配PDF导出，代码规范无乱码，可直接运行</span>
+clear; clc; close all;
+
+<span class="hljs-comment">%% 1. 基础物理常数（对应公式参数定义）</span>
+mu_sun = <span class="hljs-number">1.32712440018e20</span>;   <span class="hljs-comment">% 太阳引力常数 \mu，m^3/s^2</span>
+r_earth = <span class="hljs-number">1.496e11</span>;          <span class="hljs-comment">% 地球轨道半径 r_\oplus，1AU，m</span>
+T_earth = <span class="hljs-number">365.25</span> * <span class="hljs-number">86400</span>;    <span class="hljs-comment">% 地球公转周期 T_\oplus，s</span>
+omega_earth = <span class="hljs-number">2</span>*<span class="hljs-built_in">pi</span> / T_earth;<span class="hljs-comment">% 地球公转角速度，rad/s</span>
+v_earth = r_earth * omega_earth; <span class="hljs-comment">% 地球公转线速度，m/s</span>
+
+<span class="hljs-comment">%% 2. 火箭初始条件（对应边界约束）</span>
+t0 = <span class="hljs-number">0</span>;                      <span class="hljs-comment">% 初始时间，s</span>
+tf = T_earth;                <span class="hljs-comment">% 总仿真时间1地球年，保证周期匹配</span>
+r0 = [r_earth, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>];        <span class="hljs-comment">% 初始位置：地球轨道上，日心X轴</span>
+v0 = [<span class="hljs-number">0</span>, <span class="hljs-number">1.05</span>*v_earth, <span class="hljs-number">0</span>];   <span class="hljs-comment">% 初始切向速度，微调实现椭圆返回轨道</span>
+y0 = [r0, v0];               <span class="hljs-comment">% 状态向量：[x,y,z,vx,vy,vz]</span>
+
+<span class="hljs-comment">%% 3. 核心运动微分方程（对应公式2.1）</span>
+<span class="hljs-comment">% 输入：t时间，y状态向量；输出：状态一阶导数</span>
+dfun = @(t, y) [
+    y(<span class="hljs-number">4</span>); y(<span class="hljs-number">5</span>); y(<span class="hljs-number">6</span>);                                <span class="hljs-comment">% 速度项：dr/dt = v</span>
+    -mu_sun * y(<span class="hljs-number">1</span>) / norm(y(<span class="hljs-number">1</span>:<span class="hljs-number">3</span>))^<span class="hljs-number">3</span>;                 <span class="hljs-comment">% X向加速度</span>
+    -mu_sun * y(<span class="hljs-number">2</span>) / norm(y(<span class="hljs-number">1</span>:<span class="hljs-number">3</span>))^<span class="hljs-number">3</span>;                 <span class="hljs-comment">% Y向加速度</span>
+    -mu_sun * y(<span class="hljs-number">3</span>) / norm(y(<span class="hljs-number">1</span>:<span class="hljs-number">3</span>))^<span class="hljs-number">3</span>                  <span class="hljs-comment">% Z向加速度</span>
+];
+
+<span class="hljs-comment">%% 4. 数值积分求解（Runge-Kutta法）</span>
+options = odeset(<span class="hljs-string">&#x27;RelTol&#x27;</span>, <span class="hljs-number">1e-8</span>, <span class="hljs-string">&#x27;AbsTol&#x27;</span>, <span class="hljs-number">1e-8</span>);   <span class="hljs-comment">% 高精度积分设置</span>
+[t, y] = ode45(dfun, [t0, tf], y0, options);
+
+<span class="hljs-comment">%% 5. 结果数据提取</span>
+r_rocket = y(:, <span class="hljs-number">1</span>:<span class="hljs-number">3</span>);  <span class="hljs-comment">% 火箭位置矩阵</span>
+v_rocket = y(:, <span class="hljs-number">4</span>:<span class="hljs-number">6</span>);  <span class="hljs-comment">% 火箭速度矩阵</span>
+<span class="hljs-comment">% 同步计算地球实时位置（圆周运动）</span>
+theta_earth = omega_earth * t;
+r_earth_t = [r_earth*<span class="hljs-built_in">cos</span>(theta_earth), r_earth*<span class="hljs-built_in">sin</span>(theta_earth), <span class="hljs-built_in">zeros</span>(<span class="hljs-built_in">size</span>(t))];
+
+<span class="hljs-comment">%% 6. 轨道核心参数计算（对应公式2.2-2.3）</span>
+r_mag = vecnorm(r_rocket, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>);    <span class="hljs-comment">% 火箭到太阳距离</span>
+v_mag = vecnorm(v_rocket, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>);    <span class="hljs-comment">% 火箭速度大小</span>
+h = <span class="hljs-built_in">cross</span>(r_rocket, v_rocket);      <span class="hljs-comment">% 角动量矢量（角动量守恒）</span>
+h_mag = vecnorm(h, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>);
+<span class="hljs-comment">% 轨道半长轴与偏心率</span>
+a = (<span class="hljs-number">2.</span>/r_mag - v_mag.^<span class="hljs-number">2</span>/mu_sun).^(<span class="hljs-number">-1</span>);
+e_vec = (<span class="hljs-built_in">cross</span>(v_rocket, h) - mu_sun*r_rocket./r_mag)/mu_sun;
+e_mag = vecnorm(e_vec, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>);
+
+<span class="hljs-comment">%% 7. 结果输出与可视化</span>
+fprintf(<span class="hljs-string">&#x27;========== 火箭轨道核心参数 ==========\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;地球公转速度：%.2f km/s\n&#x27;</span>, v_earth/<span class="hljs-number">1000</span>);
+fprintf(<span class="hljs-string">&#x27;火箭初始速度：%.2f km/s\n&#x27;</span>, norm(v0)/<span class="hljs-number">1000</span>);
+fprintf(<span class="hljs-string">&#x27;轨道偏心率均值：%.4f（椭圆轨道，满足返回条件）\n&#x27;</span>, <span class="hljs-built_in">mean</span>(e_mag));
+pos_error = norm(r_rocket(<span class="hljs-keyword">end</span>,:)-r_earth_t(<span class="hljs-keyword">end</span>,:))/<span class="hljs-number">1000</span>;
+fprintf(<span class="hljs-string">&#x27;返回时与地球距离偏差：%.2f km\n&#x27;</span>, pos_error);
+
+<span class="hljs-comment">% 轨道可视化（PDF导出可清晰显示图像）</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;w&#x27;</span>,<span class="hljs-string">&#x27;Position&#x27;</span>,[<span class="hljs-number">100</span>,<span class="hljs-number">100</span>,<span class="hljs-number">1200</span>,<span class="hljs-number">500</span>]);
+subplot(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">1</span>);
+<span class="hljs-built_in">plot</span>(r_rocket(:,<span class="hljs-number">1</span>)/<span class="hljs-number">1e9</span>, r_rocket(:,<span class="hljs-number">2</span>)/<span class="hljs-number">1e9</span>, <span class="hljs-string">&#x27;b-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">1.5</span>); <span class="hljs-built_in">hold</span> on;
+<span class="hljs-built_in">plot</span>(r_earth_t(:,<span class="hljs-number">1</span>)/<span class="hljs-number">1e9</span>, r_earth_t(:,<span class="hljs-number">2</span>)/<span class="hljs-number">1e9</span>, <span class="hljs-string">&#x27;g--&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">1</span>);
+<span class="hljs-built_in">plot</span>(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-string">&#x27;yo&#x27;</span>,<span class="hljs-string">&#x27;MarkerSize&#x27;</span>,<span class="hljs-number">10</span>,<span class="hljs-string">&#x27;DisplayName&#x27;</span>,<span class="hljs-string">&#x27;太阳&#x27;</span>);
+<span class="hljs-built_in">plot</span>(r0(<span class="hljs-number">1</span>)/<span class="hljs-number">1e9</span>,r0(<span class="hljs-number">2</span>)/<span class="hljs-number">1e9</span>,<span class="hljs-string">&#x27;rs&#x27;</span>,<span class="hljs-string">&#x27;MarkerSize&#x27;</span>,<span class="hljs-number">8</span>,<span class="hljs-string">&#x27;DisplayName&#x27;</span>,<span class="hljs-string">&#x27;发射点&#x27;</span>);
+<span class="hljs-built_in">plot</span>(r_rocket(<span class="hljs-keyword">end</span>,<span class="hljs-number">1</span>)/<span class="hljs-number">1e9</span>,r_rocket(<span class="hljs-keyword">end</span>,<span class="hljs-number">2</span>)/<span class="hljs-number">1e9</span>,<span class="hljs-string">&#x27;rd&#x27;</span>,<span class="hljs-string">&#x27;MarkerSize&#x27;</span>,<span class="hljs-number">8</span>,<span class="hljs-string">&#x27;DisplayName&#x27;</span>,<span class="hljs-string">&#x27;返回点&#x27;</span>);
+xlabel(<span class="hljs-string">&#x27;X (10^9 m)&#x27;</span>); ylabel(<span class="hljs-string">&#x27;Y (10^9 m)&#x27;</span>);
+title(<span class="hljs-string">&#x27;火箭绕太阳返回地球轨道（黄道平面）&#x27;</span>);
+axis equal; grid on; <span class="hljs-built_in">legend</span>;
+
+subplot(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">2</span>);
+<span class="hljs-built_in">plot</span>(t/<span class="hljs-number">86400</span>, r_mag/<span class="hljs-number">1e9</span>, <span class="hljs-string">&#x27;b-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">1.5</span>); <span class="hljs-built_in">hold</span> on;
+<span class="hljs-built_in">plot</span>(t/<span class="hljs-number">86400</span>, r_earth*<span class="hljs-built_in">ones</span>(<span class="hljs-built_in">size</span>(t))/<span class="hljs-number">1e9</span>, <span class="hljs-string">&#x27;g--&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">1</span>);
+xlabel(<span class="hljs-string">&#x27;时间（天）&#x27;</span>); ylabel(<span class="hljs-string">&#x27;到太阳距离（10^9 m）&#x27;</span>);
+title(<span class="hljs-string">&#x27;火箭日心距离随时间变化&#x27;</span>);
+grid on; <span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x27;火箭轨道&#x27;</span>,<span class="hljs-string">&#x27;地球轨道&#x27;</span>);
+</code></pre>
+<p><img src="../uploads/csdn/%E9%92%B1%E5%AD%A6%E6%A3%AE%E7%BB%8F%E5%85%B8%E7%BB%93%E4%B8%9A%E8%80%83%E9%A2%98%E7%81%AB%E7%AE%AD%E7%BB%95%E5%A4%AA%E9%98%B3%E8%BF%94%E5%9B%9E%E5%9C%B0%E7%90%83%E8%BD%A8%E9%81%93%E6%B1%82%E8%A7%A3%E5%90%AB%E5%85%AC%E5%BC%8Fmatlab%E4%BB%A3%E7%A0%81/img-02.jpeg" alt=""></p>
+<p><img src="../uploads/csdn/%E9%92%B1%E5%AD%A6%E6%A3%AE%E7%BB%8F%E5%85%B8%E7%BB%93%E4%B8%9A%E8%80%83%E9%A2%98%E7%81%AB%E7%AE%AD%E7%BB%95%E5%A4%AA%E9%98%B3%E8%BF%94%E5%9B%9E%E5%9C%B0%E7%90%83%E8%BD%A8%E9%81%93%E6%B1%82%E8%A7%A3%E5%90%AB%E5%85%AC%E5%BC%8Fmatlab%E4%BB%A3%E7%A0%81/img-03.jpeg" alt=""><img src="../uploads/csdn/%E9%92%B1%E5%AD%A6%E6%A3%AE%E7%BB%8F%E5%85%B8%E7%BB%93%E4%B8%9A%E8%80%83%E9%A2%98%E7%81%AB%E7%AE%AD%E7%BB%95%E5%A4%AA%E9%98%B3%E8%BF%94%E5%9B%9E%E5%9C%B0%E7%90%83%E8%BD%A8%E9%81%93%E6%B1%82%E8%A7%A3%E5%90%AB%E5%85%AC%E5%BC%8Fmatlab%E4%BB%A3%E7%A0%81/img-04.jpeg" alt=""><img src="../uploads/csdn/%E9%92%B1%E5%AD%A6%E6%A3%AE%E7%BB%8F%E5%85%B8%E7%BB%93%E4%B8%9A%E8%80%83%E9%A2%98%E7%81%AB%E7%AE%AD%E7%BB%95%E5%A4%AA%E9%98%B3%E8%BF%94%E5%9B%9E%E5%9C%B0%E7%90%83%E8%BD%A8%E9%81%93%E6%B1%82%E8%A7%A3%E5%90%AB%E5%85%AC%E5%BC%8Fmatlab%E4%BB%A3%E7%A0%81/img-05.jpeg" alt=""><img src="../uploads/csdn/%E9%92%B1%E5%AD%A6%E6%A3%AE%E7%BB%8F%E5%85%B8%E7%BB%93%E4%B8%9A%E8%80%83%E9%A2%98%E7%81%AB%E7%AE%AD%E7%BB%95%E5%A4%AA%E9%98%B3%E8%BF%94%E5%9B%9E%E5%9C%B0%E7%90%83%E8%BD%A8%E9%81%93%E6%B1%82%E8%A7%A3%E5%90%AB%E5%85%AC%E5%BC%8Fmatlab%E4%BB%A3%E7%A0%81/img-06.jpeg" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/阿尔忒弥斯二号任务的核心轨迹.html">
+      <span>上一篇</span>
+      <strong>阿尔忒弥斯二号任务的核心轨迹</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">
+      <span>下一篇</span>
+      <strong>试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/计算卫星与地面时差用广义相对论给出计算公式与matlab代码.html">计算卫星与地面时差用广义相对论给出计算公式与MATLAB代码</a></h3>
+        <p class="post-excerpt">一、相对论时差的主要来源</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.817Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/空间飞行器轨道旅行者号行星际飞行轨道递推计算与分析matlab代码.html">空间飞行器轨道旅行者号行星际飞行轨道递推计算与分析Matlab代码</a></h3>
+        <p class="post-excerpt">本文基于Wagner和Wie的论文思路，实现了旅行者号引力辅助(MGA)轨迹的教学版仿真。程序首先计算各行星在简化圆轨道下的日心状态，通过分段Lambert求解得到转移轨道。核心部分分析了飞越点的关键参数：相对速度(vinf)、转角(delta)、近拱点距离(rp)和速度增量(DeltaV\GA)。结果显示木星、土星、天王星飞越时的转角分别为47.8°、83.3°和88.1°。程序还提供了3D可视…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.721Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/嫦娥号地月轨道环月一个月matlab仿真.html">嫦娥号地月轨道环月一个月MATLAB仿真</a></h3>
+        <p class="post-excerpt">本文基于MATLAB实现了嫦娥系列探测器登月任务的轨道仿真，包含地月转移轨道和30天的环月轨道运行。仿真考虑了地球停泊轨道（200km）、地月转移轨道（200×405000km）、中途修正、月球捕获和环月轨道（100km）等关键阶段。结果显示：总速度增量约3.3km/s，转移时间约5.2天，30天环月运行约450圈轨道。通过数值积分和可视化分析，验证了轨道设计的合理性。该仿真为深空探测任务提供了轨…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.515Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

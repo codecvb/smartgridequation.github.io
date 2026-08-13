@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>MATLAB计算理想情况下每节火车车厢所受到的力并用构图的形式画出由10节车厢组成的火车受力图包含数 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">MATLAB计算理想情况下每节火车车厢所受到的力并用构图的形式画出由10节车厢组成的火车受力图包含数</h1>
+        <p class="post-deck">摘要：该MATLAB代码实现了对10节火车车厢的受力分析与可视化。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.173Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>8 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>摘要：该MATLAB代码实现了对10节火车车厢的受力分析与可视化。</p>
+<p>通过设定总拉力10000N，计算每节车厢的受力分布（F_i=(10-i+1)F/10），并绘制车厢结构、车轮及受力示意图。</p>
+<p>程序包含机车牵引力标注、受力公式说明等可视化元素，最终生成包含位置坐标、受力大小和物理公式的完整分析图。</p>
+<p>代码采用矩形绘制车厢和车轮，箭头标注受力方向，实现了直观的物理模型展示。</p>
+<p><img src="../uploads/csdn/matlab%E8%AE%A1%E7%AE%97%E7%90%86%E6%83%B3%E6%83%85%E5%86%B5%E4%B8%8B%E6%AF%8F%E8%8A%82%E7%81%AB%E8%BD%A6%E8%BD%A6%E5%8E%A2%E6%89%80%E5%8F%97%E5%88%B0%E7%9A%84%E5%8A%9B%E5%B9%B6%E7%94%A8%E6%9E%84%E5%9B%BE%E7%9A%84%E5%BD%A2%E5%BC%8F%E7%94%BB%E5%87%BA%E7%94%B110%E8%8A%82%E8%BD%A6%E5%8E%A2%E7%BB%84%E6%88%90%E7%9A%84%E7%81%AB%E8%BD%A6%E5%8F%97%E5%8A%9B%E5%9B%BE%E5%8C%85%E5%90%AB%E6%95%B0/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/matlab%E8%AE%A1%E7%AE%97%E7%90%86%E6%83%B3%E6%83%85%E5%86%B5%E4%B8%8B%E6%AF%8F%E8%8A%82%E7%81%AB%E8%BD%A6%E8%BD%A6%E5%8E%A2%E6%89%80%E5%8F%97%E5%88%B0%E7%9A%84%E5%8A%9B%E5%B9%B6%E7%94%A8%E6%9E%84%E5%9B%BE%E7%9A%84%E5%BD%A2%E5%BC%8F%E7%94%BB%E5%87%BA%E7%94%B110%E8%8A%82%E8%BD%A6%E5%8E%A2%E7%BB%84%E6%88%90%E7%9A%84%E7%81%AB%E8%BD%A6%E5%8F%97%E5%8A%9B%E5%9B%BE%E5%8C%85%E5%90%AB%E6%95%B0/img-02.png" alt=""></p>
+<p><img src="../uploads/csdn/matlab%E8%AE%A1%E7%AE%97%E7%90%86%E6%83%B3%E6%83%85%E5%86%B5%E4%B8%8B%E6%AF%8F%E8%8A%82%E7%81%AB%E8%BD%A6%E8%BD%A6%E5%8E%A2%E6%89%80%E5%8F%97%E5%88%B0%E7%9A%84%E5%8A%9B%E5%B9%B6%E7%94%A8%E6%9E%84%E5%9B%BE%E7%9A%84%E5%BD%A2%E5%BC%8F%E7%94%BB%E5%87%BA%E7%94%B110%E8%8A%82%E8%BD%A6%E5%8E%A2%E7%BB%84%E6%88%90%E7%9A%84%E7%81%AB%E8%BD%A6%E5%8F%97%E5%8A%9B%E5%9B%BE%E5%8C%85%E5%90%AB%E6%95%B0/img-03.png" alt=""></p>
+<p>MATLAB代码</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% 火车车厢受力分析与可视化</span>
+<span class="hljs-comment">% 理想情况下10节车厢的受力计算与绘图</span>
+
+clear; clc; close all;
+
+<span class="hljs-comment">% 参数设置</span>
+n = <span class="hljs-number">10</span>;                  <span class="hljs-comment">% 车厢数量</span>
+F_total = <span class="hljs-number">10000</span>;         <span class="hljs-comment">% 总拉力 (N)</span>
+car_length = <span class="hljs-number">10</span>;         <span class="hljs-comment">% 每节车厢长度 (m)</span>
+car_width = <span class="hljs-number">3</span>;           <span class="hljs-comment">% 每节车厢宽度 (m)</span>
+
+<span class="hljs-comment">% 计算每节车厢所受的力</span>
+<span class="hljs-comment">% F(i)表示第i节车厢受到的拉力</span>
+F = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">1</span>, n);
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:n
+    F(<span class="hljs-built_in">i</span>) = F_total * (n - <span class="hljs-built_in">i</span> + <span class="hljs-number">1</span>) / n;  <span class="hljs-comment">% 第i节车厢受到的拉力</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 绘图</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;w&#x27;</span>);
+<span class="hljs-built_in">hold</span> on; axis equal;
+
+<span class="hljs-comment">% 绘制每节车厢</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:n
+    <span class="hljs-comment">% 计算车厢位置</span>
+    x_pos = (<span class="hljs-built_in">i</span> - <span class="hljs-number">1</span>) * car_length;
+
+    <span class="hljs-comment">% 绘制车厢矩形</span>
+    rectangle(<span class="hljs-string">&#x27;Position&#x27;</span>, [x_pos, <span class="hljs-number">0</span>, car_length, car_width], ...
+              <span class="hljs-string">&#x27;FaceColor&#x27;</span>, [<span class="hljs-number">0.8</span>, <span class="hljs-number">0.8</span>, <span class="hljs-number">0.8</span>], ...
+              <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;k&#x27;</span>, ...
+              <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>);
+
+    <span class="hljs-comment">% 绘制车轮</span>
+    wheel_offset = [<span class="hljs-number">1</span>, car_length - <span class="hljs-number">1</span>];  <span class="hljs-comment">% 车轮位置偏移</span>
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">j</span> = <span class="hljs-number">1</span>:<span class="hljs-number">2</span>
+        rectangle(<span class="hljs-string">&#x27;Position&#x27;</span>, [x_pos + wheel_offset(<span class="hljs-built_in">j</span>) - <span class="hljs-number">0.5</span>, <span class="hljs-number">-0.8</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0.8</span>], ...
+                  <span class="hljs-string">&#x27;FaceColor&#x27;</span>, <span class="hljs-string">&#x27;k&#x27;</span>, ...
+                  <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;k&#x27;</span>);
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 标注受力大小</span>
+    text(x_pos + car_length/<span class="hljs-number">2</span>, car_width + <span class="hljs-number">0.5</span>, ...
+         sprintf(<span class="hljs-string">&#x27;F = %.0f N&#x27;</span>, F(<span class="hljs-built_in">i</span>)), ...
+         <span class="hljs-string">&#x27;HorizontalAlignment&#x27;</span>, <span class="hljs-string">&#x27;center&#x27;</span>, ...
+         <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">10</span>);
+
+    <span class="hljs-comment">% 绘制拉力箭头</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">i</span> &lt; n
+        arrow_x = x_pos + car_length;
+        arrow_y = car_width / <span class="hljs-number">2</span>;
+        annotation(<span class="hljs-string">&#x27;arrow&#x27;</span>, [arrow_x/car_length/n, (arrow_x + <span class="hljs-number">0.8</span>)/car_length/n], ...
+                  [arrow_y/(car_width + <span class="hljs-number">2</span>), arrow_y/(car_width + <span class="hljs-number">2</span>)], ...
+                  <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 添加机车</span>
+rectangle(<span class="hljs-string">&#x27;Position&#x27;</span>, [-car_length, <span class="hljs-number">0</span>, car_length, car_width], ...
+          <span class="hljs-string">&#x27;FaceColor&#x27;</span>, [<span class="hljs-number">0.6</span>, <span class="hljs-number">0.6</span>, <span class="hljs-number">0.6</span>], ...
+          <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;k&#x27;</span>, ...
+          <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>);
+
+<span class="hljs-comment">% 绘制机车对第一节车厢的拉力箭头</span>
+annotation(<span class="hljs-string">&#x27;arrow&#x27;</span>, [<span class="hljs-number">0</span>, <span class="hljs-number">0.8</span>/car_length/n], ...
+          [car_width/<span class="hljs-number">2</span>/(car_width + <span class="hljs-number">2</span>), car_width/<span class="hljs-number">2</span>/(car_width + <span class="hljs-number">2</span>)], ...
+          <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;r&#x27;</span>);
+
+<span class="hljs-comment">% 标注总拉力</span>
+text(-car_length/<span class="hljs-number">2</span>, car_width + <span class="hljs-number">1</span>, ...
+     sprintf(<span class="hljs-string">&#x27;总拉力 F = %.0f N&#x27;</span>, F_total), ...
+     <span class="hljs-string">&#x27;HorizontalAlignment&#x27;</span>, <span class="hljs-string">&#x27;center&#x27;</span>, ...
+     <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">12</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;r&#x27;</span>);
+
+<span class="hljs-comment">% 添加公式说明</span>
+annotation(<span class="hljs-string">&#x27;textbox&#x27;</span>, [<span class="hljs-number">0.1</span>, <span class="hljs-number">0.8</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">0.15</span>], ...
+           <span class="hljs-string">&#x27;String&#x27;</span>, {<span class="hljs-string">&#x27;受力公式:&#x27;</span>, <span class="hljs-string">&#x27;F_i = (10-i+1)F/10&#x27;</span>, <span class="hljs-string">&#x27;其中 F = 10ma&#x27;</span>}, ...
+           <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">11</span>, ...
+           <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>, ...
+           <span class="hljs-string">&#x27;BackgroundColor&#x27;</span>, [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0.8</span>]);
+
+<span class="hljs-comment">% 设置坐标轴和标题</span>
+xlim([-car_length - <span class="hljs-number">1</span>, n * car_length + <span class="hljs-number">1</span>]);
+ylim([<span class="hljs-number">-2</span>, car_width + <span class="hljs-number">3</span>]);
+title(<span class="hljs-string">&#x27;10节车厢火车受力分析图&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">14</span>);
+xlabel(<span class="hljs-string">&#x27;位置 (m)&#x27;</span>);
+box on;
+grid on;
+
+<span class="hljs-built_in">hold</span> off;
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/python月球地球太阳三天体联动一个月的月相图.html">
+      <span>上一篇</span>
+      <strong>Python月球地球太阳三天体联动一个月的月相图</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/matlab实现三天体三体运动相互纠缠的混沌运行可视化.html">
+      <span>下一篇</span>
+      <strong>MATLAB实现三天体三体运动相互纠缠的混沌运行可视化</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/计算卫星与地面时差用广义相对论给出计算公式与matlab代码.html">计算卫星与地面时差用广义相对论给出计算公式与MATLAB代码</a></h3>
+        <p class="post-excerpt">一、相对论时差的主要来源</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.817Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

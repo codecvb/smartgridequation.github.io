@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Python桌球游戏 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">Python桌球游戏</h1>
+        <p class="post-deck">下面是一个使用Pygame库实现的简单2D桌球游戏代码：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.313Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>31 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>下面是一个使用Pygame库实现的简单2D桌球游戏代码：</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> pygame
+<span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">import</span> math
+<span class="hljs-keyword">import</span> random
+
+<span class="hljs-comment"># 初始化pygame</span>
+pygame.init()
+
+<span class="hljs-comment"># 游戏常量</span>
+WIDTH, HEIGHT = <span class="hljs-number">800</span>, <span class="hljs-number">600</span>
+BALL_RADIUS = <span class="hljs-number">15</span>
+POCKET_RADIUS = <span class="hljs-number">25</span>
+WHITE = (<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>)
+BLACK = (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+GREEN = (<span class="hljs-number">0</span>, <span class="hljs-number">100</span>, <span class="hljs-number">0</span>)
+BROWN = (<span class="hljs-number">139</span>, <span class="hljs-number">69</span>, <span class="hljs-number">19</span>)
+RED = (<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+BLUE = (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>)
+YELLOW = (<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>)
+ORANGE = (<span class="hljs-number">255</span>, <span class="hljs-number">165</span>, <span class="hljs-number">0</span>)
+PURPLE = (<span class="hljs-number">128</span>, <span class="hljs-number">0</span>, <span class="hljs-number">128</span>)
+PINK = (<span class="hljs-number">255</span>, <span class="hljs-number">192</span>, <span class="hljs-number">203</span>)
+GRAY = (<span class="hljs-number">128</span>, <span class="hljs-number">128</span>, <span class="hljs-number">128</span>)
+
+<span class="hljs-comment"># 创建游戏窗口</span>
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(<span class="hljs-string">&quot;桌球游戏&quot;</span>)
+
+<span class="hljs-comment"># 球杆类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Cue</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.length = <span class="hljs-number">150</span>
+        <span class="hljs-variable language_">self</span>.width = <span class="hljs-number">5</span>
+        <span class="hljs-variable language_">self</span>.color = BROWN
+        <span class="hljs-variable language_">self</span>.angle = <span class="hljs-number">0</span>
+        <span class="hljs-variable language_">self</span>.power = <span class="hljs-number">0</span>
+        <span class="hljs-variable language_">self</span>.max_power = <span class="hljs-number">15</span>
+        <span class="hljs-variable language_">self</span>.visible = <span class="hljs-literal">False</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">draw</span>(<span class="hljs-params">self, surface, pos</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.visible:
+            <span class="hljs-keyword">return</span>
+
+        end_x = pos[<span class="hljs-number">0</span>] + math.cos(<span class="hljs-variable language_">self</span>.angle) * <span class="hljs-variable language_">self</span>.length
+        end_y = pos[<span class="hljs-number">1</span>] + math.sin(<span class="hljs-variable language_">self</span>.angle) * <span class="hljs-variable language_">self</span>.length
+
+        <span class="hljs-comment"># 绘制球杆</span>
+        pygame.draw.line(surface, <span class="hljs-variable language_">self</span>.color, pos, (end_x, end_y), <span class="hljs-variable language_">self</span>.width)
+
+        <span class="hljs-comment"># 绘制力量指示器</span>
+        power_height = <span class="hljs-variable language_">self</span>.power * <span class="hljs-number">2</span>
+        pygame.draw.rect(surface, RED, (pos[<span class="hljs-number">0</span>] + <span class="hljs-number">30</span>, pos[<span class="hljs-number">1</span>] - <span class="hljs-number">50</span>, <span class="hljs-number">20</span>, <span class="hljs-number">50</span>), <span class="hljs-number">2</span>)
+        pygame.draw.rect(surface, RED, (pos[<span class="hljs-number">0</span>] + <span class="hljs-number">30</span>, pos[<span class="hljs-number">1</span>] - power_height, <span class="hljs-number">20</span>, power_height))
+
+<span class="hljs-comment"># 球类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Ball</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x, y, color, number=<span class="hljs-number">0</span></span>):
+        <span class="hljs-variable language_">self</span>.x = x
+        <span class="hljs-variable language_">self</span>.y = y
+        <span class="hljs-variable language_">self</span>.color = color
+        <span class="hljs-variable language_">self</span>.radius = BALL_RADIUS
+        <span class="hljs-variable language_">self</span>.vx = <span class="hljs-number">0</span>
+        <span class="hljs-variable language_">self</span>.vy = <span class="hljs-number">0</span>
+        <span class="hljs-variable language_">self</span>.number = number
+        <span class="hljs-variable language_">self</span>.in_pocket = <span class="hljs-literal">False</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">draw</span>(<span class="hljs-params">self, surface</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.in_pocket:
+            <span class="hljs-keyword">return</span>
+
+        pygame.draw.circle(surface, <span class="hljs-variable language_">self</span>.color, (<span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.x), <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.y)), <span class="hljs-variable language_">self</span>.radius)
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.number &gt; <span class="hljs-number">0</span>:
+            text_color = WHITE <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.color == BLACK <span class="hljs-keyword">else</span> BLACK
+            font = pygame.font.SysFont(<span class="hljs-literal">None</span>, <span class="hljs-number">20</span>)
+            text = font.render(<span class="hljs-built_in">str</span>(<span class="hljs-variable language_">self</span>.number), <span class="hljs-literal">True</span>, text_color)
+            text_rect = text.get_rect(center=(<span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.x), <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.y)))
+            surface.blit(text, text_rect)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">self, table</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.in_pocket:
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-comment"># 更新位置</span>
+        <span class="hljs-variable language_">self</span>.x += <span class="hljs-variable language_">self</span>.vx
+        <span class="hljs-variable language_">self</span>.y += <span class="hljs-variable language_">self</span>.vy
+
+        <span class="hljs-comment"># 摩擦力减速</span>
+        <span class="hljs-variable language_">self</span>.vx *= <span class="hljs-number">0.98</span>
+        <span class="hljs-variable language_">self</span>.vy *= <span class="hljs-number">0.98</span>
+
+        <span class="hljs-comment"># 如果速度很小，停止运动</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">abs</span>(<span class="hljs-variable language_">self</span>.vx) &lt; <span class="hljs-number">0.1</span> <span class="hljs-keyword">and</span> <span class="hljs-built_in">abs</span>(<span class="hljs-variable language_">self</span>.vy) &lt; <span class="hljs-number">0.1</span>:
+            <span class="hljs-variable language_">self</span>.vx = <span class="hljs-number">0</span>
+            <span class="hljs-variable language_">self</span>.vy = <span class="hljs-number">0</span>
+
+        <span class="hljs-comment"># 边界碰撞检测</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.x - <span class="hljs-variable language_">self</span>.radius &lt; table.margin:
+            <span class="hljs-variable language_">self</span>.x = table.margin + <span class="hljs-variable language_">self</span>.radius
+            <span class="hljs-variable language_">self</span>.vx = -<span class="hljs-variable language_">self</span>.vx * <span class="hljs-number">0.8</span>
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.x + <span class="hljs-variable language_">self</span>.radius &gt; table.width - table.margin:
+            <span class="hljs-variable language_">self</span>.x = table.width - table.margin - <span class="hljs-variable language_">self</span>.radius
+            <span class="hljs-variable language_">self</span>.vx = -<span class="hljs-variable language_">self</span>.vx * <span class="hljs-number">0.8</span>
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.y - <span class="hljs-variable language_">self</span>.radius &lt; table.margin:
+            <span class="hljs-variable language_">self</span>.y = table.margin + <span class="hljs-variable language_">self</span>.radius
+            <span class="hljs-variable language_">self</span>.vy = -<span class="hljs-variable language_">self</span>.vy * <span class="hljs-number">0.8</span>
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.y + <span class="hljs-variable language_">self</span>.radius &gt; table.height - table.margin:
+            <span class="hljs-variable language_">self</span>.y = table.height - table.margin - <span class="hljs-variable language_">self</span>.radius
+            <span class="hljs-variable language_">self</span>.vy = -<span class="hljs-variable language_">self</span>.vy * <span class="hljs-number">0.8</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">check_pocket</span>(<span class="hljs-params">self, pockets</span>):
+        <span class="hljs-keyword">for</span> pocket <span class="hljs-keyword">in</span> pockets:
+            dx = <span class="hljs-variable language_">self</span>.x - pocket[<span class="hljs-number">0</span>]
+            dy = <span class="hljs-variable language_">self</span>.y - pocket[<span class="hljs-number">1</span>]
+            distance = math.sqrt(dx*dx + dy*dy)
+
+            <span class="hljs-keyword">if</span> distance &lt; POCKET_RADIUS:
+                <span class="hljs-variable language_">self</span>.in_pocket = <span class="hljs-literal">True</span>
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+
+<span class="hljs-comment"># 球桌类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Table</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, width, height</span>):
+        <span class="hljs-variable language_">self</span>.width = width
+        <span class="hljs-variable language_">self</span>.height = height
+        <span class="hljs-variable language_">self</span>.margin = <span class="hljs-number">50</span>
+        <span class="hljs-variable language_">self</span>.color = GREEN
+        <span class="hljs-variable language_">self</span>.border_color = BROWN
+        <span class="hljs-variable language_">self</span>.border_width = <span class="hljs-number">20</span>
+
+        <span class="hljs-comment"># 定义袋口位置</span>
+        <span class="hljs-variable language_">self</span>.pockets = [
+            (<span class="hljs-variable language_">self</span>.margin, <span class="hljs-variable language_">self</span>.margin),  <span class="hljs-comment"># 左上</span>
+            (<span class="hljs-variable language_">self</span>.width // <span class="hljs-number">2</span>, <span class="hljs-variable language_">self</span>.margin - <span class="hljs-number">10</span>),  <span class="hljs-comment"># 中上</span>
+            (<span class="hljs-variable language_">self</span>.width - <span class="hljs-variable language_">self</span>.margin, <span class="hljs-variable language_">self</span>.margin),  <span class="hljs-comment"># 右上</span>
+            (<span class="hljs-variable language_">self</span>.margin, <span class="hljs-variable language_">self</span>.height - <span class="hljs-variable language_">self</span>.margin),  <span class="hljs-comment"># 左下</span>
+            (<span class="hljs-variable language_">self</span>.width // <span class="hljs-number">2</span>, <span class="hljs-variable language_">self</span>.height - <span class="hljs-variable language_">self</span>.margin + <span class="hljs-number">10</span>),  <span class="hljs-comment"># 中下</span>
+            (<span class="hljs-variable language_">self</span>.width - <span class="hljs-variable language_">self</span>.margin, <span class="hljs-variable language_">self</span>.height - <span class="hljs-variable language_">self</span>.margin)  <span class="hljs-comment"># 右下</span>
+        ]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">draw</span>(<span class="hljs-params">self, surface</span>):
+        <span class="hljs-comment"># 绘制边框</span>
+        pygame.draw.rect(surface, <span class="hljs-variable language_">self</span>.border_color, (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-variable language_">self</span>.width, <span class="hljs-variable language_">self</span>.height))
+
+        <span class="hljs-comment"># 绘制桌面</span>
+        pygame.draw.rect(surface, <span class="hljs-variable language_">self</span>.color,
+                        (<span class="hljs-variable language_">self</span>.margin, <span class="hljs-variable language_">self</span>.margin,
+                         <span class="hljs-variable language_">self</span>.width - <span class="hljs-number">2</span>*<span class="hljs-variable language_">self</span>.margin,
+                         <span class="hljs-variable language_">self</span>.height - <span class="hljs-number">2</span>*<span class="hljs-variable language_">self</span>.margin))
+
+        <span class="hljs-comment"># 绘制袋口</span>
+        <span class="hljs-keyword">for</span> pocket <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.pockets:
+            pygame.draw.circle(surface, BLACK, pocket, POCKET_RADIUS)
+
+<span class="hljs-comment"># 游戏类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">PoolGame</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.table = Table(WIDTH, HEIGHT)
+        <span class="hljs-variable language_">self</span>.cue = Cue()
+        <span class="hljs-variable language_">self</span>.balls = []
+        <span class="hljs-variable language_">self</span>.init_balls()
+        <span class="hljs-variable language_">self</span>.current_player = <span class="hljs-number">1</span>
+        <span class="hljs-variable language_">self</span>.game_over = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.winner = <span class="hljs-literal">None</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">init_balls</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 白球（母球）</span>
+        white_ball = Ball(WIDTH // <span class="hljs-number">4</span>, HEIGHT // <span class="hljs-number">2</span>, WHITE, <span class="hljs-number">0</span>)
+        <span class="hljs-variable language_">self</span>.balls.append(white_ball)
+        <span class="hljs-variable language_">self</span>.cue_ball = white_ball
+
+        <span class="hljs-comment"># 其他球（三角形排列）</span>
+        colors = [RED, YELLOW, BLUE, PURPLE, ORANGE, GREEN, PINK, BLACK,
+                 YELLOW, BLUE, PURPLE, ORANGE, GREEN, PINK, RED]
+
+        start_x = WIDTH * <span class="hljs-number">3</span> // <span class="hljs-number">4</span>
+        start_y = HEIGHT // <span class="hljs-number">2</span>
+        rows = <span class="hljs-number">5</span>
+        ball_idx = <span class="hljs-number">0</span>
+
+        <span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(rows):
+            <span class="hljs-keyword">for</span> col <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(row + <span class="hljs-number">1</span>):
+                <span class="hljs-keyword">if</span> ball_idx &lt; <span class="hljs-built_in">len</span>(colors):
+                    x = start_x + row * BALL_RADIUS * <span class="hljs-number">2</span>
+                    y = start_y - (row * BALL_RADIUS) + (col * BALL_RADIUS * <span class="hljs-number">2</span>)
+                    <span class="hljs-variable language_">self</span>.balls.append(Ball(x, y, colors[ball_idx], ball_idx + <span class="hljs-number">1</span>))
+                    ball_idx += <span class="hljs-number">1</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">check_collisions</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.balls)):
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.balls[i].in_pocket:
+                <span class="hljs-keyword">continue</span>
+
+            <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(i + <span class="hljs-number">1</span>, <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.balls)):
+                <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.balls[j].in_pocket:
+                    <span class="hljs-keyword">continue</span>
+
+                dx = <span class="hljs-variable language_">self</span>.balls[i].x - <span class="hljs-variable language_">self</span>.balls[j].x
+                dy = <span class="hljs-variable language_">self</span>.balls[i].y - <span class="hljs-variable language_">self</span>.balls[j].y
+                distance = math.sqrt(dx*dx + dy*dy)
+
+                <span class="hljs-keyword">if</span> distance &lt; <span class="hljs-variable language_">self</span>.balls[i].radius + <span class="hljs-variable language_">self</span>.balls[j].radius:
+                    <span class="hljs-comment"># 碰撞响应</span>
+                    angle = math.atan2(dy, dx)
+
+                    <span class="hljs-comment"># 速度分量</span>
+                    v1 = math.sqrt(<span class="hljs-variable language_">self</span>.balls[i].vx**<span class="hljs-number">2</span> + <span class="hljs-variable language_">self</span>.balls[i].vy**<span class="hljs-number">2</span>)
+                    v2 = math.sqrt(<span class="hljs-variable language_">self</span>.balls[j].vx**<span class="hljs-number">2</span> + <span class="hljs-variable language_">self</span>.balls[j].vy**<span class="hljs-number">2</span>)
+
+                    <span class="hljs-comment"># 方向角度</span>
+                    dir1 = math.atan2(<span class="hljs-variable language_">self</span>.balls[i].vy, <span class="hljs-variable language_">self</span>.balls[i].vx)
+                    dir2 = math.atan2(<span class="hljs-variable language_">self</span>.balls[j].vy, <span class="hljs-variable language_">self</span>.balls[j].vx)
+
+                    <span class="hljs-comment"># 新速度分量</span>
+                    new_vx1 = v2 * math.cos(dir2 - angle) * math.cos(angle) + v1 * math.sin(dir1 - angle) * math.cos(angle + math.pi/<span class="hljs-number">2</span>)
+                    new_vy1 = v2 * math.cos(dir2 - angle) * math.sin(angle) + v1 * math.sin(dir1 - angle) * math.sin(angle + math.pi/<span class="hljs-number">2</span>)
+
+                    new_vx2 = v1 * math.cos(dir1 - angle) * math.cos(angle) + v2 * math.sin(dir2 - angle) * math.cos(angle + math.pi/<span class="hljs-number">2</span>)
+                    new_vy2 = v1 * math.cos(dir1 - angle) * math.sin(angle) + v2 * math.sin(dir2 - angle) * math.sin(angle + math.pi/<span class="hljs-number">2</span>)
+
+                    <span class="hljs-comment"># 更新速度</span>
+                    <span class="hljs-variable language_">self</span>.balls[i].vx = new_vx1 * <span class="hljs-number">0.95</span>
+                    <span class="hljs-variable language_">self</span>.balls[i].vy = new_vy1 * <span class="hljs-number">0.95</span>
+                    <span class="hljs-variable language_">self</span>.balls[j].vx = new_vx2 * <span class="hljs-number">0.95</span>
+                    <span class="hljs-variable language_">self</span>.balls[j].vy = new_vy2 * <span class="hljs-number">0.95</span>
+
+                    <span class="hljs-comment"># 防止球重叠</span>
+                    overlap = (<span class="hljs-variable language_">self</span>.balls[i].radius + <span class="hljs-variable language_">self</span>.balls[j].radius - distance) / <span class="hljs-number">2</span>
+                    <span class="hljs-variable language_">self</span>.balls[i].x += overlap * math.cos(angle)
+                    <span class="hljs-variable language_">self</span>.balls[i].y += overlap * math.sin(angle)
+                    <span class="hljs-variable language_">self</span>.balls[j].x -= overlap * math.cos(angle)
+                    <span class="hljs-variable language_">self</span>.balls[j].y -= overlap * math.sin(angle)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">all_balls_stopped</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">for</span> ball <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.balls:
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> ball.in_pocket <span class="hljs-keyword">and</span> (ball.vx != <span class="hljs-number">0</span> <span class="hljs-keyword">or</span> ball.vy != <span class="hljs-number">0</span>):
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">for</span> ball <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.balls:
+            ball.update(<span class="hljs-variable language_">self</span>.table)
+            ball.check_pocket(<span class="hljs-variable language_">self</span>.table.pockets)
+
+        <span class="hljs-variable language_">self</span>.check_collisions()
+
+        <span class="hljs-comment"># 检查游戏是否结束</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.cue_ball.in_pocket:
+            <span class="hljs-variable language_">self</span>.game_over = <span class="hljs-literal">True</span>
+            <span class="hljs-variable language_">self</span>.winner = <span class="hljs-string">&quot;玩家2&quot;</span> <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.current_player == <span class="hljs-number">1</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;玩家1&quot;</span>
+
+        balls_left = <span class="hljs-built_in">sum</span>(<span class="hljs-number">1</span> <span class="hljs-keyword">for</span> ball <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.balls <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> ball.in_pocket <span class="hljs-keyword">and</span> ball != <span class="hljs-variable language_">self</span>.cue_ball)
+        <span class="hljs-keyword">if</span> balls_left == <span class="hljs-number">0</span>:
+            <span class="hljs-variable language_">self</span>.game_over = <span class="hljs-literal">True</span>
+            <span class="hljs-variable language_">self</span>.winner = <span class="hljs-string">f&quot;玩家<span class="hljs-subst">{self.current_player}</span>&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">draw</span>(<span class="hljs-params">self, surface</span>):
+        <span class="hljs-variable language_">self</span>.table.draw(surface)
+
+        <span class="hljs-keyword">for</span> ball <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.balls:
+            ball.draw(surface)
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.all_balls_stopped() <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.cue_ball.in_pocket:
+            <span class="hljs-variable language_">self</span>.cue.visible = <span class="hljs-literal">True</span>
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            <span class="hljs-variable language_">self</span>.cue.angle = math.atan2(mouse_y - <span class="hljs-variable language_">self</span>.cue_ball.y, mouse_x - <span class="hljs-variable language_">self</span>.cue_ball.x) + math.pi
+            <span class="hljs-variable language_">self</span>.cue.draw(surface, (<span class="hljs-variable language_">self</span>.cue_ball.x, <span class="hljs-variable language_">self</span>.cue_ball.y))
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-variable language_">self</span>.cue.visible = <span class="hljs-literal">False</span>
+
+        <span class="hljs-comment"># 显示当前玩家</span>
+        font = pygame.font.SysFont(<span class="hljs-literal">None</span>, <span class="hljs-number">36</span>)
+        text = font.render(<span class="hljs-string">f&quot;当前玩家: <span class="hljs-subst">{self.current_player}</span>&quot;</span>, <span class="hljs-literal">True</span>, WHITE)
+        surface.blit(text, (<span class="hljs-number">10</span>, <span class="hljs-number">10</span>))
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.game_over:
+            font = pygame.font.SysFont(<span class="hljs-literal">None</span>, <span class="hljs-number">72</span>)
+            text = font.render(<span class="hljs-string">f&quot;<span class="hljs-subst">{self.winner}</span> 获胜!&quot;</span>, <span class="hljs-literal">True</span>, WHITE)
+            text_rect = text.get_rect(center=(WIDTH//<span class="hljs-number">2</span>, HEIGHT//<span class="hljs-number">2</span>))
+            pygame.draw.rect(surface, BLACK, text_rect.inflate(<span class="hljs-number">20</span>, <span class="hljs-number">20</span>))
+            surface.blit(text, text_rect)
+
+            font = pygame.font.SysFont(<span class="hljs-literal">None</span>, <span class="hljs-number">36</span>)
+            text = font.render(<span class="hljs-string">&quot;按R键重新开始&quot;</span>, <span class="hljs-literal">True</span>, WHITE)
+            text_rect = text.get_rect(center=(WIDTH//<span class="hljs-number">2</span>, HEIGHT//<span class="hljs-number">2</span> + <span class="hljs-number">50</span>))
+            surface.blit(text, text_rect)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">shoot</span>(<span class="hljs-params">self, power</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.all_balls_stopped() <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.cue_ball.in_pocket:
+            <span class="hljs-variable language_">self</span>.cue_ball.vx = math.cos(<span class="hljs-variable language_">self</span>.cue.angle) * power
+            <span class="hljs-variable language_">self</span>.cue_ball.vy = math.sin(<span class="hljs-variable language_">self</span>.cue.angle) * power
+            <span class="hljs-variable language_">self</span>.current_player = <span class="hljs-number">3</span> - <span class="hljs-variable language_">self</span>.current_player  <span class="hljs-comment"># 切换玩家(1-&gt;2, 2-&gt;1)</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">reset</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.__init__()
+
+<span class="hljs-comment"># 主游戏循环</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    clock = pygame.time.Clock()
+    game = PoolGame()
+
+    power_increasing = <span class="hljs-literal">False</span>
+
+    <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+        <span class="hljs-keyword">for</span> event <span class="hljs-keyword">in</span> pygame.event.get():
+            <span class="hljs-keyword">if</span> event.<span class="hljs-built_in">type</span> == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            <span class="hljs-keyword">if</span> event.<span class="hljs-built_in">type</span> == pygame.MOUSEBUTTONDOWN:
+                <span class="hljs-keyword">if</span> game.all_balls_stopped() <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> game.cue_ball.in_pocket:
+                    power_increasing = <span class="hljs-literal">True</span>
+
+            <span class="hljs-keyword">if</span> event.<span class="hljs-built_in">type</span> == pygame.MOUSEBUTTONUP:
+                <span class="hljs-keyword">if</span> power_increasing:
+                    game.shoot(game.cue.power)
+                    power_increasing = <span class="hljs-literal">False</span>
+                    game.cue.power = <span class="hljs-number">0</span>
+
+            <span class="hljs-keyword">if</span> event.<span class="hljs-built_in">type</span> == pygame.KEYDOWN:
+                <span class="hljs-keyword">if</span> event.key == pygame.K_r:
+                    game.reset()
+                    power_increasing = <span class="hljs-literal">False</span>
+
+        <span class="hljs-comment"># 增加力量</span>
+        <span class="hljs-keyword">if</span> power_increasing <span class="hljs-keyword">and</span> game.cue.power &lt; game.cue.max_power:
+            game.cue.power += <span class="hljs-number">0.2</span>
+
+        game.update()
+
+        screen.fill(BLACK)
+        game.draw(screen)
+
+        pygame.display.flip()
+        clock.tick(<span class="hljs-number">60</span>)
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    main()
+</code></pre>
+<h3 id="运行说明" class="prose-heading">运行说明</h3>
+<ol>
+<li></li>
+</ol>
+<pre><code>你需要安装Pygame库才能运行此代码：`pip install pygame`
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>游戏规则：
+
+
+-
+
+    玩家轮流击球
+
+
+-
+
+    使用鼠标瞄准，点击并按住鼠标按钮来增加击球力量
+
+
+-
+
+    释放鼠标按钮来击球
+
+
+-
+
+    如果白球（母球）进袋，游戏结束，对方获胜
+
+
+-
+
+    将所有彩色球击入袋中即可获胜
+</code></pre>
+<h3 id="游戏功能" class="prose-heading">游戏功能</h3>
+<ul>
+<li></li>
+</ul>
+<pre><code>真实的物理碰撞模拟
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>球杆瞄准系统
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>力量指示器
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>多个袋口
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>玩家轮流击球
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>游戏胜负判定
+</code></pre>
+<p>你可以根据需要修改代码，调整游戏难度、球桌大小或添加更多功能！</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-3" href="#运行说明">运行说明</a>
+          
+            <a class="toc-level-3" href="#游戏功能">游戏功能</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/python模仿微信程序功能pyqt5.html">
+      <span>上一篇</span>
+      <strong>Python模仿微信程序功能PyQt5</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/python录制高清视频录制软件电脑windows版.html">
+      <span>下一篇</span>
+      <strong>Python录制高清视频录制软件电脑windows版</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

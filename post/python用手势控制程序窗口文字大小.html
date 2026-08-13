@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>python用手势控制程序窗口文字大小 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">python用手势控制程序窗口文字大小</h1>
+        <p class="post-deck">python</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.387Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>22 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p><img src="../uploads/csdn/python%E7%94%A8%E6%89%8B%E5%8A%BF%E6%8E%A7%E5%88%B6%E7%A8%8B%E5%BA%8F%E7%AA%97%E5%8F%A3%E6%96%87%E5%AD%97%E5%A4%A7%E5%B0%8F/img-01.gif" alt=""></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> pygame
+<span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">import</span> math
+<span class="hljs-keyword">import</span> random
+<span class="hljs-keyword">import</span> cv2
+<span class="hljs-keyword">import</span> mediapipe <span class="hljs-keyword">as</span> mp
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-comment"># 初始化mediapipe手部检测</span>
+mp_hands = mp.solutions.hands
+mp_drawing = mp.solutions.drawing_utils
+hands = mp_hands.Hands(static_image_mode=<span class="hljs-literal">False</span>, max_num_hands=<span class="hljs-number">1</span>, min_detection_confidence=<span class="hljs-number">0.7</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">get_hand_landmarks</span>(<span class="hljs-params">image</span>):
+    <span class="hljs-string">&quot;&quot;&quot;获取手部关键点&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">try</span>:
+        <span class="hljs-comment"># 转换为RGB格式</span>
+        rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        results = hands.process(rgb_image)
+        <span class="hljs-keyword">if</span> results.multi_hand_landmarks:
+            <span class="hljs-keyword">return</span> results.multi_hand_landmarks[<span class="hljs-number">0</span>]
+    <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;手部检测出错: <span class="hljs-subst">{e}</span>&quot;</span>)
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+pygame.init()
+
+<span class="hljs-comment"># 设置屏幕</span>
+screen_width, screen_height = <span class="hljs-number">800</span>, <span class="hljs-number">600</span>
+screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption(<span class="hljs-string">&#x27;交互式3D心跳效果&#x27;</span>)
+
+<span class="hljs-comment"># 文本设置</span>
+font_size = <span class="hljs-number">30</span>
+font = pygame.font.Font(<span class="hljs-literal">None</span>, font_size)
+text = <span class="hljs-string">&quot;Heart Beat&quot;</span>
+initial_font_size = <span class="hljs-number">30</span>
+
+<span class="hljs-comment"># 粒子类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Particle</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x, y, z, color=(<span class="hljs-params"><span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span></span>)</span>):
+        <span class="hljs-variable language_">self</span>.x = x
+        <span class="hljs-variable language_">self</span>.y = y
+        <span class="hljs-variable language_">self</span>.z = z
+        <span class="hljs-variable language_">self</span>.color = color
+        <span class="hljs-comment"># 限制粒子大小</span>
+        <span class="hljs-variable language_">self</span>.size = random.randint(<span class="hljs-number">1</span>, <span class="hljs-number">4</span>)
+        <span class="hljs-comment"># 初始速度，模拟心跳向外扩散</span>
+        angle = random.uniform(<span class="hljs-number">0</span>, <span class="hljs-number">2</span> * math.pi)
+        direction = random.uniform(<span class="hljs-number">0</span>, math.pi)
+        speed = random.uniform(<span class="hljs-number">1.5</span>, <span class="hljs-number">5</span>)
+        <span class="hljs-variable language_">self</span>.vx = speed * math.sin(direction) * math.cos(angle)
+        <span class="hljs-variable language_">self</span>.vy = speed * math.sin(direction) * math.sin(angle)
+        <span class="hljs-variable language_">self</span>.vz = speed * math.cos(direction)
+        <span class="hljs-variable language_">self</span>.life = <span class="hljs-number">1.0</span>  <span class="hljs-comment"># 生命值，从1开始衰减</span>
+        <span class="hljs-comment"># 缩短生命周期以加快粒子消失</span>
+        <span class="hljs-variable language_">self</span>.decay = random.uniform(<span class="hljs-number">0.02</span>, <span class="hljs-number">0.04</span>)
+        <span class="hljs-variable language_">self</span>.gravity = random.uniform(<span class="hljs-number">0.05</span>, <span class="hljs-number">0.15</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 更新位置</span>
+        <span class="hljs-variable language_">self</span>.x += <span class="hljs-variable language_">self</span>.vx
+        <span class="hljs-variable language_">self</span>.y += <span class="hljs-variable language_">self</span>.vy
+        <span class="hljs-variable language_">self</span>.z += <span class="hljs-variable language_">self</span>.vz
+
+        <span class="hljs-comment"># 添加重力效果</span>
+        <span class="hljs-variable language_">self</span>.vy += <span class="hljs-variable language_">self</span>.gravity
+
+        <span class="hljs-comment"># 空气阻力</span>
+        <span class="hljs-variable language_">self</span>.vx *= <span class="hljs-number">0.98</span>
+        <span class="hljs-variable language_">self</span>.vy *= <span class="hljs-number">0.98</span>
+        <span class="hljs-variable language_">self</span>.vz *= <span class="hljs-number">0.98</span>
+
+        <span class="hljs-comment"># 减少生命值</span>
+        <span class="hljs-variable language_">self</span>.life -= <span class="hljs-variable language_">self</span>.decay
+
+        <span class="hljs-comment"># 根据Z轴距离调整大小和透明度</span>
+        <span class="hljs-variable language_">self</span>.size = <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, <span class="hljs-variable language_">self</span>.life * random.uniform(<span class="hljs-number">1</span>, <span class="hljs-number">4</span>))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">draw</span>(<span class="hljs-params">self, surface, camera_z=<span class="hljs-number">50</span></span>):
+        <span class="hljs-comment"># 3D到2D的投影</span>
+        <span class="hljs-keyword">if</span> camera_z - <span class="hljs-variable language_">self</span>.z &gt; <span class="hljs-number">0</span>:
+            scale = camera_z / (camera_z - <span class="hljs-variable language_">self</span>.z)
+            screen_x = <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.x * scale + screen_width // <span class="hljs-number">2</span>)
+            screen_y = <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.y * scale + screen_height // <span class="hljs-number">2</span>)
+            <span class="hljs-comment"># 限制最大绘制尺寸</span>
+            size = <span class="hljs-built_in">min</span>(<span class="hljs-number">6</span>, <span class="hljs-built_in">max</span>(<span class="hljs-number">1</span>, <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.size * scale)))
+
+            <span class="hljs-comment"># 根据生命值调整透明度</span>
+            alpha = <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.life * <span class="hljs-number">255</span>)
+            color_with_alpha = (*<span class="hljs-variable language_">self</span>.color, alpha)
+
+            <span class="hljs-comment"># 创建带有透明度的粒子</span>
+            particle_surface = pygame.Surface((size*<span class="hljs-number">2</span>, size*<span class="hljs-number">2</span>), pygame.SRCALPHA)
+            pygame.draw.circle(particle_surface, color_with_alpha, (size, size), size)
+            surface.blit(particle_surface, (screen_x - size, screen_y - size))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">is_alive</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.life &gt; <span class="hljs-number">0</span>
+
+<span class="hljs-comment"># 粒子系统类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ParticleSystem</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.particles = []
+        <span class="hljs-variable language_">self</span>.last_beat_time = <span class="hljs-number">0</span>
+        <span class="hljs-variable language_">self</span>.beat_interval = <span class="hljs-number">1200</span>  <span class="hljs-comment"># 心跳间隔（毫秒）- 增加以减少心跳频率</span>
+        <span class="hljs-variable language_">self</span>.beat_intensity = <span class="hljs-number">0.5</span>  <span class="hljs-comment"># 心跳强度 (0-1)</span>
+        <span class="hljs-variable language_">self</span>.colors = [(<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), (<span class="hljs-number">255</span>, <span class="hljs-number">50</span>, <span class="hljs-number">50</span>), (<span class="hljs-number">255</span>, <span class="hljs-number">100</span>, <span class="hljs-number">100</span>), (<span class="hljs-number">255</span>, <span class="hljs-number">150</span>, <span class="hljs-number">150</span>)]
+        <span class="hljs-variable language_">self</span>.max_particles = <span class="hljs-number">60</span>  <span class="hljs-comment"># 降低最大粒子数量限制，防止内存溢出</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update_beat_intensity</span>(<span class="hljs-params">self, intensity</span>):
+        <span class="hljs-variable language_">self</span>.beat_intensity = <span class="hljs-built_in">max</span>(<span class="hljs-number">0.1</span>, <span class="hljs-built_in">min</span>(<span class="hljs-number">1.0</span>, intensity))
+        <span class="hljs-comment"># 心跳强度影响心跳间隔</span>
+        <span class="hljs-variable language_">self</span>.beat_interval = <span class="hljs-built_in">int</span>(<span class="hljs-number">1800</span> - (<span class="hljs-variable language_">self</span>.beat_intensity * <span class="hljs-number">700</span>))  <span class="hljs-comment"># 增加基础间隔时间</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">self, current_time</span>):
+        <span class="hljs-comment"># 检查是否需要触发心跳</span>
+        <span class="hljs-keyword">if</span> current_time - <span class="hljs-variable language_">self</span>.last_beat_time &gt; <span class="hljs-variable language_">self</span>.beat_interval:
+            <span class="hljs-variable language_">self</span>.trigger_heartbeat()
+            <span class="hljs-variable language_">self</span>.last_beat_time = current_time
+
+        <span class="hljs-comment"># 更新所有粒子</span>
+        <span class="hljs-keyword">for</span> particle <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.particles[:]:
+            particle.update()
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> particle.is_alive():
+                <span class="hljs-variable language_">self</span>.particles.remove(particle)
+
+        <span class="hljs-comment"># 确保粒子总数不超过最大值</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.particles) &gt; <span class="hljs-variable language_">self</span>.max_particles:
+            <span class="hljs-comment"># 优先保留较新的粒子（假设存活时间短表示较新）</span>
+            <span class="hljs-variable language_">self</span>.particles = <span class="hljs-built_in">sorted</span>(<span class="hljs-variable language_">self</span>.particles, key=<span class="hljs-keyword">lambda</span> p: p.life, reverse=<span class="hljs-literal">True</span>)[:<span class="hljs-variable language_">self</span>.max_particles]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">trigger_heartbeat</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># 根据心跳强度生成粒子（大幅减少数量）</span>
+        max_new_particles = <span class="hljs-built_in">int</span>(<span class="hljs-number">10</span> + <span class="hljs-variable language_">self</span>.beat_intensity * <span class="hljs-number">15</span>)  <span class="hljs-comment"># 大幅减少粒子生成数量</span>
+        available_slots = <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, <span class="hljs-variable language_">self</span>.max_particles - <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.particles))
+        num_particles = <span class="hljs-built_in">min</span>(max_new_particles, available_slots)
+        center_x, center_y = <span class="hljs-number">0</span>, <span class="hljs-number">0</span>
+
+        <span class="hljs-comment"># 生成心形图案的粒子分布</span>
+        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_particles):
+            <span class="hljs-comment"># 使用心形参数方程生成点</span>
+            t = random.uniform(<span class="hljs-number">0</span>, <span class="hljs-number">2</span> * math.pi)
+            r = random.uniform(<span class="hljs-number">0.6</span>, <span class="hljs-number">1.0</span>) * <span class="hljs-variable language_">self</span>.beat_intensity
+
+            <span class="hljs-comment"># 心形参数方程</span>
+            x = <span class="hljs-number">16</span> * (math.sin(t) ** <span class="hljs-number">3</span>) * r
+            y = -(<span class="hljs-number">13</span> * math.cos(t) - <span class="hljs-number">5</span> * math.cos(<span class="hljs-number">2</span>*t) - <span class="hljs-number">2</span> * math.cos(<span class="hljs-number">3</span>*t) - math.cos(<span class="hljs-number">4</span>*t)) * r
+            z = random.uniform(-<span class="hljs-number">8</span>, <span class="hljs-number">8</span>)  <span class="hljs-comment"># 减少Z轴范围</span>
+
+            <span class="hljs-comment"># 添加一些随机性</span>
+            x += random.uniform(-<span class="hljs-number">1.5</span>, <span class="hljs-number">1.5</span>)  <span class="hljs-comment"># 减少随机性</span>
+            y += random.uniform(-<span class="hljs-number">1.5</span>, <span class="hljs-number">1.5</span>)
+
+            <span class="hljs-comment"># 选择颜色</span>
+            color = random.choice(<span class="hljs-variable language_">self</span>.colors)
+
+            <span class="hljs-comment"># 创建粒子</span>
+            <span class="hljs-variable language_">self</span>.particles.append(Particle(x, y, z, color))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">draw</span>(<span class="hljs-params">self, surface</span>):
+        <span class="hljs-comment"># 进一步限制绘制的粒子数量以提高性能</span>
+        max_draw_particles = <span class="hljs-built_in">min</span>(<span class="hljs-number">40</span>, <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.particles))
+
+        <span class="hljs-comment"># 按Z轴排序，远处的先画</span>
+        sorted_particles = <span class="hljs-built_in">sorted</span>(<span class="hljs-variable language_">self</span>.particles[:max_draw_particles], key=<span class="hljs-keyword">lambda</span> p: p.z, reverse=<span class="hljs-literal">True</span>)
+        <span class="hljs-keyword">for</span> particle <span class="hljs-keyword">in</span> sorted_particles:
+            particle.draw(surface)
+
+<span class="hljs-comment"># 主循环</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    <span class="hljs-keyword">global</span> font_size  <span class="hljs-comment"># 使用全局font_size变量</span>
+    cap = cv2.VideoCapture(<span class="hljs-number">0</span>)
+    clock = pygame.time.Clock()
+
+    <span class="hljs-comment"># 初始化粒子系统</span>
+    particle_system = ParticleSystem()
+    last_hand_distance = <span class="hljs-number">0.1</span>  <span class="hljs-comment"># 上次检测的手距离</span>
+    smooth_factor = <span class="hljs-number">0.2</span>  <span class="hljs-comment"># 平滑因子</span>
+
+    <span class="hljs-keyword">while</span> cap.isOpened():
+        <span class="hljs-keyword">for</span> event <span class="hljs-keyword">in</span> pygame.event.get():
+            <span class="hljs-keyword">if</span> event.<span class="hljs-built_in">type</span> == pygame.QUIT:
+                cap.release()
+                cv2.destroyAllWindows()
+                pygame.quit()
+                sys.exit()
+
+        success, frame = cap.read()
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> success:
+            <span class="hljs-keyword">break</span>
+
+        hand_landmarks = get_hand_landmarks(frame)
+        current_time = pygame.time.get_ticks()
+
+        <span class="hljs-keyword">if</span> hand_landmarks:
+            <span class="hljs-comment"># 检测手的距离用于缩放文字和控制心跳强度</span>
+            <span class="hljs-keyword">try</span>:
+                thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
+                index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+                distance = math.sqrt((thumb_tip.x - index_tip.x)**<span class="hljs-number">2</span> + (thumb_tip.y - index_tip.y)**<span class="hljs-number">2</span>)
+
+                <span class="hljs-comment"># 平滑处理距离变化</span>
+                last_hand_distance = last_hand_distance * (<span class="hljs-number">1</span> - smooth_factor) + distance * smooth_factor
+
+                <span class="hljs-comment"># 根据距离调整文字大小</span>
+                font_size = <span class="hljs-built_in">max</span>(<span class="hljs-number">30</span>, <span class="hljs-built_in">min</span>(<span class="hljs-number">200</span>, <span class="hljs-built_in">int</span>(initial_font_size + last_hand_distance * <span class="hljs-number">1000</span>)))
+
+                <span class="hljs-comment"># 根据距离调整心跳强度（距离越小，强度越大）</span>
+                beat_intensity = <span class="hljs-number">1.0</span> - <span class="hljs-built_in">min</span>(<span class="hljs-number">0.9</span>, last_hand_distance * <span class="hljs-number">3</span>)
+                particle_system.update_beat_intensity(beat_intensity)
+
+                <span class="hljs-comment"># 可选：在视频帧上绘制手部关键点</span>
+                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                mp_drawing.draw_landmarks(rgb_frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+                frame = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR)
+            <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;处理手部数据时出错: <span class="hljs-subst">{e}</span>&quot;</span>)
+
+        <span class="hljs-comment"># 更新粒子系统</span>
+        particle_system.update(current_time)
+
+        <span class="hljs-comment"># 清空屏幕</span>
+        screen.fill((<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>))
+
+        <span class="hljs-comment"># 绘制粒子效果</span>
+        particle_system.draw(screen)
+
+        <span class="hljs-comment"># 动态调整字体大小并绘制心跳文本</span>
+        time = current_time / <span class="hljs-number">1000</span>
+        scale = <span class="hljs-built_in">int</span>(<span class="hljs-number">10</span> * math.sin(time * <span class="hljs-number">2</span>) + <span class="hljs-number">15</span>)
+        scaled_font = pygame.font.Font(<span class="hljs-literal">None</span>, font_size + scale)
+        text_surface = scaled_font.render(text, <span class="hljs-literal">True</span>, (<span class="hljs-number">255</span>, <span class="hljs-number">200</span>, <span class="hljs-number">200</span>))
+
+        <span class="hljs-comment"># 创建文本矩形</span>
+        text_rect = text_surface.get_rect(center=(screen_width // <span class="hljs-number">2</span>, screen_height // <span class="hljs-number">2</span>))
+
+        <span class="hljs-comment"># 添加文字阴影效果</span>
+        shadow_surface = scaled_font.render(text, <span class="hljs-literal">True</span>, (<span class="hljs-number">100</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>))
+        screen.blit(shadow_surface, (text_rect.centerx + <span class="hljs-number">2</span>, text_rect.centery + <span class="hljs-number">2</span>))
+
+        <span class="hljs-comment"># 绘制主文本</span>
+        screen.blit(text_surface, text_rect)
+
+        <span class="hljs-comment"># 显示当前心跳强度</span>
+        intensity_text = <span class="hljs-string">f&quot;Heart Rate: <span class="hljs-subst">{<span class="hljs-built_in">int</span>(particle_system.beat_intensity * <span class="hljs-number">100</span>)}</span>%&quot;</span>
+        intensity_surface = font.render(intensity_text, <span class="hljs-literal">True</span>, (<span class="hljs-number">200</span>, <span class="hljs-number">200</span>, <span class="hljs-number">200</span>))
+        screen.blit(intensity_surface, (<span class="hljs-number">20</span>, <span class="hljs-number">20</span>))
+
+        <span class="hljs-comment"># 更新屏幕</span>
+        pygame.display.flip()
+        clock.tick(<span class="hljs-number">30</span>)
+
+    cap.release()
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    main()
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/python画绚烂浪漫的烟花效果.html">
+      <span>上一篇</span>
+      <strong>Python画绚烂浪漫的烟花效果</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/python生成书法字体以瘦金体为例.html">
+      <span>下一篇</span>
+      <strong>Python生成书法字体以瘦金体为例</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

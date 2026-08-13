@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>目前机器人主要用到的编程技术和大模型是什么关系大模型的具体落地到机器人已经成为现实但是机器人的运动系 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">目前机器人主要用到的编程技术和大模型是什么关系大模型的具体落地到机器人已经成为现实但是机器人的运动系</h1>
+        <p class="post-deck">需要明确机器人常用的编程技术，比如控制算法、传感器处理、运动规划等，然后结合大模型的应用，比如自然语言处理、决策支持等，分析它们之间的融合点。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.212Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>16 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-10.html">科技</a>
+          
+            <a class="tag-chip" href="../tags/tag-11.html">社会</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>需要明确机器人常用的编程技术，比如控制算法、传感器处理、运动规划等，然后结合大模型的应用，比如自然语言处理、决策支持等，分析它们之间的融合点。</p>
+<p>接下来，用户问大模型能否直接计算机器人的运动系统。这里需要区分大模型的优势在于高层决策和复杂推理，而运动控制需要实时性和精确性，可能需要传统控制算法与大模型结合，比如大模型负责任务规划，底层运动由专用控制器处理。</p>
+<p>然后是关于机器人具备思考和情感能力后的人类应对。这涉及到 AI 伦理、人机交互、社会影响等方面，需要讨论技术挑战、伦理框架、法律规范等。</p>
+<p>需要确保回答结构清晰，分点论述，结合具体例子和技术细节，比如提到 ROS、强化学习、大模型在任务规划中的应用，以及现有的机器人案例，如 Boston Dynamics 的机器人与大模型的结合。同时，注意用户可能关心技术可行性和未来影响，所以需要平衡技术分析和伦理思考。</p>
+<p>机器人技术正经历 **“大模型重构智能架构、控制算法与 AI 深度融合”<strong>的变革，其编程技术体系与大模型的关系可从</strong>技术分层、能力互补、落地挑战 ** 三个维度解析，结合 2024 年最新研究成果与产业实践，具体分析如下：</p>
+<h4 id="一-机器人核心编程技术体系与大模型的融合架构" class="prose-heading">一、机器人核心编程技术体系与大模型的融合架构</h4>
+<h5 id="1-传统编程技术层-底层控制" class="prose-heading">1. <strong>传统编程技术层（底层控制）</strong></h5>
+<ul>
+<li><strong>运动控制</strong>：
+<ul>
+<li><strong>算法</strong>：逆运动学（IK）、PID 控制、模型预测控制（MPC），典型工具如 ROS（Robot Operating System）的<code>moveit!</code>库。</li>
+<li><strong>实时性</strong>：需满足 μs 级响应，例如 Boston Dynamics 机器人通过定制 FPGA 实现 2000Hz 的关节控制频率。</li>
+</ul>
+</li>
+<li><strong>传感器处理</strong>：
+<ul>
+<li><strong>SLAM</strong>：ORB-SLAM3 实现视觉与 IMU 融合定位，误差控制在 0.1% 地图尺度内。</li>
+<li><strong>多模态融合</strong>：使用 EKF/UKF 滤波算法融合激光雷达、摄像头、力传感器数据，如协作机器人 UR10e 的力控精度达 0.1N。</li>
+</ul>
+</li>
+</ul>
+<h5 id="2-大模型赋能层-高层决策" class="prose-heading">2. <strong>大模型赋能层（高层决策）</strong></h5>
+<ul>
+<li><strong>任务规划</strong>：
+<ul>
+<li><strong>自然语言理解</strong>：OpenAI 的 GPT-4 驱动机器人理解 “将红色杯子放到厨房餐桌” 等复杂指令，通过<strong>Task Graph Parsing</strong>分解为子动作序列。</li>
+<li><strong>场景推理</strong>：DeepMind 的 Gato 模型处理多模态输入（图像、触觉、语言），实现跨任务泛化，如从 “拧瓶盖” 迁移至 “开抽屉”。</li>
+</ul>
+</li>
+<li><strong>交互优化</strong>：
+<ul>
+<li><strong>情感计算</strong>：通过 FaceNet 识别人类微表情，结合 BERT 分析语音语调，调整交互策略（如服务机器人的语气适配）。</li>
+<li><strong>伦理决策</strong>：MIT 开发的<strong>RoboEthics Model</strong>嵌入大模型，在避障时优先保护人类安全，避免 “电车难题” 困境。</li>
+</ul>
+</li>
+</ul>
+<h5 id="3-技术栈关系图" class="prose-heading">3. <strong>技术栈关系图</strong></h5>
+<p>plaintext</p>
+<pre class="hljs"><code>大模型（高层）：任务规划、自然语言交互、伦理决策、跨模态推理
+├─ 中间件（桥梁）：ROS2的DDS通信协议、OpenRDK控制框架
+└─ 传统技术（底层）：运动学/动力学建模、实时控制算法、传感器驱动
+</code></pre>
+<h4 id="二-大模型与机器人运动系统的协同机制" class="prose-heading">二、大模型与机器人运动系统的协同机制</h4>
+<h5 id="1-大模型无法直接替代运动控制的核心原因" class="prose-heading">1. <strong>大模型无法直接替代运动控制的核心原因</strong></h5>
+<ul>
+<li><strong>实时性瓶颈</strong>：
+<ul>
+<li>大模型推理延迟（如 GPT-4 单次调用需 500ms）远超运动控制周期（工业机器人通常≤1ms），无法满足实时轨迹规划需求。</li>
+<li>案例：ABB YuMi 协作机器人的力控系统要求 1000Hz 更新频率，大模型难以直接介入。</li>
+</ul>
+</li>
+<li><strong>精度需求差异</strong>：
+<ul>
+<li>运动控制需毫米级位置精度、0.1° 角度控制，而大模型输出为概率性决策（如 “向左移动” 而非具体关节角度）。</li>
+<li>解决方案：<strong>分层控制架构</strong>—— 大模型输出任务级指令（如 “抓取物体”），底层通过运动规划算法（如 OMPL）生成具体轨迹。</li>
+</ul>
+</li>
+</ul>
+<h5 id="2-大模型对运动系统的间接优化" class="prose-heading">2. <strong>大模型对运动系统的间接优化</strong></h5>
+<ul>
+<li><strong>数据驱动建模</strong>：
+<ul>
+<li>利用大模型分析历史运动数据，优化动力学参数（如摩擦系数、惯性矩阵），减少传统建模的人工标定成本。</li>
+<li>案例：NVIDIA Isaac Gym 通过强化学习训练机器人步态，结合 GPT-4 分析失败案例，将双足行走稳定性提升 30%。</li>
+</ul>
+</li>
+<li><strong>异常处理</strong>：
+<ul>
+<li>当传感器数据异常（如激光雷达遮挡）时，大模型通过多模态推理（视觉 + 触觉）生成替代策略，而非依赖预设规则。</li>
+<li>如亚马逊仓储机器人在货架标签模糊时，通过大模型调用历史图像数据，识别准确率提升至 98%。</li>
+</ul>
+</li>
+</ul>
+<h4 id="三-机器人-思考与情感能力-的技术实现与人类应对策略" class="prose-heading">三、机器人 “思考与情感能力” 的技术实现与人类应对策略</h4>
+<h5 id="1-技术实现路径" class="prose-heading">1. <strong>技术实现路径</strong></h5>
+<ul>
+<li><strong>思考能力（认知智能）</strong>：
+<ul>
+<li><strong>符号逻辑 + 深度学习</strong>：DeepMind 的 GNN（图神经网络）构建环境语义图，结合逻辑推理实现因果分析（如 “推桌子会导致上面的杯子掉落”）。</li>
+<li><strong>元学习</strong>：OpenAI 的 Meta-RL 算法使机器人快速适应新任务，如从 “拧螺丝” 迁移至 “插排线”，训练数据减少 80%。</li>
+</ul>
+</li>
+<li><strong>情感能力（社交智能）</strong>：
+<ul>
+<li><strong>情感计算框架</strong>：CMU 开发的 AffectiveROBOT 系统，通过 FACS（面部动作编码系统）分析人类表情，结合 LSTM 生成情感响应。</li>
+<li><strong>具身对话模型</strong>：Google 的 PaLM-E 将视觉 Transformer 与机器人控制模型结合，实现 “一边对话一边操作” 的具身交互。</li>
+</ul>
+</li>
+</ul>
+<h5 id="2-人类应对的三大核心维度" class="prose-heading">2. <strong>人类应对的三大核心维度</strong></h5>
+<ul>
+<li><strong>技术层：构建安全边界</strong>
+<ul>
+<li><strong>控制隔离</strong>：设置物理急停按钮 + 软件安全围栏，确保大模型决策可被底层控制器中断（如库卡机器人的 Safety Logic 模块）。</li>
+<li><strong>可解释性技术</strong>：使用 SHAP 值分析大模型决策依据，例如解释 “为何选择该抓取姿态”，提升人机信任度。</li>
+</ul>
+</li>
+<li><strong>伦理层：制定规范体系</strong>
+<ul>
+<li><strong>AI 伦理委员会</strong>：参考 IEEE P7000 标准，建立机器人决策的透明度原则（如情感表达需明确标注 “模拟生成”）。</li>
+<li><strong>责任界定</strong>：欧盟《AI 法案》要求机器人制造商为大模型决策导致的事故负责，推动企业部署伦理校验模块。</li>
+</ul>
+</li>
+<li><strong>社会层：重塑人机关系</strong>
+<ul>
+<li><strong>教育普及</strong>：开设 “机器人伦理与协作” 课程，培养公众对机器情感的理性认知（如区分 “模拟情感” 与真实情感）。</li>
+<li><strong>应用场景限定</strong>：医疗、养老等领域的机器人禁用 “自主情感进化” 功能，避免过度依赖风险。</li>
+</ul>
+</li>
+</ul>
+<h4 id="四-前沿案例与技术突破" class="prose-heading">四、前沿案例与技术突破</h4>
+<h5 id="1-大模型落地机器人的典型场景" class="prose-heading">1. <strong>大模型落地机器人的典型场景</strong></h5>
+<ul>
+<li><strong>工业场景</strong>：
+<ul>
+<li>西门子工厂的 AMR（自主移动机器人）通过 GPT-4 解析工人自然语言指令，结合视觉大模型识别货架标签，任务完成效率提升 40%。</li>
+</ul>
+</li>
+<li><strong>服务场景</strong>：
+<ul>
+<li>软银 Pepper 机器人搭载情感大模型，通过分析顾客语音语调与手势，推荐个性化商品，销售转化率提升 25%。</li>
+</ul>
+</li>
+</ul>
+<h5 id="2-技术挑战与突破" class="prose-heading">2. <strong>技术挑战与突破</strong></h5>
+<ul>
+<li><strong>实时性优化</strong>：
+<ul>
+<li>NVIDIA 推出的<strong>TensorRT-LLM</strong>将大模型推理延迟降至 100ms 以下，满足协作机器人的交互需求。</li>
+</ul>
+</li>
+<li><strong>能耗控制</strong>：
+<ul>
+<li>麻省理工研发的<strong>轻量化大模型</strong>（参数≤10B），在移动机器人上运行能耗降低 70%，续航时间延长 2 倍。</li>
+</ul>
+</li>
+</ul>
+<h4 id="五-总结-人机共生的未来图景" class="prose-heading">五、总结：人机共生的未来图景</h4>
+<p>机器人技术正从 **“程序预设”<strong>走向</strong>“智能涌现”<strong>，大模型的角色是</strong>“决策大脑” 而非 “执行肢体”<strong>，需与传统控制技术形成</strong>“符号推理 + 数据驱动”** 的混合架构。当机器人具备类人智能时，人类的核心应对策略应是：</p>
+<ol>
+<li><strong>技术上</strong>：构建 “可中断、可解释、可追溯” 的安全闭环，避免单一依赖大模型决策；</li>
+<li><strong>伦理上</strong>：确立 “工具属性” 定位，禁止赋予机器人自主情感进化能力；</li>
+<li><strong>社会上</strong>：通过教育与政策引导，将机器人定义为 “增强人类能力的协作伙伴”，而非替代者。</li>
+</ol>
+<p>未来人机关系的终极形态，可能是 **“人类负责价值判断与创新，机器人负责执行与优化”** 的共生模式，正如 2024 年达沃斯论坛提出的 “智能工具化” 理念 —— 让技术成为拓展人类可能性的翅膀，而非改变人类本质的钥匙。</p>
+<p>什么是电车难题？</p>
+<p>用户问的是 “什么是电车难题？”。首先，我需要回忆一下电车难题的基本定义和背景。电车难题是伦理学中的一个经典思想实验，由哲学家菲利帕・福特在 1967 年提出，后来由朱迪思・汤姆森等人进一步发展。主要涉及道德困境，即在两种选择中必须牺牲少数人来拯救多数人，或者不采取行动导致更多人死亡。</p>
+<p>接下来，用户之前的对话是关于机器人技术和大模型的，特别是提到了 MIT 开发的 RoboEthics Model 在避障时处理类似电车难题的情况。所以用户可能是在理解机器人伦理时遇到了这个概念，需要解释清楚其核心内容、不同版本以及在 AI 和机器人领域的应用。</p>
+<p>需要明确电车难题的基本情景：一辆失控的电车即将撞死轨道上的五个人，你可以拉动杠杆让电车转向另一条轨道，牺牲一个人拯救五个人。然后讨论道德哲学中的功利主义和义务论的不同观点，功利主义倾向于最小化伤害，而义务论认为主动杀人是错误的，即使结果更好。</p>
+<p>还要提到变体，比如天桥上推胖子的版本，这涉及到直接身体接触，让问题更复杂，测试人们对不同行动方式的道德判断差异。此外，结合机器人伦理，说明在自动驾驶或机器人决策中如何处理类似的困境，比如编程时如何设定优先保护人类安全，平衡不同生命的风险，这可能涉及到伦理算法和价值对齐的问题。</p>
+<p>需要确保解释清晰，结构合理，先定义，再讲起源、情景、哲学观点、变体，最后联系到实际应用，比如机器人和 AI 领域的伦理挑战。避免使用太专业的术语，让用户容易理解。同时，检查是否有遗漏的重要点，比如不同文化背景下的道德判断差异，或者现代技术中如何处理这类问题，比如自动驾驶汽车的编程决策。</p>
+<p><strong>电车难题（Trolley Problem）</strong> 是伦理学领域经典的思想实验，由英国哲学家菲利帕・福特（Philippa Foot）于 1967 年提出，后经朱迪思・汤姆森（Judith Jarvis Thomson）等学者扩展，核心探讨 **“牺牲少数人以拯救多数人是否符合道德”** 的困境。其核心场景与变体如下：</p>
+<h4 id="一-基础情景-轨道选择困境" class="prose-heading">一、基础情景：轨道选择困境</h4>
+<ul>
+<li><strong>设定</strong>：<br>
+一辆失控的电车正驶向一条轨道，轨道上有 5 名工人，无法及时撤离；你站在道岔旁，若拉动杠杆，电车会转向另一条轨道，而那条轨道上有 1 名工人。</li>
+<li><strong>核心问题</strong>：<br>
+<strong>是否应该拉动杠杆，牺牲 1 人拯救 5 人？</strong></li>
+</ul>
+<h4 id="二-道德哲学的两大对立观点" class="prose-heading">二、道德哲学的两大对立观点</h4>
+<ol>
+<li>
+<p><strong>功利主义（Utilitarianism）</strong>：</p>
+<ul>
+<li>主张 “最大幸福原则”，认为应选择<strong>牺牲 1 人拯救 5 人</strong>，以最小化总体伤害。</li>
+<li>代表人物：杰里米・边沁、约翰・密尔。</li>
+</ul>
+</li>
+<li>
+<p><strong>义务论（Deontology）</strong>：</p>
+<ul>
+<li>强调行为本身的对错，而非结果。认为<strong>主动杀死 1 人是违背道德义务的行为</strong>（即使结果更好），因为人不能被当作 “工具” 利用。</li>
+<li>代表人物：伊曼努尔・康德（“人是目的，而非手段”）。</li>
+</ul>
+</li>
+</ol>
+<h4 id="三-变体-更复杂的道德困境" class="prose-heading">三、变体：更复杂的道德困境</h4>
+<ol>
+<li>
+<p><strong>天桥困境（Footbridge Variant）</strong>：</p>
+<ul>
+<li>情景：你站在天桥上，电车即将撞死 5 人，身旁有个胖子，若将他推下桥可挡住电车（牺牲他拯救 5 人）。</li>
+<li>关键差异：
+<ul>
+<li>直接 “动手杀人”（推胖子）比 “拉动杠杆”（间接导致死亡）更违背直觉，多数人在此情景下拒绝行动，显示道德判断受 “行为方式” 影响。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>自动驾驶版电车难题</strong>：</p>
+<ul>
+<li>现代技术映射：当自动驾驶汽车必须在 “撞向 5 名行人” 和 “转向撞向 1 名骑车人” 之间选择时，算法应如何决策？</li>
+<li>挑战：需提前编程设定道德优先级（如保护乘客还是路人？平等对待所有人还是优先弱势者？）。</li>
+</ul>
+</li>
+</ol>
+<h4 id="四-在机器人与-ai-领域的映射" class="prose-heading">四、在机器人与 AI 领域的映射</h4>
+<ul>
+<li>
+<p><strong>机器人伦理应用</strong>：<br>
+如前文提到的 MIT <strong>RoboEthics Model</strong>，需在避障时处理类似困境 —— 例如机器人搬运重物时，若失控，应选择撞向墙壁（无生命）还是转向避开人群但可能伤害 1 名旁观者？</p>
+<ul>
+<li>技术难点：如何将人类道德直觉转化为可计算的算法，同时兼顾法律、文化差异（如不同国家对 “优先保护对象” 的定义可能不同）。</li>
+</ul>
+</li>
+<li>
+<p><strong>争议核心</strong>：<br>
+机器是否有权做出 “杀人” 决策？其编程逻辑应基于普遍道德原则，还是允许用户自定义（如自动驾驶汽车的 “个人设置”）？</p>
+</li>
+</ul>
+<h4 id="五-意义与争议" class="prose-heading">五、意义与争议</h4>
+<ul>
+<li><strong>哲学价值</strong>：揭示人类道德判断中 “结果论” 与 “义务论” 的内在冲突，以及直觉与理性的矛盾。</li>
+<li><strong>现实映射</strong>：在 AI、自动驾驶、医疗伦理等领域，需提前制定规则应对类似困境，避免技术失控引发伦理危机。</li>
+<li><strong>争议点</strong>：至今无 “标准答案”，但其讨论推动了道德哲学、认知科学、技术伦理的交叉发展。</li>
+</ul>
+<p>简单来说，电车难题的本质是：<strong>当必须在 “主动造成少数人死亡” 和 “放任多数人死亡” 之间选择时，如何定义 “道德正确”</strong>—— 这一问题至今仍是考验人类伦理智慧与技术价值对齐的重要标尺。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#一-机器人核心编程技术体系与大模型的融合架构">一、机器人核心编程技术体系与大模型的融合架构</a>
+          
+            <a class="toc-level-5" href="#1-传统编程技术层-底层控制">1. **传统编程技术层（底层控制）**</a>
+          
+            <a class="toc-level-5" href="#2-大模型赋能层-高层决策">2. **大模型赋能层（高层决策）**</a>
+          
+            <a class="toc-level-5" href="#3-技术栈关系图">3. **技术栈关系图**</a>
+          
+            <a class="toc-level-4" href="#二-大模型与机器人运动系统的协同机制">二、大模型与机器人运动系统的协同机制</a>
+          
+            <a class="toc-level-5" href="#1-大模型无法直接替代运动控制的核心原因">1. **大模型无法直接替代运动控制的核心原因**</a>
+          
+            <a class="toc-level-5" href="#2-大模型对运动系统的间接优化">2. **大模型对运动系统的间接优化**</a>
+          
+            <a class="toc-level-4" href="#三-机器人-思考与情感能力-的技术实现与人类应对策略">三、机器人 “思考与情感能力” 的技术实现与人类应对策略</a>
+          
+            <a class="toc-level-5" href="#1-技术实现路径">1. **技术实现路径**</a>
+          
+            <a class="toc-level-5" href="#2-人类应对的三大核心维度">2. **人类应对的三大核心维度**</a>
+          
+            <a class="toc-level-4" href="#四-前沿案例与技术突破">四、前沿案例与技术突破</a>
+          
+            <a class="toc-level-5" href="#1-大模型落地机器人的典型场景">1. **大模型落地机器人的典型场景**</a>
+          
+            <a class="toc-level-5" href="#2-技术挑战与突破">2. **技术挑战与突破**</a>
+          
+            <a class="toc-level-4" href="#五-总结-人机共生的未来图景">五、总结：人机共生的未来图景</a>
+          
+            <a class="toc-level-4" href="#一-基础情景-轨道选择困境">一、基础情景：轨道选择困境</a>
+          
+            <a class="toc-level-4" href="#二-道德哲学的两大对立观点">二、道德哲学的两大对立观点</a>
+          
+            <a class="toc-level-4" href="#三-变体-更复杂的道德困境">三、变体：更复杂的道德困境</a>
+          
+            <a class="toc-level-4" href="#四-在机器人与-ai-领域的映射">四、在机器人与 AI 领域的映射</a>
+          
+            <a class="toc-level-4" href="#五-意义与争议">五、意义与争议</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/目前顶尖ai所用算法包含的数学内容详细列举.html">
+      <span>上一篇</span>
+      <strong>目前顶尖AI所用算法包含的数学内容详细列举</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/用ai训练数据预测房地产价格走势.html">
+      <span>下一篇</span>
+      <strong>用AI训练数据预测房地产价格走势</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/科学家的祛魅与返魅论当代学生科学职业理想式微的背后.html">科学家的祛魅与返魅论当代学生科学职业理想式微的背后</a></h3>
+        <p class="post-excerpt">小学作文里，“我的理想是当科学家”曾是与“当老师”“当医生”并列的标准答案。那时的科学家在孩子心中是一个光辉而模糊的符号——穿着白大褂，拿着试管，代表着智慧与荣耀。然而，当这批孩子成长为高中生、大学生，真正面临职业选择时，“科学家”却成了一个被谨慎回避的选项。中国人民大学统计学院的一项调查显示，58%的大学生希望成为职场精英，仅有15%希望成为专业领域内的一流专家 \-7。另一项面向全国20个城市…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.271Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/目前地理信息科学与气候技术需要什么样的编程技术推荐几篇相关论文.html">目前地理信息科学与气候技术需要什么样的编程技术推荐几篇相关论文</a></h3>
+        <p class="post-excerpt">需要回答的问题：“目前地理信息科学与气候技术需要什么样的编程技术？推荐几篇相关论文。” 首先，我要回顾之前的对话历史，用户之前询问了未来科学软件开发趋势以及地球气候变化科学软件的开发技术和人才需求，而我的回答详细涵盖了 AI、量子计算、开源生态等方面的技术，以及数据处理、模型开发、应用层的具体技术工具和人才类型。现在用户进一步询问地理信息科学（GIS）与气候技术所需的编程技术，并要求推荐相关论文。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.241Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/当代科学技术视角下值得学习的知识-豆包问答分享.html">当代科学技术视角下值得学习的知识 豆包问答分享</a></h3>
+        <p class="post-excerpt">探讨最值得学习的知识以及如何学习，还要详细说明学习步骤。首先，我需要确定在当前科技环境下，哪些知识领域是核心且具有前瞻性的。考虑到 2025 年的时间点，可能需要涵盖人工智能、大数据、量子计算、生物技术、新能源、跨学科方法等。这些领域不仅是当前的热点，也是推动未来科技发展的关键。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.178Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

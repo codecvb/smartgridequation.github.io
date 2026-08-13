@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>QT6使用OpenGL库画两个不同外形的立方体1 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/嵌入式与硬件.html">嵌入式与硬件</a>
+        </nav>
+        <h1 class="post-title">QT6使用OpenGL库画两个不同外形的立方体1</h1>
+        <p class="post-deck">QT6 使用OpenGL库画两个不同外形的立方体</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.389Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>58 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-12.html">嵌入式</a>
+          
+            <a class="tag-chip" href="../tags/tag-13.html">物联网</a>
+          
+            <a class="tag-chip" href="../tags/tag-17.html">QT6</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>QT6 使用OpenGL库画两个不同外形的立方体</p>
+<p>首先准备两幅图片，分别如下</p>
+<p><img src="../uploads/csdn/qt6%E4%BD%BF%E7%94%A8opengl%E5%BA%93%E7%94%BB%E4%B8%A4%E4%B8%AA%E4%B8%8D%E5%90%8C%E5%A4%96%E5%BD%A2%E7%9A%84%E7%AB%8B%E6%96%B9%E4%BD%931/img-01.jpeg" alt=""></p>
+<p><img src="../uploads/csdn/qt6%E4%BD%BF%E7%94%A8opengl%E5%BA%93%E7%94%BB%E4%B8%A4%E4%B8%AA%E4%B8%8D%E5%90%8C%E5%A4%96%E5%BD%A2%E7%9A%84%E7%AB%8B%E6%96%B9%E4%BD%931/img-02.jpeg" alt=""></p>
+<p>然后新建一个工程，不用窗体。分别新建如下代码：</p>
+<p>文档结构如下：</p>
+<p><img src="../uploads/csdn/qt6%E4%BD%BF%E7%94%A8opengl%E5%BA%93%E7%94%BB%E4%B8%A4%E4%B8%AA%E4%B8%8D%E5%90%8C%E5%A4%96%E5%BD%A2%E7%9A%84%E7%AB%8B%E6%96%B9%E4%BD%931/img-03.png" alt=""></p>
+<p>two_cube.pro</p>
+<pre class="hljs"><code class="language-cs">QT += core gui widgets opengl openglwidgets
+
+TARGET = cube
+TEMPLATE = app
+
+SOURCES += main.cpp
+
+SOURCES += \
+    mainwidget.cpp \
+    geometryengine.cpp
+
+HEADERS += \
+    mainwidget.h \
+    geometryengine.h
+
+RESOURCES += \
+    shaders.qrc \
+    textures.qrc
+
+<span class="hljs-meta"># install</span>
+target.path = $$[QT_INSTALL_EXAMPLES]/opengl/cube
+INSTALLS += target
+</code></pre>
+<pre class="hljs"><code>GEOMETRYENGINE_H
+</code></pre>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> GEOMETRYENGINE_H</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> GEOMETRYENGINE_H</span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QOpenGLFunctions&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QOpenGLShaderProgram&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QOpenGLBuffer&gt;</span></span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">GeometryEngine</span> : <span class="hljs-keyword">protected</span> QOpenGLFunctions
+{
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-built_in">GeometryEngine</span>();
+    <span class="hljs-keyword">virtual</span> ~<span class="hljs-built_in">GeometryEngine</span>();
+
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">drawCubeGeometry</span><span class="hljs-params">(QOpenGLShaderProgram *program)</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">drawCubeGeometry2</span><span class="hljs-params">(QOpenGLShaderProgram *program)</span></span>;
+
+
+<span class="hljs-keyword">private</span>:
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">initCubeGeometry</span><span class="hljs-params">()</span></span>;
+
+    QOpenGLBuffer arrayBuf;
+    QOpenGLBuffer indexBuf;
+
+    QOpenGLBuffer arrayBuf2;
+};
+
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span> <span class="hljs-comment">// GEOMETRYENGINE_H</span></span>
+</code></pre>
+<pre class="hljs"><code>MAINWIDGET_H
+</code></pre>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> MAINWIDGET_H</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> MAINWIDGET_H</span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;geometryengine.h&quot;</span></span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QOpenGLWidget&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QOpenGLFunctions&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QMatrix4x4&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QQuaternion&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QVector2D&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QBasicTimer&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QOpenGLShaderProgram&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QOpenGLTexture&gt;</span></span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">GeometryEngine</span>;
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MainWidget</span> : <span class="hljs-keyword">public</span> QOpenGLWidget, <span class="hljs-keyword">protected</span> QOpenGLFunctions
+{
+    Q_OBJECT
+
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-keyword">using</span> QOpenGLWidget::QOpenGLWidget;
+    ~<span class="hljs-built_in">MainWidget</span>();
+
+<span class="hljs-keyword">protected</span>:
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">mousePressEvent</span><span class="hljs-params">(QMouseEvent *e)</span> <span class="hljs-keyword">override</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">mouseReleaseEvent</span><span class="hljs-params">(QMouseEvent *e)</span> <span class="hljs-keyword">override</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">timerEvent</span><span class="hljs-params">(QTimerEvent *e)</span> <span class="hljs-keyword">override</span></span>;
+
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">initializeGL</span><span class="hljs-params">()</span> <span class="hljs-keyword">override</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">resizeGL</span><span class="hljs-params">(<span class="hljs-type">int</span> w, <span class="hljs-type">int</span> h)</span> <span class="hljs-keyword">override</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">paintGL</span><span class="hljs-params">()</span> <span class="hljs-keyword">override</span></span>;
+
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">initShaders</span><span class="hljs-params">()</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">initTextures</span><span class="hljs-params">()</span></span>;
+
+<span class="hljs-keyword">private</span>:
+    QBasicTimer timer;
+    QOpenGLShaderProgram program;
+    QOpenGLShaderProgram program2;
+    GeometryEngine *geometries = <span class="hljs-literal">nullptr</span>;
+
+    QOpenGLTexture *texture = <span class="hljs-literal">nullptr</span>;
+    QOpenGLTexture *texture2 = <span class="hljs-literal">nullptr</span>;
+
+    QMatrix4x4 projection;
+    QMatrix4x4 projection2;
+
+    QVector2D mousePressPosition;
+    QVector3D rotationAxis;
+    qreal angularSpeed = <span class="hljs-number">0</span>;
+    QQuaternion rotation;
+    QQuaternion rotation2;
+};
+
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span> <span class="hljs-comment">// MAINWIDGET_H</span></span>
+</code></pre>
+<pre class="hljs"><code>geometryengine.cpp
+</code></pre>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;geometryengine.h&quot;</span></span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QVector2D&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QVector3D&gt;</span></span>
+
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">VertexData</span>
+{
+    QVector3D position;
+    QVector2D texCoord;
+};
+
+<span class="hljs-comment">//! [0]</span>
+GeometryEngine::<span class="hljs-built_in">GeometryEngine</span>()
+    : <span class="hljs-built_in">indexBuf</span>(QOpenGLBuffer::IndexBuffer)
+{
+    <span class="hljs-built_in">initializeOpenGLFunctions</span>();
+
+    <span class="hljs-comment">// Generate 2 VBOs</span>
+    arrayBuf.<span class="hljs-built_in">create</span>();
+    arrayBuf<span class="hljs-number">2.</span><span class="hljs-built_in">create</span>();
+    indexBuf.<span class="hljs-built_in">create</span>();
+
+    <span class="hljs-comment">// Initializes cube geometry and transfers it to VBOs</span>
+    <span class="hljs-built_in">initCubeGeometry</span>();
+}
+
+GeometryEngine::~<span class="hljs-built_in">GeometryEngine</span>()
+{
+    arrayBuf.<span class="hljs-built_in">destroy</span>();
+    arrayBuf<span class="hljs-number">2.</span><span class="hljs-built_in">destroy</span>();
+    indexBuf.<span class="hljs-built_in">destroy</span>();
+}
+<span class="hljs-comment">//! [0]</span>
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">GeometryEngine::initCubeGeometry</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-comment">// For cube we would need only 8 vertices but we have to</span>
+    <span class="hljs-comment">// duplicate vertex for each face because texture coordinate</span>
+    <span class="hljs-comment">// is different.</span>
+    VertexData vertices[] = {
+
+
+        <span class="hljs-comment">// Vertex data for face 0</span>
+        {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span>, <span class="hljs-number">-1.0f</span>,  <span class="hljs-number">1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.0f</span>, <span class="hljs-number">0.0f</span>)},  <span class="hljs-comment">// v0</span>
+        {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span>, <span class="hljs-number">-1.0f</span>,  <span class="hljs-number">1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">0.0f</span>)}, <span class="hljs-comment">// v1</span>
+        {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span>,  <span class="hljs-number">1.0f</span>,  <span class="hljs-number">1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.0f</span>, <span class="hljs-number">0.5f</span>)},  <span class="hljs-comment">// v2</span>
+        {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span>,  <span class="hljs-number">1.0f</span>,  <span class="hljs-number">1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v3</span>
+
+        <span class="hljs-comment">// Vertex data for face 1</span>
+        {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span>, <span class="hljs-number">-1.0f</span>,  <span class="hljs-number">1.0f</span>), <span class="hljs-built_in">QVector2D</span>( <span class="hljs-number">0.0f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v4</span>
+        {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span>, <span class="hljs-number">-1.0f</span>, <span class="hljs-number">-1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v5</span>
+        {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span>,  <span class="hljs-number">1.0f</span>,  <span class="hljs-number">1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.0f</span>, <span class="hljs-number">1.0f</span>)},  <span class="hljs-comment">// v6</span>
+        {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span>,  <span class="hljs-number">1.0f</span>, <span class="hljs-number">-1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">1.0f</span>)}, <span class="hljs-comment">// v7</span>
+
+        <span class="hljs-comment">// Vertex data for face 2</span>
+        {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span>, <span class="hljs-number">-1.0f</span>, <span class="hljs-number">-1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v8</span>
+        {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span>, <span class="hljs-number">-1.0f</span>, <span class="hljs-number">-1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">1.0f</span>, <span class="hljs-number">0.5f</span>)},  <span class="hljs-comment">// v9</span>
+        {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span>,  <span class="hljs-number">1.0f</span>, <span class="hljs-number">-1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">1.0f</span>)}, <span class="hljs-comment">// v10</span>
+        {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span>,  <span class="hljs-number">1.0f</span>, <span class="hljs-number">-1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">1.0f</span>, <span class="hljs-number">1.0f</span>)},  <span class="hljs-comment">// v11</span>
+
+        <span class="hljs-comment">// Vertex data for face 3</span>
+        {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span>, <span class="hljs-number">-1.0f</span>, <span class="hljs-number">-1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">0.0f</span>)}, <span class="hljs-comment">// v12</span>
+        {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span>, <span class="hljs-number">-1.0f</span>,  <span class="hljs-number">1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">1.0f</span>, <span class="hljs-number">0.0f</span>)},  <span class="hljs-comment">// v13</span>
+        {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span>,  <span class="hljs-number">1.0f</span>, <span class="hljs-number">-1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v14</span>
+        {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span>,  <span class="hljs-number">1.0f</span>,  <span class="hljs-number">1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">1.0f</span>, <span class="hljs-number">0.5f</span>)},  <span class="hljs-comment">// v15</span>
+
+        <span class="hljs-comment">// Vertex data for face 4</span>
+        {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span>, <span class="hljs-number">-1.0f</span>, <span class="hljs-number">-1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">0.0f</span>)}, <span class="hljs-comment">// v16</span>
+        {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span>, <span class="hljs-number">-1.0f</span>, <span class="hljs-number">-1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">0.0f</span>)}, <span class="hljs-comment">// v17</span>
+        {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span>, <span class="hljs-number">-1.0f</span>,  <span class="hljs-number">1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v18</span>
+        {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span>, <span class="hljs-number">-1.0f</span>,  <span class="hljs-number">1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v19</span>
+
+        <span class="hljs-comment">// Vertex data for face 5</span>
+        {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span>,  <span class="hljs-number">1.0f</span>,  <span class="hljs-number">1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v20</span>
+        {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span>,  <span class="hljs-number">1.0f</span>,  <span class="hljs-number">1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v21</span>
+        {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span>,  <span class="hljs-number">1.0f</span>, <span class="hljs-number">-1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">1.0f</span>)}, <span class="hljs-comment">// v22</span>
+        {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span>,  <span class="hljs-number">1.0f</span>, <span class="hljs-number">-1.0f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">1.0f</span>)},  <span class="hljs-comment">// v23</span>
+
+        <span class="hljs-comment">/***
+        // Vertex data for face 01
+        {QVector3D(-1.0f, -1.0f,  1.0f), QVector2D(0.0f-0.2f, 0.0f-0.2f)},  // v0
+        {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D(0.33f-0.2f, 0.0f-0.2f)}, // v1
+        {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(0.0f-0.2f, 0.5f-0.2f)},  // v2
+        {QVector3D( 1.0f,  1.0f,  1.0f), QVector2D(0.33f-0.2f, 0.5f-0.2f)}, // v3
+
+        // Vertex data for face 11
+        {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D( 0.0f-0.2f, 0.5f-0.2f)}, // v4
+        {QVector3D( 1.0f, -1.0f, -1.0f), QVector2D(0.33f-0.2f, 0.5f-0.2f)}, // v5
+        {QVector3D( 1.0f,  1.0f,  1.0f), QVector2D(0.0f-0.2f, 1.0f-0.2f)},  // v6
+        {QVector3D( 1.0f,  1.0f, -1.0f), QVector2D(0.33f-0.2f, 1.0f-0.2f)}, // v7
+
+        // Vertex data for face 21
+        {QVector3D( 1.0f, -1.0f, -1.0f), QVector2D(0.66f-0.2f, 0.5f-0.2f)}, // v8
+        {QVector3D(-1.0f, -1.0f, -1.0f), QVector2D(1.0f-0.2f, 0.5f-0.2f)},  // v9
+        {QVector3D( 1.0f,  1.0f, -1.0f), QVector2D(0.66f-0.2f, 1.0f-0.2f)}, // v10
+        {QVector3D(-1.0f,  1.0f, -1.0f), QVector2D(1.0f-0.2f, 1.0f-0.2f)},  // v11
+
+        // Vertex data for face 31
+        {QVector3D(-1.0f, -1.0f, -1.0f), QVector2D(0.66f-0.2f, 0.0f-0.2f)}, // v12
+        {QVector3D(-1.0f, -1.0f,  1.0f), QVector2D(1.0f-0.2f, 0.0f-0.2f)},  // v13
+        {QVector3D(-1.0f,  1.0f, -1.0f), QVector2D(0.66f-0.2f, 0.5f-0.2f)}, // v14
+        {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(1.0f-0.2f, 0.5f-0.2f)},  // v15
+
+        // Vertex data for face 41
+        {QVector3D(-1.0f, -1.0f, -1.0f), QVector2D(0.33f-0.2f, 0.0f-0.2f)}, // v16
+        {QVector3D( 1.0f, -1.0f, -1.0f), QVector2D(0.66f-0.2f, 0.0f-0.2f)}, // v17
+        {QVector3D(-1.0f, -1.0f,  1.0f), QVector2D(0.33f-0.2f, 0.5f-0.2f)}, // v18
+        {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D(0.66f-0.2f, 0.5f-0.2f)}, // v19
+
+        // Vertex data for face 51
+        {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(0.33f-0.2f, 0.5f-0.2f)}, // v20
+        {QVector3D( 1.0f,  1.0f,  1.0f), QVector2D(0.66f-0.2f, 0.5f-0.2f)}, // v21
+        {QVector3D(-1.0f,  1.0f, -1.0f), QVector2D(0.33f-0.2f, 1.0f-0.2f)}, // v22
+        {QVector3D( 1.0f,  1.0f, -1.0f), QVector2D(0.66f-0.2f, 1.0f-0.2f)}  // v23
+        ***/</span>
+    };
+
+
+    <span class="hljs-comment">/***
+    VertexData vertices2[] = {
+        // Vertex data for face 0
+        {QVector3D(-1.0f, -1.0f,  1.0f), QVector2D(0.0f-0.2f, 0.0f-0.2f)},  // v0
+        {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D(0.33f-0.2f, 0.0f-0.2f)}, // v1
+        {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(0.0f-0.2f, 0.5f-0.2f)},  // v2
+        {QVector3D( 1.0f,  1.0f,  1.0f), QVector2D(0.33f-0.2f, 0.5f-0.2f)}, // v3
+
+        // Vertex data for face 1
+        {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D( 0.0f-0.2f, 0.5f-0.2f)}, // v4
+        {QVector3D( 1.0f, -1.0f, -1.0f), QVector2D(0.33f-0.2f, 0.5f-0.2f)}, // v5
+        {QVector3D( 1.0f,  1.0f,  1.0f), QVector2D(0.0f-0.2f, 1.0f-0.2f)},  // v6
+        {QVector3D( 1.0f,  1.0f, -1.0f), QVector2D(0.33f-0.2f, 1.0f-0.2f)}, // v7
+
+        // Vertex data for face 2
+        {QVector3D( 1.0f, -1.0f, -1.0f), QVector2D(0.66f-0.2f, 0.5f-0.2f)}, // v8
+        {QVector3D(-1.0f, -1.0f, -1.0f), QVector2D(1.0f-0.2f, 0.5f-0.2f)},  // v9
+        {QVector3D( 1.0f,  1.0f, -1.0f), QVector2D(0.66f-0.2f, 1.0f-0.2f)}, // v10
+        {QVector3D(-1.0f,  1.0f, -1.0f), QVector2D(1.0f-0.2f, 1.0f-0.2f)},  // v11
+
+        // Vertex data for face 3
+        {QVector3D(-1.0f, -1.0f, -1.0f), QVector2D(0.66f-0.2f, 0.0f-0.2f)}, // v12
+        {QVector3D(-1.0f, -1.0f,  1.0f), QVector2D(1.0f-0.2f, 0.0f-0.2f)},  // v13
+        {QVector3D(-1.0f,  1.0f, -1.0f), QVector2D(0.66f-0.2f, 0.5f-0.2f)}, // v14
+        {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(1.0f-0.2f, 0.5f-0.2f)},  // v15
+
+        // Vertex data for face 4
+        {QVector3D(-1.0f, -1.0f, -1.0f), QVector2D(0.33f-0.2f, 0.0f-0.2f)}, // v16
+        {QVector3D( 1.0f, -1.0f, -1.0f), QVector2D(0.66f-0.2f, 0.0f-0.2f)}, // v17
+        {QVector3D(-1.0f, -1.0f,  1.0f), QVector2D(0.33f-0.2f, 0.5f-0.2f)}, // v18
+        {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D(0.66f-0.2f, 0.5f-0.2f)}, // v19
+
+        // Vertex data for face 5
+        {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(0.33f-0.2f, 0.5f-0.2f)}, // v20
+        {QVector3D( 1.0f,  1.0f,  1.0f), QVector2D(0.66f-0.2f, 0.5f-0.2f)}, // v21
+        {QVector3D(-1.0f,  1.0f, -1.0f), QVector2D(0.33f-0.2f, 1.0f-0.2f)}, // v22
+        {QVector3D( 1.0f,  1.0f, -1.0f), QVector2D(0.66f-0.2f, 1.0f-0.2f)}  // v23
+    };
+    ***/</span>
+
+
+     VertexData vertices3[] = {
+         <span class="hljs-comment">// Vertex data for face 02</span>
+         {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.0f</span>, <span class="hljs-number">0.0f</span>)},  <span class="hljs-comment">// v0</span>
+         {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">0.0f</span>)}, <span class="hljs-comment">// v1</span>
+         {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.0f</span>, <span class="hljs-number">0.5f</span>)},  <span class="hljs-comment">// v2</span>
+         {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v3</span>
+
+         <span class="hljs-comment">// Vertex data for face 12</span>
+         {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>( <span class="hljs-number">0.0f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v4</span>
+         {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v5</span>
+         {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.0f</span>, <span class="hljs-number">1.0f</span>)},  <span class="hljs-comment">// v6</span>
+         {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">1.0f</span>)}, <span class="hljs-comment">// v7</span>
+
+         <span class="hljs-comment">// Vertex data for face 22</span>
+         {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v8</span>
+         {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">1.0f</span>, <span class="hljs-number">0.5f</span>)},  <span class="hljs-comment">// v9</span>
+         {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">1.0f</span>)}, <span class="hljs-comment">// v10</span>
+         {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">1.0f</span>, <span class="hljs-number">1.0f</span>)},  <span class="hljs-comment">// v11</span>
+
+         <span class="hljs-comment">// Vertex data for face 32</span>
+         {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">0.0f</span>)}, <span class="hljs-comment">// v12</span>
+         {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">1.0f</span>, <span class="hljs-number">0.0f</span>)},  <span class="hljs-comment">// v13</span>
+         {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v14</span>
+         {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">1.0f</span>, <span class="hljs-number">0.5f</span>)},  <span class="hljs-comment">// v15</span>
+
+         <span class="hljs-comment">// Vertex data for face 42</span>
+         {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">0.0f</span>)}, <span class="hljs-comment">// v16</span>
+         {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">0.0f</span>)}, <span class="hljs-comment">// v17</span>
+         {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v18</span>
+         {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v19</span>
+
+         <span class="hljs-comment">// Vertex data for face 52</span>
+         {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v20</span>
+         {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">0.5f</span>)}, <span class="hljs-comment">// v21</span>
+         {<span class="hljs-built_in">QVector3D</span>(<span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.33f</span>, <span class="hljs-number">1.0f</span>)}, <span class="hljs-comment">// v22</span>
+         {<span class="hljs-built_in">QVector3D</span>( <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>,  <span class="hljs-number">1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>, <span class="hljs-number">-1.0f</span><span class="hljs-number">-3.0f</span>*<span class="hljs-number">0.5f</span>), <span class="hljs-built_in">QVector2D</span>(<span class="hljs-number">0.66f</span>, <span class="hljs-number">1.0f</span>)},  <span class="hljs-comment">// v23</span>
+     };
+
+    <span class="hljs-comment">// Indices for drawing cube faces using triangle strips.</span>
+    <span class="hljs-comment">// Triangle strips can be connected by duplicating indices</span>
+    <span class="hljs-comment">// between the strips. If connecting strips have opposite</span>
+    <span class="hljs-comment">// vertex order then last index of the first strip and first</span>
+    <span class="hljs-comment">// index of the second strip needs to be duplicated. If</span>
+    <span class="hljs-comment">// connecting strips have same vertex order then only last</span>
+    <span class="hljs-comment">// index of the first strip needs to be duplicated.</span>
+    GLushort indices[] = {
+         <span class="hljs-number">0</span>,  <span class="hljs-number">1</span>,  <span class="hljs-number">2</span>,  <span class="hljs-number">3</span>,  <span class="hljs-number">3</span>,     <span class="hljs-comment">// Face 0 - triangle strip ( v0,  v1,  v2,  v3)</span>
+         <span class="hljs-number">4</span>,  <span class="hljs-number">4</span>,  <span class="hljs-number">5</span>,  <span class="hljs-number">6</span>,  <span class="hljs-number">7</span>,  <span class="hljs-number">7</span>, <span class="hljs-comment">// Face 1 - triangle strip ( v4,  v5,  v6,  v7)</span>
+         <span class="hljs-number">8</span>,  <span class="hljs-number">8</span>,  <span class="hljs-number">9</span>, <span class="hljs-number">10</span>, <span class="hljs-number">11</span>, <span class="hljs-number">11</span>, <span class="hljs-comment">// Face 2 - triangle strip ( v8,  v9, v10, v11)</span>
+        <span class="hljs-number">12</span>, <span class="hljs-number">12</span>, <span class="hljs-number">13</span>, <span class="hljs-number">14</span>, <span class="hljs-number">15</span>, <span class="hljs-number">15</span>, <span class="hljs-comment">// Face 3 - triangle strip (v12, v13, v14, v15)</span>
+        <span class="hljs-number">16</span>, <span class="hljs-number">16</span>, <span class="hljs-number">17</span>, <span class="hljs-number">18</span>, <span class="hljs-number">19</span>, <span class="hljs-number">19</span>, <span class="hljs-comment">// Face 4 - triangle strip (v16, v17, v18, v19)</span>
+        <span class="hljs-number">20</span>, <span class="hljs-number">20</span>, <span class="hljs-number">21</span>, <span class="hljs-number">22</span>, <span class="hljs-number">23</span>      <span class="hljs-comment">// Face 5 - triangle strip (v20, v21, v22, v23)</span>
+    };
+
+<span class="hljs-comment">//! [1]</span>
+    <span class="hljs-comment">// Transfer vertex data to VBO 0</span>
+    arrayBuf.<span class="hljs-built_in">bind</span>();
+    arrayBuf.<span class="hljs-built_in">allocate</span>(vertices, <span class="hljs-number">24</span> * <span class="hljs-built_in">sizeof</span>(VertexData));
+    arrayBuf<span class="hljs-number">2.</span><span class="hljs-built_in">bind</span>();
+    arrayBuf<span class="hljs-number">2.</span><span class="hljs-built_in">allocate</span>(vertices3, <span class="hljs-number">24</span> * <span class="hljs-built_in">sizeof</span>(VertexData));
+    <span class="hljs-comment">// Transfer index data to VBO 1</span>
+    indexBuf.<span class="hljs-built_in">bind</span>();
+    indexBuf.<span class="hljs-built_in">allocate</span>(indices, <span class="hljs-number">34</span> * <span class="hljs-built_in">sizeof</span>(GLushort));
+<span class="hljs-comment">//! [1]</span>
+}
+
+<span class="hljs-comment">//! [2]</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">GeometryEngine::drawCubeGeometry</span><span class="hljs-params">(QOpenGLShaderProgram *program)</span>
+</span>{
+    <span class="hljs-comment">// Tell OpenGL which VBOs to use</span>
+    arrayBuf.<span class="hljs-built_in">bind</span>();
+    <span class="hljs-comment">//arrayBuf2.bind();</span>
+    indexBuf.<span class="hljs-built_in">bind</span>();
+
+    <span class="hljs-comment">// Offset for position</span>
+    quintptr offset = <span class="hljs-number">0</span>;
+
+    <span class="hljs-comment">// Tell OpenGL programmable pipeline how to locate vertex position data</span>
+    <span class="hljs-type">int</span> vertexLocation = program-&gt;<span class="hljs-built_in">attributeLocation</span>(<span class="hljs-string">&quot;a_position&quot;</span>);
+    program-&gt;<span class="hljs-built_in">enableAttributeArray</span>(vertexLocation);
+    program-&gt;<span class="hljs-built_in">setAttributeBuffer</span>(vertexLocation, GL_FLOAT, offset, <span class="hljs-number">3</span>, <span class="hljs-built_in">sizeof</span>(VertexData));
+
+    <span class="hljs-comment">// Offset for texture coordinate</span>
+    offset += <span class="hljs-built_in">sizeof</span>(QVector3D);
+
+    <span class="hljs-comment">// Tell OpenGL programmable pipeline how to locate vertex texture coordinate data</span>
+    <span class="hljs-type">int</span> texcoordLocation = program-&gt;<span class="hljs-built_in">attributeLocation</span>(<span class="hljs-string">&quot;a_texcoord&quot;</span>);
+    program-&gt;<span class="hljs-built_in">enableAttributeArray</span>(texcoordLocation);
+    program-&gt;<span class="hljs-built_in">setAttributeBuffer</span>(texcoordLocation, GL_FLOAT, offset, <span class="hljs-number">2</span>, <span class="hljs-built_in">sizeof</span>(VertexData));
+
+    <span class="hljs-comment">// Draw cube geometry using indices from VBO 1</span>
+    <span class="hljs-built_in">glDrawElements</span>(GL_TRIANGLE_STRIP, <span class="hljs-number">34</span>, GL_UNSIGNED_SHORT, <span class="hljs-literal">nullptr</span>);
+}
+
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">GeometryEngine::drawCubeGeometry2</span><span class="hljs-params">(QOpenGLShaderProgram *program)</span>
+</span>{
+    <span class="hljs-comment">// Tell OpenGL which VBOs to use</span>
+    <span class="hljs-comment">//arrayBuf.bind();</span>
+    arrayBuf<span class="hljs-number">2.</span><span class="hljs-built_in">bind</span>();
+    indexBuf.<span class="hljs-built_in">bind</span>();
+
+    <span class="hljs-comment">// Offset for position</span>
+    quintptr offset = <span class="hljs-number">0</span>;
+
+    <span class="hljs-comment">// Tell OpenGL programmable pipeline how to locate vertex position data</span>
+    <span class="hljs-type">int</span> vertexLocation = program-&gt;<span class="hljs-built_in">attributeLocation</span>(<span class="hljs-string">&quot;a_position&quot;</span>);
+    program-&gt;<span class="hljs-built_in">enableAttributeArray</span>(vertexLocation);
+    program-&gt;<span class="hljs-built_in">setAttributeBuffer</span>(vertexLocation, GL_FLOAT, offset, <span class="hljs-number">3</span>, <span class="hljs-built_in">sizeof</span>(VertexData));
+
+    <span class="hljs-comment">// Offset for texture coordinate</span>
+    offset += <span class="hljs-built_in">sizeof</span>(QVector3D);
+
+    <span class="hljs-comment">// Tell OpenGL programmable pipeline how to locate vertex texture coordinate data</span>
+    <span class="hljs-type">int</span> texcoordLocation = program-&gt;<span class="hljs-built_in">attributeLocation</span>(<span class="hljs-string">&quot;a_texcoord&quot;</span>);
+    program-&gt;<span class="hljs-built_in">enableAttributeArray</span>(texcoordLocation);
+    program-&gt;<span class="hljs-built_in">setAttributeBuffer</span>(texcoordLocation, GL_FLOAT, offset, <span class="hljs-number">2</span>, <span class="hljs-built_in">sizeof</span>(VertexData));
+
+    <span class="hljs-comment">// Draw cube geometry using indices from VBO 1</span>
+    <span class="hljs-built_in">glDrawElements</span>(GL_TRIANGLE_STRIP, <span class="hljs-number">34</span>, GL_UNSIGNED_SHORT, <span class="hljs-literal">nullptr</span>);
+}
+<span class="hljs-comment">//! [2]</span>
+</code></pre>
+<p>mainwidget.cpp</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;mainwidget.h&quot;</span></span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QMouseEvent&gt;</span></span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;cmath&gt;</span></span>
+
+MainWidget::~<span class="hljs-built_in">MainWidget</span>()
+{
+    <span class="hljs-comment">// Make sure the context is current when deleting the texture</span>
+    <span class="hljs-comment">// and the buffers.</span>
+    <span class="hljs-built_in">makeCurrent</span>();
+    <span class="hljs-keyword">delete</span> texture;
+    <span class="hljs-keyword">delete</span> texture2;
+    <span class="hljs-keyword">delete</span> geometries;
+    <span class="hljs-built_in">doneCurrent</span>();
+}
+
+<span class="hljs-comment">//! [0]</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWidget::mousePressEvent</span><span class="hljs-params">(QMouseEvent *e)</span>
+</span>{
+    <span class="hljs-comment">// Save mouse press position</span>
+    mousePressPosition = <span class="hljs-built_in">QVector2D</span>(e-&gt;<span class="hljs-built_in">position</span>());
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWidget::mouseReleaseEvent</span><span class="hljs-params">(QMouseEvent *e)</span>
+</span>{
+    <span class="hljs-comment">// Mouse release position - mouse press position</span>
+    QVector2D diff = <span class="hljs-built_in">QVector2D</span>(e-&gt;<span class="hljs-built_in">position</span>()) - mousePressPosition;
+
+    <span class="hljs-comment">// Rotation axis is perpendicular to the mouse position difference</span>
+    <span class="hljs-comment">// vector</span>
+    QVector3D n = <span class="hljs-built_in">QVector3D</span>(diff.<span class="hljs-built_in">y</span>(), diff.<span class="hljs-built_in">x</span>(), <span class="hljs-number">0.0</span>).<span class="hljs-built_in">normalized</span>();
+
+    <span class="hljs-comment">// Accelerate angular speed relative to the length of the mouse sweep</span>
+    qreal acc = diff.<span class="hljs-built_in">length</span>() / <span class="hljs-number">100.0</span>;
+
+    <span class="hljs-comment">// Calculate new rotation axis as weighted sum</span>
+    rotationAxis = (rotationAxis * angularSpeed + n * acc).<span class="hljs-built_in">normalized</span>();
+
+    <span class="hljs-comment">// Increase angular speed</span>
+    angularSpeed += acc;
+}
+<span class="hljs-comment">//! [0]</span>
+
+<span class="hljs-comment">//! [1]</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWidget::timerEvent</span><span class="hljs-params">(QTimerEvent *)</span>
+</span>{
+    <span class="hljs-comment">// Decrease angular speed (friction)</span>
+    angularSpeed *= <span class="hljs-number">0.99</span>;
+
+    <span class="hljs-comment">// Stop rotation when speed goes below threshold</span>
+    <span class="hljs-keyword">if</span> (angularSpeed &lt; <span class="hljs-number">0.01</span>) {
+        angularSpeed = <span class="hljs-number">0.0</span>;
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-comment">// Update rotation</span>
+        rotation = QQuaternion::<span class="hljs-built_in">fromAxisAndAngle</span>(rotationAxis, angularSpeed) * rotation;
+        rotation2 = QQuaternion::<span class="hljs-built_in">fromAxisAndAngle</span>(rotationAxis, angularSpeed/<span class="hljs-number">2.0</span>) * rotation2;
+        <span class="hljs-comment">// Request an update</span>
+        <span class="hljs-built_in">update</span>();
+    }
+}
+<span class="hljs-comment">//! [1]</span>
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWidget::initializeGL</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-built_in">initializeOpenGLFunctions</span>();
+
+    <span class="hljs-built_in">glClearColor</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+
+    <span class="hljs-built_in">initShaders</span>();
+    <span class="hljs-built_in">initTextures</span>();
+
+<span class="hljs-comment">//! [2]</span>
+    <span class="hljs-comment">// Enable depth buffer</span>
+    <span class="hljs-built_in">glEnable</span>(GL_DEPTH_TEST);
+
+    <span class="hljs-comment">// Enable back face culling</span>
+    <span class="hljs-built_in">glEnable</span>(GL_CULL_FACE);
+<span class="hljs-comment">//! [2]</span>
+
+    geometries = <span class="hljs-keyword">new</span> GeometryEngine;
+
+    <span class="hljs-comment">// Use QBasicTimer because its faster than QTimer</span>
+    timer.<span class="hljs-built_in">start</span>(<span class="hljs-number">12</span>, <span class="hljs-keyword">this</span>);
+}
+
+<span class="hljs-comment">//! [3]</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWidget::initShaders</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-comment">// Compile vertex shader</span>
+    <span class="hljs-keyword">if</span> (!program.<span class="hljs-built_in">addShaderFromSourceFile</span>(QOpenGLShader::Vertex, <span class="hljs-string">&quot;:/vshader.glsl&quot;</span>))
+        <span class="hljs-built_in">close</span>();
+
+    <span class="hljs-comment">// Compile fragment shader</span>
+    <span class="hljs-keyword">if</span> (!program.<span class="hljs-built_in">addShaderFromSourceFile</span>(QOpenGLShader::Fragment, <span class="hljs-string">&quot;:/fshader.glsl&quot;</span>))
+        <span class="hljs-built_in">close</span>();
+
+    <span class="hljs-comment">// Link shader pipeline</span>
+    <span class="hljs-keyword">if</span> (!program.<span class="hljs-built_in">link</span>())
+        <span class="hljs-built_in">close</span>();
+
+    <span class="hljs-comment">// Bind shader pipeline for use</span>
+    <span class="hljs-keyword">if</span> (!program.<span class="hljs-built_in">bind</span>())
+        <span class="hljs-built_in">close</span>();
+
+    <span class="hljs-comment">// Compile vertex shader</span>
+    <span class="hljs-keyword">if</span> (!program<span class="hljs-number">2.</span><span class="hljs-built_in">addShaderFromSourceFile</span>(QOpenGLShader::Vertex, <span class="hljs-string">&quot;:/vshader.glsl&quot;</span>))
+        <span class="hljs-built_in">close</span>();
+
+    <span class="hljs-comment">// Compile fragment shader</span>
+    <span class="hljs-keyword">if</span> (!program<span class="hljs-number">2.</span><span class="hljs-built_in">addShaderFromSourceFile</span>(QOpenGLShader::Fragment, <span class="hljs-string">&quot;:/fshader.glsl&quot;</span>))
+        <span class="hljs-built_in">close</span>();
+
+    <span class="hljs-comment">// Link shader pipeline</span>
+    <span class="hljs-keyword">if</span> (!program<span class="hljs-number">2.l</span>ink())
+        <span class="hljs-built_in">close</span>();
+
+    <span class="hljs-comment">// Bind shader pipeline for use</span>
+    <span class="hljs-keyword">if</span> (!program<span class="hljs-number">2.</span><span class="hljs-built_in">bind</span>())
+        <span class="hljs-built_in">close</span>();
+}
+<span class="hljs-comment">//! [3]</span>
+
+<span class="hljs-comment">//! [4]</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWidget::initTextures</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-comment">// Load cube.png image</span>
+    texture = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QOpenGLTexture</span>(<span class="hljs-built_in">QImage</span>(<span class="hljs-string">&quot;:/cube3.jpeg&quot;</span>).<span class="hljs-built_in">mirrored</span>());
+
+    <span class="hljs-comment">// Set nearest filtering mode for texture minification</span>
+    texture-&gt;<span class="hljs-built_in">setMinificationFilter</span>(QOpenGLTexture::Nearest);
+
+    <span class="hljs-comment">// Set bilinear filtering mode for texture magnification</span>
+    texture-&gt;<span class="hljs-built_in">setMagnificationFilter</span>(QOpenGLTexture::Linear);
+
+    <span class="hljs-comment">// Wrap texture coordinates by repeating</span>
+    <span class="hljs-comment">// f.ex. texture coordinate (1.1, 1.2) is same as (0.1, 0.2)</span>
+    texture-&gt;<span class="hljs-built_in">setWrapMode</span>(QOpenGLTexture::Repeat);
+
+    <span class="hljs-comment">// Load cube.png image</span>
+    texture2 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QOpenGLTexture</span>(<span class="hljs-built_in">QImage</span>(<span class="hljs-string">&quot;:/cube.jpg&quot;</span>).<span class="hljs-built_in">mirrored</span>());
+
+    <span class="hljs-comment">// Set nearest filtering mode for texture minification</span>
+    texture2-&gt;<span class="hljs-built_in">setMinificationFilter</span>(QOpenGLTexture::Nearest);
+
+    <span class="hljs-comment">// Set bilinear filtering mode for texture magnification</span>
+    texture2-&gt;<span class="hljs-built_in">setMagnificationFilter</span>(QOpenGLTexture::Linear);
+
+    <span class="hljs-comment">// Wrap texture coordinates by repeating</span>
+    <span class="hljs-comment">// f.ex. texture coordinate (1.1, 1.2) is same as (0.1, 0.2)</span>
+    texture2-&gt;<span class="hljs-built_in">setWrapMode</span>(QOpenGLTexture::Repeat);
+}
+<span class="hljs-comment">//! [4]</span>
+
+<span class="hljs-comment">//! [5]</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWidget::resizeGL</span><span class="hljs-params">(<span class="hljs-type">int</span> w, <span class="hljs-type">int</span> h)</span>
+</span>{
+    <span class="hljs-comment">// Calculate aspect ratio</span>
+    qreal aspect = <span class="hljs-built_in">qreal</span>(w) / <span class="hljs-built_in">qreal</span>(h ? h : <span class="hljs-number">1</span>);
+
+    qreal aspect2 = aspect*<span class="hljs-number">1.5</span>;<span class="hljs-comment">//此处可以改变立方体形状</span>
+
+    <span class="hljs-comment">// Set near plane to 3.0, far plane to 7.0, field of view 45 degrees</span>
+    <span class="hljs-type">const</span> qreal zNear = <span class="hljs-number">3.0</span>, zFar = <span class="hljs-number">7.0</span>, fov = <span class="hljs-number">45.0</span>;
+
+    <span class="hljs-comment">// Reset projection</span>
+    projection.<span class="hljs-built_in">setToIdentity</span>();
+
+    <span class="hljs-comment">// Set perspective projection</span>
+    projection.<span class="hljs-built_in">perspective</span>(fov, aspect, zNear, zFar);
+
+    <span class="hljs-comment">// Reset projection</span>
+    projection<span class="hljs-number">2.</span><span class="hljs-built_in">setToIdentity</span>();
+
+    <span class="hljs-comment">// Set perspective projection</span>
+    projection<span class="hljs-number">2.</span><span class="hljs-built_in">perspective</span>(fov, aspect2, zNear, zFar);
+}
+<span class="hljs-comment">//! [5]</span>
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWidget::paintGL</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-comment">// Clear color and depth buffer</span>
+    <span class="hljs-built_in">glClear</span>(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    texture-&gt;<span class="hljs-built_in">bind</span>();
+
+    <span class="hljs-comment">//texture2-&gt;bind();</span>
+
+<span class="hljs-comment">//! [6]</span>
+    <span class="hljs-comment">// Calculate model view transformation</span>
+    QMatrix4x4 matrix;
+    matrix.<span class="hljs-built_in">translate</span>(<span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">-5.0</span>);
+    matrix.<span class="hljs-built_in">rotate</span>(rotation);
+
+    <span class="hljs-comment">/***
+    QMatrix4x4 matrix2;
+    matrix2.translate(-1.5, -1.5, -7.0);
+    matrix2.rotate(rotation2);
+    ***/</span>
+
+    <span class="hljs-comment">// Set modelview-projection matrix</span>
+    program.<span class="hljs-built_in">setUniformValue</span>(<span class="hljs-string">&quot;mvp_matrix&quot;</span>, projection * matrix);
+
+    program<span class="hljs-number">2.</span><span class="hljs-built_in">setUniformValue</span>(<span class="hljs-string">&quot;mvp_matrix2&quot;</span>, projection2 * matrix);
+<span class="hljs-comment">//! [6]</span>
+
+    <span class="hljs-comment">// Use texture unit 0 which contains cube.png</span>
+    program.<span class="hljs-built_in">setUniformValue</span>(<span class="hljs-string">&quot;texture&quot;</span>, <span class="hljs-number">0</span>);
+
+    <span class="hljs-comment">// Use texture unit 1 which contains cube.jpg</span>
+    program<span class="hljs-number">2.</span><span class="hljs-built_in">setUniformValue</span>(<span class="hljs-string">&quot;texture2&quot;</span>, <span class="hljs-number">1</span>);
+
+    <span class="hljs-comment">// Draw cube geometry</span>
+    geometries-&gt;<span class="hljs-built_in">drawCubeGeometry</span>(&amp;program);
+
+    texture2-&gt;<span class="hljs-built_in">bind</span>();
+    geometries-&gt;<span class="hljs-built_in">drawCubeGeometry2</span>(&amp;program2);
+}
+</code></pre>
+<p>main.cpp</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QApplication&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QLabel&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QSurfaceFormat&gt;</span></span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> QT_NO_OPENGL</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;mainwidget.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> *argv[])</span>
+</span>{
+    <span class="hljs-function">QApplication <span class="hljs-title">app</span><span class="hljs-params">(argc, argv)</span></span>;
+
+    QSurfaceFormat format;
+    format.<span class="hljs-built_in">setDepthBufferSize</span>(<span class="hljs-number">24</span>);
+    QSurfaceFormat::<span class="hljs-built_in">setDefaultFormat</span>(format);
+
+    app.<span class="hljs-built_in">setApplicationName</span>(<span class="hljs-string">&quot;cube&quot;</span>);
+    app.<span class="hljs-built_in">setApplicationVersion</span>(<span class="hljs-string">&quot;0.1&quot;</span>);
+<span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> QT_NO_OPENGL</span>
+    MainWidget widget;
+    widget.<span class="hljs-built_in">show</span>();
+<span class="hljs-meta">#<span class="hljs-keyword">else</span></span>
+    <span class="hljs-function">QLabel <span class="hljs-title">note</span><span class="hljs-params">(<span class="hljs-string">&quot;OpenGL Support required&quot;</span>)</span></span>;
+    note.<span class="hljs-built_in">show</span>();
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span></span>
+    <span class="hljs-keyword">return</span> app.<span class="hljs-built_in">exec</span>();
+}
+</code></pre>
+<p>代码效果如下，图像可旋转：</p>
+<p><img src="../uploads/csdn/qt6%E4%BD%BF%E7%94%A8opengl%E5%BA%93%E7%94%BB%E4%B8%A4%E4%B8%AA%E4%B8%8D%E5%90%8C%E5%A4%96%E5%BD%A2%E7%9A%84%E7%AB%8B%E6%96%B9%E4%BD%931/img-04.png" alt=""></p>
+<p>如有疑问，请您留言或者私信，谢谢阅读。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/qt6写一个诗词鉴赏朗诵阅读程序智谱清言ai赏析接口.html">
+      <span>上一篇</span>
+      <strong>QT6写一个诗词鉴赏朗诵阅读程序智谱清言AI赏析接口</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/lvgl智能手表心跳脉搏波动显示数字动态图像.html">
+      <span>下一篇</span>
+      <strong>lvgl智能手表心跳脉搏波动显示数字动态图像</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/模仿微信发送消息界面traecn版qt6.html">模仿微信发送消息界面traecn版QT6</a></h3>
+        <p class="post-excerpt">本文介绍了一个基于Qt框架的微信克隆应用主窗口实现。该应用采用左右布局设计，左侧为聊天列表（包含搜索栏和联系人列表），右侧为聊天窗口堆栈。通过QListWidget管理联系人列表，QStackedWidget实现多聊天窗口切换，并支持点击联系人切换对应聊天界面。代码展示了UI初始化、示例联系人创建和信号槽连接等核心功能实现，为开发类微信应用提供了基础框架参考。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.779Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/手搓一个qt6candroid版本的tcp调试软件.html">手搓一个QT6CANDROID版本的TCP调试软件</a></h3>
+        <p class="post-excerpt">文章摘要： 这是一个基于Qt框架开发的TCP调试工具程序，包含MainWindow类和TCP通信功能。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.723Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于arduino的冰导热系数智能测量装置及影响因素研究.html">基于Arduino的冰导热系数智能测量装置及影响因素研究</a></h3>
+        <p class="post-excerpt">![](/uploads/csdn/基于arduino的冰导热系数智能测量装置及影响因素研究/img-01.jpeg)![](/uploads/csdn/基于arduino的冰导热系数智能测量装置及影响因素研究/img-02.jpeg)![](/uploads/csdn/基于arduino的冰导热系数智能测量装置及影响因素研究/img-03.jpeg)![]…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.690Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

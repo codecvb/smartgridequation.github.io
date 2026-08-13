@@ -3,13 +3,50 @@
     <p class="kicker">ARCHIVE</p>
     <h1><%= heading %></h1>
     <p class="page-desc"><%= description %></p>
-    <% if (!tags.length) { %>
-      <form class="search-form wide" action="<%= staticSite ? 'search.html' : '/search' %>" method="get" role="search">
-        <input name="q" type="search" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="搜索文章…" aria-label="搜索文章">
-        <button type="submit">搜索</button>
-      </form>
-    <% } %>
+    <form class="search-form wide" action="<%= staticSite ? 'search.html' : '/search' %>" method="get" role="search">
+      <input name="q" type="search" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="搜索文章…" aria-label="搜索文章">
+      <button type="submit">搜索</button>
+    </form>
   </div>
 </section>
 
-<%- include('_post-list', { posts: posts }) %>
+<% if (categories && categories.length) { %>
+<section class="wrap category-strip">
+  <div class="category-pills">
+    <% categories.forEach(function(cat) { %>
+      <a class="category-pill" href="/category/<%= cat.slug %>"><%= cat.name %><em><%= cat.count %></em></a>
+    <% }) %>
+  </div>
+</section>
+<% } %>
+
+<% if (groups && groups.length) { %>
+  <% groups.forEach(function(group, gi) { %>
+    <section class="wrap section archive-group">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow"><%= String(gi + 1).padStart(2, '0') %></p>
+          <h2><a href="/category/<%= group.slug %>"><%= group.name %></a></h2>
+        </div>
+        <span class="group-count"><%= group.count %> 篇</span>
+      </div>
+      <div class="list">
+        <% group.posts.forEach(function(post, i) { %>
+          <a class="list-item" href="/post/<%= post.slug %>">
+            <span class="list-index"><%= String(i + 1).padStart(2, '0') %></span>
+            <span class="list-main">
+              <span class="list-title"><%= post.title %></span>
+              <span class="list-summary"><%= post.summary || '……' %></span>
+            </span>
+            <span class="list-meta">
+              <span class="list-tags"><%= post.tags.slice(0, 3).join(' / ') %></span>
+              <time datetime="<%= post.publishedAt %>"><%= formatDate(post.publishedAt) %></time>
+            </span>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+  <% }) %>
+<% } else { %>
+  <%- include('_post-list', { posts: posts }) %>
+<% } %>

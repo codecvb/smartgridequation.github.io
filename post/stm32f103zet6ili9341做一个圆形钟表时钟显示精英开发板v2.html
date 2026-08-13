@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>STM32F103ZET6ILI9341做一个圆形钟表时钟显示精英开发板V2 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/嵌入式与硬件.html">嵌入式与硬件</a>
+        </nav>
+        <h1 class="post-title">STM32F103ZET6ILI9341做一个圆形钟表时钟显示精英开发板V2</h1>
+        <p class="post-deck">摘要：本文深入探究了利用 STM32 微控制器驱动 ILI9341 显示屏绘制时钟的技术方案。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.524Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>11 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-12.html">嵌入式</a>
+          
+            <a class="tag-chip" href="../tags/tag-13.html">物联网</a>
+          
+            <a class="tag-chip" href="../tags/tag-23.html">STM32</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>摘要：本文深入探究了利用 STM32 微控制器驱动 ILI9341 显示屏绘制时钟的技术方案。</p>
+<p>在硬件连接方面，采用 FSMC（灵活静态存储控制器）接口，通过合理配置引脚，实现 STM32 与 ILI9341 的高速稳定通信，确保数据能够快速准确地传输至显示屏。</p>
+<p>时间获取借助延时函数，通过精确设定延时参数，实现对秒、分、时等时间单位的计数，为时钟绘制提供准确的时间基准。</p>
+<p>时钟显示的流畅性则依赖于 STM32 芯片的高速处理能力，其能够快速完成时间数据的运算与图形绘制指令的生成。同时，优化 ILI9341 的屏幕刷新速度，通过调整显示缓存及刷新频率，减少画面卡顿现象。</p>
+<p>源代码如下：</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;./SYSTEM/sys/sys.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;./SYSTEM/usart/usart.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;./SYSTEM/delay/delay.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;./BSP/LED/led.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;./BSP/LCD/lcd.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;math.h&quot;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+    <span class="hljs-type">uint8_t</span> x = <span class="hljs-number">0</span>;
+    <span class="hljs-type">uint8_t</span> lcd_id[<span class="hljs-number">12</span>];
+	<span class="hljs-type">uint16_t</span> xx = <span class="hljs-number">0</span>;
+	<span class="hljs-type">uint16_t</span> y = <span class="hljs-number">0</span>;
+	<span class="hljs-type">uint8_t</span> time_minutes = <span class="hljs-number">30</span>;
+	<span class="hljs-type">uint8_t</span> time_hour = <span class="hljs-number">5</span>;
+    <span class="hljs-built_in">HAL_Init</span>();
+    <span class="hljs-built_in">sys_stm32_clock_init</span>(RCC_PLL_MUL9);
+    <span class="hljs-built_in">delay_init</span>(<span class="hljs-number">72</span>);
+    <span class="hljs-built_in">usart_init</span>(<span class="hljs-number">115200</span>);
+    <span class="hljs-built_in">led_init</span>();
+    <span class="hljs-built_in">lcd_init</span>();
+    g_point_color = RED;
+    <span class="hljs-built_in">sprintf</span>((<span class="hljs-type">char</span> *)lcd_id, <span class="hljs-string">&quot;LCD ID:%04X&quot;</span>, lcddev.id);
+
+    <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>)
+    {
+        <span class="hljs-keyword">switch</span> (<span class="hljs-number">0</span>)
+        {
+        <span class="hljs-keyword">case</span> <span class="hljs-number">0</span>:
+            <span class="hljs-built_in">lcd_clear</span>(WHITE);
+            <span class="hljs-keyword">break</span>;
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">1</span>:
+            <span class="hljs-built_in">lcd_clear</span>(BLACK);
+            <span class="hljs-keyword">break</span>;
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">2</span>:
+            <span class="hljs-built_in">lcd_clear</span>(BLUE);
+            <span class="hljs-keyword">break</span>;
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">3</span>:
+            <span class="hljs-built_in">lcd_clear</span>(RED);
+            <span class="hljs-keyword">break</span>;
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">4</span>:
+            <span class="hljs-built_in">lcd_clear</span>(MAGENTA);
+            <span class="hljs-keyword">break</span>;
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">5</span>:
+            <span class="hljs-built_in">lcd_clear</span>(GREEN);
+            <span class="hljs-keyword">break</span>;
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">6</span>:
+            <span class="hljs-built_in">lcd_clear</span>(CYAN);
+            <span class="hljs-keyword">break</span>;
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">7</span>:
+            <span class="hljs-built_in">lcd_clear</span>(YELLOW);
+            <span class="hljs-keyword">break</span>;
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">8</span>:
+            <span class="hljs-built_in">lcd_clear</span>(BRRED);
+            <span class="hljs-keyword">break</span>;
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">9</span>:
+            <span class="hljs-built_in">lcd_clear</span>(GRAY);
+            <span class="hljs-keyword">break</span>;
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">10</span>:
+            <span class="hljs-built_in">lcd_clear</span>(LGRAY);
+            <span class="hljs-keyword">break</span>;
+
+        <span class="hljs-keyword">case</span> <span class="hljs-number">11</span>:
+            <span class="hljs-built_in">lcd_clear</span>(BROWN);
+            <span class="hljs-keyword">break</span>;
+        }
+
+        <span class="hljs-built_in">lcd_show_string</span>(<span class="hljs-number">10</span>, <span class="hljs-number">40</span>, <span class="hljs-number">240</span>, <span class="hljs-number">32</span>, <span class="hljs-number">32</span>, <span class="hljs-string">&quot;STM32&quot;</span>, RED);
+        <span class="hljs-built_in">lcd_show_string</span>(<span class="hljs-number">10</span>, <span class="hljs-number">80</span>, <span class="hljs-number">240</span>, <span class="hljs-number">24</span>, <span class="hljs-number">24</span>, <span class="hljs-string">&quot;TFTLCD TIME CLOCK TEST&quot;</span>, RED);
+        x++;
+
+        <span class="hljs-keyword">if</span> (x == <span class="hljs-number">12</span>)
+            x = <span class="hljs-number">0</span>;
+
+
+			<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> time_t1 = <span class="hljs-number">0</span>;time_t1&lt;=<span class="hljs-number">60</span>;time_t1++){
+
+				xx = (<span class="hljs-type">int</span>)(<span class="hljs-number">72</span>*<span class="hljs-built_in">sin</span>(((<span class="hljs-type">float</span>)time_t1*<span class="hljs-number">6.0</span>)/<span class="hljs-number">360.0</span>*<span class="hljs-number">3.14</span>*<span class="hljs-number">2</span>));
+				y = (<span class="hljs-type">int</span>)(<span class="hljs-number">72</span>*<span class="hljs-built_in">cos</span>(((<span class="hljs-type">float</span>)time_t1*<span class="hljs-number">6.0</span>)/<span class="hljs-number">360.0</span>*<span class="hljs-number">3.14</span>*<span class="hljs-number">2</span>));
+				<span class="hljs-built_in">lcd_draw_point</span>(xx<span class="hljs-number">+100</span>, y<span class="hljs-number">+200</span>, <span class="hljs-number">0x1234</span>);
+				<span class="hljs-keyword">if</span>(time_t1%<span class="hljs-number">5</span>==<span class="hljs-number">0</span>)
+				<span class="hljs-built_in">lcd_show_num</span>(xx<span class="hljs-number">+100</span><span class="hljs-number">-10</span>, y<span class="hljs-number">+200</span><span class="hljs-number">-5</span>, (time_t1/<span class="hljs-number">5</span>), <span class="hljs-number">2</span>, <span class="hljs-number">16</span>, RED);
+			}
+			<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> time_t1 = <span class="hljs-number">0</span>;time_t1&lt;=<span class="hljs-number">60</span>;time_t1++){
+				<span class="hljs-built_in">HAL_Delay</span>(<span class="hljs-number">1000</span>);
+
+				<span class="hljs-keyword">if</span>(time_t1&gt;=<span class="hljs-number">60</span>)
+				time_minutes++;
+
+				<span class="hljs-keyword">if</span>(time_minutes&gt;=<span class="hljs-number">60</span>){
+					time_hour++;
+
+					<span class="hljs-keyword">if</span>(time_hour&gt;=<span class="hljs-number">60</span>){
+							time_hour = <span class="hljs-number">0</span>;
+						}
+					time_minutes = <span class="hljs-number">0</span>;
+
+				}
+
+				<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> ii = <span class="hljs-number">0</span>;ii&lt;<span class="hljs-number">51</span>;ii++){
+					xx = -(<span class="hljs-type">int</span>)(ii*<span class="hljs-built_in">sin</span>(((<span class="hljs-type">float</span>)(time_hour<span class="hljs-number">-1</span>)*<span class="hljs-number">6.0</span>)/<span class="hljs-number">360.0</span>*<span class="hljs-number">3.14</span>*<span class="hljs-number">2</span>));
+					y = (<span class="hljs-type">int</span>)(ii*<span class="hljs-built_in">cos</span>(((<span class="hljs-type">float</span>)(time_hour<span class="hljs-number">-1</span>)*<span class="hljs-number">6.0</span>)/<span class="hljs-number">360.0</span>*<span class="hljs-number">3.14</span>*<span class="hljs-number">2</span>));
+					<span class="hljs-built_in">lcd_draw_point</span>(xx<span class="hljs-number">+100</span>, y<span class="hljs-number">+200</span>, <span class="hljs-number">0xffff</span>);
+				}
+
+				<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> ii = <span class="hljs-number">0</span>;ii&lt;<span class="hljs-number">51</span>;ii++){
+					xx = -(<span class="hljs-type">int</span>)(ii*<span class="hljs-built_in">sin</span>(((<span class="hljs-type">float</span>)time_hour*<span class="hljs-number">6.0</span>)/<span class="hljs-number">360.0</span>*<span class="hljs-number">3.14</span>*<span class="hljs-number">2</span>));
+					y = (<span class="hljs-type">int</span>)(ii*<span class="hljs-built_in">cos</span>(((<span class="hljs-type">float</span>)time_hour*<span class="hljs-number">6.0</span>)/<span class="hljs-number">360.0</span>*<span class="hljs-number">3.14</span>*<span class="hljs-number">2</span>));
+					<span class="hljs-built_in">lcd_draw_point</span>(xx<span class="hljs-number">+100</span>, y<span class="hljs-number">+200</span>, <span class="hljs-number">0x1234</span>);
+				}
+
+				<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> ii = <span class="hljs-number">0</span>;ii&lt;<span class="hljs-number">72</span>;ii++){
+					xx = -(<span class="hljs-type">int</span>)(ii*<span class="hljs-built_in">sin</span>(((<span class="hljs-type">float</span>)(time_t1<span class="hljs-number">-1</span>)*<span class="hljs-number">6.0</span>)/<span class="hljs-number">360.0</span>*<span class="hljs-number">3.14</span>*<span class="hljs-number">2</span>));
+				  y = (<span class="hljs-type">int</span>)(ii*<span class="hljs-built_in">cos</span>(((<span class="hljs-type">float</span>)(time_t1<span class="hljs-number">-1</span>)*<span class="hljs-number">6.0</span>)/<span class="hljs-number">360.0</span>*<span class="hljs-number">3.14</span>*<span class="hljs-number">2</span>));
+					<span class="hljs-built_in">lcd_draw_point</span>(xx<span class="hljs-number">+100</span>, y<span class="hljs-number">+200</span>, <span class="hljs-number">0xffff</span>);
+				}
+
+				<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> ii = <span class="hljs-number">0</span>;ii&lt;<span class="hljs-number">72</span>;ii++){
+					xx = -(<span class="hljs-type">int</span>)(ii*<span class="hljs-built_in">sin</span>(((<span class="hljs-type">float</span>)time_t1*<span class="hljs-number">6.0</span>)/<span class="hljs-number">360.0</span>*<span class="hljs-number">3.14</span>*<span class="hljs-number">2</span>));
+				  y = (<span class="hljs-type">int</span>)(ii*<span class="hljs-built_in">cos</span>(((<span class="hljs-type">float</span>)time_t1*<span class="hljs-number">6.0</span>)/<span class="hljs-number">360.0</span>*<span class="hljs-number">3.14</span>*<span class="hljs-number">2</span>));
+					<span class="hljs-built_in">lcd_draw_point</span>(xx<span class="hljs-number">+100</span>, y<span class="hljs-number">+200</span>, <span class="hljs-number">0x1234</span>);
+				}
+
+				<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> ii = <span class="hljs-number">0</span>;ii&lt;<span class="hljs-number">56</span>;ii++){
+					xx = -(<span class="hljs-type">int</span>)(ii*<span class="hljs-built_in">sin</span>(((<span class="hljs-type">float</span>)(time_minutes<span class="hljs-number">-1</span>)*<span class="hljs-number">6.0</span>)/<span class="hljs-number">360.0</span>*<span class="hljs-number">3.14</span>*<span class="hljs-number">2</span>));
+				  y = (<span class="hljs-type">int</span>)(ii*<span class="hljs-built_in">cos</span>(((<span class="hljs-type">float</span>)(time_minutes<span class="hljs-number">-1</span>)*<span class="hljs-number">6.0</span>)/<span class="hljs-number">360.0</span>*<span class="hljs-number">3.14</span>*<span class="hljs-number">2</span>));
+					<span class="hljs-built_in">lcd_draw_point</span>(xx<span class="hljs-number">+100</span>, y<span class="hljs-number">+200</span>, <span class="hljs-number">0xffff</span>);
+				}
+
+				<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> ii = <span class="hljs-number">0</span>;ii&lt;<span class="hljs-number">56</span>;ii++){
+					xx = -(<span class="hljs-type">int</span>)(ii*<span class="hljs-built_in">sin</span>(((<span class="hljs-type">float</span>)time_minutes*<span class="hljs-number">6.0</span>)/<span class="hljs-number">360.0</span>*<span class="hljs-number">3.14</span>*<span class="hljs-number">2</span>));
+				  y = (<span class="hljs-type">int</span>)(ii*<span class="hljs-built_in">cos</span>(((<span class="hljs-type">float</span>)time_minutes*<span class="hljs-number">6.0</span>)/<span class="hljs-number">360.0</span>*<span class="hljs-number">3.14</span>*<span class="hljs-number">2</span>));
+					<span class="hljs-built_in">lcd_draw_point</span>(xx<span class="hljs-number">+100</span>, y<span class="hljs-number">+200</span>, <span class="hljs-number">0x1234</span>);
+				}
+
+			}
+        <span class="hljs-built_in">LED0_TOGGLE</span>();
+        <span class="hljs-built_in">delay_ms</span>(<span class="hljs-number">1000</span>);
+    }
+}
+</code></pre>
+<p>效果如下，觉得时钟样式不够好，可以自己慢慢调整：</p>
+<p><img src="../uploads/csdn/stm32f103zet6ili9341%E5%81%9A%E4%B8%80%E4%B8%AA%E5%9C%86%E5%BD%A2%E9%92%9F%E8%A1%A8%E6%97%B6%E9%92%9F%E6%98%BE%E7%A4%BA%E7%B2%BE%E8%8B%B1%E5%BC%80%E5%8F%91%E6%9D%BFv2/img-01.gif" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/stm32f103zet6sdiofatfs读写sd卡例程读写挂载错误排除.html">
+      <span>上一篇</span>
+      <strong>STM32F103ZET6SDIOFATFS读写SD卡例程读写挂载错误排除</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/stm32f103zet6ili9341fsmcfreertos制作数字电子时钟.html">
+      <span>下一篇</span>
+      <strong>stm32f103zet6ili9341fsmcfreertos制作数字电子时钟</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/stm32f103zet6sdiofatfs读写sd卡例程读写挂载错误排除.html">STM32F103ZET6SDIOFATFS读写SD卡例程读写挂载错误排除</a></h3>
+        <p class="post-excerpt">一、首先我们要对串口进行重定向（在没有屏幕或者其他提示的情况下方便调试错误），注意在flash config里面勾选microlib。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.552Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/stm32f103r6proteus9-0freertos实现双任务流水灯.html">STM32F103R6PROTEUS9.0FREERTOS实现双任务流水灯</a></h3>
+        <p class="post-excerpt">本文展示了一个基于STM32F1和FreeRTOS的双LED控制程序。主要内容包括：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.470Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/stm32f103c8t6sdcardspi驱动ili9341lcdproteus8-0仿真将存储在.html">STM32F103C8T6SDcardSPI驱动ILI9341LCDPROTEUS8.0仿真将存储在</a></h3>
+        <p class="post-excerpt">本文展示了一个基于STM32微控制器的SD卡文件读取系统。系统通过SPI接口连接SD卡，实现了FAT12文件系统的解析功能。主要功能包括：1) 读取SD卡基本信息(容量、类型)；2) 解析FAT12文件系统的引导扇区参数；3) 搜索并定位指定文件；4) 在ILI9341 LCD屏幕上显示文本文件内容。系统还包含文件列表显示功能，可查看SD卡中的文件信息。程序使用HAL库进行硬件初始化，通过状态指示…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.444Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

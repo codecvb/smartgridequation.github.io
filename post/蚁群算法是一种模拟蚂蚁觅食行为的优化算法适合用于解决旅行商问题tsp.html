@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>蚁群算法是一种模拟蚂蚁觅食行为的优化算法适合用于解决旅行商问题TSP · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/算法与数据结构.html">算法与数据结构</a>
+        </nav>
+        <h1 class="post-title">蚁群算法是一种模拟蚂蚁觅食行为的优化算法适合用于解决旅行商问题TSP</h1>
+        <p class="post-deck">蚁群算法是一种模拟蚂蚁觅食行为的优化算法，适合用于解决旅行商问题（TSP）。以下是使用 MATLAB 实现蚁群算法解决 50 个城市 TSP 问题的代码：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.633Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>10 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-18.html">算法</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>蚁群算法是一种模拟蚂蚁觅食行为的优化算法，适合用于解决旅行商问题（TSP）。以下是使用 MATLAB 实现蚁群算法解决 50 个城市 TSP 问题的代码：</p>
+<p><img src="../uploads/csdn/%E8%9A%81%E7%BE%A4%E7%AE%97%E6%B3%95%E6%98%AF%E4%B8%80%E7%A7%8D%E6%A8%A1%E6%8B%9F%E8%9A%82%E8%9A%81%E8%A7%85%E9%A3%9F%E8%A1%8C%E4%B8%BA%E7%9A%84%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95%E9%80%82%E5%90%88%E7%94%A8%E4%BA%8E%E8%A7%A3%E5%86%B3%E6%97%85%E8%A1%8C%E5%95%86%E9%97%AE%E9%A2%98tsp/img-01.jpeg" alt=""></p>
+<h4 id="代码说明" class="prose-heading">代码说明：</h4>
+<ol>
+<li><strong>城市坐标生成</strong>：利用 <code>rand(numCities, 2)</code> 随机生成 50 个城市的坐标，接着算出城市之间的距离矩阵。</li>
+<li><strong>蚁群算法参数设置</strong>：对蚂蚁数量、迭代次数、信息素重要程度因子、启发式因子、信息素挥发因子以及信息素增加强度系数等参数进行设置。</li>
+<li><strong>信息素矩阵初始化</strong>：把信息素矩阵初始化为全 1 矩阵。</li>
+<li><strong>蚁群算法主循环</strong>：
+<ul>
+<li>每只蚂蚁随机选择起始城市，再依据信息素和距离计算转移概率，采用轮盘赌的方式选择下一个城市，从而构建完整的路径。</li>
+<li>计算每只蚂蚁路径的总距离，更新最优解。</li>
+<li>按照信息素挥发和增加规则更新信息素矩阵。</li>
+</ul>
+</li>
+<li><strong>绘制最优路线</strong>：将最优路线首尾相连，然后绘制出城市和最优路线。</li>
+</ol>
+<p>运行这段代码后，你会看到 50 个城市的最优旅行路线以及对应的总距离。</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% 随机生成 50 个城市的坐标</span>
+numCities = <span class="hljs-number">50</span>;
+cities = <span class="hljs-built_in">rand</span>(numCities, <span class="hljs-number">2</span>);
+
+<span class="hljs-comment">% 计算城市之间的距离矩阵</span>
+distMatrix = pdist2(cities, cities);
+
+<span class="hljs-comment">% 蚁群算法参数设置</span>
+numAnts = <span class="hljs-number">50</span>; <span class="hljs-comment">% 蚂蚁数量</span>
+numIterations = <span class="hljs-number">200</span>; <span class="hljs-comment">% 迭代次数</span>
+alpha = <span class="hljs-number">1</span>; <span class="hljs-comment">% 信息素重要程度因子</span>
+<span class="hljs-built_in">beta</span> = <span class="hljs-number">5</span>; <span class="hljs-comment">% 启发式因子</span>
+rho = <span class="hljs-number">0.5</span>; <span class="hljs-comment">% 信息素挥发因子</span>
+Q = <span class="hljs-number">100</span>; <span class="hljs-comment">% 信息素增加强度系数</span>
+
+<span class="hljs-comment">% 初始化信息素矩阵</span>
+pheromoneMatrix = <span class="hljs-built_in">ones</span>(numCities, numCities);
+
+<span class="hljs-comment">% 初始化最优解</span>
+bestRoute = [];
+bestDistance = Inf;
+
+<span class="hljs-comment">% 蚁群算法主循环</span>
+<span class="hljs-keyword">for</span> iter = <span class="hljs-number">1</span>:numIterations
+    <span class="hljs-comment">% 初始化所有蚂蚁的路径</span>
+    allRoutes = <span class="hljs-built_in">zeros</span>(numAnts, numCities);
+    allDistances = <span class="hljs-built_in">zeros</span>(numAnts, <span class="hljs-number">1</span>);
+
+    <span class="hljs-comment">% 每只蚂蚁构建路径</span>
+    <span class="hljs-keyword">for</span> ant = <span class="hljs-number">1</span>:numAnts
+        <span class="hljs-comment">% 随机选择起始城市</span>
+        currentCity = randi(numCities);
+        unvisitedCities = setdiff(<span class="hljs-number">1</span>:numCities, currentCity);
+        route = currentCity;
+
+        <span class="hljs-comment">% 依次选择下一个城市</span>
+        <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">2</span>:numCities
+            <span class="hljs-comment">% 计算转移概率</span>
+            probabilities = (pheromoneMatrix(currentCity, unvisitedCities).^alpha) .* ((<span class="hljs-number">1.</span>/distMatrix(currentCity, unvisitedCities)).^<span class="hljs-built_in">beta</span>);
+            probabilities = probabilities / sum(probabilities);
+
+            <span class="hljs-comment">% 轮盘赌选择下一个城市</span>
+            nextCityIndex = randsample(<span class="hljs-built_in">length</span>(unvisitedCities), <span class="hljs-number">1</span>, <span class="hljs-built_in">true</span>, probabilities);
+            nextCity = unvisitedCities(nextCityIndex);
+
+            <span class="hljs-comment">% 更新路径和未访问城市集合</span>
+            route = [route nextCity];
+            unvisitedCities = setdiff(unvisitedCities, nextCity);
+            currentCity = nextCity;
+        <span class="hljs-keyword">end</span>
+
+        <span class="hljs-comment">% 记录当前蚂蚁的路径和总距离</span>
+        allRoutes(ant, :) = route;
+        allDistances(ant) = calculateTotalDistance(route, distMatrix);
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 更新最优解</span>
+    [minDistance, minIndex] = <span class="hljs-built_in">min</span>(allDistances);
+    <span class="hljs-keyword">if</span> minDistance &lt; bestDistance
+        bestDistance = minDistance;
+        bestRoute = allRoutes(minIndex, :);
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 更新信息素矩阵</span>
+    pheromoneMatrix = (<span class="hljs-number">1</span> - rho) * pheromoneMatrix;
+    <span class="hljs-keyword">for</span> ant = <span class="hljs-number">1</span>:numAnts
+        route = allRoutes(ant, :);
+        <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:numCities - <span class="hljs-number">1</span>
+            pheromoneMatrix(route(<span class="hljs-built_in">i</span>), route(<span class="hljs-built_in">i</span> + <span class="hljs-number">1</span>)) = pheromoneMatrix(route(<span class="hljs-built_in">i</span>), route(<span class="hljs-built_in">i</span> + <span class="hljs-number">1</span>)) + Q / allDistances(ant);
+            pheromoneMatrix(route(<span class="hljs-built_in">i</span> + <span class="hljs-number">1</span>), route(<span class="hljs-built_in">i</span>)) = pheromoneMatrix(route(<span class="hljs-built_in">i</span> + <span class="hljs-number">1</span>), route(<span class="hljs-built_in">i</span>)) + Q / allDistances(ant);
+        <span class="hljs-keyword">end</span>
+        pheromoneMatrix(route(numCities), route(<span class="hljs-number">1</span>)) = pheromoneMatrix(route(numCities), route(<span class="hljs-number">1</span>)) + Q / allDistances(ant);
+        pheromoneMatrix(route(<span class="hljs-number">1</span>), route(numCities)) = pheromoneMatrix(route(<span class="hljs-number">1</span>), route(numCities)) + Q / allDistances(ant);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 回到起始城市</span>
+bestRoute = [bestRoute bestRoute(<span class="hljs-number">1</span>)];
+
+<span class="hljs-comment">% 绘制最优路线</span>
+<span class="hljs-built_in">figure</span>;
+<span class="hljs-built_in">hold</span> on;
+<span class="hljs-built_in">plot</span>(cities(:, <span class="hljs-number">1</span>), cities(:, <span class="hljs-number">2</span>), <span class="hljs-string">&#x27;ko&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">5</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1</span>); <span class="hljs-comment">% 绘制城市</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">j</span> = <span class="hljs-number">1</span>:numCities
+    startCity = bestRoute(<span class="hljs-built_in">j</span>);
+    endCity = bestRoute(<span class="hljs-built_in">j</span> + <span class="hljs-number">1</span>);
+    <span class="hljs-built_in">plot</span>([cities(startCity, <span class="hljs-number">1</span>) cities(endCity, <span class="hljs-number">1</span>)], [cities(startCity, <span class="hljs-number">2</span>) cities(endCity, <span class="hljs-number">2</span>)], <span class="hljs-string">&#x27;b-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">0.5</span>);
+<span class="hljs-keyword">end</span>
+title(sprintf(<span class="hljs-string">&#x27;最优路线总距离: %.2f&#x27;</span>, bestDistance));
+xlabel(<span class="hljs-string">&#x27;X 坐标&#x27;</span>);
+ylabel(<span class="hljs-string">&#x27;Y 坐标&#x27;</span>);
+<span class="hljs-built_in">hold</span> off;
+
+<span class="hljs-comment">% 计算总距离的函数</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">totalDistance</span> = <span class="hljs-title">calculateTotalDistance</span><span class="hljs-params">(route, distMatrix)</span></span>
+    numCities = <span class="hljs-built_in">length</span>(route);
+    totalDistance = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:numCities - <span class="hljs-number">1</span>
+        totalDistance = totalDistance + distMatrix(route(<span class="hljs-built_in">i</span>), route(<span class="hljs-built_in">i</span> + <span class="hljs-number">1</span>));
+    <span class="hljs-keyword">end</span>
+    totalDistance = totalDistance + distMatrix(route(numCities), route(<span class="hljs-number">1</span>)); <span class="hljs-comment">% 回到起始城市</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#代码说明">代码说明：</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/2的100次方mod5用代码怎么计算.html">
+      <span>上一篇</span>
+      <strong>2的100次方mod5用代码怎么计算</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/由小到大的数列寻找是否存在一个数的耗时最小的算法.html">
+      <span>下一篇</span>
+      <strong>由小到大的数列寻找是否存在一个数的耗时最小的算法</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/基于levy飞行粒子群优化算法的微电网优化调度.html">基于Levy飞行粒子群优化算法的微电网优化调度</a></h3>
+        <p class="post-excerpt">本文提出了一种基于Levy飞行粒子群优化（LFPSO）的微电网优化调度模型。该模型综合考虑经济成本和环境成本，通过优化光伏、风电、燃料电池、微型燃气轮机、柴油发电机和蓄电池等设备的出力，实现微电网24小时最优运行。研究对比了削峰填谷和模糊逻辑两种蓄电池控制策略，结果表明模糊逻辑策略能进一步降低总成本。系统包含负荷预测、可再生能源发电预测、设备参数设置和约束条件处理等功能模块，采用加权目标函数平衡经…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.532Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/什么是哈希表详解c哈希表.html">什么是哈希表详解c哈希表</a></h3>
+        <p class="post-excerpt">什么是哈希表？</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.463Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/为什么new分配在堆上函数变量在栈上递归调用时栈内存的变化过程.html">为什么new分配在堆上函数变量在栈上递归调用时栈内存的变化过程</a></h3>
+        <p class="post-excerpt">在 C++ 里，new 运算符分配的内存位于堆上，而函数的局部变量存于栈上，这是由它们各自的特性和设计目的决定的，下面为你详细解释：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.430Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

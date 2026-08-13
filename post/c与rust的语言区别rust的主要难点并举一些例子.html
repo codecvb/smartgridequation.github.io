@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>c与rust的语言区别rust的主要难点并举一些例子 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/c-c-与-rust.html">C/C++ 与 Rust</a>
+        </nav>
+        <h1 class="post-title">c与rust的语言区别rust的主要难点并举一些例子</h1>
+        <p class="post-deck">C++ 和 Rust 都是系统级编程语言，它们在设计目标、语法、内存管理等方面存在诸多区别，以下为你详细介绍：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.839Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>11 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-7.html">C/C++</a>
+          
+            <a class="tag-chip" href="../tags/tag-8.html">Rust</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>C++ 和 Rust 都是系统级编程语言，它们在设计目标、语法、内存管理等方面存在诸多区别，以下为你详细介绍：</p>
+<h4 id="设计目标" class="prose-heading">设计目标</h4>
+<ul>
+<li><strong>C++</strong>：C++ 最初是为了给 C 语言添加面向对象编程特性而设计的，之后不断发展，旨在提供高性能、灵活性和对底层硬件的直接控制，适用于操作系统、游戏开发、嵌入式系统等领域。</li>
+<li><strong>Rust</strong>：Rust 的设计目标是在保证高性能的同时，提供内存安全和线程安全，避免出现诸如空指针引用、数据竞争等常见的编程错误，主要用于系统编程、网络服务、区块链等领域。</li>
+</ul>
+<h4 id="语法" class="prose-heading">语法</h4>
+<ul>
+<li><strong>类和对象</strong>：
+<ul>
+<li><strong>C++</strong>：使用<code>class</code>关键字来定义类，支持多重继承，这使得代码结构可以更加灵活，但也增加了代码的复杂性和维护难度。</li>
+<li><strong>Rust</strong>：没有传统意义上的类和多重继承，它通过结构体（<code>struct</code>）和枚举（<code>enum</code>）结合<code>trait</code>来实现类似的功能，代码结构相对更加清晰和简洁。</li>
+</ul>
+</li>
+<li><strong>泛型</strong>：
+<ul>
+<li><strong>C++</strong>：使用模板（<code>template</code>）实现泛型编程，模板可以应用于函数和类。模板的实例化是在编译时进行的，这可能会导致编译时间变长，并且错误信息有时会比较晦涩难懂。</li>
+<li><strong>Rust</strong>：同样支持泛型编程，但语法更加简洁，并且编译器会在编译时进行更严格的类型检查，错误信息通常更加友好和易于理解。</li>
+</ul>
+</li>
+</ul>
+<h4 id="内存管理" class="prose-heading">内存管理</h4>
+<ul>
+<li><strong>C++</strong>：提供了手动内存管理（使用<code>new</code>和<code>delete</code>）和智能指针（如<code>std::shared_ptr</code>、<code>std::unique_ptr</code>）两种方式。手动内存管理需要开发者自己负责内存的分配和释放，容易出现内存泄漏和悬空指针等问题；智能指针虽然可以在一定程度上避免这些问题，但使用不当仍然可能导致错误。</li>
+<li><strong>Rust</strong>：采用所有权系统来管理内存，编译器在编译时会根据所有权规则进行检查，确保内存安全。开发者不需要手动释放内存，也不会出现悬空指针和内存泄漏的问题。</li>
+</ul>
+<h4 id="并发编程" class="prose-heading">并发编程</h4>
+<ul>
+<li><strong>C++</strong>：提供了标准库中的线程库（<code>std::thread</code>）和同步原语（如<code>std::mutex</code>、<code>std::condition_variable</code>）来支持并发编程。但在多线程环境下，数据竞争和死锁等问题需要开发者自己小心处理。</li>
+<li><strong>Rust</strong>：通过所有权系统和<code>Send</code>、<code>Sync</code>这两个<code>trait</code>来保证并发安全。编译器会在编译时检查代码是否存在数据竞争等问题，大大减少了并发编程中的错误。</li>
+</ul>
+<h4 id="错误处理" class="prose-heading">错误处理</h4>
+<ul>
+<li><strong>C++</strong>：使用异常处理机制（<code>try</code>、<code>catch</code>、<code>throw</code>）来处理错误。异常处理可以跨越函数调用栈，但可能会导致性能开销，并且在一些性能敏感的场景中使用不当可能会影响程序的性能。</li>
+<li><strong>Rust</strong>：采用<code>Result</code>和<code>Option</code>枚举类型来处理错误。<code>Result</code>类型用于可能会失败的操作，<code>Option</code>类型用于可能为空的值。这种方式使得错误处理更加显式，开发者需要在代码中明确处理可能出现的错误。</li>
+</ul>
+<h4 id="示例代码对比" class="prose-heading">示例代码对比</h4>
+<p>下面是一个简单的示例，展示了 C++ 和 Rust 在函数定义和调用上的区别。</p>
+<p><strong>C++ 示例代码</strong></p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+
+<span class="hljs-comment">// 定义一个函数，返回两个整数的和</span>
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">add</span><span class="hljs-params">(<span class="hljs-type">int</span> a, <span class="hljs-type">int</span> b)</span> </span>{
+    <span class="hljs-keyword">return</span> a + b;
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-type">int</span> result = <span class="hljs-built_in">add</span>(<span class="hljs-number">3</span>, <span class="hljs-number">5</span>);
+    std::cout &lt;&lt; <span class="hljs-string">&quot;The result is: &quot;</span> &lt;&lt; result &lt;&lt; std::endl;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<p><strong>Rust 示例代码</strong></p>
+<pre class="hljs"><code class="language-rust"><span class="hljs-comment">// 定义一个函数，返回两个整数的和</span>
+<span class="hljs-keyword">fn</span> <span class="hljs-title function_">add</span>(a: <span class="hljs-type">i32</span>, b: <span class="hljs-type">i32</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">i32</span> {
+    a + b
+}
+
+<span class="hljs-keyword">fn</span> <span class="hljs-title function_">main</span>() {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">result</span> = <span class="hljs-title function_ invoke__">add</span>(<span class="hljs-number">3</span>, <span class="hljs-number">5</span>);
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;The result is: {}&quot;</span>, result);
+}
+</code></pre>
+<p>通过对比可以看出，C++ 和 Rust 在语法上有一些相似之处，但也存在明显的差异。C++ 的代码需要包含头文件，并且使用<code>std::</code>来访问标准库中的函数和对象；而 Rust 的代码更加简洁，不需要显式地引入头文件。</p>
+<p>Rust 是一门注重安全性、性能和并发的系统编程语言，它有几个比较突出的难点，下面为你详细介绍并给出示例：</p>
+<h4 id="所有权系统" class="prose-heading">所有权系统</h4>
+<p>所有权是 Rust 的核心特性，它保证了内存安全且无需垃圾回收。但理解和运用所有权规则对初学者而言颇具难度。所有权规则如下：</p>
+<ul>
+<li>Rust 中的每个值都有一个变量作为其所有者。</li>
+<li>同一时间内，一个值只能有一个所有者。</li>
+<li>当所有者离开作用域时，值会被丢弃。</li>
+</ul>
+<p><strong>示例代码</strong></p>
+<pre class="hljs"><code class="language-rust"><span class="hljs-keyword">fn</span> <span class="hljs-title function_">main</span>() {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">s1</span> = <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;hello&quot;</span>);
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">s2</span> = s1;
+    <span class="hljs-comment">// 下面这行代码会报错，因为s1的所有权已经转移给s2</span>
+    <span class="hljs-comment">// println!(&quot;{}&quot;, s1);</span>
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;{}&quot;</span>, s2);
+}
+</code></pre>
+<p>在这个例子里，<code>s1</code> 原本拥有 <code>String</code> 类型的值 <code>&quot;hello&quot;</code>。当执行 <code>let s2 = s1;</code> 时，所有权从 <code>s1</code> 转移到了 <code>s2</code>，之后再使用 <code>s1</code> 就会引发编译错误。</p>
+<h4 id="生命周期注解" class="prose-heading">生命周期注解</h4>
+<p>生命周期注解用于确保引用总是指向有效的数据。它有助于编译器理解引用的存活时间，防止悬空引用。</p>
+<p><strong>示例代码</strong></p>
+<pre class="hljs"><code class="language-rust"><span class="hljs-keyword">fn</span> <span class="hljs-title function_">longest</span>&lt;<span class="hljs-symbol">&#x27;a</span>&gt;(x: &amp;<span class="hljs-symbol">&#x27;a</span> <span class="hljs-type">str</span>, y: &amp;<span class="hljs-symbol">&#x27;a</span> <span class="hljs-type">str</span>) <span class="hljs-punctuation">-&gt;</span> &amp;<span class="hljs-symbol">&#x27;a</span> <span class="hljs-type">str</span> {
+    <span class="hljs-keyword">if</span> x.<span class="hljs-title function_ invoke__">len</span>() &gt; y.<span class="hljs-title function_ invoke__">len</span>() {
+        x
+    } <span class="hljs-keyword">else</span> {
+        y
+    }
+}
+
+<span class="hljs-keyword">fn</span> <span class="hljs-title function_">main</span>() {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">string1</span> = <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;abcd&quot;</span>);
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">string2</span> = <span class="hljs-string">&quot;xyz&quot;</span>;
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">result</span> = <span class="hljs-title function_ invoke__">longest</span>(&amp;string1, string2);
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;The longest string is {}&quot;</span>, result);
+}
+</code></pre>
+<p>在 <code>longest</code> 函数中，<code>'a</code> 是生命周期注解，它表明参数 <code>x</code> 和 <code>y</code> 以及返回值的生命周期必须至少和 <code>'a</code> 一样长。</p>
+<h4 id="trait-系统" class="prose-heading">Trait 系统</h4>
+<p>Trait 类似于其他语言的接口，它定义了一组可以被类型实现的方法。Trait 的使用和理解，尤其是关联类型、Trait 边界和 Trait 对象，对初学者而言是个挑战。</p>
+<p><strong>示例代码</strong></p>
+<pre class="hljs"><code class="language-rust"><span class="hljs-keyword">trait</span> <span class="hljs-title class_">Summary</span> {
+    <span class="hljs-keyword">fn</span> <span class="hljs-title function_">summarize</span>(&amp;<span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">String</span>;
+}
+
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">NewsArticle</span> {
+    headline: <span class="hljs-type">String</span>,
+    location: <span class="hljs-type">String</span>,
+    author: <span class="hljs-type">String</span>,
+    content: <span class="hljs-type">String</span>,
+}
+
+<span class="hljs-keyword">impl</span> <span class="hljs-title class_">Summary</span> <span class="hljs-keyword">for</span> <span class="hljs-title class_">NewsArticle</span> {
+    <span class="hljs-keyword">fn</span> <span class="hljs-title function_">summarize</span>(&amp;<span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">String</span> {
+        <span class="hljs-built_in">format!</span>(<span class="hljs-string">&quot;{}, by {} ({})&quot;</span>, <span class="hljs-keyword">self</span>.headline, <span class="hljs-keyword">self</span>.author, <span class="hljs-keyword">self</span>.location)
+    }
+}
+
+<span class="hljs-keyword">fn</span> <span class="hljs-title function_">main</span>() {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">article</span> = NewsArticle {
+        headline: <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;Penguins win the Stanley Cup Championship!&quot;</span>),
+        location: <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;Pittsburgh, PA, USA&quot;</span>),
+        author: <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;Iceburgh&quot;</span>),
+        content: <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;The Pittsburgh Penguins once again are the best \
+                              hockey team in the NHL.&quot;</span>),
+    };
+
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;New article available! {}&quot;</span>, article.<span class="hljs-title function_ invoke__">summarize</span>());
+}
+</code></pre>
+<p>在这个例子中，定义了一个 <code>Summary</code> Trait，然后让 <code>NewsArticle</code> 结构体实现了这个 Trait。通过这种方式，<code>NewsArticle</code> 类型的实例就可以调用 <code>summarize</code> 方法。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#设计目标">设计目标</a>
+          
+            <a class="toc-level-4" href="#语法">语法</a>
+          
+            <a class="toc-level-4" href="#内存管理">内存管理</a>
+          
+            <a class="toc-level-4" href="#并发编程">并发编程</a>
+          
+            <a class="toc-level-4" href="#错误处理">错误处理</a>
+          
+            <a class="toc-level-4" href="#示例代码对比">示例代码对比</a>
+          
+            <a class="toc-level-4" href="#所有权系统">所有权系统</a>
+          
+            <a class="toc-level-4" href="#生命周期注解">生命周期注解</a>
+          
+            <a class="toc-level-4" href="#trait-系统">Trait 系统</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/c二进制字符串与十六进制字符串相互转换.html">
+      <span>上一篇</span>
+      <strong>C二进制字符串与十六进制字符串相互转换</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/c20的协程简介.html">
+      <span>下一篇</span>
+      <strong>C20的协程简介</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/编写有内存漏洞的c代码并实现内存注入的示例一个程序注入另一个程序.html">编写有内存漏洞的C代码并实现内存注入的示例一个程序注入另一个程序</a></h3>
+        <p class="post-excerpt">实现思路</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.956Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/用c语言实现的回调函数案例涵盖基础用法及不同消息机制gui模拟网络请求模拟状态机消息队列.html">用C语言实现的回调函数案例涵盖基础用法及不同消息机制GUI模拟网络请求模拟状态机消息队列</a></h3>
+        <p class="post-excerpt">以下是用 C 语言实现的回调函数案例，涵盖基础用法及不同消息机制（GUI 模拟、网络请求模拟、状态机、消息队列），包含详细注释和解释。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.946Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/推荐比mini-stl更好的c实现项目代码.html">推荐比mini stl更好的C实现项目代码</a></h3>
+        <p class="post-excerpt">代码来源 -- STL模拟: STL模拟 的各类实现 - Gitee.com</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.937Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

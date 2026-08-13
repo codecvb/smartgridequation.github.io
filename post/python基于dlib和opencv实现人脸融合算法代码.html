@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Python基于Dlib和OpenCV实现人脸融合算法代码 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">Python基于Dlib和OpenCV实现人脸融合算法代码</h1>
+        <p class="post-deck">该代码实现了一个基于Dlib和OpenCV的人脸融合工具FaceMerger。主要功能包括：1) 使用Dlib检测68个人脸特征点；2) 通过三角剖分和仿射变换将源人脸特征点映射到目标人脸；3) 采用泊松融合(seamlessClone)实现自然过渡。核心步骤为：提取特征点→计算凸包→三角剖分→逐三角形变形→泊松融合。最终输出将源人脸特征区域无缝融合到目标人脸上的结果。该算法适用于需要保持目标人脸…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.769Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>12 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-5.html">人工智能</a>
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+            <a class="tag-chip" href="../tags/tag-28.html">OpenCV</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>该代码实现了一个基于Dlib和OpenCV的人脸融合工具FaceMerger。主要功能包括：1) 使用Dlib检测68个人脸特征点；2) 通过三角剖分和仿射变换将源人脸特征点映射到目标人脸；3) 采用泊松融合(seamlessClone)实现自然过渡。核心步骤为：提取特征点→计算凸包→三角剖分→逐三角形变形→泊松融合。最终输出将源人脸特征区域无缝融合到目标人脸上的结果。该算法适用于需要保持目标人脸整体结构同时融合源人脸特征的场景，如人脸编辑、特效制作等应用。</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> cv2
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> dlib
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">FaceMerger</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, predictor_path=<span class="hljs-string">&quot;shape_predictor_68_face_landmarks.dat&quot;</span></span>):
+        <span class="hljs-variable language_">self</span>.detector = dlib.get_frontal_face_detector()
+        <span class="hljs-variable language_">self</span>.predictor = dlib.shape_predictor(predictor_path)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_landmarks</span>(<span class="hljs-params">self, image</span>):
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        faces = <span class="hljs-variable language_">self</span>.detector(gray, <span class="hljs-number">1</span>)
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(faces) == <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;No face detected&quot;</span>)
+
+        shape = <span class="hljs-variable language_">self</span>.predictor(gray, faces[<span class="hljs-number">0</span>])
+        landmarks = np.array([(p.x, p.y) <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> shape.parts()])
+        <span class="hljs-keyword">return</span> landmarks
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">apply_affine_transform</span>(<span class="hljs-params">self, src, src_tri, dst_tri, size</span>):
+        warp_mat = cv2.getAffineTransform(np.float32(src_tri), np.float32(dst_tri))
+        dst = cv2.warpAffine(src, warp_mat, (size[<span class="hljs-number">0</span>], size[<span class="hljs-number">1</span>]), <span class="hljs-literal">None</span>,
+                             flags=cv2.INTER_LINEAR,
+                             borderMode=cv2.BORDER_REFLECT_101)
+        <span class="hljs-keyword">return</span> dst
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">warp_triangle</span>(<span class="hljs-params">self, img1, img2, tri1, tri2</span>):
+        rect1 = cv2.boundingRect(np.float32([tri1]))
+        rect2 = cv2.boundingRect(np.float32([tri2]))
+
+        tri1_rect = [(p[<span class="hljs-number">0</span>] - rect1[<span class="hljs-number">0</span>], p[<span class="hljs-number">1</span>] - rect1[<span class="hljs-number">1</span>]) <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> tri1]
+        tri2_rect = [(p[<span class="hljs-number">0</span>] - rect2[<span class="hljs-number">0</span>], p[<span class="hljs-number">1</span>] - rect2[<span class="hljs-number">1</span>]) <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> tri2]
+
+        mask = np.zeros((rect2[<span class="hljs-number">3</span>], rect2[<span class="hljs-number">2</span>], <span class="hljs-number">3</span>), dtype=np.float32)
+        cv2.fillConvexPoly(mask, np.int32(tri2_rect), (<span class="hljs-number">1.0</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">1.0</span>), <span class="hljs-number">16</span>, <span class="hljs-number">0</span>)
+
+        img1_rect = img1[rect1[<span class="hljs-number">1</span>]:rect1[<span class="hljs-number">1</span>] + rect1[<span class="hljs-number">3</span>],
+                         rect1[<span class="hljs-number">0</span>]:rect1[<span class="hljs-number">0</span>] + rect1[<span class="hljs-number">2</span>]]
+
+        size = (rect2[<span class="hljs-number">2</span>], rect2[<span class="hljs-number">3</span>])
+        warped_rect = <span class="hljs-variable language_">self</span>.apply_affine_transform(img1_rect, tri1_rect, tri2_rect, size)
+
+        img2_rect = img2[rect2[<span class="hljs-number">1</span>]:rect2[<span class="hljs-number">1</span>] + rect2[<span class="hljs-number">3</span>],
+                         rect2[<span class="hljs-number">0</span>]:rect2[<span class="hljs-number">0</span>] + rect2[<span class="hljs-number">2</span>]]
+
+        img2_rect = img2_rect * (<span class="hljs-number">1</span> - mask) + warped_rect * mask
+        img2[rect2[<span class="hljs-number">1</span>]:rect2[<span class="hljs-number">1</span>] + rect2[<span class="hljs-number">3</span>],
+             rect2[<span class="hljs-number">0</span>]:rect2[<span class="hljs-number">0</span>] + rect2[<span class="hljs-number">2</span>]] = img2_rect
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">seamless_clone</span>(<span class="hljs-params">self, src, dst, mask, center</span>):
+        <span class="hljs-string">&quot;&quot;&quot;泊松融合&quot;&quot;&quot;</span>
+        output = cv2.seamlessClone(src, dst, mask, center, cv2.NORMAL_CLONE)
+        <span class="hljs-keyword">return</span> output
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">merge_faces</span>(<span class="hljs-params">self, img1, img2</span>):
+        landmarks1 = <span class="hljs-variable language_">self</span>.get_landmarks(img1)
+        landmarks2 = <span class="hljs-variable language_">self</span>.get_landmarks(img2)
+
+        <span class="hljs-comment"># 凸包点索引（68个特征点的凸包）</span>
+        hull_indices = cv2.convexHull(landmarks2, returnPoints=<span class="hljs-literal">False</span>).flatten()
+        hull2 = landmarks2[hull_indices]
+        hull1 = landmarks1[hull_indices]
+
+        <span class="hljs-comment"># 三角剖分</span>
+        rect = (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, img2.shape[<span class="hljs-number">1</span>], img2.shape[<span class="hljs-number">0</span>])
+        subdiv = cv2.Subdiv2D(rect)
+        <span class="hljs-keyword">for</span> point <span class="hljs-keyword">in</span> hull2:
+            subdiv.insert((<span class="hljs-built_in">int</span>(point[<span class="hljs-number">0</span>]), <span class="hljs-built_in">int</span>(point[<span class="hljs-number">1</span>])))
+        triangles = subdiv.getTriangleList()
+        triangles = np.array(triangles, dtype=np.int32)
+
+        <span class="hljs-comment"># 创建掩码和图像副本</span>
+        mask = np.zeros(img2.shape, dtype=img2.dtype)
+        img1_warped = np.copy(img2)
+
+        <span class="hljs-comment"># 对每个三角形进行变形</span>
+        <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> triangles:
+            pt1 = (t[<span class="hljs-number">0</span>], t[<span class="hljs-number">1</span>])
+            pt2 = (t[<span class="hljs-number">2</span>], t[<span class="hljs-number">3</span>])
+            pt3 = (t[<span class="hljs-number">4</span>], t[<span class="hljs-number">5</span>])
+
+            idx1 = np.where((hull2 == pt1).<span class="hljs-built_in">all</span>(axis=<span class="hljs-number">1</span>))[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>]
+            idx2 = np.where((hull2 == pt2).<span class="hljs-built_in">all</span>(axis=<span class="hljs-number">1</span>))[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>]
+            idx3 = np.where((hull2 == pt3).<span class="hljs-built_in">all</span>(axis=<span class="hljs-number">1</span>))[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>]
+
+            tri2 = [hull2[idx1], hull2[idx2], hull2[idx3]]
+            tri1 = [hull1[idx1], hull1[idx2], hull1[idx3]]
+
+            <span class="hljs-variable language_">self</span>.warp_triangle(img1, img1_warped, tri1, tri2)
+            cv2.fillConvexPoly(mask, np.int32(tri2), (<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>))
+
+        <span class="hljs-comment"># 泊松融合</span>
+        center = (<span class="hljs-built_in">int</span>(np.mean(hull2[:, <span class="hljs-number">0</span>])), <span class="hljs-built_in">int</span>(np.mean(hull2[:, <span class="hljs-number">1</span>])))
+        output = <span class="hljs-variable language_">self</span>.seamless_clone(img1_warped, img2, mask, center)
+        <span class="hljs-keyword">return</span> output
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    merger = FaceMerger(<span class="hljs-string">&quot;shape_predictor_68_face_landmarks.dat&quot;</span>)
+
+    <span class="hljs-comment"># 读取图片</span>
+    img1 = cv2.imread(<span class="hljs-string">&quot;6.jpg&quot;</span>)  <span class="hljs-comment"># 源人脸</span>
+    img2 = cv2.imread(<span class="hljs-string">&quot;5.jpg&quot;</span>)  <span class="hljs-comment"># 目标人脸</span>
+
+    <span class="hljs-comment"># 调整图像尺寸一致（可选）</span>
+    img1 = cv2.resize(img1, (<span class="hljs-number">500</span>, <span class="hljs-number">500</span>))
+    img2 = cv2.resize(img2, (<span class="hljs-number">500</span>, <span class="hljs-number">500</span>))
+
+    <span class="hljs-comment"># 执行融合</span>
+    result = merger.merge_faces(img1, img2)
+
+    <span class="hljs-comment"># 显示结果</span>
+    cv2.imshow(<span class="hljs-string">&quot;Source Face&quot;</span>, img1)
+    cv2.imshow(<span class="hljs-string">&quot;Target Face&quot;</span>, img2)
+    cv2.imshow(<span class="hljs-string">&quot;Merged Face&quot;</span>, result)
+    cv2.waitKey(<span class="hljs-number">0</span>)
+    cv2.destroyAllWindows()
+
+    <span class="hljs-comment"># 保存结果</span>
+    cv2.imwrite(<span class="hljs-string">&quot;merged_result.jpg&quot;</span>, result)
+</code></pre>
+<p><img src="../uploads/csdn/python%E5%9F%BA%E4%BA%8Edlib%E5%92%8Copencv%E5%AE%9E%E7%8E%B0%E4%BA%BA%E8%84%B8%E8%9E%8D%E5%90%88%E7%AE%97%E6%B3%95%E4%BB%A3%E7%A0%81/img-01.png" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/python实现视频目标检测与轨迹跟踪流程详解转载.html">
+      <span>上一篇</span>
+      <strong>Python实现视频目标检测与轨迹跟踪流程详解转载</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/python图片文字识别ocr-tesseract版本.html">
+      <span>下一篇</span>
+      <strong>Python图片文字识别OCR Tesseract版本</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/详细案例说明ai所用的算法列出公式用python代码说明用法.html">详细案例说明AI所用的算法列出公式用Python代码说明用法</a></h3>
+        <p class="post-excerpt">我们来详细拆解一个最经典、最基础的 AI 算法 ——线性回归 (Linear Regression)。它是理解几乎所有更复杂 AI 模型（如神经网络）的基石。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.312Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/无人机表演点云路径规划python版.html">无人机表演点云路径规划Python版</a></h3>
+        <p class="post-excerpt">摘要：本文介绍了一个无人机表演路径规划系统，支持加载两个TXT格式的点云数据文件进行路径规划。系统采用PyQt5框架开发3D可视化界面，包含点云加载、路径优化、动画控制等功能模块。核心算法通过KD树实现点云匹配和路径优化，支持多种插值方式生成平滑动画。系统可调整无人机数量、大小、颜色等参数，提供3D可视化视图和轨迹显示功能，适用于大型无人机编队表演的路径规划需求。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.134Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/yolopython实现多种物体识别时钟水杯小熊路人车辆.html">YOLOpython实现多种物体识别时钟水杯小熊路人车辆</a></h3>
+        <p class="post-excerpt">本文介绍了一个基于YOLO的目标检测类ObjectDetector，支持YOLOv8标准模型和YOLO-World自定义模型。该类提供了两种模型加载方式：标准YOLOv8模型（80类）和可自定义检测类别的YOLO-World模型。主要功能包括模型自动加载和单张图片检测，能够输出检测目标的类别、数量和平均置信度，并保存检测结果图像。使用示例展示了如何初始化检测器并进行图片检测。该实现具有自动回退机制…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.835Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

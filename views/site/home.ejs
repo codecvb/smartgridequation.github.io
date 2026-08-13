@@ -1,84 +1,74 @@
-<section class="masthead">
-  <div class="wrap">
-    <div class="masthead-grid">
-      <div class="masthead-main">
-        <p class="kicker">PERSONAL JOURNAL</p>
-        <h1><%= site.siteTitle %></h1>
-        <p class="lede"><%= site.siteSubtitle %></p>
-        <form class="search-form" action="<%= staticSite ? 'search.html' : '/search' %>" method="get" role="search">
-          <input name="q" type="search" placeholder="搜索文章…" aria-label="搜索文章">
-          <button type="submit">搜索</button>
-        </form>
-      </div>
-      <dl class="stat-list">
-        <div><dt>文章</dt><dd><%= stats.posts %></dd></div>
-        <div><dt>阅读</dt><dd><%= stats.views %></dd></div>
-        <div><dt>标签</dt><dd><%= stats.tags %></dd></div>
-      </dl>
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-copy">
+      <p class="kicker">PERSONAL NOTES</p>
+      <h1><%= site.siteTitle %></h1>
+      <p class="lede"><%= site.siteSubtitle %></p>
+      <form class="search-form" action="<%= staticSite ? 'search.html' : '/search' %>" method="get" role="search">
+        <input name="q" type="search" placeholder="搜索文章…" aria-label="搜索文章">
+        <button type="submit">搜索</button>
+      </form>
     </div>
-    <div class="masthead-rule"><span></span></div>
+    <dl class="stat-list">
+      <div><dt>文章</dt><dd><%= stats.posts %></dd></div>
+      <div><dt>分类</dt><dd><%= stats.categories %></dd></div>
+      <div><dt>阅读</dt><dd><%= stats.views %></dd></div>
+    </dl>
   </div>
 </section>
 
-<% if (featured) { %>
-<section class="wrap featured-section">
-  <div class="featured">
-    <div class="featured-head">
-      <span class="featured-label">最新</span>
-      <h2 class="featured-title"><a href="/post/<%= featured.slug %>"><%= featured.title %></a></h2>
-    </div>
-    <p class="featured-summary"><%= featured.summary %></p>
-    <div class="post-meta">
-      <time datetime="<%= featured.publishedAt %>"><%= formatDate(featured.publishedAt) %></time>
-      <span>·</span>
-      <span><%= readTime(featured.content) %> 分钟</span>
-      <span>·</span>
-      <span><%= featured.viewCount %> 次阅读</span>
-    </div>
-    <div class="tag-row">
-      <% featured.tags.forEach(function(tag) { %>
-        <a class="tag-chip" href="/tags?tag=<%= encodeURIComponent(tag) %>"><%= tag %></a>
-      <% }) %>
-    </div>
-    <a class="text-link" href="/post/<%= featured.slug %>">继续阅读 →</a>
-  </div>
-</section>
-<% } %>
-
-<section class="wrap posts-section">
+<section class="wrap section categories-section">
   <div class="section-head">
-    <h2>近期文章</h2>
-    <a href="/archive">查看全部</a>
-  </div>
-  <% if (posts.length) { %>
-    <div class="post-grid">
-      <% posts.forEach(function(post, i) { %>
-        <article class="post-card">
-          <span class="post-index"><%= String(i + 2).padStart(2, '0') %></span>
-          <h3 class="post-card-title"><a href="/post/<%= post.slug %>"><%= post.title %></a></h3>
-          <p class="post-excerpt"><%= post.summary || '……' %></p>
-          <div class="tag-row">
-            <% post.tags.slice(0, 3).forEach(function(tag) { %>
-              <a class="tag-chip" href="/tags?tag=<%= encodeURIComponent(tag) %>"><%= tag %></a>
-            <% }) %>
-          </div>
-          <div class="post-meta">
-            <time datetime="<%= post.publishedAt %>"><%= formatDate(post.publishedAt) %></time>
-            <span>·</span>
-            <span><%= post.viewCount %> 阅读</span>
-          </div>
-        </article>
-      <% }) %>
+    <div>
+      <p class="eyebrow">COLLECTIONS</p>
+      <h2>分类目录</h2>
     </div>
-  <% } else { %>
-    <p class="empty">还没有文章，去后台写下第一篇吧。</p>
-  <% } %>
+    <a class="text-link" href="/categories">查看全部</a>
+  </div>
+  <div class="category-grid">
+    <% (categories || []).forEach(function(cat, i) { %>
+      <a class="category-card" href="/category/<%= cat.slug %>" style="--card-index: <%= i %>">
+        <span class="category-num"><%= String(i + 1).padStart(2, '0') %></span>
+        <span class="category-name"><%= cat.name %></span>
+        <span class="category-count"><%= cat.count %> 篇</span>
+        <span class="category-arrow" aria-hidden="true">→</span>
+      </a>
+    <% }) %>
+  </div>
 </section>
 
-<section class="wrap tags-strip">
+<section class="wrap section recent-section">
   <div class="section-head">
-    <h2>标签</h2>
-    <a href="/tags">全部标签</a>
+    <div>
+      <p class="eyebrow">RECENT</p>
+      <h2>近期文章</h2>
+    </div>
+    <a class="text-link" href="/archive">全部归档</a>
+  </div>
+  <div class="recent-list">
+    <% posts.forEach(function(post, i) { %>
+      <article class="recent-item">
+        <span class="recent-index"><%= String(i + 1).padStart(2, '0') %></span>
+        <div class="recent-main">
+          <h3 class="recent-title"><a href="/post/<%= post.slug %>"><%= post.title %></a></h3>
+          <p class="recent-summary"><%= post.summary || '……' %></p>
+        </div>
+        <div class="recent-meta">
+          <span class="recent-category"><%= post.category || '随笔' %></span>
+          <time datetime="<%= post.publishedAt %>"><%= formatDate(post.publishedAt) %></time>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+</section>
+
+<section class="wrap section tags-section">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">TAGS</p>
+      <h2>标签</h2>
+    </div>
+    <a class="text-link" href="/tags">全部标签</a>
   </div>
   <div class="tag-cloud">
     <% tags.forEach(function(tag) { %>

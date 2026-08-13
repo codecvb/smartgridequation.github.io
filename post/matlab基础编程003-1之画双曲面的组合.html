@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>MATLAB基础编程003 1之画双曲面的组合 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/matlab-仿真.html">MATLAB 仿真</a>
+        </nav>
+        <h1 class="post-title">MATLAB基础编程003 1之画双曲面的组合</h1>
+        <p class="post-deck">（1）先画一个双曲面，代码如下：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.994Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>2 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>（1）先画一个双曲面，代码如下：</p>
+<pre class="hljs"><code class="language-cs">u = <span class="hljs-number">-32</span>:<span class="hljs-number">0.1</span>:<span class="hljs-number">32</span>;
+v = <span class="hljs-number">-32</span>:<span class="hljs-number">0.1</span>:<span class="hljs-number">32</span>;
+[<span class="hljs-meta">xx,yy</span>] = meshgrid(u,v);
+zz = (xx.^<span class="hljs-number">2</span>)/<span class="hljs-number">9</span>-(yy.^<span class="hljs-number">2</span>)/<span class="hljs-number">16</span>;
+mesh(xx,zz,yy)
+</code></pre>
+<p>效果如下：</p>
+<p><img src="../uploads/csdn/matlab%E5%9F%BA%E7%A1%80%E7%BC%96%E7%A8%8B003-1%E4%B9%8B%E7%94%BB%E5%8F%8C%E6%9B%B2%E9%9D%A2%E7%9A%84%E7%BB%84%E5%90%88/img-01.jpeg" alt=""></p>
+<p>（2）再画一个对称的的双曲面，代码如下:</p>
+<pre class="hljs"><code class="language-cs">u = <span class="hljs-number">-32</span>:<span class="hljs-number">0.1</span>:<span class="hljs-number">32</span>;
+v = <span class="hljs-number">-32</span>:<span class="hljs-number">0.1</span>:<span class="hljs-number">32</span>;
+[<span class="hljs-meta">xx,yy</span>] = meshgrid(u,v);
+zz = (xx.^<span class="hljs-number">2</span>)/<span class="hljs-number">9</span>-(yy.^<span class="hljs-number">2</span>)/<span class="hljs-number">16</span>;
+mesh(xx,yy,zz)
+hold <span class="hljs-keyword">on</span>
+u = <span class="hljs-number">-32</span>:<span class="hljs-number">0.1</span>:<span class="hljs-number">32</span>;
+v = <span class="hljs-number">-32</span>:<span class="hljs-number">0.1</span>:<span class="hljs-number">32</span>;
+[<span class="hljs-meta">xx,yy</span>] = meshgrid(u,v);
+zz = (xx.^<span class="hljs-number">2</span>)/<span class="hljs-number">9</span>-(yy.^<span class="hljs-number">2</span>)/<span class="hljs-number">16</span> - <span class="hljs-number">192</span>;
+mesh(xx,yy,-zz)
+</code></pre>
+<p>显示效果如下：</p>
+<p><img src="../uploads/csdn/matlab%E5%9F%BA%E7%A1%80%E7%BC%96%E7%A8%8B003-1%E4%B9%8B%E7%94%BB%E5%8F%8C%E6%9B%B2%E9%9D%A2%E7%9A%84%E7%BB%84%E5%90%88/img-02.jpeg" alt=""></p>
+<p>（3）无意中画出了另外的图形，效果如下：</p>
+<p><img src="../uploads/csdn/matlab%E5%9F%BA%E7%A1%80%E7%BC%96%E7%A8%8B003-1%E4%B9%8B%E7%94%BB%E5%8F%8C%E6%9B%B2%E9%9D%A2%E7%9A%84%E7%BB%84%E5%90%88/img-03.jpeg" alt=""></p>
+<p><img src="../uploads/csdn/matlab%E5%9F%BA%E7%A1%80%E7%BC%96%E7%A8%8B003-1%E4%B9%8B%E7%94%BB%E5%8F%8C%E6%9B%B2%E9%9D%A2%E7%9A%84%E7%BB%84%E5%90%88/img-04.gif" alt=""></p>
+<p>源代码来自百度经验，如有疑问，请您留言。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/matlab山地地形仿真与最高点到最低点最短路径.html">
+      <span>上一篇</span>
+      <strong>MATLAB山地地形仿真与最高点到最低点最短路径</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/matlab写最短路径的模拟代码一个小球从顶点出发以不同的时间到达终点可视化.html">
+      <span>下一篇</span>
+      <strong>MATLAB写最短路径的模拟代码一个小球从顶点出发以不同的时间到达终点可视化</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/凸包问题graham扫描算法matlab.html">凸包问题Graham扫描算法MATLAB</a></h3>
+        <p class="post-excerpt">算法要解决的问题</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.498Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

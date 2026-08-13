@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>MATLAB实现三天体三体运动相互纠缠的混沌运行可视化 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">MATLAB实现三天体三体运动相互纠缠的混沌运行可视化</h1>
+        <p class="post-deck">\## 核心功能</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.145Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>18 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p><img src="../uploads/csdn/matlab%E5%AE%9E%E7%8E%B0%E4%B8%89%E5%A4%A9%E4%BD%93%E4%B8%89%E4%BD%93%E8%BF%90%E5%8A%A8%E7%9B%B8%E4%BA%92%E7%BA%A0%E7%BC%A0%E7%9A%84%E6%B7%B7%E6%B2%8C%E8%BF%90%E8%A1%8C%E5%8F%AF%E8%A7%86%E5%8C%96/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/matlab%E5%AE%9E%E7%8E%B0%E4%B8%89%E5%A4%A9%E4%BD%93%E4%B8%89%E4%BD%93%E8%BF%90%E5%8A%A8%E7%9B%B8%E4%BA%92%E7%BA%A0%E7%BC%A0%E7%9A%84%E6%B7%B7%E6%B2%8C%E8%BF%90%E8%A1%8C%E5%8F%AF%E8%A7%86%E5%8C%96/img-02.jpeg" alt=""></p>
+<p>## 核心功能</p>
+<p>该MATLAB代码实现了**混沌三体系统的数值模拟与可视化**，基于经典的Burrau问题初始条件，展示三个不同质量天体在相互引力作用下的混沌运动。</p>
+<p>## 关键特性</p>
+<p>### 🔬 物理模型</p>
+<p>- **牛顿引力定律**：完整实现三体引力相互作用</p>
+<p>- **数值求解**：使用ODE45求解器进行高精度积分</p>
+<p>- **质量设置**：三个天体质量比为3:4:5（归一化）</p>
+<p>- **初始条件**：Burrau问题设置，从静止状态开始</p>
+<p>### 🎯 混沌特征体现</p>
+<p>- **不可预测轨迹**：复杂且永不重复的运动路径</p>
+<p>- **敏感依赖性**：对初始条件的极端敏感性</p>
+<p>- **不规则振荡**：天体间距离的混沌变化</p>
+<p>- **长期不可预测性**：确定性系统中的随机行为</p>
+<p>### 📊 可视化功能</p>
+<p>1. **实时动画**</p>
+<ul>
+<li>
+<p>彩色轨迹跟踪显示</p>
+</li>
+<li>
+<p>实时位置更新</p>
+</li>
+<li>
+<p>时间进度显示</p>
+</li>
+<li>
+<p>质量标签动态跟随</p>
+</li>
+</ul>
+<p>2. **分析图表**</p>
+<ul>
+<li>
+<p>完整运动轨迹图</p>
+</li>
+<li>
+<p>天体间距离随时间变化曲线</p>
+</li>
+<li>
+<p>多子图对比分析</p>
+</li>
+</ul>
+<p>### ⚙️ 技术实现</p>
+<p>- **坐标系**：二维平面运动模拟</p>
+<p>- **时间参数**：可调节模拟时长和步长</p>
+<p>- **视觉效果**：黑色背景配合彩色轨迹，优化观察体验</p>
+<p>- **性能优化**：跳帧显示和轨迹长度控制</p>
+<p>## 科学意义</p>
+<p>该代码完美展现了**三体问题的本质特征**：</p>
+<p>- 从简单物理定律衍生出极端复杂行为</p>
+<p>- 混沌系统中确定性方程产生不可预测结果</p>
+<p>- 为理解非线性动力学和混沌理论提供直观示例</p>
+<p>## 应用价值</p>
+<p>- 天体力学教学演示</p>
+<p>- 混沌理论可视化研究</p>
+<p>- 数值方法验证</p>
+<p>- 复杂系统行为分析</p>
+<p>这个模拟生动地再现了《三体》小说中描述的那种&quot;永恒混乱、不可预测&quot;的宇宙环境，将抽象的数学概念转化为直观的视觉体验。</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">three_body_chaotic</span></span>
+<span class="hljs-comment">% 混沌三体问题模拟</span>
+<span class="hljs-comment">% 使用Burrau问题初始条件</span>
+
+clf;
+clear;
+
+<span class="hljs-comment">% 物理常数</span>
+G = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 引力常数 (归一化)</span>
+
+<span class="hljs-comment">% 三个天体的质量 (归一化)</span>
+m = [<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>];
+
+<span class="hljs-comment">% 初始位置 - Burrau问题</span>
+r0 = [<span class="hljs-number">1</span>, <span class="hljs-number">3</span>;    <span class="hljs-comment">% 天体1 [x, y]</span>
+     <span class="hljs-number">-2</span>, <span class="hljs-number">-1</span>;   <span class="hljs-comment">% 天体2 [x, y]</span>
+     <span class="hljs-number">1</span>, <span class="hljs-number">-1</span>];   <span class="hljs-comment">% 天体3 [x, y]</span>
+
+<span class="hljs-comment">% 初始速度</span>
+v0 = [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>;    <span class="hljs-comment">% 天体1 [vx, vy]</span>
+     <span class="hljs-number">0</span>, <span class="hljs-number">0</span>;     <span class="hljs-comment">% 天体2 [vx, vy]</span>
+     <span class="hljs-number">0</span>, <span class="hljs-number">0</span>];    <span class="hljs-comment">% 天体3 [vx, vy]</span>
+
+<span class="hljs-comment">% 模拟参数</span>
+tspan = [<span class="hljs-number">0</span>, <span class="hljs-number">10</span>];  <span class="hljs-comment">% 时间范围</span>
+dt = <span class="hljs-number">0.01</span>;        <span class="hljs-comment">% 时间步长</span>
+
+<span class="hljs-comment">% 初始状态向量 [x1,y1,x2,y2,x3,y3, vx1,vy1,vx2,vy2,vx3,vy3]</span>
+y0 = [r0(<span class="hljs-number">1</span>,:), r0(<span class="hljs-number">2</span>,:), r0(<span class="hljs-number">3</span>,:), v0(<span class="hljs-number">1</span>,:), v0(<span class="hljs-number">2</span>,:), v0(<span class="hljs-number">3</span>,:)];
+
+<span class="hljs-comment">% 求解ODE</span>
+options = odeset(<span class="hljs-string">&#x27;RelTol&#x27;</span>,<span class="hljs-number">1e-8</span>,<span class="hljs-string">&#x27;AbsTol&#x27;</span>,<span class="hljs-number">1e-10</span>);
+[t, y] = ode45(@three_body_ode, tspan, y0, options, m, G);
+
+<span class="hljs-comment">% 提取轨迹</span>
+r1 = y(:,<span class="hljs-number">1</span>:<span class="hljs-number">2</span>);
+r2 = y(:,<span class="hljs-number">3</span>:<span class="hljs-number">4</span>);
+r3 = y(:,<span class="hljs-number">5</span>:<span class="hljs-number">6</span>);
+
+<span class="hljs-comment">% 创建动画</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">100</span>, <span class="hljs-number">100</span>, <span class="hljs-number">1000</span>, <span class="hljs-number">800</span>]);
+set(gcf, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;black&#x27;</span>);
+axis equal;
+<span class="hljs-built_in">hold</span> on;
+
+<span class="hljs-comment">% 设置坐标轴范围</span>
+margin = <span class="hljs-number">2</span>;
+x_vals = [r1(:,<span class="hljs-number">1</span>); r2(:,<span class="hljs-number">1</span>); r3(:,<span class="hljs-number">1</span>)];
+y_vals = [r1(:,<span class="hljs-number">2</span>); r2(:,<span class="hljs-number">2</span>); r3(:,<span class="hljs-number">2</span>)];
+xlim([<span class="hljs-built_in">min</span>(x_vals)-margin, <span class="hljs-built_in">max</span>(x_vals)+margin]);
+ylim([<span class="hljs-built_in">min</span>(y_vals)-margin, <span class="hljs-built_in">max</span>(y_vals)+margin]);
+
+<span class="hljs-comment">% 颜色设置</span>
+colors = [<span class="hljs-number">1</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>;    <span class="hljs-comment">% 浅红色</span>
+          <span class="hljs-number">0.5</span>, <span class="hljs-number">0.8</span>, <span class="hljs-number">0.5</span>;  <span class="hljs-comment">% 浅绿色</span>
+          <span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">1</span>];   <span class="hljs-comment">% 浅蓝色</span>
+
+<span class="hljs-comment">% 轨迹线</span>
+trace1 = <span class="hljs-built_in">plot</span>(<span class="hljs-built_in">nan</span>, <span class="hljs-built_in">nan</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, [colors(<span class="hljs-number">1</span>,:), <span class="hljs-number">0.3</span>], <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1</span>);
+trace2 = <span class="hljs-built_in">plot</span>(<span class="hljs-built_in">nan</span>, <span class="hljs-built_in">nan</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, [colors(<span class="hljs-number">2</span>,:), <span class="hljs-number">0.3</span>], <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1</span>);
+trace3 = <span class="hljs-built_in">plot</span>(<span class="hljs-built_in">nan</span>, <span class="hljs-built_in">nan</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, [colors(<span class="hljs-number">3</span>,:), <span class="hljs-number">0.3</span>], <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1</span>);
+
+<span class="hljs-comment">% 天体点</span>
+body1 = <span class="hljs-built_in">scatter</span>(<span class="hljs-built_in">nan</span>, <span class="hljs-built_in">nan</span>, <span class="hljs-number">100</span>, colors(<span class="hljs-number">1</span>,:), <span class="hljs-string">&#x27;filled&#x27;</span>);
+body2 = <span class="hljs-built_in">scatter</span>(<span class="hljs-built_in">nan</span>, <span class="hljs-built_in">nan</span>, <span class="hljs-number">100</span>, colors(<span class="hljs-number">2</span>,:), <span class="hljs-string">&#x27;filled&#x27;</span>);
+body3 = <span class="hljs-built_in">scatter</span>(<span class="hljs-built_in">nan</span>, <span class="hljs-built_in">nan</span>, <span class="hljs-number">100</span>, colors(<span class="hljs-number">3</span>,:), <span class="hljs-string">&#x27;filled&#x27;</span>);
+
+<span class="hljs-comment">% 质量标签</span>
+text(r0(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>), r0(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>), sprintf(<span class="hljs-string">&#x27;m=%.1f&#x27;</span>, m(<span class="hljs-number">1</span>)), <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">10</span>);
+text(r0(<span class="hljs-number">2</span>,<span class="hljs-number">1</span>), r0(<span class="hljs-number">2</span>,<span class="hljs-number">2</span>), sprintf(<span class="hljs-string">&#x27;m=%.1f&#x27;</span>, m(<span class="hljs-number">2</span>)), <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">10</span>);
+text(r0(<span class="hljs-number">3</span>,<span class="hljs-number">1</span>), r0(<span class="hljs-number">3</span>,<span class="hljs-number">2</span>), sprintf(<span class="hljs-string">&#x27;m=%.1f&#x27;</span>, m(<span class="hljs-number">3</span>)), <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">10</span>);
+
+title(<span class="hljs-string">&#x27;混沌三体问题 - Burrau问题&#x27;</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">14</span>);
+xlabel(<span class="hljs-string">&#x27;X坐标&#x27;</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>);
+ylabel(<span class="hljs-string">&#x27;Y坐标&#x27;</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>);
+set(gca, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;black&#x27;</span>, <span class="hljs-string">&#x27;XColor&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>, <span class="hljs-string">&#x27;YColor&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>);
+
+<span class="hljs-comment">% 动画参数</span>
+skip_frames = <span class="hljs-number">5</span>;  <span class="hljs-comment">% 跳帧以提高动画速度</span>
+trace_length = <span class="hljs-number">100</span>;  <span class="hljs-comment">% 轨迹长度</span>
+
+<span class="hljs-comment">% 动画循环</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:skip_frames:<span class="hljs-built_in">length</span>(t)
+    <span class="hljs-comment">% 更新轨迹（只显示最近的部分）</span>
+    start_idx = <span class="hljs-built_in">max</span>(<span class="hljs-number">1</span>, <span class="hljs-built_in">i</span>-trace_length);
+    idx_range = start_idx:<span class="hljs-built_in">i</span>;
+
+    set(trace1, <span class="hljs-string">&#x27;XData&#x27;</span>, r1(idx_range,<span class="hljs-number">1</span>), <span class="hljs-string">&#x27;YData&#x27;</span>, r1(idx_range,<span class="hljs-number">2</span>));
+    set(trace2, <span class="hljs-string">&#x27;XData&#x27;</span>, r2(idx_range,<span class="hljs-number">1</span>), <span class="hljs-string">&#x27;YData&#x27;</span>, r2(idx_range,<span class="hljs-number">2</span>));
+    set(trace3, <span class="hljs-string">&#x27;XData&#x27;</span>, r3(idx_range,<span class="hljs-number">1</span>), <span class="hljs-string">&#x27;YData&#x27;</span>, r3(idx_range,<span class="hljs-number">2</span>));
+
+    <span class="hljs-comment">% 更新天体位置</span>
+    set(body1, <span class="hljs-string">&#x27;XData&#x27;</span>, r1(<span class="hljs-built_in">i</span>,<span class="hljs-number">1</span>), <span class="hljs-string">&#x27;YData&#x27;</span>, r1(<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>));
+    set(body2, <span class="hljs-string">&#x27;XData&#x27;</span>, r2(<span class="hljs-built_in">i</span>,<span class="hljs-number">1</span>), <span class="hljs-string">&#x27;YData&#x27;</span>, r2(<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>));
+    set(body3, <span class="hljs-string">&#x27;XData&#x27;</span>, r3(<span class="hljs-built_in">i</span>,<span class="hljs-number">1</span>), <span class="hljs-string">&#x27;YData&#x27;</span>, r3(<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>));
+
+    <span class="hljs-comment">% 更新质量标签位置</span>
+    delete(findall(gca, <span class="hljs-string">&#x27;Type&#x27;</span>, <span class="hljs-string">&#x27;text&#x27;</span>, <span class="hljs-string">&#x27;String&#x27;</span>, sprintf(<span class="hljs-string">&#x27;m=%.1f&#x27;</span>, m(<span class="hljs-number">1</span>))));
+    delete(findall(gca, <span class="hljs-string">&#x27;Type&#x27;</span>, <span class="hljs-string">&#x27;text&#x27;</span>, <span class="hljs-string">&#x27;String&#x27;</span>, sprintf(<span class="hljs-string">&#x27;m=%.1f&#x27;</span>, m(<span class="hljs-number">2</span>))));
+    delete(findall(gca, <span class="hljs-string">&#x27;Type&#x27;</span>, <span class="hljs-string">&#x27;text&#x27;</span>, <span class="hljs-string">&#x27;String&#x27;</span>, sprintf(<span class="hljs-string">&#x27;m=%.1f&#x27;</span>, m(<span class="hljs-number">3</span>))));
+
+    text(r1(<span class="hljs-built_in">i</span>,<span class="hljs-number">1</span>), r1(<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>), sprintf(<span class="hljs-string">&#x27;m=%.1f&#x27;</span>, m(<span class="hljs-number">1</span>)), <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">10</span>);
+    text(r2(<span class="hljs-built_in">i</span>,<span class="hljs-number">1</span>), r2(<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>), sprintf(<span class="hljs-string">&#x27;m=%.1f&#x27;</span>, m(<span class="hljs-number">2</span>)), <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">10</span>);
+    text(r3(<span class="hljs-built_in">i</span>,<span class="hljs-number">1</span>), r3(<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>), sprintf(<span class="hljs-string">&#x27;m=%.1f&#x27;</span>, m(<span class="hljs-number">3</span>)), <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">10</span>);
+
+    <span class="hljs-comment">% 添加时间显示</span>
+    time_text = sprintf(<span class="hljs-string">&#x27;时间: %.2f&#x27;</span>, t(<span class="hljs-built_in">i</span>));
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">i</span> == <span class="hljs-number">1</span>
+        time_display = text(<span class="hljs-built_in">min</span>(xlim)+<span class="hljs-number">0.1</span>, <span class="hljs-built_in">max</span>(ylim)<span class="hljs-number">-0.5</span>, time_text, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;yellow&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">12</span>);
+    <span class="hljs-keyword">else</span>
+        set(time_display, <span class="hljs-string">&#x27;String&#x27;</span>, time_text);
+    <span class="hljs-keyword">end</span>
+
+    drawnow;
+
+    <span class="hljs-comment">% 暂停以控制动画速度</span>
+    pause(<span class="hljs-number">0.01</span>);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 绘制最终轨迹</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Position&#x27;</span>, [<span class="hljs-number">100</span>, <span class="hljs-number">100</span>, <span class="hljs-number">1200</span>, <span class="hljs-number">500</span>]);
+set(gcf, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;black&#x27;</span>);
+
+subplot(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">1</span>);
+set(gca, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;black&#x27;</span>, <span class="hljs-string">&#x27;XColor&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>, <span class="hljs-string">&#x27;YColor&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>);
+<span class="hljs-built_in">hold</span> on;
+<span class="hljs-built_in">plot</span>(r1(:,<span class="hljs-number">1</span>), r1(:,<span class="hljs-number">2</span>), <span class="hljs-string">&#x27;Color&#x27;</span>, colors(<span class="hljs-number">1</span>,:), <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;DisplayName&#x27;</span>, sprintf(<span class="hljs-string">&#x27;天体1 (m=%.1f)&#x27;</span>, m(<span class="hljs-number">1</span>)));
+<span class="hljs-built_in">plot</span>(r2(:,<span class="hljs-number">1</span>), r2(:,<span class="hljs-number">2</span>), <span class="hljs-string">&#x27;Color&#x27;</span>, colors(<span class="hljs-number">2</span>,:), <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;DisplayName&#x27;</span>, sprintf(<span class="hljs-string">&#x27;天体2 (m=%.1f)&#x27;</span>, m(<span class="hljs-number">2</span>)));
+<span class="hljs-built_in">plot</span>(r3(:,<span class="hljs-number">1</span>), r3(:,<span class="hljs-number">2</span>), <span class="hljs-string">&#x27;Color&#x27;</span>, colors(<span class="hljs-number">3</span>,:), <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;DisplayName&#x27;</span>, sprintf(<span class="hljs-string">&#x27;天体3 (m=%.1f)&#x27;</span>, m(<span class="hljs-number">3</span>)));
+<span class="hljs-built_in">scatter</span>(r1(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>), r1(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>), <span class="hljs-number">100</span>, colors(<span class="hljs-number">1</span>,:), <span class="hljs-string">&#x27;filled&#x27;</span>, <span class="hljs-string">&#x27;MarkerEdgeColor&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>);
+<span class="hljs-built_in">scatter</span>(r2(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>), r2(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>), <span class="hljs-number">100</span>, colors(<span class="hljs-number">2</span>,:), <span class="hljs-string">&#x27;filled&#x27;</span>, <span class="hljs-string">&#x27;MarkerEdgeColor&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>);
+<span class="hljs-built_in">scatter</span>(r3(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>), r3(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>), <span class="hljs-number">100</span>, colors(<span class="hljs-number">3</span>,:), <span class="hljs-string">&#x27;filled&#x27;</span>, <span class="hljs-string">&#x27;MarkerEdgeColor&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>);
+xlabel(<span class="hljs-string">&#x27;X坐标&#x27;</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>);
+ylabel(<span class="hljs-string">&#x27;Y坐标&#x27;</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>);
+title(<span class="hljs-string">&#x27;三体运动轨迹&#x27;</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">14</span>);
+<span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x27;TextColor&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, [<span class="hljs-number">0.2</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">0.2</span>]);
+axis equal;
+
+subplot(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">2</span>);
+set(gca, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;black&#x27;</span>, <span class="hljs-string">&#x27;XColor&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>, <span class="hljs-string">&#x27;YColor&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>);
+<span class="hljs-built_in">hold</span> on;
+<span class="hljs-comment">% 计算相对距离</span>
+dist12 = vecnorm(r1 - r2, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>);
+dist13 = vecnorm(r1 - r3, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>);
+dist23 = vecnorm(r2 - r3, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>);
+
+<span class="hljs-built_in">plot</span>(t, dist12, <span class="hljs-string">&#x27;Color&#x27;</span>, colors(<span class="hljs-number">1</span>,:), <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;DisplayName&#x27;</span>, <span class="hljs-string">&#x27;天体1-2距离&#x27;</span>);
+<span class="hljs-built_in">plot</span>(t, dist13, <span class="hljs-string">&#x27;Color&#x27;</span>, colors(<span class="hljs-number">2</span>,:), <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;DisplayName&#x27;</span>, <span class="hljs-string">&#x27;天体1-3距离&#x27;</span>);
+<span class="hljs-built_in">plot</span>(t, dist23, <span class="hljs-string">&#x27;Color&#x27;</span>, colors(<span class="hljs-number">3</span>,:), <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;DisplayName&#x27;</span>, <span class="hljs-string">&#x27;天体2-3距离&#x27;</span>);
+xlabel(<span class="hljs-string">&#x27;时间&#x27;</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>);
+ylabel(<span class="hljs-string">&#x27;距离&#x27;</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>);
+title(<span class="hljs-string">&#x27;天体间距离变化&#x27;</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>, <span class="hljs-string">&#x27;FontSize&#x27;</span>, <span class="hljs-number">14</span>);
+<span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x27;TextColor&#x27;</span>, <span class="hljs-string">&#x27;white&#x27;</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, [<span class="hljs-number">0.2</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">0.2</span>]);
+
+fprintf(<span class="hljs-string">&#x27;模拟完成！\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;系统展现了典型的混沌行为：\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;- 轨迹复杂且不可重复\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;- 对初始条件极其敏感\n&#x27;</span>);
+fprintf(<span class="hljs-string">&#x27;- 距离变化呈现不规则振荡\n&#x27;</span>);
+
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dydt</span> = <span class="hljs-title">three_body_ode</span><span class="hljs-params">(t, y, m, G)</span></span>
+<span class="hljs-comment">% 三体问题ODE函数</span>
+<span class="hljs-comment">% y = [x1,y1,x2,y2,x3,y3, vx1,vy1,vx2,vy2,vx3,vy3]</span>
+
+<span class="hljs-comment">% 提取位置和速度</span>
+r = [y(<span class="hljs-number">1</span>:<span class="hljs-number">2</span>)&#x27;; y(<span class="hljs-number">3</span>:<span class="hljs-number">4</span>)&#x27;; y(<span class="hljs-number">5</span>:<span class="hljs-number">6</span>)&#x27;];
+v = [y(<span class="hljs-number">7</span>:<span class="hljs-number">8</span>)&#x27;; y(<span class="hljs-number">9</span>:<span class="hljs-number">10</span>)&#x27;; y(<span class="hljs-number">11</span>:<span class="hljs-number">12</span>)&#x27;];
+
+<span class="hljs-comment">% 初始化加速度</span>
+a = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">3</span>,<span class="hljs-number">2</span>);
+
+<span class="hljs-comment">% 计算每个天体受到的引力</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:<span class="hljs-number">3</span>
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">j</span> = <span class="hljs-number">1</span>:<span class="hljs-number">3</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">i</span> ~= <span class="hljs-built_in">j</span>
+            r_ij = r(<span class="hljs-built_in">j</span>,:) - r(<span class="hljs-built_in">i</span>,:);
+            r_norm = norm(r_ij);
+            a(<span class="hljs-built_in">i</span>,:) = a(<span class="hljs-built_in">i</span>,:) + G * m(<span class="hljs-built_in">j</span>) * r_ij / (r_norm^<span class="hljs-number">3</span>);
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 组装导数向量</span>
+dydt = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">12</span>,<span class="hljs-number">1</span>);
+dydt(<span class="hljs-number">1</span>:<span class="hljs-number">6</span>) = [v(<span class="hljs-number">1</span>,:), v(<span class="hljs-number">2</span>,:), v(<span class="hljs-number">3</span>,:)]&#x27;;      <span class="hljs-comment">% 速度</span>
+dydt(<span class="hljs-number">7</span>:<span class="hljs-number">12</span>) = [a(<span class="hljs-number">1</span>,:), a(<span class="hljs-number">2</span>,:), a(<span class="hljs-number">3</span>,:)]&#x27;;    <span class="hljs-comment">% 加速度</span>
+
+<span class="hljs-keyword">end</span>
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/matlab计算理想情况下每节火车车厢所受到的力并用构图的形式画出由10节车厢组成的火车受力图包含数.html">
+      <span>上一篇</span>
+      <strong>MATLAB计算理想情况下每节火车车厢所受到的力并用构图的形式画出由10节车厢组成的火车受力图包含数</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/matlab凸透镜成像原理仿真凹透镜大致图.html">
+      <span>下一篇</span>
+      <strong>MATLAB凸透镜成像原理仿真凹透镜大致图</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/计算卫星与地面时差用广义相对论给出计算公式与matlab代码.html">计算卫星与地面时差用广义相对论给出计算公式与MATLAB代码</a></h3>
+        <p class="post-excerpt">一、相对论时差的主要来源</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.817Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

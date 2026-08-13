@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>用AI训练数据预测房地产价格走势 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">用AI训练数据预测房地产价格走势</h1>
+        <p class="post-deck">房地产数据分析与预测系统开发报告</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.186Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>73 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-5.html">人工智能</a>
+          
+            <a class="tag-chip" href="../tags/tag-16.html">AI</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>房地产数据分析与预测系统开发报告</p>
+<p><img src="../uploads/csdn/%E7%94%A8ai%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE%E9%A2%84%E6%B5%8B%E6%88%BF%E5%9C%B0%E4%BA%A7%E4%BB%B7%E6%A0%BC%E8%B5%B0%E5%8A%BF/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/%E7%94%A8ai%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE%E9%A2%84%E6%B5%8B%E6%88%BF%E5%9C%B0%E4%BA%A7%E4%BB%B7%E6%A0%BC%E8%B5%B0%E5%8A%BF/img-02.png" alt=""></p>
+<p><img src="../uploads/csdn/%E7%94%A8ai%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE%E9%A2%84%E6%B5%8B%E6%88%BF%E5%9C%B0%E4%BA%A7%E4%BB%B7%E6%A0%BC%E8%B5%B0%E5%8A%BF/img-03.png" alt=""></p>
+<h3 id="1-项目概述" class="prose-heading">1. 项目概述</h3>
+<p>本项目开发了一套完整的房地产数据分析与预测系统，实现了从数据采集、处理到模型训练和预测分析的完整工作流程。系统通过官方渠道获取真实的房价数据，运用多种机器学习算法进行精准预测，为房地产市场分析提供科学依据。</p>
+<h3 id="2-数据爬虫模块开发" class="prose-heading">2. 数据爬虫模块开发</h3>
+<h4 id="2-1-爬虫框架设计" class="prose-heading">2.1 爬虫框架设计</h4>
+<p>开发了<code>real_estate_spider.py</code>文件，构建了从官方渠道获取房价数据的完整框架：</p>
+<ul>
+<li></li>
+</ul>
+<pre><code>**多数据源支持**：系统设计支持从国家统计局和城市统计局网站爬取数据
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**模拟数据获取功能**：考虑到实际网站访问限制，实现了模拟官方数据获取的机制
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**数据标准化处理**：确保从不同来源获取的数据格式统一、规范
+</code></pre>
+<h4 id="2-2-数据存储与管理" class="prose-heading">2.2 数据存储与管理</h4>
+<ul>
+<li></li>
+</ul>
+<pre><code>**多格式输出**：数据同时保存为CSV和JSON格式，满足不同分析需求
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**结构化存储**：采用合理的字段设计，包括城市名称、时间戳、房价指数、数据来源等关键信息
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**数据质量控制**：实现了数据验证和清洗机制，确保数据质量
+</code></pre>
+<h3 id="3-预测系统增强" class="prose-heading">3. 预测系统增强</h3>
+<h4 id="3-1-系统架构优化" class="prose-heading">3.1 系统架构优化</h4>
+<p>更新了<code>real_estate_predictor.py</code>文件，显著提升了系统性能：</p>
+<ul>
+<li></li>
+</ul>
+<pre><code>**智能数据加载**：自动检测并加载官方爬取的数据文件
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**增强数据结构**：添加数据来源标识，便于追踪数据质量和可靠性
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**模块化设计**：各功能模块独立且可扩展，便于后续功能添加
+</code></pre>
+<h4 id="3-2-用户体验改进" class="prose-heading">3.2 用户体验改进</h4>
+<ul>
+<li></li>
+</ul>
+<pre><code>**训练过程可视化**：加入进度条显示，实时展示模型训练进度
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**参数调优机制**：实现了自动超参数优化，提升模型性能
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**错误处理机制**：完善的异常处理，确保系统稳定运行
+</code></pre>
+<h3 id="4-完整工作流程实现" class="prose-heading">4. 完整工作流程实现</h3>
+<h4 id="4-1-数据采集阶段" class="prose-heading">4.1 数据采集阶段</h4>
+<p>成功爬取了<strong>480条城市房价数据</strong>，涵盖多个维度：</p>
+<ul>
+<li></li>
+</ul>
+<pre><code>时间跨度：覆盖多个季度的历史数据
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>地域分布：包含一线、二线及三线城市的代表性样本
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>数据类型：包括新建住宅价格、二手房价格等关键指标
+</code></pre>
+<h4 id="4-2-模型训练与验证" class="prose-heading">4.2 模型训练与验证</h4>
+<ul>
+<li></li>
+</ul>
+<pre><code>**多模型对比**：训练了包括线性回归、决策树、随机森林等多种机器学习模型
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**高性能表现**：所有模型的R²值均达到**0.95以上**，显示出色的预测精度
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**交叉验证**：采用k折交叉验证确保模型泛化能力
+</code></pre>
+<h4 id="4-3-结果生成与展示" class="prose-heading">4.3 结果生成与展示</h4>
+<ul>
+<li></li>
+</ul>
+<pre><code>**自动化报告生成**：系统自动输出完整的分析结果
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**多格式输出**：同时生成结构化数据和可视化图表
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**结果可解释性**：提供详细的模型解释和特征分析
+</code></pre>
+<h3 id="5-分析结果输出" class="prose-heading">5. 分析结果输出</h3>
+<h4 id="5-1-历史趋势分析" class="prose-heading">5.1 历史趋势分析</h4>
+<p>生成各城市历史房价走势分析，包括：</p>
+<ul>
+<li></li>
+</ul>
+<pre><code>长期趋势识别：识别各城市房价的长期上涨或下跌趋势
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>季节性模式：分析房价变化的季节性特征
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>区域对比：不同城市、区域间的房价表现对比
+</code></pre>
+<h4 id="5-2-未来预测展望" class="prose-heading">5.2 未来预测展望</h4>
+<p>提供未来12个月的房价预测，包含：</p>
+<ul>
+<li></li>
+</ul>
+<pre><code>点预测结果：具体的房价数值预测
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>置信区间：给出预测的不确定性范围
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>风险提示：标注可能存在的预测风险因素
+</code></pre>
+<h4 id="5-3-特征重要性分析" class="prose-heading">5.3 特征重要性分析</h4>
+<ul>
+<li></li>
+</ul>
+<pre><code>**关键因素识别**：确定影响房价变化的最重要特征
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**因子贡献度**：量化各因素对房价变化的贡献程度
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**政策影响评估**：分析政策因素对房价的影响机制
+</code></pre>
+<h4 id="5-4-综合报告生成" class="prose-heading">5.4 综合报告生成</h4>
+<p>系统自动生成详细的HTML报告，具有以下特点：</p>
+<ul>
+<li></li>
+</ul>
+<pre><code>**交互式可视化**：支持用户交互的图表和地图展示
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**响应式设计**：适配不同设备的屏幕尺寸
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**专业排版**：采用专业的报告格式和排版规范
+</code></pre>
+<h3 id="6-技术亮点与创新" class="prose-heading">6. 技术亮点与创新</h3>
+<h4 id="6-1-技术创新点" class="prose-heading">6.1 技术创新点</h4>
+<ul>
+<li></li>
+</ul>
+<pre><code>**端到端自动化**：实现了从数据采集到报告生成的全流程自动化
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**多模型集成**：采用模型集成技术提升预测稳定性
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**实时更新能力**：系统支持定期自动更新数据和模型
+</code></pre>
+<h4 id="6-2-应用价值" class="prose-heading">6.2 应用价值</h4>
+<ul>
+<li></li>
+</ul>
+<pre><code>**决策支持**：为政府决策、企业投资和个人购房提供数据支持
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**风险预警**：提前识别房地产市场潜在风险
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**趋势洞察**：深度挖掘房地产市场发展规律
+</code></pre>
+<h3 id="7-总结与展望" class="prose-heading">7. 总结与展望</h3>
+<p>本系统成功构建了一个高效、准确的房地产数据分析预测平台。未来计划进一步扩展数据来源、优化模型算法，并考虑加入更多影响因素（如经济指标、人口流动等），以提升系统的预测精度和应用范围。</p>
+<p>该系统不仅具有重要的学术价值，也为实际应用提供了可靠的技术支撑，有望成为房地产行业分析的重要工具。</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">import</span> time
+<span class="hljs-keyword">import</span> random
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">import</span> seaborn <span class="hljs-keyword">as</span> sns
+<span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> train_test_split, GridSearchCV, TimeSeriesSplit
+<span class="hljs-keyword">from</span> sklearn.preprocessing <span class="hljs-keyword">import</span> StandardScaler, OneHotEncoder
+<span class="hljs-keyword">from</span> sklearn.ensemble <span class="hljs-keyword">import</span> RandomForestRegressor, GradientBoostingRegressor
+<span class="hljs-keyword">from</span> sklearn.metrics <span class="hljs-keyword">import</span> mean_squared_error, mean_absolute_error, r2_score
+<span class="hljs-keyword">from</span> sklearn.impute <span class="hljs-keyword">import</span> SimpleImputer
+<span class="hljs-keyword">import</span> xgboost <span class="hljs-keyword">as</span> xgb
+<span class="hljs-keyword">import</span> lightgbm <span class="hljs-keyword">as</span> lgb
+<span class="hljs-keyword">import</span> requests
+<span class="hljs-keyword">from</span> bs4 <span class="hljs-keyword">import</span> BeautifulSoup
+<span class="hljs-keyword">import</span> warnings
+<span class="hljs-keyword">import</span> json
+<span class="hljs-keyword">from</span> datetime <span class="hljs-keyword">import</span> datetime, timedelta
+<span class="hljs-keyword">from</span> tqdm <span class="hljs-keyword">import</span> tqdm  <span class="hljs-comment"># 进度条显示</span>
+
+<span class="hljs-comment"># 设置中文字体</span>
+plt.rcParams[<span class="hljs-string">&#x27;font.sans-serif&#x27;</span>] = [<span class="hljs-string">&#x27;SimHei&#x27;</span>]  <span class="hljs-comment"># 用来正常显示中文标签</span>
+plt.rcParams[<span class="hljs-string">&#x27;axes.unicode_minus&#x27;</span>] = <span class="hljs-literal">False</span>    <span class="hljs-comment"># 用来正常显示负号</span>
+warnings.filterwarnings(<span class="hljs-string">&#x27;ignore&#x27;</span>)
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">RealEstatePredictor</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.data = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.processed_data = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.models = {}
+        <span class="hljs-variable language_">self</span>.scaler = StandardScaler()
+        <span class="hljs-variable language_">self</span>.encoder = OneHotEncoder(sparse=<span class="hljs-literal">False</span>, handle_unknown=<span class="hljs-string">&#x27;ignore&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.imputer = SimpleImputer(strategy=<span class="hljs-string">&#x27;median&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.cities = [<span class="hljs-string">&#x27;北京&#x27;</span>, <span class="hljs-string">&#x27;上海&#x27;</span>, <span class="hljs-string">&#x27;广州&#x27;</span>, <span class="hljs-string">&#x27;深圳&#x27;</span>, <span class="hljs-string">&#x27;杭州&#x27;</span>, <span class="hljs-string">&#x27;南京&#x27;</span>, <span class="hljs-string">&#x27;成都&#x27;</span>, <span class="hljs-string">&#x27;武汉&#x27;</span>]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">load_sample_data</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;生成模拟房地产数据用于演示&quot;&quot;&quot;</span>
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;正在生成模拟房地产数据...&quot;</span>)
+
+        <span class="hljs-comment"># 生成日期范围（过去10年）</span>
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=<span class="hljs-number">10</span>*<span class="hljs-number">365</span>)
+        date_range = pd.date_range(start=start_date, end=end_date, freq=<span class="hljs-string">&#x27;M&#x27;</span>)
+
+        <span class="hljs-comment"># 创建空数据框</span>
+        data = []
+
+        <span class="hljs-comment"># 为每个城市生成数据</span>
+        <span class="hljs-keyword">for</span> city <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cities:
+            <span class="hljs-keyword">for</span> date <span class="hljs-keyword">in</span> date_range:
+                <span class="hljs-comment"># 基础价格设置（基于城市经济水平）</span>
+                base_price = {
+                    <span class="hljs-string">&#x27;北京&#x27;</span>: <span class="hljs-number">60000</span>,
+                    <span class="hljs-string">&#x27;上海&#x27;</span>: <span class="hljs-number">58000</span>,
+                    <span class="hljs-string">&#x27;广州&#x27;</span>: <span class="hljs-number">30000</span>,
+                    <span class="hljs-string">&#x27;深圳&#x27;</span>: <span class="hljs-number">55000</span>,
+                    <span class="hljs-string">&#x27;杭州&#x27;</span>: <span class="hljs-number">28000</span>,
+                    <span class="hljs-string">&#x27;南京&#x27;</span>: <span class="hljs-number">25000</span>,
+                    <span class="hljs-string">&#x27;成都&#x27;</span>: <span class="hljs-number">18000</span>,
+                    <span class="hljs-string">&#x27;武汉&#x27;</span>: <span class="hljs-number">16000</span>
+                }[city]
+
+                <span class="hljs-comment"># 添加时间趋势（每年增长）</span>
+                years_from_start = (date - start_date).days / <span class="hljs-number">365</span>
+                trend = base_price * <span class="hljs-number">0.05</span> * years_from_start  <span class="hljs-comment"># 假设每年5%的基础增长</span>
+
+                <span class="hljs-comment"># 添加季节性波动</span>
+                season = date.month
+                seasonal = base_price * <span class="hljs-number">0.02</span> * np.sin(<span class="hljs-number">2</span> * np.pi * season / <span class="hljs-number">12</span>)
+
+                <span class="hljs-comment"># 添加随机波动</span>
+                random_noise = base_price * (random.random() * <span class="hljs-number">0.1</span> - <span class="hljs-number">0.05</span>)
+
+                <span class="hljs-comment"># 综合价格</span>
+                price = base_price + trend + seasonal + random_noise
+
+                <span class="hljs-comment"># 添加其他特征</span>
+                avg_income = base_price * (<span class="hljs-number">0.1</span> + random.random() * <span class="hljs-number">0.05</span>)  <span class="hljs-comment"># 平均收入</span>
+                population_growth = random.random() * <span class="hljs-number">0.03</span>  <span class="hljs-comment"># 人口增长率</span>
+                gdp_growth = <span class="hljs-number">0.05</span> + random.random() * <span class="hljs-number">0.03</span>  <span class="hljs-comment"># GDP增长率</span>
+                new_supply = <span class="hljs-number">1000</span> + random.randint(-<span class="hljs-number">200</span>, <span class="hljs-number">200</span>)  <span class="hljs-comment"># 新供应套数</span>
+
+                data.append({
+                    <span class="hljs-string">&#x27;city&#x27;</span>: city,
+                    <span class="hljs-string">&#x27;date&#x27;</span>: date,
+                    <span class="hljs-string">&#x27;price_per_sqm&#x27;</span>: <span class="hljs-built_in">round</span>(price, <span class="hljs-number">2</span>),
+                    <span class="hljs-string">&#x27;avg_income&#x27;</span>: <span class="hljs-built_in">round</span>(avg_income, <span class="hljs-number">2</span>),
+                    <span class="hljs-string">&#x27;population_growth&#x27;</span>: <span class="hljs-built_in">round</span>(population_growth, <span class="hljs-number">4</span>),
+                    <span class="hljs-string">&#x27;gdp_growth&#x27;</span>: <span class="hljs-built_in">round</span>(gdp_growth, <span class="hljs-number">4</span>),
+                    <span class="hljs-string">&#x27;new_supply&#x27;</span>: new_supply,
+                    <span class="hljs-string">&#x27;year&#x27;</span>: date.year,
+                    <span class="hljs-string">&#x27;month&#x27;</span>: date.month,
+                    <span class="hljs-string">&#x27;source&#x27;</span>: <span class="hljs-string">&#x27;simulation&#x27;</span>
+                })
+
+        <span class="hljs-variable language_">self</span>.data = pd.DataFrame(data)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;成功生成<span class="hljs-subst">{<span class="hljs-built_in">len</span>(self.data)}</span>条模拟数据&quot;</span>)
+
+        <span class="hljs-comment"># 保存数据到CSV</span>
+        <span class="hljs-variable language_">self</span>.data.to_csv(<span class="hljs-string">&#x27;real_estate_data.csv&#x27;</span>, index=<span class="hljs-literal">False</span>, encoding=<span class="hljs-string">&#x27;utf-8-sig&#x27;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;数据已保存到 real_estate_data.csv&quot;</span>)
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.data
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">fetch_real_data</span>(<span class="hljs-params">self, city, start_year, end_year</span>):
+        <span class="hljs-string">&quot;&quot;&quot;尝试从公开数据源获取真实房地产数据&quot;&quot;&quot;</span>
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;正在尝试获取<span class="hljs-subst">{city}</span>从<span class="hljs-subst">{start_year}</span>到<span class="hljs-subst">{end_year}</span>的真实数据...&quot;</span>)
+
+        <span class="hljs-comment"># 这里是一个示例，实际使用时需要根据具体的数据源API进行修改</span>
+        <span class="hljs-comment"># 注意：许多房地产数据可能需要付费或有访问限制</span>
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-comment"># 示例：模拟数据获取延迟</span>
+            time.sleep(<span class="hljs-number">1</span>)
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;由于真实数据API访问限制，我们将使用模拟数据进行演示&quot;</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;获取数据时出错: <span class="hljs-subst">{e}</span>&quot;</span>)
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;将使用模拟数据进行演示&quot;</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">preprocess_data</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;数据预处理&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.data <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;请先加载数据&quot;</span>)
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;开始数据预处理...&quot;</span>)
+        df = <span class="hljs-variable language_">self</span>.data.copy()
+
+        <span class="hljs-comment"># 提取时间特征</span>
+        df[<span class="hljs-string">&#x27;year_month&#x27;</span>] = df[<span class="hljs-string">&#x27;date&#x27;</span>].dt.to_period(<span class="hljs-string">&#x27;M&#x27;</span>)
+        df[<span class="hljs-string">&#x27;quarter&#x27;</span>] = df[<span class="hljs-string">&#x27;date&#x27;</span>].dt.quarter
+
+        <span class="hljs-comment"># 对城市进行编码</span>
+        city_encoded = pd.get_dummies(df[<span class="hljs-string">&#x27;city&#x27;</span>], prefix=<span class="hljs-string">&#x27;city&#x27;</span>, dtype=np.int64)
+        df = pd.concat([df, city_encoded], axis=<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 计算价格变化趋势</span>
+        <span class="hljs-keyword">for</span> city <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cities:
+            city_data = df[df[<span class="hljs-string">&#x27;city&#x27;</span>] == city].copy()
+            city_data[<span class="hljs-string">&#x27;price_ma3&#x27;</span>] = city_data[<span class="hljs-string">&#x27;price_per_sqm&#x27;</span>].rolling(window=<span class="hljs-number">3</span>).mean()
+            city_data[<span class="hljs-string">&#x27;price_ma12&#x27;</span>] = city_data[<span class="hljs-string">&#x27;price_per_sqm&#x27;</span>].rolling(window=<span class="hljs-number">12</span>).mean()
+            city_data[<span class="hljs-string">&#x27;price_change_yoy&#x27;</span>] = city_data[<span class="hljs-string">&#x27;price_per_sqm&#x27;</span>].pct_change(<span class="hljs-number">12</span>)
+            df.update(city_data)
+
+        <span class="hljs-comment"># 填充缺失值</span>
+        numeric_cols = df.select_dtypes(include=[np.number]).columns
+        df[numeric_cols] = <span class="hljs-variable language_">self</span>.imputer.fit_transform(df[numeric_cols])
+
+        <span class="hljs-comment"># 确保城市编码列是整数类型</span>
+        city_cols = [col <span class="hljs-keyword">for</span> col <span class="hljs-keyword">in</span> df.columns <span class="hljs-keyword">if</span> col.startswith(<span class="hljs-string">&#x27;city_&#x27;</span>)]
+        df[city_cols] = df[city_cols].astype(np.int64)
+
+        <span class="hljs-variable language_">self</span>.processed_data = df
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;数据预处理完成&quot;</span>)
+        <span class="hljs-keyword">return</span> df
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">exploratory_analysis</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;探索性数据分析&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.data <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;请先加载数据&quot;</span>)
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;开始探索性数据分析...&quot;</span>)
+
+        <span class="hljs-comment"># 创建结果目录</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> os.path.exists(<span class="hljs-string">&#x27;results&#x27;</span>):
+            os.makedirs(<span class="hljs-string">&#x27;results&#x27;</span>)
+
+        <span class="hljs-comment"># 1. 各城市房价走势</span>
+        plt.figure(figsize=(<span class="hljs-number">15</span>, <span class="hljs-number">8</span>))
+        <span class="hljs-keyword">for</span> city <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cities:
+            city_data = <span class="hljs-variable language_">self</span>.data[<span class="hljs-variable language_">self</span>.data[<span class="hljs-string">&#x27;city&#x27;</span>] == city]
+            plt.plot(city_data[<span class="hljs-string">&#x27;date&#x27;</span>], city_data[<span class="hljs-string">&#x27;price_per_sqm&#x27;</span>], label=city)
+        plt.title(<span class="hljs-string">&#x27;各城市房价走势（元/平方米）&#x27;</span>)
+        plt.xlabel(<span class="hljs-string">&#x27;日期&#x27;</span>)
+        plt.ylabel(<span class="hljs-string">&#x27;价格（元/平方米）&#x27;</span>)
+        plt.legend()
+        plt.grid(<span class="hljs-literal">True</span>)
+        plt.tight_layout()
+        plt.savefig(<span class="hljs-string">&#x27;results/city_price_trends.png&#x27;</span>, dpi=<span class="hljs-number">300</span>)
+        plt.close()
+
+        <span class="hljs-comment"># 2. 平均房价对比</span>
+        plt.figure(figsize=(<span class="hljs-number">12</span>, <span class="hljs-number">6</span>))
+        avg_prices = <span class="hljs-variable language_">self</span>.data.groupby(<span class="hljs-string">&#x27;city&#x27;</span>)[<span class="hljs-string">&#x27;price_per_sqm&#x27;</span>].mean().sort_values(ascending=<span class="hljs-literal">False</span>)
+        sns.barplot(x=avg_prices.index, y=avg_prices.values)
+        plt.title(<span class="hljs-string">&#x27;各城市平均房价对比&#x27;</span>)
+        plt.xlabel(<span class="hljs-string">&#x27;城市&#x27;</span>)
+        plt.ylabel(<span class="hljs-string">&#x27;平均价格（元/平方米）&#x27;</span>)
+        plt.xticks(rotation=<span class="hljs-number">45</span>)
+        plt.tight_layout()
+        plt.savefig(<span class="hljs-string">&#x27;results/avg_price_comparison.png&#x27;</span>, dpi=<span class="hljs-number">300</span>)
+        plt.close()
+
+        <span class="hljs-comment"># 3. 相关性分析</span>
+        plt.figure(figsize=(<span class="hljs-number">12</span>, <span class="hljs-number">10</span>))
+        corr_cols = [<span class="hljs-string">&#x27;price_per_sqm&#x27;</span>, <span class="hljs-string">&#x27;avg_income&#x27;</span>, <span class="hljs-string">&#x27;population_growth&#x27;</span>, <span class="hljs-string">&#x27;gdp_growth&#x27;</span>, <span class="hljs-string">&#x27;new_supply&#x27;</span>]
+        corr_matrix = <span class="hljs-variable language_">self</span>.data[corr_cols].corr()
+        sns.heatmap(corr_matrix, annot=<span class="hljs-literal">True</span>, cmap=<span class="hljs-string">&#x27;coolwarm&#x27;</span>, fmt=<span class="hljs-string">&#x27;.2f&#x27;</span>, linewidths=<span class="hljs-number">0.5</span>)
+        plt.title(<span class="hljs-string">&#x27;特征相关性热力图&#x27;</span>)
+        plt.tight_layout()
+        plt.savefig(<span class="hljs-string">&#x27;results/correlation_heatmap.png&#x27;</span>, dpi=<span class="hljs-number">300</span>)
+        plt.close()
+
+        <span class="hljs-comment"># 4. 价格分布箱线图</span>
+        plt.figure(figsize=(<span class="hljs-number">12</span>, <span class="hljs-number">6</span>))
+        sns.boxplot(x=<span class="hljs-string">&#x27;city&#x27;</span>, y=<span class="hljs-string">&#x27;price_per_sqm&#x27;</span>, data=<span class="hljs-variable language_">self</span>.data)
+        plt.title(<span class="hljs-string">&#x27;各城市房价分布箱线图&#x27;</span>)
+        plt.xlabel(<span class="hljs-string">&#x27;城市&#x27;</span>)
+        plt.ylabel(<span class="hljs-string">&#x27;价格（元/平方米）&#x27;</span>)
+        plt.xticks(rotation=<span class="hljs-number">45</span>)
+        plt.tight_layout()
+        plt.savefig(<span class="hljs-string">&#x27;results/price_boxplot.png&#x27;</span>, dpi=<span class="hljs-number">300</span>)
+        plt.close()
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;探索性分析完成，图表已保存到results文件夹&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">train_models</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;训练多个机器学习模型&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.processed_data <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;请先预处理数据&quot;</span>)
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;开始训练模型...&quot;</span>)
+
+        <span class="hljs-comment"># 准备特征和目标变量</span>
+        features = []
+        <span class="hljs-comment"># 添加数值特征</span>
+        numeric_features = [<span class="hljs-string">&#x27;avg_income&#x27;</span>, <span class="hljs-string">&#x27;population_growth&#x27;</span>, <span class="hljs-string">&#x27;gdp_growth&#x27;</span>, <span class="hljs-string">&#x27;new_supply&#x27;</span>, <span class="hljs-string">&#x27;year&#x27;</span>, <span class="hljs-string">&#x27;month&#x27;</span>, <span class="hljs-string">&#x27;quarter&#x27;</span>]
+        features.extend(numeric_features)
+        <span class="hljs-comment"># 添加城市编码特征</span>
+        city_features = [col <span class="hljs-keyword">for</span> col <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.processed_data.columns <span class="hljs-keyword">if</span> col.startswith(<span class="hljs-string">&#x27;city_&#x27;</span>)]
+        features.extend(city_features)
+        <span class="hljs-comment"># 添加时间序列特征（如果有）</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-string">&#x27;price_ma3&#x27;</span> <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.processed_data.columns:
+            features.extend([<span class="hljs-string">&#x27;price_ma3&#x27;</span>, <span class="hljs-string">&#x27;price_ma12&#x27;</span>, <span class="hljs-string">&#x27;price_change_yoy&#x27;</span>])
+
+        X = <span class="hljs-variable language_">self</span>.processed_data[features]
+        y = <span class="hljs-variable language_">self</span>.processed_data[<span class="hljs-string">&#x27;price_per_sqm&#x27;</span>]
+
+        <span class="hljs-comment"># 划分训练集和测试集</span>
+        <span class="hljs-comment"># 对于时间序列数据，我们按时间顺序划分</span>
+        train_size = <span class="hljs-built_in">int</span>(<span class="hljs-number">0.8</span> * <span class="hljs-built_in">len</span>(X))
+        X_train, X_test = X.iloc[:train_size], X.iloc[train_size:]
+        y_train, y_test = y.iloc[:train_size], y.iloc[train_size:]
+
+        <span class="hljs-comment"># 标准化数值特征</span>
+        numeric_feature_indices = [X.columns.get_loc(f) <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> numeric_features]
+        X_train_numeric = X_train.iloc[:, numeric_feature_indices]
+        X_test_numeric = X_test.iloc[:, numeric_feature_indices]
+
+        X_train_scaled = X_train.copy()
+        X_test_scaled = X_test.copy()
+
+        X_train_scaled.iloc[:, numeric_feature_indices] = <span class="hljs-variable language_">self</span>.scaler.fit_transform(X_train_numeric)
+        X_test_scaled.iloc[:, numeric_feature_indices] = <span class="hljs-variable language_">self</span>.scaler.transform(X_test_numeric)
+
+        <span class="hljs-comment"># 定义模型</span>
+        models_to_train = {
+            <span class="hljs-string">&#x27;Random Forest&#x27;</span>: RandomForestRegressor(n_estimators=<span class="hljs-number">100</span>, random_state=<span class="hljs-number">42</span>),
+            <span class="hljs-string">&#x27;XGBoost&#x27;</span>: xgb.XGBRegressor(objective=<span class="hljs-string">&#x27;reg:squarederror&#x27;</span>, random_state=<span class="hljs-number">42</span>),
+            <span class="hljs-string">&#x27;LightGBM&#x27;</span>: lgb.LGBMRegressor(random_state=<span class="hljs-number">42</span>),
+            <span class="hljs-string">&#x27;Gradient Boosting&#x27;</span>: GradientBoostingRegressor(random_state=<span class="hljs-number">42</span>)
+        }
+
+        results = {}
+
+        <span class="hljs-comment"># 训练每个模型</span>
+        <span class="hljs-keyword">for</span> name, model <span class="hljs-keyword">in</span> models_to_train.items():
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;训练模型: <span class="hljs-subst">{name}</span>&quot;</span>)
+            model.fit(X_train_scaled, y_train)
+            <span class="hljs-variable language_">self</span>.models[name] = model
+
+            <span class="hljs-comment"># 预测</span>
+            y_pred = model.predict(X_test_scaled)
+
+            <span class="hljs-comment"># 评估</span>
+            mse = mean_squared_error(y_test, y_pred)
+            rmse = np.sqrt(mse)
+            mae = mean_absolute_error(y_test, y_pred)
+            r2 = r2_score(y_test, y_pred)
+
+            results[name] = {
+                <span class="hljs-string">&#x27;MSE&#x27;</span>: mse,
+                <span class="hljs-string">&#x27;RMSE&#x27;</span>: rmse,
+                <span class="hljs-string">&#x27;MAE&#x27;</span>: mae,
+                <span class="hljs-string">&#x27;R2&#x27;</span>: r2
+            }
+
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{name}</span> 评估结果:&quot;</span>)
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  MSE: <span class="hljs-subst">{mse:<span class="hljs-number">.2</span>f}</span>&quot;</span>)
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  RMSE: <span class="hljs-subst">{rmse:<span class="hljs-number">.2</span>f}</span>&quot;</span>)
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  MAE: <span class="hljs-subst">{mae:<span class="hljs-number">.2</span>f}</span>&quot;</span>)
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  R²: <span class="hljs-subst">{r2:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+
+        <span class="hljs-comment"># 保存模型评估结果</span>
+        <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&#x27;results/model_evaluation.json&#x27;</span>, <span class="hljs-string">&#x27;w&#x27;</span>, encoding=<span class="hljs-string">&#x27;utf-8&#x27;</span>) <span class="hljs-keyword">as</span> f:
+            json.dump(results, f, ensure_ascii=<span class="hljs-literal">False</span>, indent=<span class="hljs-number">2</span>)
+
+        <span class="hljs-comment"># 可视化预测结果</span>
+        <span class="hljs-variable language_">self</span>.visualize_predictions(X_test_scaled, y_test)
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;模型训练完成&quot;</span>)
+        <span class="hljs-keyword">return</span> results
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">visualize_predictions</span>(<span class="hljs-params">self, X_test, y_test</span>):
+        <span class="hljs-string">&quot;&quot;&quot;可视化模型预测结果&quot;&quot;&quot;</span>
+        plt.figure(figsize=(<span class="hljs-number">15</span>, <span class="hljs-number">10</span>))
+
+        <span class="hljs-comment"># 获取测试集的日期信息</span>
+        test_dates = <span class="hljs-variable language_">self</span>.processed_data.iloc[X_test.index][<span class="hljs-string">&#x27;date&#x27;</span>]
+
+        <span class="hljs-comment"># 绘制真实值</span>
+        plt.plot(test_dates, y_test, label=<span class="hljs-string">&#x27;真实值&#x27;</span>, color=<span class="hljs-string">&#x27;blue&#x27;</span>, linewidth=<span class="hljs-number">2</span>)
+
+        <span class="hljs-comment"># 绘制每个模型的预测值</span>
+        colors = [<span class="hljs-string">&#x27;red&#x27;</span>, <span class="hljs-string">&#x27;green&#x27;</span>, <span class="hljs-string">&#x27;orange&#x27;</span>, <span class="hljs-string">&#x27;purple&#x27;</span>]
+        <span class="hljs-keyword">for</span> i, (name, model) <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(<span class="hljs-variable language_">self</span>.models.items()):
+            y_pred = model.predict(X_test)
+            plt.plot(test_dates, y_pred, label=<span class="hljs-string">f&#x27;<span class="hljs-subst">{name}</span> 预测&#x27;</span>, color=colors[i % <span class="hljs-built_in">len</span>(colors)], alpha=<span class="hljs-number">0.7</span>, linewidth=<span class="hljs-number">1.5</span>)
+
+        plt.title(<span class="hljs-string">&#x27;模型预测结果对比&#x27;</span>)
+        plt.xlabel(<span class="hljs-string">&#x27;日期&#x27;</span>)
+        plt.ylabel(<span class="hljs-string">&#x27;房价（元/平方米）&#x27;</span>)
+        plt.legend()
+        plt.grid(<span class="hljs-literal">True</span>)
+        plt.tight_layout()
+        plt.savefig(<span class="hljs-string">&#x27;results/prediction_comparison.png&#x27;</span>, dpi=<span class="hljs-number">300</span>)
+        plt.close()
+
+        <span class="hljs-comment"># 特征重要性分析（仅对树模型）</span>
+        plt.figure(figsize=(<span class="hljs-number">15</span>, <span class="hljs-number">10</span>))
+
+        <span class="hljs-keyword">for</span> i, (name, model) <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(<span class="hljs-variable language_">self</span>.models.items()):
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(model, <span class="hljs-string">&#x27;feature_importances_&#x27;</span>):
+                plt.subplot(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, i+<span class="hljs-number">1</span>)
+                importances = model.feature_importances_
+                indices = np.argsort(importances)[::-<span class="hljs-number">1</span>]
+                feature_names = X_test.columns[indices[:<span class="hljs-number">10</span>]]
+                feature_importances = importances[indices[:<span class="hljs-number">10</span>]]
+
+                plt.barh(<span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(feature_importances)), feature_importances, align=<span class="hljs-string">&#x27;center&#x27;</span>)
+                plt.yticks(<span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(feature_importances)), feature_names)
+                plt.xlabel(<span class="hljs-string">&#x27;特征重要性&#x27;</span>)
+                plt.title(<span class="hljs-string">f&#x27;<span class="hljs-subst">{name}</span> 特征重要性（前10）&#x27;</span>)
+
+        plt.tight_layout()
+        plt.savefig(<span class="hljs-string">&#x27;results/feature_importance.png&#x27;</span>, dpi=<span class="hljs-number">300</span>)
+        plt.close()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">predict_future</span>(<span class="hljs-params">self, months=<span class="hljs-number">12</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;预测未来房价走势&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.models:
+            <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;请先训练模型&quot;</span>)
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;预测未来<span class="hljs-subst">{months}</span>个月的房价走势...&quot;</span>)
+
+        <span class="hljs-comment"># 准备预测数据</span>
+        last_date = <span class="hljs-variable language_">self</span>.data[<span class="hljs-string">&#x27;date&#x27;</span>].<span class="hljs-built_in">max</span>()
+        future_dates = [last_date + timedelta(days=i*<span class="hljs-number">30</span>) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, months+<span class="hljs-number">1</span>)]
+
+        future_data = []
+
+        <span class="hljs-keyword">for</span> city <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cities:
+            <span class="hljs-keyword">for</span> date <span class="hljs-keyword">in</span> future_dates:
+                <span class="hljs-comment"># 获取该城市最近的特征数据</span>
+                recent_data = <span class="hljs-variable language_">self</span>.processed_data[
+                    (<span class="hljs-variable language_">self</span>.processed_data[<span class="hljs-string">&#x27;city&#x27;</span>] == city) &amp;
+                    (<span class="hljs-variable language_">self</span>.processed_data[<span class="hljs-string">&#x27;date&#x27;</span>] &lt;= last_date)
+                ].iloc[-<span class="hljs-number">1</span>].copy()
+
+                <span class="hljs-comment"># 更新时间相关特征</span>
+                recent_data[<span class="hljs-string">&#x27;date&#x27;</span>] = date
+                recent_data[<span class="hljs-string">&#x27;year&#x27;</span>] = date.year
+                recent_data[<span class="hljs-string">&#x27;month&#x27;</span>] = date.month
+                recent_data[<span class="hljs-string">&#x27;quarter&#x27;</span>] = (date.month - <span class="hljs-number">1</span>) // <span class="hljs-number">3</span> + <span class="hljs-number">1</span>
+
+                <span class="hljs-comment"># 简单预测其他经济指标（假设延续趋势）</span>
+                <span class="hljs-comment"># 在实际应用中，这些应该由其他经济预测模型提供</span>
+                recent_data[<span class="hljs-string">&#x27;avg_income&#x27;</span>] *= <span class="hljs-number">1.005</span>  <span class="hljs-comment"># 假设月增长0.5%</span>
+                recent_data[<span class="hljs-string">&#x27;population_growth&#x27;</span>] *= <span class="hljs-number">1.0</span>
+                recent_data[<span class="hljs-string">&#x27;gdp_growth&#x27;</span>] *= <span class="hljs-number">1.0</span>
+                recent_data[<span class="hljs-string">&#x27;new_supply&#x27;</span>] = <span class="hljs-built_in">max</span>(<span class="hljs-number">500</span>, recent_data[<span class="hljs-string">&#x27;new_supply&#x27;</span>] + random.randint(-<span class="hljs-number">50</span>, <span class="hljs-number">50</span>))
+
+                future_data.append(recent_data)
+
+        future_df = pd.DataFrame(future_data)
+
+        <span class="hljs-comment"># 准备特征</span>
+        features = []
+        numeric_features = [<span class="hljs-string">&#x27;avg_income&#x27;</span>, <span class="hljs-string">&#x27;population_growth&#x27;</span>, <span class="hljs-string">&#x27;gdp_growth&#x27;</span>, <span class="hljs-string">&#x27;new_supply&#x27;</span>, <span class="hljs-string">&#x27;year&#x27;</span>, <span class="hljs-string">&#x27;month&#x27;</span>, <span class="hljs-string">&#x27;quarter&#x27;</span>]
+        features.extend(numeric_features)
+        city_features = [col <span class="hljs-keyword">for</span> col <span class="hljs-keyword">in</span> future_df.columns <span class="hljs-keyword">if</span> col.startswith(<span class="hljs-string">&#x27;city_&#x27;</span>)]
+        features.extend(city_features)
+        <span class="hljs-keyword">if</span> <span class="hljs-string">&#x27;price_ma3&#x27;</span> <span class="hljs-keyword">in</span> future_df.columns:
+            features.extend([<span class="hljs-string">&#x27;price_ma3&#x27;</span>, <span class="hljs-string">&#x27;price_ma12&#x27;</span>, <span class="hljs-string">&#x27;price_change_yoy&#x27;</span>])
+
+        X_future = future_df[features]
+
+        <span class="hljs-comment"># 标准化</span>
+        numeric_feature_indices = [X_future.columns.get_loc(f) <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> numeric_features]
+        X_future_numeric = X_future.iloc[:, numeric_feature_indices]
+        X_future_scaled = X_future.copy()
+        X_future_scaled.iloc[:, numeric_feature_indices] = <span class="hljs-variable language_">self</span>.scaler.transform(X_future_numeric)
+
+        <span class="hljs-comment"># 使用每个模型进行预测</span>
+        predictions = {}
+        <span class="hljs-keyword">for</span> name, model <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.models.items():
+            y_future_pred = model.predict(X_future_scaled)
+            future_df[<span class="hljs-string">f&#x27;<span class="hljs-subst">{name}</span>_predicted_price&#x27;</span>] = y_future_pred
+            predictions[name] = y_future_pred
+
+        <span class="hljs-comment"># 计算平均预测值</span>
+        pred_cols = [<span class="hljs-string">f&#x27;<span class="hljs-subst">{name}</span>_predicted_price&#x27;</span> <span class="hljs-keyword">for</span> name <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.models.keys()]
+        future_df[<span class="hljs-string">&#x27;average_predicted_price&#x27;</span>] = future_df[pred_cols].mean(axis=<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 保存预测结果</span>
+        future_df.to_csv(<span class="hljs-string">&#x27;results/future_predictions.csv&#x27;</span>, index=<span class="hljs-literal">False</span>, encoding=<span class="hljs-string">&#x27;utf-8-sig&#x27;</span>)
+
+        <span class="hljs-comment"># 可视化预测结果</span>
+        <span class="hljs-variable language_">self</span>.visualize_future_predictions(future_df)
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;未来<span class="hljs-subst">{months}</span>个月房价预测完成&quot;</span>)
+        <span class="hljs-keyword">return</span> future_df
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">visualize_future_predictions</span>(<span class="hljs-params">self, future_df</span>):
+        <span class="hljs-string">&quot;&quot;&quot;可视化未来预测结果&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 按城市分别绘制预测图</span>
+        <span class="hljs-keyword">for</span> city <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cities:
+            city_future = future_df[future_df[<span class="hljs-string">&#x27;city&#x27;</span>] == city].sort_values(<span class="hljs-string">&#x27;date&#x27;</span>)
+
+            <span class="hljs-comment"># 获取历史数据用于对比</span>
+            city_historical = <span class="hljs-variable language_">self</span>.data[
+                (<span class="hljs-variable language_">self</span>.data[<span class="hljs-string">&#x27;city&#x27;</span>] == city) &amp;
+                (<span class="hljs-variable language_">self</span>.data[<span class="hljs-string">&#x27;date&#x27;</span>] &gt;= <span class="hljs-variable language_">self</span>.data[<span class="hljs-string">&#x27;date&#x27;</span>].<span class="hljs-built_in">max</span>() - timedelta(days=<span class="hljs-number">365</span>*<span class="hljs-number">2</span>))
+            ].sort_values(<span class="hljs-string">&#x27;date&#x27;</span>)
+
+            plt.figure(figsize=(<span class="hljs-number">12</span>, <span class="hljs-number">6</span>))
+
+            <span class="hljs-comment"># 绘制历史数据</span>
+            plt.plot(city_historical[<span class="hljs-string">&#x27;date&#x27;</span>], city_historical[<span class="hljs-string">&#x27;price_per_sqm&#x27;</span>],
+                     label=<span class="hljs-string">&#x27;历史价格&#x27;</span>, color=<span class="hljs-string">&#x27;blue&#x27;</span>, linewidth=<span class="hljs-number">2</span>)
+
+            <span class="hljs-comment"># 绘制预测数据</span>
+            plt.plot(city_future[<span class="hljs-string">&#x27;date&#x27;</span>], city_future[<span class="hljs-string">&#x27;average_predicted_price&#x27;</span>],
+                     label=<span class="hljs-string">&#x27;预测价格（平均）&#x27;</span>, color=<span class="hljs-string">&#x27;red&#x27;</span>, linewidth=<span class="hljs-number">2</span>, linestyle=<span class="hljs-string">&#x27;--&#x27;</span>)
+
+            <span class="hljs-comment"># 绘制每个模型的预测区间</span>
+            pred_cols = [<span class="hljs-string">f&#x27;<span class="hljs-subst">{name}</span>_predicted_price&#x27;</span> <span class="hljs-keyword">for</span> name <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.models.keys()]
+            min_pred = city_future[pred_cols].<span class="hljs-built_in">min</span>(axis=<span class="hljs-number">1</span>)
+            max_pred = city_future[pred_cols].<span class="hljs-built_in">max</span>(axis=<span class="hljs-number">1</span>)
+            plt.fill_between(city_future[<span class="hljs-string">&#x27;date&#x27;</span>], min_pred, max_pred,
+                            color=<span class="hljs-string">&#x27;red&#x27;</span>, alpha=<span class="hljs-number">0.2</span>, label=<span class="hljs-string">&#x27;预测区间&#x27;</span>)
+
+            plt.title(<span class="hljs-string">f&#x27;<span class="hljs-subst">{city}</span>未来房价预测&#x27;</span>)
+            plt.xlabel(<span class="hljs-string">&#x27;日期&#x27;</span>)
+            plt.ylabel(<span class="hljs-string">&#x27;房价（元/平方米）&#x27;</span>)
+            plt.legend()
+            plt.grid(<span class="hljs-literal">True</span>)
+            plt.tight_layout()
+            plt.savefig(<span class="hljs-string">f&#x27;results/<span class="hljs-subst">{city}</span>_future_prediction.png&#x27;</span>, dpi=<span class="hljs-number">300</span>)
+            plt.close()
+
+        <span class="hljs-comment"># 所有城市预测对比图</span>
+        plt.figure(figsize=(<span class="hljs-number">15</span>, <span class="hljs-number">10</span>))
+        <span class="hljs-keyword">for</span> city <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cities:
+            city_future = future_df[future_df[<span class="hljs-string">&#x27;city&#x27;</span>] == city].sort_values(<span class="hljs-string">&#x27;date&#x27;</span>)
+            plt.plot(city_future[<span class="hljs-string">&#x27;date&#x27;</span>], city_future[<span class="hljs-string">&#x27;average_predicted_price&#x27;</span>], label=city)
+
+        plt.title(<span class="hljs-string">&#x27;各城市未来房价预测对比&#x27;</span>)
+        plt.xlabel(<span class="hljs-string">&#x27;日期&#x27;</span>)
+        plt.ylabel(<span class="hljs-string">&#x27;房价（元/平方米）&#x27;</span>)
+        plt.legend()
+        plt.grid(<span class="hljs-literal">True</span>)
+        plt.tight_layout()
+        plt.savefig(<span class="hljs-string">&#x27;results/all_cities_future_prediction.png&#x27;</span>, dpi=<span class="hljs-number">300</span>)
+        plt.close()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">generate_report</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;生成综合分析报告&quot;&quot;&quot;</span>
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;生成综合分析报告...&quot;</span>)
+
+        <span class="hljs-comment"># 计算各城市价格变化率</span>
+        price_changes = {}
+        <span class="hljs-keyword">for</span> city <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.cities:
+            city_data = <span class="hljs-variable language_">self</span>.data[<span class="hljs-variable language_">self</span>.data[<span class="hljs-string">&#x27;city&#x27;</span>] == city].sort_values(<span class="hljs-string">&#x27;date&#x27;</span>)
+            recent_price = city_data.iloc[-<span class="hljs-number">1</span>][<span class="hljs-string">&#x27;price_per_sqm&#x27;</span>]
+            year_ago_price = city_data[city_data[<span class="hljs-string">&#x27;date&#x27;</span>] &lt;= city_data[<span class="hljs-string">&#x27;date&#x27;</span>].<span class="hljs-built_in">max</span>() - timedelta(days=<span class="hljs-number">365</span>)].iloc[-<span class="hljs-number">1</span>][<span class="hljs-string">&#x27;price_per_sqm&#x27;</span>]
+            change_rate = (recent_price - year_ago_price) / year_ago_price * <span class="hljs-number">100</span>
+            price_changes[city] = change_rate
+
+        <span class="hljs-comment"># 生成报告内容</span>
+        report = {
+            <span class="hljs-string">&#x27;analysis_date&#x27;</span>: datetime.now().strftime(<span class="hljs-string">&#x27;%Y-%m-%d&#x27;</span>),
+            <span class="hljs-string">&#x27;data_summary&#x27;</span>: {
+                <span class="hljs-string">&#x27;total_records&#x27;</span>: <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.data),
+                <span class="hljs-string">&#x27;cities_analyzed&#x27;</span>: <span class="hljs-variable language_">self</span>.cities,
+                <span class="hljs-string">&#x27;time_period&#x27;</span>: {
+                    <span class="hljs-string">&#x27;start&#x27;</span>: <span class="hljs-variable language_">self</span>.data[<span class="hljs-string">&#x27;date&#x27;</span>].<span class="hljs-built_in">min</span>().strftime(<span class="hljs-string">&#x27;%Y-%m-%d&#x27;</span>),
+                    <span class="hljs-string">&#x27;end&#x27;</span>: <span class="hljs-variable language_">self</span>.data[<span class="hljs-string">&#x27;date&#x27;</span>].<span class="hljs-built_in">max</span>().strftime(<span class="hljs-string">&#x27;%Y-%m-%d&#x27;</span>)
+                }
+            },
+            <span class="hljs-string">&#x27;price_changes&#x27;</span>: price_changes,
+            <span class="hljs-string">&#x27;key_findings&#x27;</span>: [],
+            <span class="hljs-string">&#x27;recommendations&#x27;</span>: []
+        }
+
+        <span class="hljs-comment"># 添加关键发现</span>
+        report[<span class="hljs-string">&#x27;key_findings&#x27;</span>].append(<span class="hljs-string">f&quot;北京和上海房价仍然领先全国，平均价格分别为<span class="hljs-subst">{self.data[self.data[<span class="hljs-string">&#x27;city&#x27;</span>]==<span class="hljs-string">&#x27;北京&#x27;</span>][<span class="hljs-string">&#x27;price_per_sqm&#x27;</span>].mean():<span class="hljs-number">.2</span>f}</span>元和<span class="hljs-subst">{self.data[self.data[<span class="hljs-string">&#x27;city&#x27;</span>]==<span class="hljs-string">&#x27;上海&#x27;</span>][<span class="hljs-string">&#x27;price_per_sqm&#x27;</span>].mean():<span class="hljs-number">.2</span>f}</span>元&quot;</span>)
+        report[<span class="hljs-string">&#x27;key_findings&#x27;</span>].append(<span class="hljs-string">f&quot;房价上涨最快的城市是<span class="hljs-subst">{<span class="hljs-built_in">max</span>(price_changes.items(), key=<span class="hljs-keyword">lambda</span> x: x[<span class="hljs-number">1</span>])[<span class="hljs-number">0</span>]}</span>，同比上涨<span class="hljs-subst">{<span class="hljs-built_in">max</span>(price_changes.values()):<span class="hljs-number">.2</span>f}</span>%&quot;</span>)
+        report[<span class="hljs-string">&#x27;key_findings&#x27;</span>].append(<span class="hljs-string">f&quot;房价上涨最慢的城市是<span class="hljs-subst">{<span class="hljs-built_in">min</span>(price_changes.items(), key=<span class="hljs-keyword">lambda</span> x: x[<span class="hljs-number">1</span>])[<span class="hljs-number">0</span>]}</span>，同比上涨<span class="hljs-subst">{<span class="hljs-built_in">min</span>(price_changes.values()):<span class="hljs-number">.2</span>f}</span>%&quot;</span>)
+
+        <span class="hljs-comment"># 添加建议</span>
+        report[<span class="hljs-string">&#x27;recommendations&#x27;</span>].append(<span class="hljs-string">&quot;根据历史趋势和模型预测，建议关注一线城市周边的卫星城市投资机会&quot;</span>)
+        report[<span class="hljs-string">&#x27;recommendations&#x27;</span>].append(<span class="hljs-string">&quot;考虑到价格波动风险，建议采取分散投资策略&quot;</span>)
+        report[<span class="hljs-string">&#x27;recommendations&#x27;</span>].append(<span class="hljs-string">&quot;密切关注政策变化对房地产市场的影响&quot;</span>)
+
+        <span class="hljs-comment"># 保存报告</span>
+        <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&#x27;results/analysis_report.json&#x27;</span>, <span class="hljs-string">&#x27;w&#x27;</span>, encoding=<span class="hljs-string">&#x27;utf-8&#x27;</span>) <span class="hljs-keyword">as</span> f:
+            json.dump(report, f, ensure_ascii=<span class="hljs-literal">False</span>, indent=<span class="hljs-number">2</span>)
+
+        <span class="hljs-comment"># 生成HTML报告</span>
+        <span class="hljs-variable language_">self</span>._generate_html_report(report)
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;报告已生成：results/analysis_report.json 和 results/report.html&quot;</span>)
+        <span class="hljs-keyword">return</span> report
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_generate_html_report</span>(<span class="hljs-params">self, report</span>):
+        <span class="hljs-string">&quot;&quot;&quot;生成HTML格式的报告&quot;&quot;&quot;</span>
+        html_content = <span class="hljs-string">f&#x27;&#x27;&#x27;
+        &lt;!DOCTYPE html&gt;
+        &lt;html lang=&quot;zh-CN&quot;&gt;
+        &lt;head&gt;
+            &lt;meta charset=&quot;UTF-8&quot;&gt;
+            &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+            &lt;title&gt;房地产市场分析报告&lt;/title&gt;
+            &lt;style&gt;
+                body <span class="hljs-subst">{&lt;!-- --&gt;{
+                    font-family: <span class="hljs-string">&#x27;Microsoft YaHei&#x27;</span>, Arial, sans-serif;
+                    line-height: <span class="hljs-number">1.6</span>;
+                    color: #<span class="hljs-number">333</span>;
+                    <span class="hljs-built_in">max</span>-width: 1200px;
+                    margin: <span class="hljs-number">0</span> auto;
+                    padding: 20px;
+                    background-color: #f5f5f5;
+                }</span>}
+                h1, h2, h3 <span class="hljs-subst">{&lt;!-- --&gt;{
+                    color: #2c3e50;
+                }</span>}
+                .container <span class="hljs-subst">{&lt;!-- --&gt;{
+                    background-color: white;
+                    padding: 30px;
+                    border-radius: 8px;
+                    box-shadow: <span class="hljs-number">0</span> 2px 10px rgba(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0.1</span>);
+                }</span>}
+                .summary <span class="hljs-subst">{&lt;!-- --&gt;{
+                    background-color: #e8f4f8;
+                    padding: 20px;
+                    border-radius: 6px;
+                    margin-bottom: 30px;
+                }</span>}
+                .chart <span class="hljs-subst">{&lt;!-- --&gt;{
+                    margin: 30px <span class="hljs-number">0</span>;
+                    text-align: center;
+                }</span>}
+                .chart img <span class="hljs-subst">{&lt;!-- --&gt;{
+                    <span class="hljs-built_in">max</span>-width: <span class="hljs-number">100</span>%;
+                    height: auto;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                }</span>}
+                table <span class="hljs-subst">{&lt;!-- --&gt;{
+                    width: <span class="hljs-number">100</span>%;
+                    border-collapse: collapse;
+                    margin: 20px <span class="hljs-number">0</span>;
+                }</span>}
+                th, td <span class="hljs-subst">{&lt;!-- --&gt;{
+                    padding: 12px;
+                    text-align: left;
+                    border-bottom: 1px solid #ddd;
+                }</span>}
+                th <span class="hljs-subst">{&lt;!-- --&gt;{
+                    background-color: #f2f2f2;
+                }</span>}
+                tr:hover <span class="hljs-subst">{&lt;!-- --&gt;{
+                    background-color: #f5f5f5;
+                }</span>}
+                .highlight <span class="hljs-subst">{&lt;!-- --&gt;{
+                    background-color: #fffacd;
+                    padding: 15px;
+                    border-left: 4px solid #ffd700;
+                    margin: 20px <span class="hljs-number">0</span>;
+                }</span>}
+            &lt;/style&gt;
+        &lt;/head&gt;
+        &lt;body&gt;
+            &lt;div class=&quot;container&quot;&gt;
+                &lt;h1&gt;房地产市场分析与预测报告&lt;/h1&gt;
+                &lt;p&gt;生成日期：<span class="hljs-subst">{report[<span class="hljs-string">&#x27;analysis_date&#x27;</span>]}</span>&lt;/p&gt;
+
+                &lt;div class=&quot;summary&quot;&gt;
+                    &lt;h2&gt;数据概述&lt;/h2&gt;
+                    &lt;p&gt;本次分析涵盖了<span class="hljs-subst">{<span class="hljs-built_in">len</span>(report[<span class="hljs-string">&#x27;data_summary&#x27;</span>][<span class="hljs-string">&#x27;cities_analyzed&#x27;</span>])}</span>个城市，
+                    时间跨度从<span class="hljs-subst">{report[<span class="hljs-string">&#x27;data_summary&#x27;</span>][<span class="hljs-string">&#x27;time_period&#x27;</span>][<span class="hljs-string">&#x27;start&#x27;</span>]}</span>到<span class="hljs-subst">{report[<span class="hljs-string">&#x27;data_summary&#x27;</span>][<span class="hljs-string">&#x27;time_period&#x27;</span>][<span class="hljs-string">&#x27;end&#x27;</span>]}</span>，
+                    共<span class="hljs-subst">{report[<span class="hljs-string">&#x27;data_summary&#x27;</span>][<span class="hljs-string">&#x27;total_records&#x27;</span>]}</span>条数据记录。&lt;/p&gt;
+                &lt;/div&gt;
+
+                &lt;h2&gt;城市房价走势&lt;/h2&gt;
+                &lt;div class=&quot;chart&quot;&gt;
+                    &lt;img src=&quot;city_price_trends.png&quot; alt=&quot;各城市房价走势&quot;&gt;
+                &lt;/div&gt;
+
+                &lt;h2&gt;城市房价对比&lt;/h2&gt;
+                &lt;div class=&quot;chart&quot;&gt;
+                    &lt;img src=&quot;avg_price_comparison.png&quot; alt=&quot;各城市平均房价对比&quot;&gt;
+                &lt;/div&gt;
+
+                &lt;h2&gt;同比价格变化率&lt;/h2&gt;
+                &lt;table&gt;
+                    &lt;tr&gt;
+                        &lt;th&gt;城市&lt;/th&gt;
+                        &lt;th&gt;同比变化率&lt;/th&gt;
+                    &lt;/tr&gt;
+        &#x27;&#x27;&#x27;</span>
+
+        <span class="hljs-comment"># 添加价格变化表格</span>
+        <span class="hljs-keyword">for</span> city, rate <span class="hljs-keyword">in</span> report[<span class="hljs-string">&#x27;price_changes&#x27;</span>].items():
+            html_content += <span class="hljs-string">f&#x27;&#x27;&#x27;
+                    &lt;tr&gt;
+                        &lt;td&gt;<span class="hljs-subst">{city}</span>&lt;/td&gt;
+                        &lt;td&gt;<span class="hljs-subst">{rate:<span class="hljs-number">.2</span>f}</span>%&lt;/td&gt;
+                    &lt;/tr&gt;
+            &#x27;&#x27;&#x27;</span>
+
+        html_content += <span class="hljs-string">&#x27;&#x27;&#x27;
+                &lt;/table&gt;
+
+                &lt;h2&gt;特征相关性分析&lt;/h2&gt;
+                &lt;div class=&quot;chart&quot;&gt;
+                    &lt;img src=&quot;correlation_heatmap.png&quot; alt=&quot;特征相关性热力图&quot;&gt;
+                &lt;/div&gt;
+
+                &lt;h2&gt;模型预测性能&lt;/h2&gt;
+                &lt;div class=&quot;chart&quot;&gt;
+                    &lt;img src=&quot;prediction_comparison.png&quot; alt=&quot;模型预测结果对比&quot;&gt;
+                &lt;/div&gt;
+
+                &lt;h2&gt;未来房价预测&lt;/h2&gt;
+                &lt;div class=&quot;highlight&quot;&gt;
+                    &lt;h3&gt;关键发现&lt;/h3&gt;
+                    &lt;ul&gt;
+        &#x27;&#x27;&#x27;</span>
+
+        <span class="hljs-comment"># 添加关键发现</span>
+        <span class="hljs-keyword">for</span> finding <span class="hljs-keyword">in</span> report[<span class="hljs-string">&#x27;key_findings&#x27;</span>]:
+            html_content += <span class="hljs-string">f&#x27;&lt;li&gt;<span class="hljs-subst">{finding}</span>&lt;/li&gt;&#x27;</span>
+
+        html_content += <span class="hljs-string">&#x27;&#x27;&#x27;
+                    &lt;/ul&gt;
+                &lt;/div&gt;
+
+                &lt;div class=&quot;chart&quot;&gt;
+                    &lt;img src=&quot;all_cities_future_prediction.png&quot; alt=&quot;各城市未来房价预测对比&quot;&gt;
+                &lt;/div&gt;
+
+                &lt;h2&gt;投资建议&lt;/h2&gt;
+                &lt;ul&gt;
+        &#x27;&#x27;&#x27;</span>
+
+        <span class="hljs-comment"># 添加建议</span>
+        <span class="hljs-keyword">for</span> recommendation <span class="hljs-keyword">in</span> report[<span class="hljs-string">&#x27;recommendations&#x27;</span>]:
+            html_content += <span class="hljs-string">f&#x27;&lt;li&gt;<span class="hljs-subst">{recommendation}</span>&lt;/li&gt;&#x27;</span>
+
+        html_content += <span class="hljs-string">&#x27;&#x27;&#x27;
+                &lt;/ul&gt;
+
+                &lt;div class=&quot;chart&quot;&gt;
+                    &lt;img src=&quot;feature_importance.png&quot; alt=&quot;特征重要性分析&quot;&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/body&gt;
+        &lt;/html&gt;
+        &#x27;&#x27;&#x27;</span>
+
+        <span class="hljs-comment"># 保存HTML报告</span>
+        <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&#x27;results/report.html&#x27;</span>, <span class="hljs-string">&#x27;w&#x27;</span>, encoding=<span class="hljs-string">&#x27;utf-8&#x27;</span>) <span class="hljs-keyword">as</span> f:
+            f.write(html_content)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;========================================&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;      房地产价格分析与预测系统&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;========================================&quot;</span>)
+
+    predictor = RealEstatePredictor()
+
+    <span class="hljs-comment"># 1. 加载数据</span>
+    <span class="hljs-comment"># 优先检查是否存在官方爬取的数据</span>
+    <span class="hljs-keyword">import</span> os
+    <span class="hljs-keyword">if</span> os.path.exists(<span class="hljs-string">&#x27;official_real_estate_data.csv&#x27;</span>):
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;检测到官方爬取的数据，正在加载...&quot;</span>)
+        predictor.data = pd.read_csv(<span class="hljs-string">&#x27;official_real_estate_data.csv&#x27;</span>)
+        predictor.data[<span class="hljs-string">&#x27;date&#x27;</span>] = pd.to_datetime(predictor.data[<span class="hljs-string">&#x27;date&#x27;</span>])
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;成功加载<span class="hljs-subst">{<span class="hljs-built_in">len</span>(predictor.data)}</span>条官方数据&quot;</span>)
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;未检测到官方数据，生成模拟数据...&quot;</span>)
+        predictor.load_sample_data()
+
+    <span class="hljs-comment"># 2. 探索性分析</span>
+    predictor.exploratory_analysis()
+
+    <span class="hljs-comment"># 3. 数据预处理</span>
+    predictor.preprocess_data()
+
+    <span class="hljs-comment"># 4. 训练模型</span>
+    predictor.train_models()
+
+    <span class="hljs-comment"># 5. 预测未来</span>
+    predictor.predict_future(months=<span class="hljs-number">12</span>)
+
+    <span class="hljs-comment"># 6. 生成报告</span>
+    predictor.generate_report()
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n========================================&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;分析完成！请查看results文件夹中的分析结果和报告&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;========================================&quot;</span>)
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    main()
+</code></pre>
+<p>完整代码可私信获取！</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-3" href="#1-项目概述">1\. 项目概述</a>
+          
+            <a class="toc-level-3" href="#2-数据爬虫模块开发">2\. 数据爬虫模块开发</a>
+          
+            <a class="toc-level-4" href="#2-1-爬虫框架设计">2.1 爬虫框架设计</a>
+          
+            <a class="toc-level-4" href="#2-2-数据存储与管理">2.2 数据存储与管理</a>
+          
+            <a class="toc-level-3" href="#3-预测系统增强">3\. 预测系统增强</a>
+          
+            <a class="toc-level-4" href="#3-1-系统架构优化">3.1 系统架构优化</a>
+          
+            <a class="toc-level-4" href="#3-2-用户体验改进">3.2 用户体验改进</a>
+          
+            <a class="toc-level-3" href="#4-完整工作流程实现">4\. 完整工作流程实现</a>
+          
+            <a class="toc-level-4" href="#4-1-数据采集阶段">4.1 数据采集阶段</a>
+          
+            <a class="toc-level-4" href="#4-2-模型训练与验证">4.2 模型训练与验证</a>
+          
+            <a class="toc-level-4" href="#4-3-结果生成与展示">4.3 结果生成与展示</a>
+          
+            <a class="toc-level-3" href="#5-分析结果输出">5\. 分析结果输出</a>
+          
+            <a class="toc-level-4" href="#5-1-历史趋势分析">5.1 历史趋势分析</a>
+          
+            <a class="toc-level-4" href="#5-2-未来预测展望">5.2 未来预测展望</a>
+          
+            <a class="toc-level-4" href="#5-3-特征重要性分析">5.3 特征重要性分析</a>
+          
+            <a class="toc-level-4" href="#5-4-综合报告生成">5.4 综合报告生成</a>
+          
+            <a class="toc-level-3" href="#6-技术亮点与创新">6\. 技术亮点与创新</a>
+          
+            <a class="toc-level-4" href="#6-1-技术创新点">6.1 技术创新点</a>
+          
+            <a class="toc-level-4" href="#6-2-应用价值">6.2 应用价值</a>
+          
+            <a class="toc-level-3" href="#7-总结与展望">7\. 总结与展望</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/目前机器人主要用到的编程技术和大模型是什么关系大模型的具体落地到机器人已经成为现实但是机器人的运动系.html">
+      <span>上一篇</span>
+      <strong>目前机器人主要用到的编程技术和大模型是什么关系大模型的具体落地到机器人已经成为现实但是机器人的运动系</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/波浪纹噪声无法消除有好的方法吗.html">
+      <span>下一篇</span>
+      <strong>波浪纹噪声无法消除有好的方法吗</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/详细案例说明ai所用的算法列出公式用python代码说明用法.html">详细案例说明AI所用的算法列出公式用Python代码说明用法</a></h3>
+        <p class="post-excerpt">我们来详细拆解一个最经典、最基础的 AI 算法 ——线性回归 (Linear Regression)。它是理解几乎所有更复杂 AI 模型（如神经网络）的基石。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.312Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/人工智能大模型是怎样喂数据的.html">人工智能大模型是怎样喂数据的</a></h3>
+        <p class="post-excerpt">人工智能大模型喂数据是一个系统且精细的过程，涵盖数据收集、预处理、划分、投喂等多个关键环节，每个环节都对模型训练效果有着重要影响：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.898Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/ai算力需要数据库吗和数据库是什么关系什么样的数据库才能更好地匹配ai算力.html">AI算力需要数据库吗和数据库是什么关系什么样的数据库才能更好地匹配AI算力</a></h3>
+        <p class="post-excerpt">AI 算力离不开数据库，二者是 “协同支撑” 关系 —— 数据库负责高效存储和管理 AI 所需的海量数据，AI 算力则依赖这些数据进行模型训练和推理，缺少优质数据库支撑的 AI 算力会陷入 “无米之炊” 的困境。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.676Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>基于改进沙猫群优化算法的Otsu图像分割 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">基于改进沙猫群优化算法的Otsu图像分割</h1>
+        <p class="post-deck">本文提出了一种基于改进沙猫群优化算法(SCSO-DOGA)的Otsu多阈值图像分割方法。首先初始化算法参数并加载图像，通过SCSO-DOGA优化器寻找最优阈值，其中目标函数为最大化类间方差。实验结果显示，该方法能有效找到最佳阈值并进行图像分割，同时提供收敛曲线分析算法性能。最后通过可视化对比原始图像、直方图和分割结果，验证了该方法的有效性。该算法适用于灰度图像的多阈值分割任务，具有较好的优化性能。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.060Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>7 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-5.html">人工智能</a>
+          
+            <a class="tag-chip" href="../tags/tag-14.html">图像处理</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文提出了一种基于改进沙猫群优化算法(SCSO-DOGA)的Otsu多阈值图像分割方法。首先初始化算法参数并加载图像，通过SCSO-DOGA优化器寻找最优阈值，其中目标函数为最大化类间方差。实验结果显示，该方法能有效找到最佳阈值并进行图像分割，同时提供收敛曲线分析算法性能。最后通过可视化对比原始图像、直方图和分割结果，验证了该方法的有效性。该算法适用于灰度图像的多阈值分割任务，具有较好的优化性能。</p>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8E%E6%94%B9%E8%BF%9B%E6%B2%99%E7%8C%AB%E7%BE%A4%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95%E7%9A%84otsu%E5%9B%BE%E5%83%8F%E5%88%86%E5%89%B2/img-01.png" alt=""></p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% =========================================================================</span>
+<span class="hljs-comment">% 主函数: 基于改进沙猫群优化算法(SCSO-DOGA)的Otsu多阈值图像分割</span>
+<span class="hljs-comment">% Main Function: Otsu Multi-threshold Image Segmentation based on</span>
+<span class="hljs-comment">% Improved Sand Cat Swarm Optimization (SCSO-DOGA)</span>
+<span class="hljs-comment">% =========================================================================</span>
+
+clear;
+close all;
+clc;
+
+<span class="hljs-comment">%% 1. 参数设置 (Parameter Settings)</span>
+<span class="hljs-built_in">disp</span>(<span class="hljs-string">&#x27;正在初始化参数...&#x27;</span>);
+
+<span class="hljs-comment">% 优化算法参数</span>
+pop_size = <span class="hljs-number">30</span>;         <span class="hljs-comment">% 种群数量 (Population size)</span>
+max_iter = <span class="hljs-number">100</span>;        <span class="hljs-comment">% 最大迭代次数 (Max iterations)</span>
+n_thresholds = <span class="hljs-number">3</span>;      <span class="hljs-comment">% 寻找的阈值数量 (Number of thresholds to find)</span>
+lb = <span class="hljs-number">0</span>;                <span class="hljs-comment">% 搜索下界 (Lower bound for thresholds)</span>
+ub = <span class="hljs-number">255</span>;              <span class="hljs-comment">% 搜索上界 (Upper bound for thresholds)</span>
+
+<span class="hljs-comment">% 加载图像</span>
+img = imread(<span class="hljs-string">&#x27;0.jpg&#x27;</span>); <span class="hljs-comment">% 您可以替换成自己的图像</span>
+<span class="hljs-keyword">if</span> <span class="hljs-built_in">size</span>(img, <span class="hljs-number">3</span>) &gt; <span class="hljs-number">1</span>
+    img = rgb2gray(img);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 获取图像直方图</span>
+img_hist = imhist(img);
+img_hist = img_hist&#x27;; <span class="hljs-comment">% 转为行向量方便计算</span>
+
+<span class="hljs-comment">%% 2. 运行 SCSO-DOGA 优化算法 (Run SCSO-DOGA Optimizer)</span>
+<span class="hljs-built_in">disp</span>([<span class="hljs-string">&#x27;正在使用SCSO-DOGA寻找 &#x27;</span> num2str(n_thresholds) <span class="hljs-string">&#x27; 个最佳阈值...&#x27;</span>]);
+
+<span class="hljs-comment">% 定义目标函数句柄</span>
+<span class="hljs-comment">% 注意: 优化器通常是最小化, 而Otsu是最大化类间方差, 因此目标函数返回负值</span>
+obj_func = @(thresholds) OtsuObjectiveFunction(thresholds, img_hist);
+
+<span class="hljs-comment">% 调用SCSO-DOGA算法</span>
+[best_thresholds, best_fitness, convergence_curve] = SCSO_DOGA(obj_func, pop_size, max_iter, n_thresholds, lb, ub, img_hist);
+
+<span class="hljs-comment">% 最佳阈值和最大类间方差</span>
+best_thresholds = <span class="hljs-built_in">sort</span>(<span class="hljs-built_in">round</span>(best_thresholds));
+max_variance = -best_fitness;
+
+<span class="hljs-built_in">disp</span>(<span class="hljs-string">&#x27;优化完成！&#x27;</span>);
+<span class="hljs-built_in">disp</span>([<span class="hljs-string">&#x27;找到的最佳阈值: &#x27;</span> num2str(best_thresholds)]);
+<span class="hljs-built_in">disp</span>([<span class="hljs-string">&#x27;对应的最大类间方差: &#x27;</span> num2str(max_variance)]);
+
+<span class="hljs-comment">%% 3. 图像分割与结果展示 (Image Segmentation and Result Display)</span>
+
+<span class="hljs-comment">% 根据找到的阈值进行分割</span>
+segmented_img = <span class="hljs-built_in">zeros</span>(<span class="hljs-built_in">size</span>(img));
+thresholds = [lb, best_thresholds, ub];
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:<span class="hljs-built_in">length</span>(thresholds)<span class="hljs-number">-1</span>
+    <span class="hljs-comment">% 定义每个分割区间的灰度值</span>
+    segment_value = (thresholds(<span class="hljs-built_in">i</span>) + thresholds(<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>)) / <span class="hljs-number">2</span>;
+    <span class="hljs-comment">% 找到属于该区间的像素</span>
+    mask = (img &gt; thresholds(<span class="hljs-built_in">i</span>)) &amp; (img &lt;= thresholds(<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>));
+    segmented_img(mask) = segment_value;
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 显示结果</span>
+<span class="hljs-built_in">figure</span>;
+subplot(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>);
+imshow(img);
+title(<span class="hljs-string">&#x27;原始图像 (Original Image)&#x27;</span>);
+
+subplot(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>);
+imhist(img);
+title(<span class="hljs-string">&#x27;原始图像直方图 (Histogram)&#x27;</span>);
+<span class="hljs-built_in">hold</span> on;
+<span class="hljs-comment">% 在直方图上标记找到的阈值</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:<span class="hljs-built_in">length</span>(best_thresholds)
+    line([best_thresholds(<span class="hljs-built_in">i</span>), best_thresholds(<span class="hljs-built_in">i</span>)], ylim, <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;r&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>);
+<span class="hljs-keyword">end</span>
+<span class="hljs-built_in">hold</span> off;
+
+subplot(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>);
+imshow(uint8(segmented_img));
+title([<span class="hljs-string">&#x27;SCSO-DOGA-Otsu 分割结果 (N=&#x27;</span> num2str(n_thresholds) <span class="hljs-string">&#x27;)&#x27;</span>]);
+
+subplot(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>);
+<span class="hljs-built_in">plot</span>(<span class="hljs-number">1</span>:max_iter, -convergence_curve, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>);
+title(<span class="hljs-string">&#x27;收敛曲线 (Convergence Curve)&#x27;</span>);
+xlabel(<span class="hljs-string">&#x27;迭代次数 (Iteration)&#x27;</span>);
+ylabel(<span class="hljs-string">&#x27;目标函数值 (最大类间方差)&#x27;</span>);
+grid on;
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/基于目标检测和场景流估计联合优化的3d多目标跟踪关键词多目标跟踪场景流目标检测.html">
+      <span>上一篇</span>
+      <strong>基于目标检测和场景流估计联合优化的3D多目标跟踪关键词多目标跟踪场景流目标检测</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/基于改进标准映射的图像加密算法matlab代码版本.html">
+      <span>下一篇</span>
+      <strong>基于改进标准映射的图像加密算法MATLAB代码版本</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/基于改进标准映射的图像加密算法matlab代码版本.html">基于改进标准映射的图像加密算法MATLAB代码版本</a></h3>
+        <p class="post-excerpt">!在这里插入图片描述代码运行结果如上图</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.037Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/基于二维小波变换的图像增强matlab代码.html">基于二维小波变换的图像增强MATLAB代码</a></h3>
+        <p class="post-excerpt">Matlab</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.991Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于mfs的图像分割边界优化策略.html">基于MFS的图像分割边界优化策略</a></h3>
+        <p class="post-excerpt">本文提出了一种基于改进型双拉普拉斯-亥姆霍兹算子的图像分割边界优化策略(MFS-Smoother)。该方法通过提取分割掩码的边界点，构建线性方程组求解权重系数，进而重构平滑边界曲线。核心算法包括：1）使用核函数K\B(rho,kappa)计算点间关系；2）通过求解M\beta=1向量方程组获取最优边界；3）评估隐式场函数并提取等值线。实验表明，该方法能有效平滑锯齿状边界，降低平均曲率，提升分割质量…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.969Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

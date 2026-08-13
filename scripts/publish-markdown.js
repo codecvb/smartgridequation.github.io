@@ -91,15 +91,16 @@ function publishFile(file) {
   const slug = frontmatter.slug || store.slugify(title) || `post-${Date.now().toString(36)}`;
   const summary = frontmatter.summary || summaryOf(content);
   const tags = normalizeTags(frontmatter.tags);
+  const category = String(frontmatter.category || '').trim();
   const existing = store.getPostBySlug(slug);
 
   let post;
   let action;
   if (existing) {
-    post = store.updatePost(existing.id, { title, slug, summary, content, tags }, 'publish');
+    post = store.updatePost(existing.id, { title, slug, summary, content, tags, category }, 'publish');
     action = 'updated';
   } else {
-    post = store.createPost({ title, slug, summary, content, tags, status: 'published' });
+    post = store.createPost({ title, slug, summary, content, tags, category, status: 'published' });
     action = 'published';
   }
 
@@ -109,13 +110,22 @@ function publishFile(file) {
 function main() {
   const args = process.argv.slice(2);
   let files = args.length ? args : [];
+  const IGNORE_DIRS = new Set(['CSDN博文备份']);
+  function collectMarkdown(dir) {
+    if (!fs.existsSync(dir)) return [];
+    const results = [];
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        if (!IGNORE_DIRS.has(entry.name)) results.push(...collectMarkdown(path.join(dir, entry.name)));
+      } else if (/\.md$/i.test(entry.name)) {
+        results.push(path.join(dir, entry.name));
+      }
+    }
+    return results;
+  }
 
   if (!files.length && fs.existsSync(POSTS_DIR)) {
-    files = fs
-      .readdirSync(POSTS_DIR)
-      .filter((name) => /\.md$/i.test(name))
-      .sort()
-      .map((name) => path.join(POSTS_DIR, name));
+    files = collectMarkdown(POSTS_DIR).sort();
   }
 
   if (!files.length) {

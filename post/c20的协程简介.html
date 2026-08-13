@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>C20的协程简介 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/c-c-与-rust.html">C/C++ 与 Rust</a>
+        </nav>
+        <h1 class="post-title">C20的协程简介</h1>
+        <p class="post-deck">C++20 引入了协程（Coroutines），这是一种特殊的函数，它可以暂停执行并在之后恢复，而不是像普通函数那样一旦返回就终止。协程的主要特点在于它能保留自身的执行状态，这让异步编程更加简洁和直观。以下是对 C++20 协程的详细介绍：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.832Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>7 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-7.html">C/C++</a>
+          
+            <a class="tag-chip" href="../tags/tag-8.html">Rust</a>
+          
+            <a class="tag-chip" href="../tags/tag-34.html">C++</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>C++20 引入了协程（Coroutines），这是一种特殊的函数，它可以暂停执行并在之后恢复，而不是像普通函数那样一旦返回就终止。协程的主要特点在于它能保留自身的执行状态，这让异步编程更加简洁和直观。以下是对 C++20 协程的详细介绍：</p>
+<h4 id="关键概念" class="prose-heading">关键概念</h4>
+<ul>
+<li><strong><code>co_await</code></strong>：这是一个操作符，用于暂停协程的执行，直至等待的异步操作完成。当异步操作完成后，协程会恢复执行。</li>
+<li><strong><code>co_yield</code></strong>：此操作符用于暂停协程的执行，并返回一个值给调用者。协程之后可以继续执行。</li>
+<li><strong><code>co_return</code></strong>：该操作符用于终止协程的执行，并返回一个值给调用者。</li>
+</ul>
+<h4 id="示例代码" class="prose-heading">示例代码</h4>
+<p>下面的代码展示了一个简单的 C++20 协程示例：</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;coroutine&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdexcept&gt;</span></span>
+
+<span class="hljs-comment">// 生成器类模板</span>
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> T&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Generator</span> {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-keyword">struct</span> <span class="hljs-title class_">promise_type</span> {
+        T current_value;  <span class="hljs-comment">// 当前生成的数值</span>
+
+        <span class="hljs-comment">// 协程初始化时直接挂起（惰性执行）</span>
+        <span class="hljs-function">std::suspend_always <span class="hljs-title">initial_suspend</span><span class="hljs-params">()</span> <span class="hljs-keyword">noexcept</span> </span>{ <span class="hljs-keyword">return</span> {}; }
+
+        <span class="hljs-comment">// 协程结束时保持挂起以便获取最终结果</span>
+        <span class="hljs-function">std::suspend_always <span class="hljs-title">final_suspend</span><span class="hljs-params">()</span> <span class="hljs-keyword">noexcept</span> </span>{ <span class="hljs-keyword">return</span> {}; }
+
+        <span class="hljs-comment">// 协程返回时调用（无返回值）</span>
+        <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">return_void</span><span class="hljs-params">()</span> <span class="hljs-keyword">noexcept</span> </span>{}
+
+        <span class="hljs-comment">// 处理未捕获的异常</span>
+        <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">unhandled_exception</span><span class="hljs-params">()</span> </span>{ <span class="hljs-keyword">throw</span>; }
+
+        <span class="hljs-comment">// 生成器构造入口</span>
+        <span class="hljs-function">Generator <span class="hljs-title">get_return_object</span><span class="hljs-params">()</span> </span>{
+            <span class="hljs-keyword">return</span> Generator{std::coroutine_handle&lt;promise_type&gt;::<span class="hljs-built_in">from_promise</span>(*<span class="hljs-keyword">this</span>)};
+        }
+
+        <span class="hljs-comment">// 定义 co_yield 行为</span>
+        <span class="hljs-function">std::suspend_always <span class="hljs-title">yield_value</span><span class="hljs-params">(T value)</span> </span>{
+            current_value = value;
+            <span class="hljs-keyword">return</span> {};
+        }
+    };
+
+    <span class="hljs-comment">// 协程句柄</span>
+    std::coroutine_handle&lt;promise_type&gt; coro_handle;
+
+    <span class="hljs-comment">// 构造函数</span>
+    <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">Generator</span><span class="hljs-params">(std::coroutine_handle&lt;promise_type&gt; h)</span> : coro_handle(h) {</span>}
+
+    <span class="hljs-comment">// 析构时销毁协程</span>
+    ~<span class="hljs-built_in">Generator</span>() { <span class="hljs-keyword">if</span> (coro_handle) coro_handle.<span class="hljs-built_in">destroy</span>(); }
+
+    <span class="hljs-comment">// 迭代器支持</span>
+    <span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">move_next</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">if</span> (!coro_handle.<span class="hljs-built_in">done</span>()) {
+            coro_handle.<span class="hljs-built_in">resume</span>();
+            <span class="hljs-keyword">return</span> !coro_handle.<span class="hljs-built_in">done</span>();
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+
+    <span class="hljs-function">T <span class="hljs-title">current</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{ <span class="hljs-keyword">return</span> coro_handle.<span class="hljs-built_in">promise</span>().current_value; }
+
+    <span class="hljs-comment">// 范围遍历支持</span>
+    <span class="hljs-keyword">struct</span> <span class="hljs-title class_">Iter</span> {
+        Generator&amp; gen;
+        <span class="hljs-type">bool</span> <span class="hljs-keyword">operator</span>!=(std::<span class="hljs-type">nullptr_t</span>) <span class="hljs-type">const</span> { <span class="hljs-keyword">return</span> gen.<span class="hljs-built_in">move_next</span>(); }
+        <span class="hljs-type">void</span> <span class="hljs-keyword">operator</span>++() {}
+        T <span class="hljs-keyword">operator</span>*() <span class="hljs-type">const</span> { <span class="hljs-keyword">return</span> gen.<span class="hljs-built_in">current</span>(); }
+    };
+
+    <span class="hljs-function">Iter <span class="hljs-title">begin</span><span class="hljs-params">()</span> </span>{ <span class="hljs-keyword">return</span> Iter{*<span class="hljs-keyword">this</span>}; }
+    <span class="hljs-function">std::<span class="hljs-type">nullptr_t</span> <span class="hljs-title">end</span><span class="hljs-params">()</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-literal">nullptr</span>; }
+};
+
+<span class="hljs-comment">// 生成整数序列的协程函数</span>
+<span class="hljs-function">Generator&lt;<span class="hljs-type">int</span>&gt; <span class="hljs-title">generate_sequence</span><span class="hljs-params">(<span class="hljs-type">int</span> start, <span class="hljs-type">int</span> end)</span> </span>{
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = start; i &lt;= end; ++i) {
+        <span class="hljs-keyword">co_yield</span> i;  <span class="hljs-comment">// 每次生成一个值并挂起</span>
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-comment">// 生成 1 到 10 的序列</span>
+    <span class="hljs-keyword">auto</span> seq = <span class="hljs-built_in">generate_sequence</span>(<span class="hljs-number">1</span>, <span class="hljs-number">10</span>);
+
+    <span class="hljs-comment">// 遍历输出</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> num : seq) {
+        std::cout &lt;&lt; num &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;
+    }
+    <span class="hljs-comment">// 输出: 1 2 3 4 5 6 7 8 9 10</span>
+}
+</code></pre>
+<h4 id="代码解释" class="prose-heading">代码解释</h4>
+<ol>
+<li><strong><code>Task</code> 结构体</strong>：它是协程的返回类型，包含了 <code>promise_type</code> 结构体，用于定义协程的行为。</li>
+<li><strong><code>coroutineFunction</code> 函数</strong>：这是一个协程函数，使用 <code>co_await std::suspend_always{}</code> 来暂停协程的执行，然后使用 <code>co_return 42</code> 来终止协程并返回值 42。</li>
+<li><strong><code>main</code> 函数</strong>：调用 <code>coroutineFunction</code> 函数获取协程对象，然后调用 <code>get</code> 方法获取协程的返回值并输出。</li>
+</ol>
+<p>这个示例只是一个简单的演示，在实际应用中，协程通常会用于处理异步 I/O 操作，以提高程序的性能和响应能力。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#关键概念">关键概念</a>
+          
+            <a class="toc-level-4" href="#示例代码">示例代码</a>
+          
+            <a class="toc-level-4" href="#代码解释">代码解释</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/c与rust的语言区别rust的主要难点并举一些例子.html">
+      <span>上一篇</span>
+      <strong>c与rust的语言区别rust的主要难点并举一些例子</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/c-c-python改变consoleterminalcmd字体输出颜色.html">
+      <span>下一篇</span>
+      <strong>C C PYTHON改变consoleterminalcmd字体输出颜色</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/编写有内存漏洞的c代码并实现内存注入的示例一个程序注入另一个程序.html">编写有内存漏洞的C代码并实现内存注入的示例一个程序注入另一个程序</a></h3>
+        <p class="post-excerpt">实现思路</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.956Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/用c语言实现的回调函数案例涵盖基础用法及不同消息机制gui模拟网络请求模拟状态机消息队列.html">用C语言实现的回调函数案例涵盖基础用法及不同消息机制GUI模拟网络请求模拟状态机消息队列</a></h3>
+        <p class="post-excerpt">以下是用 C 语言实现的回调函数案例，涵盖基础用法及不同消息机制（GUI 模拟、网络请求模拟、状态机、消息队列），包含详细注释和解释。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.946Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/推荐比mini-stl更好的c实现项目代码.html">推荐比mini stl更好的C实现项目代码</a></h3>
+        <p class="post-excerpt">代码来源 -- STL模拟: STL模拟 的各类实现 - Gitee.com</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.937Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

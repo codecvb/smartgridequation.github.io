@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>关于贝叶斯分类器实现手写数字识别的解读bayesClassifier · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">关于贝叶斯分类器实现手写数字识别的解读bayesClassifier</h1>
+        <p class="post-deck">引用源 感谢大神Matlab-HandWriting\Number\Recognition: 在Matlab中使用Bayes分类器对GUI界面手写板输入的手写数字进行识别</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.919Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>13 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-6.html">数学</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>引用源 感谢大神<a href="https://gitee.com/HoganBest/Matlab-HandWriting_Number_Recognition" title="Matlab-HandWriting_Number_Recognition: 在Matlab中使用Bayes分类器对GUI界面手写板输入的手写数字进行识别">Matlab-HandWriting_Number_Recognition: 在Matlab中使用Bayes分类器对GUI界面手写板输入的手写数字进行识别</a></p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">label</span>=<span class="hljs-title">bayesClassifierBulid</span><span class="hljs-params">(img)</span></span>
+<span class="hljs-comment">%加载已经计算好的训练样本的特征变量</span>
+load featureData.mat;
+test_feature=singleNum_feature_extraction(img);<span class="hljs-comment">%获得测试图片的特征数据</span>
+
+<span class="hljs-comment">%计算先验概率</span>
+prior=[];<span class="hljs-comment">%存储先验概率的矩阵</span>
+sum=<span class="hljs-number">0</span>;
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span>=<span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(featureDataStruct,<span class="hljs-number">2</span>)
+    sum=sum+<span class="hljs-built_in">size</span>(featureDataStruct(<span class="hljs-built_in">i</span>).feature,<span class="hljs-number">1</span>);
+<span class="hljs-keyword">end</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span>=<span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(featureDataStruct,<span class="hljs-number">2</span>)
+    prior(<span class="hljs-built_in">i</span>)=<span class="hljs-built_in">size</span>(featureDataStruct(<span class="hljs-built_in">i</span>).feature,<span class="hljs-number">1</span>)/sum;
+<span class="hljs-keyword">end</span>
+<span class="hljs-comment">%计算类条件概率</span>
+likelihood = [];<span class="hljs-comment">%类条件概率</span>
+pij=[];<span class="hljs-comment">%i类的样本第j个特征为1的概率</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span>=<span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(featureDataStruct,<span class="hljs-number">2</span>)<span class="hljs-comment">%数字类别个数</span>
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">j</span>=<span class="hljs-number">1</span>:<span class="hljs-number">100</span><span class="hljs-comment">%每个数字图片提取出来的特征数</span>
+        sum=<span class="hljs-number">0</span>;
+
+        <span class="hljs-keyword">for</span> k=<span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(featureDataStruct(<span class="hljs-built_in">i</span>).feature,<span class="hljs-number">1</span>)<span class="hljs-comment">%每个类别下训练样本的个数</span>
+            i_feature=featureDataStruct(<span class="hljs-built_in">i</span>).feature(k);
+            sum=sum+i_feature{<span class="hljs-number">1</span>}(<span class="hljs-number">1</span>,<span class="hljs-built_in">j</span>);
+        <span class="hljs-keyword">end</span>
+        pij(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>)=(sum+<span class="hljs-number">1</span>)/(<span class="hljs-built_in">size</span>(featureDataStruct(<span class="hljs-built_in">i</span>).feature,<span class="hljs-number">1</span>)+<span class="hljs-number">2</span>);<span class="hljs-comment">%计算概率估计值即Pj(ωi)，注意拉普拉斯平滑处理</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span>=<span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(featureDataStruct,<span class="hljs-number">2</span>)<span class="hljs-comment">%数字类别个数</span>
+    multi=<span class="hljs-number">1</span>;
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">j</span>=<span class="hljs-number">1</span>:<span class="hljs-number">100</span><span class="hljs-comment">%每个数字图片提取出来的特征数</span>
+        <span class="hljs-keyword">if</span>(test_feature(<span class="hljs-built_in">j</span>)==<span class="hljs-number">1</span>)
+            multi=multi*pij(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>);
+        <span class="hljs-keyword">else</span>
+            multi=multi*(<span class="hljs-number">1</span>-pij(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>));
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+    likelihood(<span class="hljs-built_in">i</span>)=multi;
+<span class="hljs-keyword">end</span>
+<span class="hljs-comment">%计算后验概率</span>
+p_class=[];<span class="hljs-comment">%后验概率</span>
+sum=<span class="hljs-number">0</span>;
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span>=<span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(featureDataStruct,<span class="hljs-number">2</span>)<span class="hljs-comment">%数字类别个数</span>
+    sum=sum+prior(<span class="hljs-built_in">i</span>)*likelihood(<span class="hljs-built_in">i</span>);
+<span class="hljs-keyword">end</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span>=<span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(featureDataStruct,<span class="hljs-number">2</span>)<span class="hljs-comment">%数字类别个数</span>
+    p_class(<span class="hljs-built_in">i</span>)=prior(<span class="hljs-built_in">i</span>)*likelihood(<span class="hljs-built_in">i</span>)/sum;
+<span class="hljs-keyword">end</span>
+[maxval,maxpos]=<span class="hljs-built_in">max</span>(p_class);
+label=maxpos<span class="hljs-number">-1</span>;
+</code></pre>
+<p>这段代码定义了一个名为 <code>bayesClassifierBulid</code> 的函数，其功能是使用贝叶斯分类器对输入的手写数字图像进行分类。</p>
+<h4 id="函数定义与整体功能" class="prose-heading">函数定义与整体功能</h4>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">label</span>=<span class="hljs-title">bayesClassifierBulid</span><span class="hljs-params">(img)</span></span>
+</code></pre>
+<ul>
+<li>这行代码定义了一个名为 <code>bayesClassifierBulid</code> 的函数，它接受一个输入参数 <code>img</code>，代表待分类的手写数字图像。函数的返回值 <code>label</code> 是分类结果，即预测的数字标签。</li>
+</ul>
+<p>加载训练样本特征变量</p>
+<pre class="hljs"><code class="language-Matlab">load featureData.mat;
+test_feature=singleNum_feature_extraction(img);<span class="hljs-comment">%获得测试图片的特征数据</span>
+</code></pre>
+<ul>
+<li><code>load featureData.mat;</code>：从 <code>featureData.mat</code> 文件中加载预先计算好的训练样本的特征变量。这个文件里应该包含了不同数字类别的特征数据。</li>
+<li><code>test_feature=singleNum_feature_extraction(img);</code>：调用 <code>singleNum_feature_extraction</code> 函数，从输入的测试图像 <code>img</code> 中提取特征数据，存储在 <code>test_feature</code> 中。</li>
+</ul>
+<h4 id="计算先验概率" class="prose-heading">计算先验概率</h4>
+<pre class="hljs"><code class="language-Matlab">prior=[];<span class="hljs-comment">%存储先验概率的矩阵</span>
+sum=<span class="hljs-number">0</span>;
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span>=<span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(featureDataStruct,<span class="hljs-number">2</span>)
+    sum=sum+<span class="hljs-built_in">size</span>(featureDataStruct(<span class="hljs-built_in">i</span>).feature,<span class="hljs-number">1</span>);
+<span class="hljs-keyword">end</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span>=<span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(featureDataStruct,<span class="hljs-number">2</span>)
+    prior(<span class="hljs-built_in">i</span>)=<span class="hljs-built_in">size</span>(featureDataStruct(<span class="hljs-built_in">i</span>).feature,<span class="hljs-number">1</span>)/sum;
+<span class="hljs-keyword">end</span>
+</code></pre>
+<ul>
+<li><code>prior=[];</code>：初始化一个空数组 <code>prior</code>，用于存储每个数字类别的先验概率。</li>
+<li>第一个 <code>for</code> 循环：计算所有训练样本的总数。<code>size(featureDataStruct,2)</code> 表示数字类别的数量，<code>size(featureDataStruct(i).feature,1)</code> 表示第 <code>i</code> 类数字的训练样本数量。</li>
+<li>第二个 <code>for</code> 循环：计算每个数字类别的先验概率，即第 <code>i</code> 类数字的训练样本数量除以所有训练样本的总数。</li>
+</ul>
+<p>计算类条件概率</p>
+<pre class="hljs"><code class="language-Matlab">likelihood = [];<span class="hljs-comment">%类条件概率</span>
+pij=[];<span class="hljs-comment">%i类的样本第j个特征为1的概率</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span>=<span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(featureDataStruct,<span class="hljs-number">2</span>)<span class="hljs-comment">%数字类别个数</span>
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">j</span>=<span class="hljs-number">1</span>:<span class="hljs-number">100</span><span class="hljs-comment">%每个数字图片提取出来的特征数</span>
+        sum=<span class="hljs-number">0</span>;
+        <span class="hljs-keyword">for</span> k=<span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(featureDataStruct(<span class="hljs-built_in">i</span>).feature,<span class="hljs-number">1</span>)<span class="hljs-comment">%每个类别下训练样本的个数</span>
+            i_feature=featureDataStruct(<span class="hljs-built_in">i</span>).feature(k);
+            sum=sum+i_feature{<span class="hljs-number">1</span>}(<span class="hljs-number">1</span>,<span class="hljs-built_in">j</span>);
+        <span class="hljs-keyword">end</span>
+        pij(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>)=(sum+<span class="hljs-number">1</span>)/(<span class="hljs-built_in">size</span>(featureDataStruct(<span class="hljs-built_in">i</span>).feature,<span class="hljs-number">1</span>)+<span class="hljs-number">2</span>);<span class="hljs-comment">%计算概率估计值即Pj(ωi)，注意拉普拉斯平滑处理</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span>=<span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(featureDataStruct,<span class="hljs-number">2</span>)<span class="hljs-comment">%数字类别个数</span>
+    multi=<span class="hljs-number">1</span>;
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">j</span>=<span class="hljs-number">1</span>:<span class="hljs-number">100</span><span class="hljs-comment">%每个数字图片提取出来的特征数</span>
+        <span class="hljs-keyword">if</span>(test_feature(<span class="hljs-built_in">j</span>)==<span class="hljs-number">1</span>)
+            multi=multi*pij(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>);
+        <span class="hljs-keyword">else</span>
+            multi=multi*(<span class="hljs-number">1</span>-pij(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>));
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+    likelihood(<span class="hljs-built_in">i</span>)=multi;
+<span class="hljs-keyword">end</span>
+</code></pre>
+<ul>
+<li><code>likelihood = [];</code> 和 <code>pij=[];</code>：分别初始化空数组，用于存储类条件概率和每个类别下每个特征为 1 的概率。</li>
+<li>第一个嵌套 <code>for</code> 循环：计算每个类别下每个特征为 1 的概率 <code>pij(i,j)</code>。使用拉普拉斯平滑处理，避免出现概率为 0 的情况，公式为 <code>(sum + 1) / (样本数量 + 2)</code>。</li>
+<li>第二个嵌套 <code>for</code> 循环：计算每个类别的类条件概率 <code>likelihood(i)</code>。对于测试图像的每个特征，如果该特征值为 1，则乘以 <code>pij(i,j)</code>；否则乘以 <code>1 - pij(i,j)</code>。</li>
+</ul>
+<p>计算后验概率</p>
+<ul>
+<li><code>p_class=[];</code>：初始化一个空数组，用于存储每个数字类别的后验概率。</li>
+<li>第一个 <code>for</code> 循环：计算所有类别 <code>prior(i) * likelihood(i)</code> 的总和。</li>
+<li>第二个 <code>for</code> 循环：根据贝叶斯公式计算每个类别的后验概率 <code>p_class(i) = prior(i) * likelihood(i) / sum</code>。</li>
+</ul>
+<h4 id="确定分类结果" class="prose-heading">确定分类结果</h4>
+<pre class="hljs"><code class="language-Matlab">[maxval,maxpos]=<span class="hljs-built_in">max</span>(p_class);
+label=maxpos<span class="hljs-number">-1</span>;
+</code></pre>
+<ul>
+<li><code>[maxval,maxpos]=max(p_class);</code>：找出后验概率数组 <code>p_class</code> 中的最大值及其索引。</li>
+<li><code>label=maxpos-1;</code>：将索引减 1 作为最终的分类结果，因为数字标签通常从 0 开始。</li>
+</ul>
+<p>综上所述，这段代码实现了一个基于贝叶斯分类器的手写数字图像分类算法，通过计算先验概率、类条件概率和后验概率，最终确定输入图像的数字标签。</p>
+<p><code>bayesClassifierBulid</code> 是一个自定义的函数名，从命名上看，它可能存在拼写小错误，更符合命名逻辑的可能是 <code>bayesClassifierBuild</code> ，意思是构建一个贝叶斯分类器（Bayes Classifier）。</p>
+<h4 id="命名拆解分析" class="prose-heading">命名拆解分析</h4>
+<ul>
+<li><strong>Bayes</strong>：代表贝叶斯，这源于英国数学家托马斯・贝叶斯（Thomas Bayes）。贝叶斯理论是基于贝叶斯定理发展而来的一套概率统计方法，在机器学习和模式识别领域，贝叶斯分类器是基于贝叶斯定理和特征条件独立假设的分类方法，具有坚实的数学基础，能利用先验知识和样本数据进行分类决策。</li>
+<li><strong>Classifier</strong>：意为分类器，在机器学习和数据分析中，分类器是一种算法或模型，它的主要功能是将输入的数据划分到不同的类别中。例如，在手写数字识别场景中，分类器要判断输入的手写数字图像属于 0 - 9 中的哪一个数字类别。</li>
+<li><strong>Build</strong>：表示构建、创建。这里表明该函数的核心功能是搭建一个贝叶斯分类器，可能涉及初始化分类器的参数、计算先验概率、类条件概率等操作，最终实现对输入数据的分类功能。</li>
+</ul>
+<h4 id="结合代码的功能" class="prose-heading">结合代码的功能</h4>
+<p>在你给出的代码里，<code>bayesClassifierBulid</code> 函数借助加载预计算的训练样本特征数据，对输入的手写数字图像提取特征，接着计算先验概率、类条件概率和后验概率，最后依据后验概率最大的原则对图像进行分类，输出预测的数字标签。所以，这个函数实际上是在实现一个简单的贝叶斯分类器并进行分类预测。</p>
+<p><img src="../uploads/csdn/%E5%85%B3%E4%BA%8E%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%88%86%E7%B1%BB%E5%99%A8%E5%AE%9E%E7%8E%B0%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB%E7%9A%84%E8%A7%A3%E8%AF%BBbayesclassifier/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%85%B3%E4%BA%8E%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%88%86%E7%B1%BB%E5%99%A8%E5%AE%9E%E7%8E%B0%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB%E7%9A%84%E8%A7%A3%E8%AF%BBbayesclassifier/img-02.png" alt=""><img src="../uploads/csdn/%E5%85%B3%E4%BA%8E%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%88%86%E7%B1%BB%E5%99%A8%E5%AE%9E%E7%8E%B0%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB%E7%9A%84%E8%A7%A3%E8%AF%BBbayesclassifier/img-03.png" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#函数定义与整体功能">函数定义与整体功能</a>
+          
+            <a class="toc-level-4" href="#计算先验概率">计算先验概率</a>
+          
+            <a class="toc-level-4" href="#确定分类结果">确定分类结果</a>
+          
+            <a class="toc-level-4" href="#命名拆解分析">命名拆解分析</a>
+          
+            <a class="toc-level-4" href="#结合代码的功能">结合代码的功能</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/创新成果工研院智能感知与无人系统实验室论文被cvpr2023录用.html">
+      <span>上一篇</span>
+      <strong>创新成果工研院智能感知与无人系统实验室论文被CVPR2023录用</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/人工智能大模型是怎样喂数据的.html">
+      <span>下一篇</span>
+      <strong>人工智能大模型是怎样喂数据的</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/由小到大的数列寻找是否存在一个数的耗时最小的算法.html">由小到大的数列寻找是否存在一个数的耗时最小的算法</a></h3>
+        <p class="post-excerpt">对于一个由小到大排列的数列，寻找其中是否存在一个特定数，耗时最小的算法是二分查找算法（Binary Search）。下面为你详细介绍该算法：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.599Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/凸包问题graham扫描算法matlab.html">凸包问题Graham扫描算法MATLAB</a></h3>
+        <p class="post-excerpt">算法要解决的问题</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.498Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/c动态规划的解释案例和完整代码斐波那契数列和背包问题需要用到动态规划算法的常见案例.html">C动态规划的解释案例和完整代码斐波那契数列和背包问题需要用到动态规划算法的常见案例</a></h3>
+        <p class="post-excerpt">动态规划的解释</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.302Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

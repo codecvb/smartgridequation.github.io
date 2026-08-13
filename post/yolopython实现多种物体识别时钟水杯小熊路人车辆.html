@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>YOLOpython实现多种物体识别时钟水杯小熊路人车辆 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">YOLOpython实现多种物体识别时钟水杯小熊路人车辆</h1>
+        <p class="post-deck">本文介绍了一个基于YOLO的目标检测类ObjectDetector，支持YOLOv8标准模型和YOLO-World自定义模型。该类提供了两种模型加载方式：标准YOLOv8模型（80类）和可自定义检测类别的YOLO-World模型。主要功能包括模型自动加载和单张图片检测，能够输出检测目标的类别、数量和平均置信度，并保存检测结果图像。使用示例展示了如何初始化检测器并进行图片检测。该实现具有自动回退机制…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.835Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>9 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-5.html">人工智能</a>
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+            <a class="tag-chip" href="../tags/tag-29.html">YOLO</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文介绍了一个基于YOLO的目标检测类ObjectDetector，支持YOLOv8标准模型和YOLO-World自定义模型。该类提供了两种模型加载方式：标准YOLOv8模型（80类）和可自定义检测类别的YOLO-World模型。主要功能包括模型自动加载和单张图片检测，能够输出检测目标的类别、数量和平均置信度，并保存检测结果图像。使用示例展示了如何初始化检测器并进行图片检测。该实现具有自动回退机制，当指定模型加载失败时会自动切换为标准模型。</p>
+<p><img src="../uploads/csdn/yolopython%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%A7%8D%E7%89%A9%E4%BD%93%E8%AF%86%E5%88%AB%E6%97%B6%E9%92%9F%E6%B0%B4%E6%9D%AF%E5%B0%8F%E7%86%8A%E8%B7%AF%E4%BA%BA%E8%BD%A6%E8%BE%86/img-01.png" alt=""><img src="../uploads/csdn/yolopython%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%A7%8D%E7%89%A9%E4%BD%93%E8%AF%86%E5%88%AB%E6%97%B6%E9%92%9F%E6%B0%B4%E6%9D%AF%E5%B0%8F%E7%86%8A%E8%B7%AF%E4%BA%BA%E8%BD%A6%E8%BE%86/img-02.jpeg" alt=""></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">from</span> ultralytics <span class="hljs-keyword">import</span> YOLO
+<span class="hljs-keyword">import</span> cv2
+<span class="hljs-keyword">import</span> os
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ObjectDetector</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, model_type=<span class="hljs-string">&#x27;standard&#x27;</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        参数:
+            model_type: &#x27;standard&#x27; 或 &#x27;world&#x27;
+        &quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.model_type = model_type
+        <span class="hljs-variable language_">self</span>.model = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.load_model()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">load_model</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;加载模型&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.model_type == <span class="hljs-string">&#x27;world&#x27;</span>:
+                <span class="hljs-comment"># 加载YOLO World模型</span>
+                <span class="hljs-variable language_">self</span>.model = YOLO(<span class="hljs-string">&quot;E:/PYTHON/object_regconnition/YOLO-World/yolo_world_v2_l_clip_large_o365v1_goldg_pretrain_800ft-9df82e55.pth&quot;</span>)
+                <span class="hljs-comment"># 设置自定义类别</span>
+                custom_classes = [<span class="hljs-string">&quot;person&quot;</span>, <span class="hljs-string">&quot;bicycle&quot;</span>, <span class="hljs-string">&quot;car&quot;</span>, <span class="hljs-string">&quot;motorcycle&quot;</span>, <span class="hljs-string">&quot;bus&quot;</span>, <span class="hljs-string">&quot;truck&quot;</span>,
+                                <span class="hljs-string">&quot;dog&quot;</span>, <span class="hljs-string">&quot;cat&quot;</span>, <span class="hljs-string">&quot;bird&quot;</span>, <span class="hljs-string">&quot;chair&quot;</span>, <span class="hljs-string">&quot;table&quot;</span>, <span class="hljs-string">&quot;laptop&quot;</span>, <span class="hljs-string">&quot;phone&quot;</span>]
+                <span class="hljs-variable language_">self</span>.model.set_classes(custom_classes)
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;✅ YOLO World模型加载成功，使用自定义类别&quot;</span>)
+
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-comment"># 加载标准YOLOv8模型</span>
+                <span class="hljs-variable language_">self</span>.model = YOLO(<span class="hljs-string">&#x27;yolov8n.pt&#x27;</span>)
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;✅ 标准YOLOv8模型加载成功，使用80个预定义类别&quot;</span>)
+
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;📊 可检测类别数量: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(self.model.names)}</span>&quot;</span>)
+
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;❌ 模型加载失败: <span class="hljs-subst">{e}</span>&quot;</span>)
+            <span class="hljs-comment"># 回退到标准模型</span>
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;🔄 回退到标准YOLOv8模型...&quot;</span>)
+            <span class="hljs-variable language_">self</span>.model = YOLO(<span class="hljs-string">&#x27;yolov8n.pt&#x27;</span>)
+            <span class="hljs-variable language_">self</span>.model_type = <span class="hljs-string">&#x27;standard&#x27;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">detect_image</span>(<span class="hljs-params">self, image_path, save_result=<span class="hljs-literal">True</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;检测单张图片&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> os.path.exists(image_path):
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;❌ 图片不存在: <span class="hljs-subst">{image_path}</span>&quot;</span>)
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-comment"># 进行预测</span>
+            results = <span class="hljs-variable language_">self</span>.model.predict(image_path, conf=<span class="hljs-number">0.25</span>)
+
+            <span class="hljs-comment"># 处理结果</span>
+            result = results[<span class="hljs-number">0</span>]
+
+            <span class="hljs-comment"># 打印检测结果</span>
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n🎯 在 <span class="hljs-subst">{os.path.basename(image_path)}</span> 中检测到:&quot;</span>)
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;-&quot;</span> * <span class="hljs-number">50</span>)
+
+            detections = {}
+            <span class="hljs-keyword">for</span> box <span class="hljs-keyword">in</span> result.boxes:
+                cls_id = <span class="hljs-built_in">int</span>(box.cls.item())
+                confidence = box.conf.item()
+                class_name = <span class="hljs-variable language_">self</span>.model.names[cls_id]
+
+                <span class="hljs-keyword">if</span> class_name <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> detections:
+                    detections[class_name] = []
+                detections[class_name].append(confidence)
+
+            <span class="hljs-comment"># 打印汇总结果</span>
+            <span class="hljs-keyword">for</span> class_name, confidences <span class="hljs-keyword">in</span> detections.items():
+                avg_conf = <span class="hljs-built_in">sum</span>(confidences) / <span class="hljs-built_in">len</span>(confidences)
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  <span class="hljs-subst">{class_name}</span>: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(confidences)}</span> 个, 平均置信度: <span class="hljs-subst">{avg_conf:<span class="hljs-number">.3</span>f}</span>&quot;</span>)
+
+            <span class="hljs-comment"># 保存结果图像</span>
+            <span class="hljs-keyword">if</span> save_result:
+                output_path = <span class="hljs-string">f&quot;detected_<span class="hljs-subst">{os.path.basename(image_path)}</span>&quot;</span>
+                result.save(filename=output_path)
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;💾 结果保存为: <span class="hljs-subst">{output_path}</span>&quot;</span>)
+
+            <span class="hljs-keyword">return</span> result
+
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;❌ 检测失败: <span class="hljs-subst">{e}</span>&quot;</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+<span class="hljs-comment"># 使用示例</span>
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    <span class="hljs-comment"># 创建检测器</span>
+    detector = ObjectDetector(model_type=<span class="hljs-string">&#x27;standard&#x27;</span>)  <span class="hljs-comment"># 或 &#x27;world&#x27;</span>
+
+    <span class="hljs-comment"># 检测图片</span>
+    image_path = <span class="hljs-string">&quot;image.jpg&quot;</span>  <span class="hljs-comment"># 替换为你的图片路径</span>
+    detector.detect_image(image_path)
+
+        <span class="hljs-comment"># 检测图片</span>
+    image_path = <span class="hljs-string">&quot;image2.png&quot;</span>  <span class="hljs-comment"># 替换为你的图片路径</span>
+    detector.detect_image(image_path)
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/yolop车道检测.html">
+      <span>上一篇</span>
+      <strong>YOLOP车道检测</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/qt6androidctensorflowlite人脸识别程序.html">
+      <span>下一篇</span>
+      <strong>QT6AndroidCTensorFlowlite人脸识别程序</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/详细案例说明ai所用的算法列出公式用python代码说明用法.html">详细案例说明AI所用的算法列出公式用Python代码说明用法</a></h3>
+        <p class="post-excerpt">我们来详细拆解一个最经典、最基础的 AI 算法 ——线性回归 (Linear Regression)。它是理解几乎所有更复杂 AI 模型（如神经网络）的基石。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.312Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/无人机表演点云路径规划python版.html">无人机表演点云路径规划Python版</a></h3>
+        <p class="post-excerpt">摘要：本文介绍了一个无人机表演路径规划系统，支持加载两个TXT格式的点云数据文件进行路径规划。系统采用PyQt5框架开发3D可视化界面，包含点云加载、路径优化、动画控制等功能模块。核心算法通过KD树实现点云匹配和路径优化，支持多种插值方式生成平滑动画。系统可调整无人机数量、大小、颜色等参数，提供3D可视化视图和轨迹显示功能，适用于大型无人机编队表演的路径规划需求。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.134Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/yolop车道检测.html">YOLOP车道检测</a></h3>
+        <p class="post-excerpt">YOLOP 是一种全景驾驶感知的实时多任务网络，其车道检测以单阶段端到端方式，通过共享特征提取与多任务联合优化，实现对车道线的高效分割与定位，核心依赖卷积神经网络、特征融合、损失函数设计等 AI 技术，以及矩阵运算、概率统计、最优化理论等数学方法。以下从原理、AI 知识、数学知识三方面详解。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.856Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

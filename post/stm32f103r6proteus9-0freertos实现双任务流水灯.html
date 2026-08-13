@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>STM32F103R6PROTEUS9.0FREERTOS实现双任务流水灯 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/嵌入式与硬件.html">嵌入式与硬件</a>
+        </nav>
+        <h1 class="post-title">STM32F103R6PROTEUS9.0FREERTOS实现双任务流水灯</h1>
+        <p class="post-deck">本文展示了一个基于STM32F1和FreeRTOS的双LED控制程序。主要内容包括：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.470Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>17 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-12.html">嵌入式</a>
+          
+            <a class="tag-chip" href="../tags/tag-13.html">物联网</a>
+          
+            <a class="tag-chip" href="../tags/tag-23.html">STM32</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文展示了一个基于STM32F1和FreeRTOS的双LED控制程序。主要内容包括：</p>
+<ol>
+<li></li>
+</ol>
+<pre><code>系统配置：使用HSI时钟源通过PLL倍频至64MHz，配置系统时钟和外设时钟
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>GPIO初始化：设置PA1-PA3为红色LED输出，PB0-PB2为绿色LED输出
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>FreeRTOS任务创建：
+
+
+-   TaskRedLED：以400ms周期切换红色LED组
+-   TaskGreenLED：以1000ms周期切换绿色LED组
+</code></pre>
+<ol start="4">
+<li></li>
+</ol>
+<pre><code>辅助功能：
+
+
+-   系统时钟配置
+-   错误处理函数
+-   数字转换工具函数
+</code></pre>
+<p>程序采用FreeRTOS实时操作系统管理两个独立LED控制任务，实现不同频率的LED闪烁效果，展示了基本的RTOS任务创建和调度方法。</p>
+<p><img src="../uploads/csdn/stm32f103r6proteus9-0freertos%E5%AE%9E%E7%8E%B0%E5%8F%8C%E4%BB%BB%E5%8A%A1%E6%B5%81%E6%B0%B4%E7%81%AF/img-01.png" alt=""></p>
+<p>main.c</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-comment">/**
+  ******************************************************************************
+  * File Name          : main.c
+  * Description        : Dual LED Toggle with FreeRTOS (native API)
+  ******************************************************************************
+  */</span>
+<span class="hljs-comment">/* Includes ------------------------------------------------------------------*/</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;stm32f1xx_hal.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;FreeRTOS.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;task.h&quot;</span></span>
+
+<span class="hljs-comment">/* Peripheral handles (required by other modules for linker resolution) */</span>
+DMA_HandleTypeDef hdma_spi1_tx;
+DMA_HandleTypeDef hdma_usart1_tx;
+SPI_HandleTypeDef hspi1;
+UART_HandleTypeDef huart1;
+
+<span class="hljs-comment">/* Private function prototypes -----------------------------------------------*/</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">SystemClock_Config</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Error_Handler</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">MX_GPIO_Init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">TaskRedLED</span><span class="hljs-params">(<span class="hljs-type">void</span> *pvParameters)</span></span>;
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">TaskGreenLED</span><span class="hljs-params">(<span class="hljs-type">void</span> *pvParameters)</span></span>;
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+    <span class="hljs-comment">/* MCU Configuration----------------------------------------------------------*/</span>
+    <span class="hljs-built_in">HAL_Init</span>();
+
+    <span class="hljs-comment">/* Configure the system clock */</span>
+    <span class="hljs-built_in">SystemClock_Config</span>();
+
+    <span class="hljs-comment">/* Initialize all configured peripherals */</span>
+    <span class="hljs-built_in">MX_GPIO_Init</span>();
+
+    <span class="hljs-comment">/* Create the Red LED toggle task (PA1/PA2/PA3), period = 400ms */</span>
+    <span class="hljs-built_in">xTaskCreate</span>(TaskRedLED, <span class="hljs-string">&quot;RedLED&quot;</span>, configMINIMAL_STACK_SIZE, <span class="hljs-literal">NULL</span>,
+                tskIDLE_PRIORITY + <span class="hljs-number">1</span>, <span class="hljs-literal">NULL</span>);
+
+    <span class="hljs-comment">/* Create the Green LED toggle task (PB0/PB1/PB2), period = 1000ms */</span>
+    <span class="hljs-built_in">xTaskCreate</span>(TaskGreenLED, <span class="hljs-string">&quot;GreenLED&quot;</span>, configMINIMAL_STACK_SIZE, <span class="hljs-literal">NULL</span>,
+                tskIDLE_PRIORITY + <span class="hljs-number">1</span>, <span class="hljs-literal">NULL</span>);
+
+    <span class="hljs-comment">/* Start scheduler */</span>
+    <span class="hljs-built_in">vTaskStartScheduler</span>();
+
+    <span class="hljs-comment">/* We should never get here as control is now taken by the scheduler */</span>
+    <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>)
+    {
+    }
+}
+
+<span class="hljs-comment">/** System Clock Configuration
+  * HSI -&gt; PLL (x16) -&gt; 64MHz SYSCLK, HCLK=32MHz, APB1=8MHz, APB2=16MHz
+  */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">SystemClock_Config</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+    RCC_OscInitTypeDef RCC_OscInitStruct;
+    RCC_ClkInitTypeDef RCC_ClkInitStruct;
+
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    RCC_OscInitStruct.HSICalibrationValue = <span class="hljs-number">16</span>;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+    RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">HAL_RCC_OscConfig</span>(&amp;RCC_OscInitStruct) != HAL_OK)
+    {
+        <span class="hljs-built_in">Error_Handler</span>();
+    }
+
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+                                  | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV2;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">HAL_RCC_ClockConfig</span>(&amp;RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+    {
+        <span class="hljs-built_in">Error_Handler</span>();
+    }
+
+    <span class="hljs-built_in">HAL_SYSTICK_Config</span>(<span class="hljs-built_in">HAL_RCC_GetHCLKFreq</span>() / <span class="hljs-number">1000</span>);
+    <span class="hljs-built_in">HAL_SYSTICK_CLKSourceConfig</span>(SYSTICK_CLKSOURCE_HCLK);
+
+    <span class="hljs-comment">/* SysTick_IRQn interrupt configuration */</span>
+    <span class="hljs-built_in">HAL_NVIC_SetPriority</span>(SysTick_IRQn, <span class="hljs-number">15</span>, <span class="hljs-number">0</span>);
+}
+
+<span class="hljs-comment">/** Configure GPIO pins for LED control
+  * PA1/PA2/PA3 -&gt; Red LED (Output Push-Pull)
+  * PB0/PB1/PB2 -&gt; Green LED (Output Push-Pull)
+  */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">MX_GPIO_Init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+    GPIO_InitTypeDef GPIO_InitStruct;
+
+    <span class="hljs-comment">/* GPIO Ports Clock Enable */</span>
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+
+    <span class="hljs-comment">/* Configure PA1, PA2, PA3 as output push-pull for Red LED */</span>
+    GPIO_InitStruct.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    <span class="hljs-built_in">HAL_GPIO_Init</span>(GPIOA, &amp;GPIO_InitStruct);
+
+    <span class="hljs-comment">/* Configure PB0, PB1, PB2 as output push-pull for Green LED */</span>
+    GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    <span class="hljs-built_in">HAL_GPIO_Init</span>(GPIOB, &amp;GPIO_InitStruct);
+
+    <span class="hljs-comment">/* Set initial output level low (LEDs off) */</span>
+    <span class="hljs-built_in">HAL_GPIO_WritePin</span>(GPIOA, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, GPIO_PIN_RESET);
+    <span class="hljs-built_in">HAL_GPIO_WritePin</span>(GPIOB, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2, GPIO_PIN_RESET);
+}
+
+<span class="hljs-comment">/* TaskRedLED: Toggle Red LED on PA1/PA2/PA3, period = 400ms */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">TaskRedLED</span><span class="hljs-params">(<span class="hljs-type">void</span> *pvParameters)</span>
+</span>{
+    <span class="hljs-keyword">for</span>(;;)
+    {
+        <span class="hljs-built_in">HAL_GPIO_TogglePin</span>(GPIOA, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3);
+        <span class="hljs-built_in">vTaskDelay</span>(<span class="hljs-built_in">pdMS_TO_TICKS</span>(<span class="hljs-number">200</span>));
+    }
+}
+
+<span class="hljs-comment">/* TaskGreenLED: Toggle Green LED on PB0/PB1/PB2, period = 1000ms */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">TaskGreenLED</span><span class="hljs-params">(<span class="hljs-type">void</span> *pvParameters)</span>
+</span>{
+    <span class="hljs-keyword">for</span>(;;)
+    {
+        <span class="hljs-built_in">HAL_GPIO_TogglePin</span>(GPIOB, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2);
+        <span class="hljs-built_in">vTaskDelay</span>(<span class="hljs-built_in">pdMS_TO_TICKS</span>(<span class="hljs-number">500</span>));
+    }
+}
+
+<span class="hljs-comment">/* TIM1 Period Elapsed Callback - provides HAL time base */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">HAL_TIM_PeriodElapsedCallback</span><span class="hljs-params">(TIM_HandleTypeDef *htim)</span>
+</span>{
+    <span class="hljs-keyword">if</span> (htim-&gt;Instance == TIM1)
+    {
+        <span class="hljs-built_in">HAL_IncTick</span>();
+    }
+}
+
+<span class="hljs-comment">/* itoa: convert n to characters in s (required by SSD1306 module) */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">itoa</span><span class="hljs-params">(<span class="hljs-type">int</span> n, <span class="hljs-type">char</span> s[])</span>
+</span>{
+    <span class="hljs-type">int</span> i, sign;
+
+    <span class="hljs-keyword">if</span> ((sign = n) &lt; <span class="hljs-number">0</span>)
+        n = -n;
+    i = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">do</span> {
+        s[i++] = n % <span class="hljs-number">10</span> + <span class="hljs-string">&#x27;0&#x27;</span>;
+    } <span class="hljs-keyword">while</span> ((n /= <span class="hljs-number">10</span>) &gt; <span class="hljs-number">0</span>);
+    <span class="hljs-keyword">if</span> (sign &lt; <span class="hljs-number">0</span>)
+        s[i++] = <span class="hljs-string">&#x27;-&#x27;</span>;
+    s[i] = <span class="hljs-string">&#x27;\0&#x27;</span>;
+
+    <span class="hljs-comment">/* reverse the string */</span>
+    <span class="hljs-type">int</span> j, k;
+    <span class="hljs-type">char</span> c;
+    <span class="hljs-keyword">for</span> (j = <span class="hljs-number">0</span>, k = i - <span class="hljs-number">1</span>; j &lt; k; j++, k--) {
+        c = s[j];
+        s[j] = s[k];
+        s[k] = c;
+    }
+}
+
+<span class="hljs-comment">/**
+  * @brief  This function is executed in case of error occurrence.
+  */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Error_Handler</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>)
+    {
+    }
+}
+
+<span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> USE_FULL_ASSERT</span>
+
+<span class="hljs-comment">/**
+  * @brief Reports the name of the source file and the source line number
+  *   where the assert_param error has occurred.
+  */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">assert_failed</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span>* file, <span class="hljs-type">uint32_t</span> line)</span>
+</span>{
+    <span class="hljs-comment">/* User can add his own implementation to report the file name and line number,
+      ex: printf(&quot;Wrong parameters value: file %s on line %d\r\n&quot;, file, line) */</span>
+}
+
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span></span>
+
+<span class="hljs-comment">/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/</span>
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/stm32f103zet6ili9341fsmcfreertos制作数字电子时钟.html">
+      <span>上一篇</span>
+      <strong>stm32f103zet6ili9341fsmcfreertos制作数字电子时钟</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/stm32f103c8t6sdcardspi驱动ili9341lcdproteus8-0仿真将存储在.html">
+      <span>下一篇</span>
+      <strong>STM32F103C8T6SDcardSPI驱动ILI9341LCDPROTEUS8.0仿真将存储在</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/stm32f103zet6sdiofatfs读写sd卡例程读写挂载错误排除.html">STM32F103ZET6SDIOFATFS读写SD卡例程读写挂载错误排除</a></h3>
+        <p class="post-excerpt">一、首先我们要对串口进行重定向（在没有屏幕或者其他提示的情况下方便调试错误），注意在flash config里面勾选microlib。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.552Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/stm32f103zet6ili9341做一个圆形钟表时钟显示精英开发板v2.html">STM32F103ZET6ILI9341做一个圆形钟表时钟显示精英开发板V2</a></h3>
+        <p class="post-excerpt">摘要：本文深入探究了利用 STM32 微控制器驱动 ILI9341 显示屏绘制时钟的技术方案。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.524Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/stm32f103c8t6sdcardspi驱动ili9341lcdproteus8-0仿真将存储在.html">STM32F103C8T6SDcardSPI驱动ILI9341LCDPROTEUS8.0仿真将存储在</a></h3>
+        <p class="post-excerpt">本文展示了一个基于STM32微控制器的SD卡文件读取系统。系统通过SPI接口连接SD卡，实现了FAT12文件系统的解析功能。主要功能包括：1) 读取SD卡基本信息(容量、类型)；2) 解析FAT12文件系统的引导扇区参数；3) 搜索并定位指定文件；4) 在ILI9341 LCD屏幕上显示文本文件内容。系统还包含文件列表显示功能，可查看SD卡中的文件信息。程序使用HAL库进行硬件初始化，通过状态指示…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.444Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

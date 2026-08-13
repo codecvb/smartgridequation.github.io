@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>windows系统下codeblocks的lvgl智能穿戴手表圆形界面代码 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/嵌入式与硬件.html">嵌入式与硬件</a>
+        </nav>
+        <h1 class="post-title">windows系统下codeblocks的lvgl智能穿戴手表圆形界面代码</h1>
+        <p class="post-deck">windows系统下codeblocks的lvgl智能穿戴手表圆形界面代码（需要点需添加联系方式）</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.606Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>24 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-12.html">嵌入式</a>
+          
+            <a class="tag-chip" href="../tags/tag-13.html">物联网</a>
+          
+            <a class="tag-chip" href="../tags/tag-25.html">LVGL</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>windows系统下codeblocks的lvgl智能穿戴手表圆形界面代码（需要点需添加联系方式）</p>
+<p>这篇文章介绍了一个基于Windows系统下CodeBlocks的LVGL智能穿戴手表圆形界面实现代码。</p>
+<p>主要功能包括：</p>
+<ol>
+<li>
+<p>创建圆形表盘背景和刻度线；</p>
+</li>
+<li>
+<p>显示时间、日期和健康数据（步数、心率）；</p>
+</li>
+<li>
+<p>添加电池和网络状态图标；</p>
+</li>
+<li>
+<p>实现定时更新功能。代码使用LVGL图形库，通过创建定时器来模拟时间变化和健康数据更新。</p>
+</li>
+</ol>
+<p>界面设计采用320x320圆形屏幕，包含12个刻度标记，并合理布局了各类显示信息。该实现可作为智能手表UI的基础框架，如需完整代码或进一步交流，请通过指定方式联系作者。</p>
+<p>效果如下</p>
+<p><img src="../uploads/csdn/windows%E7%B3%BB%E7%BB%9F%E4%B8%8Bcodeblocks%E7%9A%84lvgl%E6%99%BA%E8%83%BD%E7%A9%BF%E6%88%B4%E6%89%8B%E8%A1%A8%E5%9C%86%E5%BD%A2%E7%95%8C%E9%9D%A2%E4%BB%A3%E7%A0%81/img-01.gif" alt=""></p>
+<p>代码如下</p>
+<p>main.c</p>
+<pre class="hljs"><code class="language-python">
+/**
+ * @file main
+ *
+ */
+
+/*********************
+ *      INCLUDES
+ *********************/
+<span class="hljs-comment">#include &lt;stdlib.h&gt;</span>
+<span class="hljs-comment">#include &lt;unistd.h&gt;</span>
+
+<span class="hljs-comment">#include &quot;lvgl/lvgl.h&quot;</span>
+<span class="hljs-comment">#include &quot;lvgl/demos/lv_demos.h&quot;</span>
+
+/*********************
+ *      DEFINES
+ *********************/
+
+/**********************
+ *      TYPEDEFS
+ **********************/
+
+/**********************
+ *  STATIC PROTOTYPES
+ **********************/
+
+/**********************
+ *  STATIC VARIABLES
+ **********************/
+static const wchar_t * title = L<span class="hljs-string">&quot;LVGL port Windows CodeBlocks.      https://lvgl.io | https://docs.lvgl.io&quot;</span>;
+
+/**********************
+ *      MACROS
+ **********************/
+
+/* 圆形屏幕尺寸设置 */
+<span class="hljs-comment">#define SCREEN_WIDTH  320</span>
+<span class="hljs-comment">#define SCREEN_HEIGHT 320</span>
+<span class="hljs-comment">#define RADIUS        160  // 屏幕半径</span>
+
+/* 全局变量 */
+static lv_obj_t *time_label;
+static lv_obj_t *date_label;
+static lv_obj_t *steps_label;
+static lv_obj_t *heart_rate_label;
+static lv_obj_t *battery_icon;
+static lv_obj_t *wifi_icon;
+static lv_obj_t *network_icon;
+
+/* 虚构时间变量 */
+static <span class="hljs-built_in">int</span> fake_hour = <span class="hljs-number">15</span>;
+static <span class="hljs-built_in">int</span> fake_minute = <span class="hljs-number">30</span>;
+static <span class="hljs-built_in">int</span> fake_second = <span class="hljs-number">0</span>;
+static <span class="hljs-built_in">int</span> fake_day = <span class="hljs-number">11</span>;
+static <span class="hljs-built_in">int</span> fake_month = <span class="hljs-number">9</span>;
+static char *months[] = {<span class="hljs-string">&quot;Jan&quot;</span>, <span class="hljs-string">&quot;Feb&quot;</span>, <span class="hljs-string">&quot;Mar&quot;</span>, <span class="hljs-string">&quot;Apr&quot;</span>, <span class="hljs-string">&quot;May&quot;</span>, <span class="hljs-string">&quot;Jun&quot;</span>,
+                         <span class="hljs-string">&quot;Jul&quot;</span>, <span class="hljs-string">&quot;Aug&quot;</span>, <span class="hljs-string">&quot;Sep&quot;</span>, <span class="hljs-string">&quot;Oct&quot;</span>, <span class="hljs-string">&quot;Nov&quot;</span>, <span class="hljs-string">&quot;Dec&quot;</span>};
+static char *weekdays[] = {<span class="hljs-string">&quot;Sun&quot;</span>, <span class="hljs-string">&quot;Mon&quot;</span>, <span class="hljs-string">&quot;Tue&quot;</span>, <span class="hljs-string">&quot;Wed&quot;</span>, <span class="hljs-string">&quot;Thu&quot;</span>, <span class="hljs-string">&quot;Fri&quot;</span>, <span class="hljs-string">&quot;Sat&quot;</span>};
+
+/* 更新虚构时间 */
+static void update_fake_time(void)
+{
+    fake_second++;
+    <span class="hljs-keyword">if</span>(fake_second &gt;= <span class="hljs-number">60</span>) {
+        fake_second = <span class="hljs-number">0</span>;
+        fake_minute++;
+        <span class="hljs-keyword">if</span>(fake_minute &gt;= <span class="hljs-number">60</span>) {
+            fake_minute = <span class="hljs-number">0</span>;
+            fake_hour++;
+            <span class="hljs-keyword">if</span>(fake_hour &gt;= <span class="hljs-number">24</span>) {
+                fake_hour = <span class="hljs-number">0</span>;
+                fake_day++;
+                // 简单处理日期变更
+            }
+        }
+    }
+}
+
+/* 更新时间显示 */
+static void update_time(void *param)
+{
+    char time_str[<span class="hljs-number">9</span>];
+    char date_str[<span class="hljs-number">16</span>];
+    <span class="hljs-built_in">int</span> weekday = (fake_day + <span class="hljs-number">3</span>) % <span class="hljs-number">7</span>; // 简单计算星期几
+
+    // 更新虚构时间
+    update_fake_time();
+
+    /* 格式化时间字符串 */
+    sprintf(time_str, <span class="hljs-string">&quot;%02d:%02d:%02d&quot;</span>, fake_hour, fake_minute, fake_second);
+    lv_label_set_text(time_label, time_str);
+
+    /* 格式化日期字符串 */
+    sprintf(date_str, <span class="hljs-string">&quot;%s, %s %02d&quot;</span>, weekdays[weekday],
+            months[fake_month - <span class="hljs-number">1</span>], fake_day);
+    lv_label_set_text(date_label, date_str);
+
+    /* <span class="hljs-number">1</span>秒后再次调用 */
+    lv_timer_set_period(param, <span class="hljs-number">1000</span>);
+}
+
+/* 更新健康数据（模拟） */
+static void update_health_data(void *param)
+{
+    static <span class="hljs-built_in">int</span> steps = <span class="hljs-number">5432</span>;
+    static <span class="hljs-built_in">int</span> heart_rate = <span class="hljs-number">72</span>;
+
+    /* 随机模拟数据变化 */
+    steps += rand() % <span class="hljs-number">5</span>;
+    heart_rate += (rand() % <span class="hljs-number">5</span>) - <span class="hljs-number">2</span>;
+    <span class="hljs-keyword">if</span>(heart_rate &lt; <span class="hljs-number">60</span>) heart_rate = <span class="hljs-number">60</span>;
+    <span class="hljs-keyword">if</span>(heart_rate &gt; <span class="hljs-number">100</span>) heart_rate = <span class="hljs-number">100</span>;
+
+    /* 更新显示 */
+    char steps_str[<span class="hljs-number">16</span>];
+    sprintf(steps_str, <span class="hljs-string">&quot;Steps: %d&quot;</span>, steps);
+    lv_label_set_text(steps_label, steps_str);
+
+    char hr_str[<span class="hljs-number">16</span>];
+    sprintf(hr_str, <span class="hljs-string">&quot;Heart: %d BPM&quot;</span>, heart_rate);
+    lv_label_set_text(heart_rate_label, hr_str);
+
+    /* <span class="hljs-number">10</span>秒后再次调用 */
+    lv_timer_set_period(param, <span class="hljs-number">10000</span>);
+}
+
+/* 创建圆形表盘背景 */
+static void create_circular_background(void)
+{
+    // 创建圆形背景
+    lv_obj_t *bg = lv_obj_create(lv_scr_act());
+    lv_obj_set_size(bg, SCREEN_WIDTH, SCREEN_HEIGHT);
+    lv_obj_center(bg);
+    lv_obj_set_style_radius(bg, LV_RADIUS_CIRCLE, <span class="hljs-number">0</span>);
+    lv_obj_set_style_bg_color(bg, lv_color_hex(<span class="hljs-number">0x121212</span>), <span class="hljs-number">0</span>);
+    lv_obj_set_style_border_width(bg, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);
+    lv_obj_set_style_border_color(bg, lv_color_hex(<span class="hljs-number">0x333333</span>), <span class="hljs-number">0</span>);
+
+    // 修改create_circular_background函数中的刻度线部分
+    <span class="hljs-keyword">for</span>(<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">12</span>; i++) {
+    lv_obj_t *mark = lv_obj_create(bg);
+    // 根据位置调整刻度线的尺寸和方向，避免使用旋转
+    <span class="hljs-keyword">if</span>(i % <span class="hljs-number">3</span> == <span class="hljs-number">0</span>) {
+        lv_obj_set_size(mark, <span class="hljs-number">2</span>, <span class="hljs-number">10</span>);  // 长刻度
+    } <span class="hljs-keyword">else</span> {
+        lv_obj_set_size(mark, <span class="hljs-number">2</span>, <span class="hljs-number">6</span>);   // 短刻度
+    }
+    lv_obj_set_style_radius(mark, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>);
+    lv_obj_set_style_bg_color(mark, lv_color_hex(<span class="hljs-number">0x555555</span>), <span class="hljs-number">0</span>);
+
+    // 计算刻度位置（圆形分布）
+    <span class="hljs-built_in">float</span> rad = (i * <span class="hljs-number">30</span> - <span class="hljs-number">90</span>) * <span class="hljs-number">3.1415926</span> / <span class="hljs-number">180</span>;  // 转换为弧度，-<span class="hljs-number">90</span>度是顶部
+    <span class="hljs-built_in">int</span> x = (RADIUS - <span class="hljs-number">5</span>) * cos(rad);  // 调整位置，避免需要旋转
+    <span class="hljs-built_in">int</span> y = (RADIUS - <span class="hljs-number">5</span>) * sin(rad);
+
+    lv_obj_align(mark, LV_ALIGN_CENTER, x, y);
+    // 移除旋转相关代码
+}
+}
+
+/* 创建电池图标 */
+static void create_battery_icon(void)
+{
+    // 计算右上角位置（圆形屏幕边缘）
+    <span class="hljs-built_in">float</span> rad = (-<span class="hljs-number">45</span>) * <span class="hljs-number">3.1415926</span> / <span class="hljs-number">180</span>;  // 右上角<span class="hljs-number">45</span>度位置
+    <span class="hljs-built_in">int</span> x = (RADIUS - <span class="hljs-number">25</span>) * cos(rad);
+    <span class="hljs-built_in">int</span> y = (RADIUS - <span class="hljs-number">25</span>) * sin(rad);
+
+    battery_icon = lv_obj_create(lv_scr_act());
+    lv_obj_set_size(battery_icon, <span class="hljs-number">30</span>, <span class="hljs-number">15</span>);
+    lv_obj_align(battery_icon, LV_ALIGN_CENTER, x, y);
+    lv_obj_set_style_radius(battery_icon, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);
+    lv_obj_set_style_bg_color(battery_icon, lv_color_hex(<span class="hljs-number">0x00FF00</span>), <span class="hljs-number">0</span>);
+
+    /* 电池正极 */
+    lv_obj_t *batt_pos = lv_obj_create(lv_scr_act());
+    lv_obj_set_size(batt_pos, <span class="hljs-number">3</span>, <span class="hljs-number">8</span>);
+    lv_obj_align_to(batt_pos, battery_icon, LV_ALIGN_OUT_RIGHT_MID, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    lv_obj_set_style_radius(batt_pos, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>);
+    lv_obj_set_style_bg_color(batt_pos, lv_color_hex(<span class="hljs-number">0x00FF00</span>), <span class="hljs-number">0</span>);
+}
+
+/* 创建网络状态图标 */
+static void create_network_icons(void)
+{
+    // 计算左上角位置（圆形屏幕边缘）
+    <span class="hljs-built_in">float</span> wifi_rad = (<span class="hljs-number">135</span>) * <span class="hljs-number">3.1415926</span> / <span class="hljs-number">180</span>;  // 左上角<span class="hljs-number">135</span>度位置
+    <span class="hljs-built_in">int</span> wifi_x = (RADIUS - <span class="hljs-number">30</span>) * cos(wifi_rad);
+    <span class="hljs-built_in">int</span> wifi_y = (RADIUS - <span class="hljs-number">30</span>) * sin(wifi_rad)-<span class="hljs-number">200</span>;
+
+    // 创建WiFi图标（使用LVGL的符号字体）
+    wifi_icon = lv_label_create(lv_scr_act());
+    lv_obj_set_style_text_font(wifi_icon, &amp;lv_font_montserrat_14, <span class="hljs-number">0</span>);
+    lv_obj_set_style_text_color(wifi_icon, lv_color_hex(<span class="hljs-number">0xFFFFFF</span>), <span class="hljs-number">0</span>);
+    lv_label_set_text(wifi_icon, LV_SYMBOL_WIFI);
+    lv_obj_align(wifi_icon, LV_ALIGN_CENTER, wifi_x, wifi_y);
+
+    // 4G图标位置（在WiFi右侧）
+    <span class="hljs-built_in">float</span> net_rad = (<span class="hljs-number">120</span>) * <span class="hljs-number">3.1415926</span> / <span class="hljs-number">180</span>;  // 稍右一点
+    <span class="hljs-built_in">int</span> net_x = (RADIUS - <span class="hljs-number">30</span>) * cos(net_rad);
+    <span class="hljs-built_in">int</span> net_y = (RADIUS - <span class="hljs-number">30</span>) * sin(net_rad)-<span class="hljs-number">240</span>;
+
+    network_icon = lv_label_create(lv_scr_act());
+    lv_obj_set_style_text_font(network_icon, &amp;lv_font_montserrat_14, <span class="hljs-number">0</span>);
+    lv_obj_set_style_text_color(network_icon, lv_color_hex(<span class="hljs-number">0xFFFFFF</span>), <span class="hljs-number">0</span>);
+    lv_label_set_text(network_icon, <span class="hljs-string">&quot;4G&quot;</span>);
+    lv_obj_align(network_icon, LV_ALIGN_CENTER, net_x, net_y);
+}
+
+/* 创建主界面 */
+static void create_main_screen(void)
+{
+    /* 设置背景为黑色 */
+    lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(<span class="hljs-number">0x000000</span>), <span class="hljs-number">0</span>);
+
+    /* 创建圆形表盘背景和刻度 */
+    create_circular_background();
+
+    /* 创建时间标签（居中显示） */
+    time_label = lv_label_create(lv_scr_act());
+    lv_obj_set_style_text_font(time_label, &amp;lv_font_montserrat_48, <span class="hljs-number">0</span>);
+    lv_obj_set_style_text_color(time_label, lv_color_hex(<span class="hljs-number">0xFFFFFF</span>), <span class="hljs-number">0</span>);
+    lv_label_set_text(time_label, <span class="hljs-string">&quot;00:00:00&quot;</span>);
+    lv_obj_align(time_label, LV_ALIGN_CENTER, <span class="hljs-number">0</span>, -<span class="hljs-number">20</span>);
+
+    /* 创建日期标签（时间下方） */
+    date_label = lv_label_create(lv_scr_act());
+    lv_obj_set_style_text_font(date_label, &amp;lv_font_montserrat_20, <span class="hljs-number">0</span>);
+    lv_obj_set_style_text_color(date_label, lv_color_hex(<span class="hljs-number">0xBBBBBB</span>), <span class="hljs-number">0</span>);
+    lv_label_set_text(date_label, <span class="hljs-string">&quot;Mon, Jan 01&quot;</span>);
+    lv_obj_align_to(date_label, time_label, LV_ALIGN_OUT_BOTTOM_MID, <span class="hljs-number">0</span>, <span class="hljs-number">10</span>);
+
+    /* 创建步数标签（左下位置） */
+    steps_label = lv_label_create(lv_scr_act());
+    lv_obj_set_style_text_font(steps_label, &amp;lv_font_montserrat_16, <span class="hljs-number">0</span>);
+    lv_obj_set_style_text_color(steps_label, lv_color_hex(<span class="hljs-number">0xFFFFFF</span>), <span class="hljs-number">0</span>);
+    lv_label_set_text(steps_label, <span class="hljs-string">&quot;Steps: 0&quot;</span>);
+    lv_obj_align(steps_label, LV_ALIGN_CENTER, -<span class="hljs-number">80</span>, <span class="hljs-number">100</span>);
+
+    /* 创建心率标签（右下位置） */
+    heart_rate_label = lv_label_create(lv_scr_act());
+    lv_obj_set_style_text_font(heart_rate_label, &amp;lv_font_montserrat_16, <span class="hljs-number">0</span>);
+    lv_obj_set_style_text_color(heart_rate_label, lv_color_hex(<span class="hljs-number">0xFFFFFF</span>), <span class="hljs-number">0</span>);
+    lv_label_set_text(heart_rate_label, <span class="hljs-string">&quot;Heart: 0 BPM&quot;</span>);
+    lv_obj_align(heart_rate_label, LV_ALIGN_CENTER, <span class="hljs-number">80</span>, <span class="hljs-number">100</span>);
+
+    /* 创建电池图标 */
+    create_battery_icon();
+
+    /* 创建网络状态图标 */
+    create_network_icons();
+
+    /* 创建定时器更新时间 */
+    lv_timer_create(update_time, <span class="hljs-number">1000</span>, NULL);
+
+    /* 创建定时器更新健康数据 */
+    lv_timer_create(update_health_data, <span class="hljs-number">10000</span>, NULL);
+}
+/**********************
+ *   GLOBAL FUNCTIONS
+ **********************/
+<span class="hljs-built_in">int</span> APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine, <span class="hljs-built_in">int</span> nCmdShow)
+{
+    /*Initialize LVGL*/
+    lv_init();
+
+    /*Initialize the HAL <span class="hljs-keyword">for</span> LVGL*/
+    lv_display_t * display = lv_windows_create_display(title, <span class="hljs-number">800</span>, <span class="hljs-number">480</span>, <span class="hljs-number">100</span>, FALSE, FALSE);
+    lv_windows_acquire_pointer_indev(display);
+
+    /*Output prompt information to the console, you can also use printf() to <span class="hljs-built_in">print</span> directly*/
+    LV_LOG_USER(<span class="hljs-string">&quot;LVGL initialization completed!&quot;</span>);
+
+    /* 创建主界面 */
+    create_main_screen();
+
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+        /* Periodically call the lv_task handler.
+         * It could be done <span class="hljs-keyword">in</span> a timer interrupt <span class="hljs-keyword">or</span> an OS task too.*/
+        lv_task_handler();
+        usleep(<span class="hljs-number">5000</span>);       /*Just to let the system breath*/
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/使用androidstudio写一个android的远程通信软件app有通讯的发送和接收消息界面.html">
+      <span>上一篇</span>
+      <strong>使用androidstudio写一个Android的远程通信软件APP有通讯的发送和接收消息界面</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/stm32实现按键单击双击三击长按功能的proteus8仿真.html">
+      <span>下一篇</span>
+      <strong>stm32实现按键单击双击三击长按功能的proteus8仿真</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/lvgl智能手表心跳脉搏波动显示数字动态图像.html">lvgl智能手表心跳脉搏波动显示数字动态图像</a></h3>
+        <p class="post-excerpt">本文实现了一个基于LVGL的智能手表心率监测界面，主要功能包括：1) 动态显示心率数值(65-95随机变化)；2) 双色波纹扩散动画模拟心跳；3) 使用正弦波组合算法生成逼真的心电图波形；4) 可缩放跳动的3D心形图标；5) 圆形表盘UI设计。代码通过定时器驱动动画效果，包括波纹透明度渐变、心电图滚动显示和心形缩放效果。界面采用深灰背景配红白元素，包含心率数值显示区、心电图波形区和动态心形图标，模…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.365Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/模仿微信发送消息界面traecn版qt6.html">模仿微信发送消息界面traecn版QT6</a></h3>
+        <p class="post-excerpt">本文介绍了一个基于Qt框架的微信克隆应用主窗口实现。该应用采用左右布局设计，左侧为聊天列表（包含搜索栏和联系人列表），右侧为聊天窗口堆栈。通过QListWidget管理联系人列表，QStackedWidget实现多聊天窗口切换，并支持点击联系人切换对应聊天界面。代码展示了UI初始化、示例联系人创建和信号槽连接等核心功能实现，为开发类微信应用提供了基础框架参考。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.779Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/手搓一个qt6candroid版本的tcp调试软件.html">手搓一个QT6CANDROID版本的TCP调试软件</a></h3>
+        <p class="post-excerpt">文章摘要： 这是一个基于Qt框架开发的TCP调试工具程序，包含MainWindow类和TCP通信功能。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.723Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

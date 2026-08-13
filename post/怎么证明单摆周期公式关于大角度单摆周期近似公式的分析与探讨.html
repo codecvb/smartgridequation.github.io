@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>怎么证明单摆周期公式关于大角度单摆周期近似公式的分析与探讨 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">怎么证明单摆周期公式关于大角度单摆周期近似公式的分析与探讨</h1>
+        <p class="post-deck">单摆运动是一种简单又经典的机械运动。取一根不可伸长的轻质细线，一端固定，另一端系上一个小球，在重力作用下，小球被拉离平衡位置后释放，便开始做单摆运动。它以固定点为圆心，来回往复摆动，轨迹近似一段圆弧。运动过程中，小球在最高点势能最大、动能最小；向最低点摆动时，势能逐渐转化为动能，速度加快；抵达最低点，动能达最大，随后又反向摆动，如此循环，周期和摆长、重力加速度相关。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.631Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>3 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>单摆运动是一种简单又经典的机械运动。取一根不可伸长的轻质细线，一端固定，另一端系上一个小球，在重力作用下，小球被拉离平衡位置后释放，便开始做单摆运动。它以固定点为圆心，来回往复摆动，轨迹近似一段圆弧。运动过程中，小球在最高点势能最大、动能最小；向最低点摆动时，势能逐渐转化为动能，速度加快；抵达最低点，动能达最大，随后又反向摆动，如此循环，周期和摆长、重力加速度相关。</p>
+<p>单摆运动的研究历史源远流长，可追溯至古代。</p>
+<p>古希腊时期，学者们就已留意到摆动现象，但未深入剖析。17 世纪，伽利略率先对单摆展开系统钻研，传说他在教堂观察吊灯晃动，敏锐察觉到摆动的等时性，即不论摆动幅度大小，单摆完成一次全摆动的时间近乎相同，这一发现为计时工具的革新奠定根基。</p>
+<p>随后，惠更斯在伽利略的基础上大步迈进，于 1656 年成功创制出首个摆钟，把单摆的等时性巧妙应用于计时，极大提升了计时精度，让人类迈入更精准的计时时代，也促使单摆成为物理学里关键的研究模型，后续牛顿等科学家不断深化相关理论认知。</p>
+<p><img src="../uploads/csdn/%E6%80%8E%E4%B9%88%E8%AF%81%E6%98%8E%E5%8D%95%E6%91%86%E5%91%A8%E6%9C%9F%E5%85%AC%E5%BC%8F%E5%85%B3%E4%BA%8E%E5%A4%A7%E8%A7%92%E5%BA%A6%E5%8D%95%E6%91%86%E5%91%A8%E6%9C%9F%E8%BF%91%E4%BC%BC%E5%85%AC%E5%BC%8F%E7%9A%84%E5%88%86%E6%9E%90%E4%B8%8E%E6%8E%A2%E8%AE%A8/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/%E6%80%8E%E4%B9%88%E8%AF%81%E6%98%8E%E5%8D%95%E6%91%86%E5%91%A8%E6%9C%9F%E5%85%AC%E5%BC%8F%E5%85%B3%E4%BA%8E%E5%A4%A7%E8%A7%92%E5%BA%A6%E5%8D%95%E6%91%86%E5%91%A8%E6%9C%9F%E8%BF%91%E4%BC%BC%E5%85%AC%E5%BC%8F%E7%9A%84%E5%88%86%E6%9E%90%E4%B8%8E%E6%8E%A2%E8%AE%A8/img-02.jpeg" alt=""><img src="../uploads/csdn/%E6%80%8E%E4%B9%88%E8%AF%81%E6%98%8E%E5%8D%95%E6%91%86%E5%91%A8%E6%9C%9F%E5%85%AC%E5%BC%8F%E5%85%B3%E4%BA%8E%E5%A4%A7%E8%A7%92%E5%BA%A6%E5%8D%95%E6%91%86%E5%91%A8%E6%9C%9F%E8%BF%91%E4%BC%BC%E5%85%AC%E5%BC%8F%E7%9A%84%E5%88%86%E6%9E%90%E4%B8%8E%E6%8E%A2%E8%AE%A8/img-03.jpeg" alt=""><img src="../uploads/csdn/%E6%80%8E%E4%B9%88%E8%AF%81%E6%98%8E%E5%8D%95%E6%91%86%E5%91%A8%E6%9C%9F%E5%85%AC%E5%BC%8F%E5%85%B3%E4%BA%8E%E5%A4%A7%E8%A7%92%E5%BA%A6%E5%8D%95%E6%91%86%E5%91%A8%E6%9C%9F%E8%BF%91%E4%BC%BC%E5%85%AC%E5%BC%8F%E7%9A%84%E5%88%86%E6%9E%90%E4%B8%8E%E6%8E%A2%E8%AE%A8/img-04.jpeg" alt=""><img src="../uploads/csdn/%E6%80%8E%E4%B9%88%E8%AF%81%E6%98%8E%E5%8D%95%E6%91%86%E5%91%A8%E6%9C%9F%E5%85%AC%E5%BC%8F%E5%85%B3%E4%BA%8E%E5%A4%A7%E8%A7%92%E5%BA%A6%E5%8D%95%E6%91%86%E5%91%A8%E6%9C%9F%E8%BF%91%E4%BC%BC%E5%85%AC%E5%BC%8F%E7%9A%84%E5%88%86%E6%9E%90%E4%B8%8E%E6%8E%A2%E8%AE%A8/img-05.jpeg" alt=""><img src="../uploads/csdn/%E6%80%8E%E4%B9%88%E8%AF%81%E6%98%8E%E5%8D%95%E6%91%86%E5%91%A8%E6%9C%9F%E5%85%AC%E5%BC%8F%E5%85%B3%E4%BA%8E%E5%A4%A7%E8%A7%92%E5%BA%A6%E5%8D%95%E6%91%86%E5%91%A8%E6%9C%9F%E8%BF%91%E4%BC%BC%E5%85%AC%E5%BC%8F%E7%9A%84%E5%88%86%E6%9E%90%E4%B8%8E%E6%8E%A2%E8%AE%A8/img-06.jpeg" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/物理竞赛书籍按层级堆叠求质心的问题附带matlab仿真代码和数学求导过程.html">
+      <span>上一篇</span>
+      <strong>物理竞赛书籍按层级堆叠求质心的问题附带MATLAB仿真代码和数学求导过程</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/引力透镜效应添加光线弯曲程度可视化层的matlab代码.html">
+      <span>下一篇</span>
+      <strong>引力透镜效应添加光线弯曲程度可视化层的MATLAB代码</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/高中物理竞赛一道三角形物体运动的最优解.html">高中物理竞赛一道三角形物体运动的最优解</a></h3>
+        <p class="post-excerpt">Python代码</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.935Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

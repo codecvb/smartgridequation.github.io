@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>群时变中子扩散方程求解与可视化玻尔兹曼输运方程的一个简化版本MATLAB · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">群时变中子扩散方程求解与可视化玻尔兹曼输运方程的一个简化版本MATLAB</h1>
+        <p class="post-deck">本文实现了一维两群中子扩散方程的数值求解与可视化。采用有限差分法离散空间变量，向后欧拉法处理时间变量，模拟了中子通量在20cm平板介质中的时变传播。快中子（群1）和热中子（群2）分别设置不同的扩散系数、吸收截面和散射截面，初始条件下在中心位置设置高斯脉冲源。程序实现了真空边界条件，并通过周期性地绘制通量分布来展示演化过程。最终输出两个中子群在模拟结束时刻的详细空间分布。该代码为玻尔兹曼输运方程提供…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.754Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>11 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文实现了一维两群中子扩散方程的数值求解与可视化。采用有限差分法离散空间变量，向后欧拉法处理时间变量，模拟了中子通量在20cm平板介质中的时变传播。快中子（群1）和热中子（群2）分别设置不同的扩散系数、吸收截面和散射截面，初始条件下在中心位置设置高斯脉冲源。程序实现了真空边界条件，并通过周期性地绘制通量分布来展示演化过程。最终输出两个中子群在模拟结束时刻的详细空间分布。该代码为玻尔兹曼输运方程提供了简化的一维两群扩散求解方案，可用于中子输运基本特性的教学研究。</p>
+<p><img src="../uploads/csdn/%E7%BE%A4%E6%97%B6%E5%8F%98%E4%B8%AD%E5%AD%90%E6%89%A9%E6%95%A3%E6%96%B9%E7%A8%8B%E6%B1%82%E8%A7%A3%E4%B8%8E%E5%8F%AF%E8%A7%86%E5%8C%96%E7%8E%BB%E5%B0%94%E5%85%B9%E6%9B%BC%E8%BE%93%E8%BF%90%E6%96%B9%E7%A8%8B%E7%9A%84%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8C%96%E7%89%88%E6%9C%ACmatlab/img-01.jpeg" alt=""></p>
+<p><img src="../uploads/csdn/%E7%BE%A4%E6%97%B6%E5%8F%98%E4%B8%AD%E5%AD%90%E6%89%A9%E6%95%A3%E6%96%B9%E7%A8%8B%E6%B1%82%E8%A7%A3%E4%B8%8E%E5%8F%AF%E8%A7%86%E5%8C%96%E7%8E%BB%E5%B0%94%E5%85%B9%E6%9B%BC%E8%BE%93%E8%BF%90%E6%96%B9%E7%A8%8B%E7%9A%84%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8C%96%E7%89%88%E6%9C%ACmatlab/img-02.jpeg" alt=""></p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% ================================================================</span>
+<span class="hljs-comment">% 1D, 2群时变中子扩散方程求解与可视化</span>
+<span class="hljs-comment">% 这个代码是玻尔兹曼输运方程的一个简化版本</span>
+<span class="hljs-comment">% ================================================================</span>
+
+clear; clc; close all;
+
+<span class="hljs-comment">%% 1. 定义物理参数和计算网格</span>
+L = <span class="hljs-number">20.0</span>;                 <span class="hljs-comment">% 平板介质厚度 [cm]</span>
+
+<span class="hljs-comment">% --- 群 1 (快中子) 参数 ---</span>
+D1 = <span class="hljs-number">1.5</span>;                 <span class="hljs-comment">% 扩散系数 [cm]</span>
+Sigma_a1 = <span class="hljs-number">0.01</span>;          <span class="hljs-comment">% 吸收截面 [1/cm]</span>
+Sigma_s12 = <span class="hljs-number">0.1</span>;          <span class="hljs-comment">% 散射到群2的截面 [1/cm]</span>
+Sigma1 = Sigma_a1 + Sigma_s12; <span class="hljs-comment">% 总去除截面</span>
+
+<span class="hljs-comment">% --- 群 2 (热中子) 参数 ---</span>
+D2 = <span class="hljs-number">0.5</span>;                 <span class="hljs-comment">% 扩散系数 [cm]</span>
+Sigma_a2 = <span class="hljs-number">0.2</span>;           <span class="hljs-comment">% 吸收截面 [1/cm]</span>
+Sigma2 = Sigma_a2;
+
+<span class="hljs-comment">% --- 时间和空间离散化 ---</span>
+Nx = <span class="hljs-number">40</span>;                  <span class="hljs-comment">% 空间网格节点数</span>
+x = <span class="hljs-built_in">linspace</span>(<span class="hljs-number">0</span>, L, Nx);   <span class="hljs-comment">% 生成空间坐标网格</span>
+dx = x(<span class="hljs-number">2</span>) - x(<span class="hljs-number">1</span>);         <span class="hljs-comment">% 计算网格步长</span>
+
+t_max = <span class="hljs-number">5.0</span>;              <span class="hljs-comment">% 最大模拟时间 [s]</span>
+Nt = <span class="hljs-number">100</span>;                 <span class="hljs-comment">% 时间步数</span>
+dt = t_max / Nt;          <span class="hljs-comment">% 时间步长</span>
+
+<span class="hljs-comment">%% 2. 初始化通量数组</span>
+Phi1 = <span class="hljs-built_in">zeros</span>(Nx, <span class="hljs-number">1</span>);      <span class="hljs-comment">% 群1通量</span>
+Phi2 = <span class="hljs-built_in">zeros</span>(Nx, <span class="hljs-number">1</span>);      <span class="hljs-comment">% 群2通量</span>
+
+<span class="hljs-comment">% 设置初始条件 (例如，在中心有一个脉冲源)</span>
+source_width = <span class="hljs-number">2.0</span>;
+source_amplitude = <span class="hljs-number">100.0</span>;
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:Nx
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">abs</span>(x(<span class="hljs-built_in">i</span>) - L/<span class="hljs-number">2</span>) &lt; source_width
+        Phi1(<span class="hljs-built_in">i</span>) = source_amplitude * <span class="hljs-built_in">exp</span>(-((x(<span class="hljs-built_in">i</span>)-L/<span class="hljs-number">2</span>)/source_width)^<span class="hljs-number">2</span>);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 3. 定义有限差分系数 (用于空间项)</span>
+<span class="hljs-comment">% 对于内部节点，Laplacian算子 ∇·D∇Φ 的离散形式为:</span>
+<span class="hljs-comment">% D*(Phi(i+1) - 2*Phi(i) + Phi(i-1)) / dx^2</span>
+coeff = <span class="hljs-number">1</span> / dx^<span class="hljs-number">2</span>;
+
+<span class="hljs-comment">%% 4. 时间演化与求解</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Name&#x27;</span>, <span class="hljs-string">&#x27;1D, 2群中子通量时间演化&#x27;</span>);
+
+<span class="hljs-keyword">for</span> n = <span class="hljs-number">1</span>:Nt
+    <span class="hljs-comment">% 创建用于求解下一时间步的矩阵</span>
+    <span class="hljs-comment">% 为了效率，我们使用原地更新，而不是每次都创建新矩阵</span>
+
+    <span class="hljs-comment">% --- 更新群 1 ---</span>
+    Phi1_new = Phi1;
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">2</span>:Nx<span class="hljs-number">-1</span> <span class="hljs-comment">% 内部节点</span>
+        <span class="hljs-comment">% 向后欧拉法离散:</span>
+        <span class="hljs-comment">% (Phi1_new - Phi1_old)/dt = D1*Laplacian(Phi1_new) - Sigma1*Phi1_new + S1</span>
+        <span class="hljs-comment">% 整理得:</span>
+        <span class="hljs-comment">% Phi1_new - dt*D1*Laplacian(Phi1_new) + dt*Sigma1*Phi1_new = Phi1_old + dt*S1</span>
+
+        <span class="hljs-comment">% 此处 S1 = 0 (除了初始条件)</span>
+        lhs = <span class="hljs-number">1.0</span> + dt * (D1 * coeff * <span class="hljs-number">2.0</span> + Sigma1);
+        rhs = Phi1(<span class="hljs-built_in">i</span>) + dt * D1 * coeff * (Phi1(<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>) + Phi1(<span class="hljs-built_in">i</span><span class="hljs-number">-1</span>));
+
+        Phi1_new(<span class="hljs-built_in">i</span>) = rhs / lhs;
+    <span class="hljs-keyword">end</span>
+    <span class="hljs-comment">% 真空边界条件 (Neumann-like)</span>
+    Phi1_new(<span class="hljs-number">1</span>) = Phi1_new(<span class="hljs-number">2</span>);
+    Phi1_new(<span class="hljs-keyword">end</span>) = Phi1_new(<span class="hljs-keyword">end</span><span class="hljs-number">-1</span>);
+
+    <span class="hljs-comment">% --- 更新群 2 ---</span>
+    Phi2_new = Phi2;
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">2</span>:Nx<span class="hljs-number">-1</span> <span class="hljs-comment">% 内部节点</span>
+        <span class="hljs-comment">% 向后欧拉法离散:</span>
+        <span class="hljs-comment">% (Phi2_new - Phi2_old)/dt = D2*Laplacian(Phi2_new) - Sigma2*Phi2_new + Sigma_s12*Phi1_new + S2</span>
+
+        <span class="hljs-comment">% 此处 S2 = 0</span>
+        lhs = <span class="hljs-number">1.0</span> + dt * (D2 * coeff * <span class="hljs-number">2.0</span> + Sigma2);
+        rhs = Phi2(<span class="hljs-built_in">i</span>) + dt * ( D2 * coeff * (Phi2(<span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>) + Phi2(<span class="hljs-built_in">i</span><span class="hljs-number">-1</span>)) + Sigma_s12 * Phi1_new(<span class="hljs-built_in">i</span>) );
+
+        Phi2_new(<span class="hljs-built_in">i</span>) = rhs / lhs;
+    <span class="hljs-keyword">end</span>
+    <span class="hljs-comment">% 真空边界条件</span>
+    Phi2_new(<span class="hljs-number">1</span>) = Phi2_new(<span class="hljs-number">2</span>);
+    Phi2_new(<span class="hljs-keyword">end</span>) = Phi2_new(<span class="hljs-keyword">end</span><span class="hljs-number">-1</span>);
+
+    <span class="hljs-comment">% 更新通量</span>
+    Phi1 = Phi1_new;
+    Phi2 = Phi2_new;
+
+    <span class="hljs-comment">% --- 定期绘图以观察演化 ---</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">mod</span>(n, Nt/<span class="hljs-number">10</span>) == <span class="hljs-number">0</span> || n == <span class="hljs-number">1</span>
+        <span class="hljs-built_in">plot</span>(x, Phi1, <span class="hljs-string">&#x27;r-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;DisplayName&#x27;</span>, [<span class="hljs-string">&#x27;快中子通量 (t=&#x27;</span> num2str(n*dt,<span class="hljs-string">&#x27;%.2f&#x27;</span>) <span class="hljs-string">&#x27;s)&#x27;</span>]);
+        <span class="hljs-built_in">hold</span> on;
+        <span class="hljs-built_in">plot</span>(x, Phi2, <span class="hljs-string">&#x27;b-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;DisplayName&#x27;</span>, [<span class="hljs-string">&#x27;热中子通量 (t=&#x27;</span> num2str(n*dt,<span class="hljs-string">&#x27;%.2f&#x27;</span>) <span class="hljs-string">&#x27;s)&#x27;</span>]);
+        xlabel(<span class="hljs-string">&#x27;位置 x [cm]&#x27;</span>);
+        ylabel(<span class="hljs-string">&#x27;中子通量 \Phi [1/cm^2/s]&#x27;</span>);
+        title(<span class="hljs-string">&#x27;1D, 2群中子通量时间演化&#x27;</span>);
+        <span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x27;Location&#x27;</span>, <span class="hljs-string">&#x27;best&#x27;</span>);
+        grid on;
+        ylim([<span class="hljs-number">0</span>, <span class="hljs-built_in">max</span>([<span class="hljs-built_in">max</span>(Phi1), <span class="hljs-built_in">max</span>(Phi2)])*<span class="hljs-number">1.1</span>]);
+        drawnow; <span class="hljs-comment">% 强制刷新图像</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+<span class="hljs-built_in">hold</span> off;
+
+<span class="hljs-comment">% --- 最终状态的详细视图 ---</span>
+<span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Name&#x27;</span>, <span class="hljs-string">&#x27;最终时刻的中子通量分布&#x27;</span>);
+subplot(<span class="hljs-number">2</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>);
+<span class="hljs-built_in">plot</span>(x, Phi1, <span class="hljs-string">&#x27;r-o&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>);
+xlabel(<span class="hljs-string">&#x27;位置 x [cm]&#x27;</span>);
+ylabel(<span class="hljs-string">&#x27;快中子通量 \Phi_1 [1/cm^2/s]&#x27;</span>);
+title([<span class="hljs-string">&#x27;最终时刻 (t=&#x27;</span> num2str(t_max) <span class="hljs-string">&#x27;s) 的快中子通量&#x27;</span>]);
+grid on;
+
+subplot(<span class="hljs-number">2</span>,<span class="hljs-number">1</span>,<span class="hljs-number">2</span>);
+<span class="hljs-built_in">plot</span>(x, Phi2, <span class="hljs-string">&#x27;b-o&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">1.5</span>);
+xlabel(<span class="hljs-string">&#x27;位置 x [cm]&#x27;</span>);
+ylabel(<span class="hljs-string">&#x27;热中子通量 \Phi_2 [1/cm^2/s]&#x27;</span>);
+title([<span class="hljs-string">&#x27;最终时刻 (t=&#x27;</span> num2str(t_max) <span class="hljs-string">&#x27;s) 的热中子通量&#x27;</span>]);
+grid on;
+
+fprintf(<span class="hljs-string">&#x27;模拟完成。\n&#x27;</span>);
+
+<span class="hljs-comment">% ================================================================</span>
+<span class="hljs-comment">% 代码结束</span>
+<span class="hljs-comment">% ================================================================</span>
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/航天器轨道递推及lambert问题计算方法综述轨道递推lambert问题打靶法伪谱法配点法边值问题有.html">
+      <span>上一篇</span>
+      <strong>航天器轨道递推及Lambert问题计算方法综述轨道递推Lambert问题打靶法伪谱法配点法边值问题有</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/空间飞行器轨道旅行者号行星际飞行轨道递推计算与分析matlab代码.html">
+      <span>下一篇</span>
+      <strong>空间飞行器轨道旅行者号行星际飞行轨道递推计算与分析Matlab代码</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/计算卫星与地面时差用广义相对论给出计算公式与matlab代码.html">计算卫星与地面时差用广义相对论给出计算公式与MATLAB代码</a></h3>
+        <p class="post-excerpt">一、相对论时差的主要来源</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.817Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

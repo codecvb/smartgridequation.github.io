@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>QT6AndroidC自制美观闹钟 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/c-c-与-rust.html">C/C++ 与 Rust</a>
+        </nav>
+        <h1 class="post-title">QT6AndroidC自制美观闹钟</h1>
+        <p class="post-deck">该代码实现了一个基于Qt的闹钟应用，主要功能包括：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.902Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>36 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-7.html">C/C++</a>
+          
+            <a class="tag-chip" href="../tags/tag-8.html">Rust</a>
+          
+            <a class="tag-chip" href="../tags/tag-17.html">QT6</a>
+          
+            <a class="tag-chip" href="../tags/tag-22.html">Android</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>该代码实现了一个基于Qt的闹钟应用，主要功能包括：</p>
+<ol>
+<li>闹钟管理：添加、编辑、删除和开关闹钟，支持单次和重复闹钟设置</li>
+<li>界面显示：实时显示当前时间、日期和问候语，提供下次闹钟提醒时间</li>
+<li>闹钟提醒：到达设定时间时全屏显示提醒界面，支持稍后提醒功能</li>
+<li>数据持久化：使用QSettings保存和加载闹钟设置</li>
+</ol>
+<p>核心功能通过MainWindow类实现，包含时间更新、闹钟检查、界面布局和用户交互处理。代码结构清晰，使用了Qt的信号槽机制处理事件，并考虑了触摸屏适配和界面美化效果。</p>
+<p><img src="../uploads/csdn/qt6androidc%E8%87%AA%E5%88%B6%E7%BE%8E%E8%A7%82%E9%97%B9%E9%92%9F/img-01.jpeg" alt=""><img src="../uploads/csdn/qt6androidc%E8%87%AA%E5%88%B6%E7%BE%8E%E8%A7%82%E9%97%B9%E9%92%9F/img-02.jpeg" alt=""><img src="../uploads/csdn/qt6androidc%E8%87%AA%E5%88%B6%E7%BE%8E%E8%A7%82%E9%97%B9%E9%92%9F/img-03.jpeg" alt=""></p>
+<p>mainwindow.cpp</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;mainwindow.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;alarmsettings.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;alarmringing.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QDateTime&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QGraphicsDropShadowEffect&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QDebug&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;limits&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QLabel&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QPushButton&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QCheckBox&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QVBoxLayout&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QHBoxLayout&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QLayout&gt;</span></span>
+
+
+MainWindow::<span class="hljs-built_in">MainWindow</span>(QWidget *parent)
+    : <span class="hljs-built_in">QWidget</span>(parent)
+    , <span class="hljs-built_in">ui</span>(<span class="hljs-keyword">new</span> Ui::MainWindow)
+    , <span class="hljs-built_in">m_ringingDialog</span>(<span class="hljs-literal">nullptr</span>)
+    , <span class="hljs-built_in">m_nextId</span>(<span class="hljs-number">0</span>)
+    , <span class="hljs-built_in">m_settings</span>(<span class="hljs-string">&quot;AlarmClock&quot;</span>, <span class="hljs-string">&quot;AlarmClock&quot;</span>)
+{
+    ui-&gt;<span class="hljs-built_in">setupUi</span>(<span class="hljs-keyword">this</span>);
+    <span class="hljs-built_in">setWindowTitle</span>(<span class="hljs-string">&quot;闹钟&quot;</span>);
+
+    <span class="hljs-comment">// 添加阴影效果到header</span>
+    QGraphicsDropShadowEffect *headerShadow = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QGraphicsDropShadowEffect</span>(<span class="hljs-keyword">this</span>);
+    headerShadow-&gt;<span class="hljs-built_in">setBlurRadius</span>(<span class="hljs-number">20</span>);
+    headerShadow-&gt;<span class="hljs-built_in">setOffset</span>(<span class="hljs-number">0</span>, <span class="hljs-number">4</span>);
+    headerShadow-&gt;<span class="hljs-built_in">setColor</span>(<span class="hljs-built_in">QColor</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">30</span>));
+    ui-&gt;headerWidget-&gt;<span class="hljs-built_in">setGraphicsEffect</span>(headerShadow);
+
+    <span class="hljs-built_in">loadAlarms</span>();
+    <span class="hljs-built_in">updateAlarmList</span>();
+
+    m_clockTimer = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QTimer</span>(<span class="hljs-keyword">this</span>);
+    <span class="hljs-built_in">connect</span>(m_clockTimer, &amp;QTimer::timeout, <span class="hljs-keyword">this</span>, &amp;MainWindow::updateTime);
+    m_clockTimer-&gt;<span class="hljs-built_in">start</span>(<span class="hljs-number">1000</span>);
+
+    m_alarmCheckTimer = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QTimer</span>(<span class="hljs-keyword">this</span>);
+    <span class="hljs-built_in">connect</span>(m_alarmCheckTimer, &amp;QTimer::timeout, <span class="hljs-keyword">this</span>, &amp;MainWindow::checkAlarms);
+    m_alarmCheckTimer-&gt;<span class="hljs-built_in">start</span>(<span class="hljs-number">1000</span>);
+
+    <span class="hljs-built_in">connect</span>(ui-&gt;addButton, &amp;QPushButton::clicked, <span class="hljs-keyword">this</span>, &amp;MainWindow::addAlarm);
+
+    <span class="hljs-built_in">updateTime</span>();
+}
+
+MainWindow::~<span class="hljs-built_in">MainWindow</span>()
+{
+    <span class="hljs-built_in">saveAlarms</span>();
+    <span class="hljs-built_in">qDeleteAll</span>(m_alarms);
+    <span class="hljs-keyword">delete</span> ui;
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::resizeEvent</span><span class="hljs-params">(QResizeEvent *event)</span>
+</span>{
+    QWidget::<span class="hljs-built_in">resizeEvent</span>(event);
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::loadAlarms</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-type">int</span> size = m_settings.<span class="hljs-built_in">beginReadArray</span>(<span class="hljs-string">&quot;alarms&quot;</span>);
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; size; ++i) {
+        m_settings.<span class="hljs-built_in">setArrayIndex</span>(i);
+        Alarm *alarm = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Alarm</span>(<span class="hljs-keyword">this</span>);
+        alarm-&gt;<span class="hljs-built_in">load</span>(m_settings, i);
+        m_alarms.<span class="hljs-built_in">append</span>(alarm);
+        <span class="hljs-keyword">if</span> (alarm-&gt;<span class="hljs-built_in">id</span>() &gt;= m_nextId) {
+            m_nextId = alarm-&gt;<span class="hljs-built_in">id</span>() + <span class="hljs-number">1</span>;
+        }
+    }
+    m_settings.<span class="hljs-built_in">endArray</span>();
+
+    <span class="hljs-keyword">if</span> (m_alarms.<span class="hljs-built_in">isEmpty</span>()) {
+        Alarm *defaultAlarm = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Alarm</span>(m_nextId++, <span class="hljs-built_in">QTime</span>(<span class="hljs-number">7</span>, <span class="hljs-number">0</span>), <span class="hljs-string">&quot;起床闹钟&quot;</span>, <span class="hljs-literal">true</span>, <span class="hljs-keyword">this</span>);
+        m_alarms.<span class="hljs-built_in">append</span>(defaultAlarm);
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::saveAlarms</span><span class="hljs-params">()</span>
+</span>{
+    m_settings.<span class="hljs-built_in">beginWriteArray</span>(<span class="hljs-string">&quot;alarms&quot;</span>);
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; m_alarms.<span class="hljs-built_in">size</span>(); ++i) {
+        m_settings.<span class="hljs-built_in">setArrayIndex</span>(i);
+        m_alarms[i]-&gt;<span class="hljs-built_in">save</span>(m_settings);
+    }
+    m_settings.<span class="hljs-built_in">endArray</span>();
+}
+
+<span class="hljs-function">QWidget *<span class="hljs-title">MainWindow::createAlarmWidget</span><span class="hljs-params">(Alarm *alarm)</span>
+</span>{
+    QWidget *alarmWidget = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QWidget</span>();
+    alarmWidget-&gt;<span class="hljs-built_in">setObjectName</span>(<span class="hljs-string">&quot;alarmItem&quot;</span>);
+    alarmWidget-&gt;<span class="hljs-built_in">setProperty</span>(<span class="hljs-string">&quot;enabled&quot;</span>, alarm-&gt;<span class="hljs-built_in">isEnabled</span>());
+    alarmWidget-&gt;<span class="hljs-built_in">setProperty</span>(<span class="hljs-string">&quot;alarmId&quot;</span>, alarm-&gt;<span class="hljs-built_in">id</span>());
+
+    QHBoxLayout *itemLayout = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QHBoxLayout</span>(alarmWidget);
+    itemLayout-&gt;<span class="hljs-built_in">setContentsMargins</span>(<span class="hljs-number">16</span>, <span class="hljs-number">14</span>, <span class="hljs-number">12</span>, <span class="hljs-number">14</span>);
+    itemLayout-&gt;<span class="hljs-built_in">setSpacing</span>(<span class="hljs-number">12</span>);
+
+    QVBoxLayout *textLayout = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QVBoxLayout</span>();
+    textLayout-&gt;<span class="hljs-built_in">setSpacing</span>(<span class="hljs-number">4</span>);
+
+    QLabel *timeLbl = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QLabel</span>(alarm-&gt;<span class="hljs-built_in">timeDisplay</span>(), alarmWidget);
+    timeLbl-&gt;<span class="hljs-built_in">setObjectName</span>(<span class="hljs-string">&quot;alarmTime&quot;</span>);
+    timeLbl-&gt;<span class="hljs-built_in">setSizePolicy</span>(QSizePolicy::Maximum, QSizePolicy::Preferred);
+
+    QLabel *labelLbl = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QLabel</span>(alarm-&gt;<span class="hljs-built_in">label</span>() + <span class="hljs-string">&quot; · &quot;</span> + alarm-&gt;<span class="hljs-built_in">repeatDisplay</span>(), alarmWidget);
+    labelLbl-&gt;<span class="hljs-built_in">setObjectName</span>(<span class="hljs-string">&quot;alarmLabel&quot;</span>);
+    labelLbl-&gt;<span class="hljs-built_in">setSizePolicy</span>(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    textLayout-&gt;<span class="hljs-built_in">addWidget</span>(timeLbl);
+    textLayout-&gt;<span class="hljs-built_in">addWidget</span>(labelLbl);
+
+    QCheckBox *toggleCheck = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QCheckBox</span>(alarmWidget);
+    toggleCheck-&gt;<span class="hljs-built_in">setObjectName</span>(<span class="hljs-string">&quot;alarmToggle&quot;</span>);
+    toggleCheck-&gt;<span class="hljs-built_in">setChecked</span>(alarm-&gt;<span class="hljs-built_in">isEnabled</span>());
+    toggleCheck-&gt;<span class="hljs-built_in">setCursor</span>(Qt::PointingHandCursor);
+    toggleCheck-&gt;<span class="hljs-built_in">setFixedSize</span>(<span class="hljs-built_in">QSize</span>(<span class="hljs-number">60</span>, <span class="hljs-number">44</span>));
+    toggleCheck-&gt;<span class="hljs-built_in">setFocusPolicy</span>(Qt::NoFocus);
+    <span class="hljs-type">int</span> alarmId = alarm-&gt;<span class="hljs-built_in">id</span>();
+    <span class="hljs-built_in">connect</span>(toggleCheck, &amp;QCheckBox::toggled, <span class="hljs-keyword">this</span>, [<span class="hljs-keyword">this</span>, alarmId](<span class="hljs-type">bool</span> checked) {
+        <span class="hljs-built_in">toggleAlarm</span>(alarmId, checked);
+    });
+
+    QPushButton *deleteBtn = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QPushButton</span>(<span class="hljs-string">&quot;删除&quot;</span>, alarmWidget);
+    deleteBtn-&gt;<span class="hljs-built_in">setObjectName</span>(<span class="hljs-string">&quot;deleteBtn&quot;</span>);
+    deleteBtn-&gt;<span class="hljs-built_in">setCursor</span>(Qt::PointingHandCursor);
+    deleteBtn-&gt;<span class="hljs-built_in">setFixedSize</span>(<span class="hljs-built_in">QSize</span>(<span class="hljs-number">64</span>, <span class="hljs-number">44</span>));
+    deleteBtn-&gt;<span class="hljs-built_in">setFocusPolicy</span>(Qt::NoFocus);
+    <span class="hljs-built_in">connect</span>(deleteBtn, &amp;QPushButton::clicked, <span class="hljs-keyword">this</span>, [<span class="hljs-keyword">this</span>, alarmId]() {
+        <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;Delete button clicked for alarm&quot;</span> &lt;&lt; alarmId;
+        <span class="hljs-built_in">deleteAlarm</span>(alarmId);
+    });
+
+    itemLayout-&gt;<span class="hljs-built_in">addLayout</span>(textLayout, <span class="hljs-number">1</span>);
+    itemLayout-&gt;<span class="hljs-built_in">addWidget</span>(toggleCheck);
+    itemLayout-&gt;<span class="hljs-built_in">addWidget</span>(deleteBtn);
+
+    <span class="hljs-comment">// 确保子控件不接受触摸事件，让触摸事件冒泡到 TouchScrollContainer</span>
+    ui-&gt;alarmScrollArea-&gt;<span class="hljs-built_in">disableChildTouchEvents</span>(alarmWidget);
+
+    <span class="hljs-keyword">return</span> alarmWidget;
+}
+
+<span class="hljs-function">QWidget *<span class="hljs-title">MainWindow::createEmptyWidget</span><span class="hljs-params">()</span>
+</span>{
+    QWidget *emptyWidget = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QWidget</span>();
+    emptyWidget-&gt;<span class="hljs-built_in">setObjectName</span>(<span class="hljs-string">&quot;emptyWidget&quot;</span>);
+    QVBoxLayout *emptyLayout = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QVBoxLayout</span>(emptyWidget);
+    emptyLayout-&gt;<span class="hljs-built_in">setContentsMargins</span>(<span class="hljs-number">20</span>, <span class="hljs-number">60</span>, <span class="hljs-number">20</span>, <span class="hljs-number">60</span>);
+    emptyLayout-&gt;<span class="hljs-built_in">setSpacing</span>(<span class="hljs-number">12</span>);
+
+    QLabel *emptyIcon = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QLabel</span>(<span class="hljs-string">&quot;⏰&quot;</span>, emptyWidget);
+    emptyIcon-&gt;<span class="hljs-built_in">setObjectName</span>(<span class="hljs-string">&quot;emptyIcon&quot;</span>);
+    emptyIcon-&gt;<span class="hljs-built_in">setAlignment</span>(Qt::AlignCenter);
+
+    QLabel *emptyText = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QLabel</span>(<span class="hljs-string">&quot;暂无闹钟\n点击上方按钮添加新闹钟&quot;</span>, emptyWidget);
+    emptyText-&gt;<span class="hljs-built_in">setObjectName</span>(<span class="hljs-string">&quot;emptyText&quot;</span>);
+    emptyText-&gt;<span class="hljs-built_in">setAlignment</span>(Qt::AlignCenter);
+    emptyText-&gt;<span class="hljs-built_in">setWordWrap</span>(<span class="hljs-literal">true</span>);
+
+    emptyLayout-&gt;<span class="hljs-built_in">addWidget</span>(emptyIcon);
+    emptyLayout-&gt;<span class="hljs-built_in">addWidget</span>(emptyText);
+
+    <span class="hljs-keyword">return</span> emptyWidget;
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::updateAlarmList</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-comment">// 清除 layout 中的所有 widget</span>
+    QVBoxLayout *layout = ui-&gt;alarmScrollArea-&gt;<span class="hljs-built_in">contentLayout</span>();
+    <span class="hljs-keyword">while</span> (layout-&gt;<span class="hljs-built_in">count</span>() &gt; <span class="hljs-number">0</span>) {
+        QLayoutItem *item = layout-&gt;<span class="hljs-built_in">takeAt</span>(<span class="hljs-number">0</span>);
+        <span class="hljs-keyword">if</span> (item-&gt;<span class="hljs-built_in">widget</span>()) {
+            item-&gt;<span class="hljs-built_in">widget</span>()-&gt;<span class="hljs-built_in">deleteLater</span>();
+        }
+        <span class="hljs-keyword">delete</span> item;
+    }
+
+    <span class="hljs-keyword">if</span> (m_alarms.<span class="hljs-built_in">isEmpty</span>()) {
+        layout-&gt;<span class="hljs-built_in">addWidget</span>(<span class="hljs-built_in">createEmptyWidget</span>());
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">for</span> (Alarm *alarm : m_alarms) {
+            layout-&gt;<span class="hljs-built_in">addWidget</span>(<span class="hljs-built_in">createAlarmWidget</span>(alarm));
+        }
+    }
+
+    <span class="hljs-comment">// 添加底部弹簧</span>
+    layout-&gt;<span class="hljs-built_in">addStretch</span>();
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::updateTime</span><span class="hljs-params">()</span>
+</span>{
+    QDateTime now = QDateTime::<span class="hljs-built_in">currentDateTime</span>();
+    ui-&gt;timeLabel-&gt;<span class="hljs-built_in">setText</span>(now.<span class="hljs-built_in">time</span>().<span class="hljs-built_in">toString</span>(<span class="hljs-string">&quot;HH:mm&quot;</span>));
+    ui-&gt;dateLabel-&gt;<span class="hljs-built_in">setText</span>(<span class="hljs-built_in">getDateString</span>());
+    ui-&gt;greetingLabel-&gt;<span class="hljs-built_in">setText</span>(<span class="hljs-built_in">getGreeting</span>());
+    ui-&gt;nextAlarmLabel-&gt;<span class="hljs-built_in">setText</span>(<span class="hljs-built_in">getNextAlarmTime</span>());
+
+    <span class="hljs-comment">// 每天零点重置已触发闹钟记录</span>
+    <span class="hljs-keyword">if</span> (now.<span class="hljs-built_in">time</span>().<span class="hljs-built_in">hour</span>() == <span class="hljs-number">0</span> &amp;&amp; now.<span class="hljs-built_in">time</span>().<span class="hljs-built_in">minute</span>() == <span class="hljs-number">0</span>) {
+        m_triggeredAlarmsToday.<span class="hljs-built_in">clear</span>();
+        <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;Reset triggered alarms for new day&quot;</span>;
+    }
+}
+
+<span class="hljs-function">QString <span class="hljs-title">MainWindow::getGreeting</span><span class="hljs-params">()</span> <span class="hljs-type">const</span>
+</span>{
+    <span class="hljs-type">int</span> hour = QTime::<span class="hljs-built_in">currentTime</span>().<span class="hljs-built_in">hour</span>();
+    <span class="hljs-keyword">if</span> (hour &gt;= <span class="hljs-number">5</span> &amp;&amp; hour &lt; <span class="hljs-number">12</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;早上好 ☀️&quot;</span>;
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (hour &gt;= <span class="hljs-number">12</span> &amp;&amp; hour &lt; <span class="hljs-number">18</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;下午好 🌤️&quot;</span>;
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (hour &gt;= <span class="hljs-number">18</span> &amp;&amp; hour &lt; <span class="hljs-number">22</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;晚上好 🌙&quot;</span>;
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;夜深了 🌟&quot;</span>;
+    }
+}
+
+<span class="hljs-function">QString <span class="hljs-title">MainWindow::getDateString</span><span class="hljs-params">()</span> <span class="hljs-type">const</span>
+</span>{
+    QDate date = QDate::<span class="hljs-built_in">currentDate</span>();
+    QStringList weekDays = {<span class="hljs-string">&quot;周日&quot;</span>, <span class="hljs-string">&quot;周一&quot;</span>, <span class="hljs-string">&quot;周二&quot;</span>, <span class="hljs-string">&quot;周三&quot;</span>, <span class="hljs-string">&quot;周四&quot;</span>, <span class="hljs-string">&quot;周五&quot;</span>, <span class="hljs-string">&quot;周六&quot;</span>};
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">QString</span>(<span class="hljs-string">&quot;%1年%2月%3日 %4&quot;</span>)
+        .<span class="hljs-built_in">arg</span>(date.<span class="hljs-built_in">year</span>())
+        .<span class="hljs-built_in">arg</span>(date.<span class="hljs-built_in">month</span>())
+        .<span class="hljs-built_in">arg</span>(date.<span class="hljs-built_in">day</span>())
+        .<span class="hljs-built_in">arg</span>(weekDays[date.<span class="hljs-built_in">dayOfWeek</span>() % <span class="hljs-number">7</span>]);
+}
+
+<span class="hljs-function">QString <span class="hljs-title">MainWindow::getNextAlarmTime</span><span class="hljs-params">()</span> <span class="hljs-type">const</span>
+</span>{
+    QTime now = QTime::<span class="hljs-built_in">currentTime</span>();
+    QDate today = QDate::<span class="hljs-built_in">currentDate</span>();
+    <span class="hljs-type">int</span> dayOfWeek = today.<span class="hljs-built_in">dayOfWeek</span>();
+
+    QTime nextTime;
+    <span class="hljs-type">int</span> minDaysUntil = INT_MAX;
+
+    <span class="hljs-keyword">for</span> (Alarm *alarm : m_alarms) {
+        <span class="hljs-keyword">if</span> (!alarm-&gt;<span class="hljs-built_in">isEnabled</span>()) <span class="hljs-keyword">continue</span>;
+
+        QTime alarmTime = alarm-&gt;<span class="hljs-built_in">time</span>();
+        <span class="hljs-type">int</span> daysUntil = <span class="hljs-number">0</span>;
+
+        <span class="hljs-keyword">if</span> (alarm-&gt;<span class="hljs-built_in">isRepeating</span>()) {
+            QList&lt;<span class="hljs-type">int</span>&gt; repeatDays = alarm-&gt;<span class="hljs-built_in">repeatDays</span>();
+            <span class="hljs-keyword">if</span> (repeatDays.<span class="hljs-built_in">isEmpty</span>()) <span class="hljs-keyword">continue</span>;
+
+            <span class="hljs-keyword">if</span> (repeatDays.<span class="hljs-built_in">contains</span>(dayOfWeek) &amp;&amp; alarmTime &gt; now) {
+                daysUntil = <span class="hljs-number">0</span>;
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-type">bool</span> found = <span class="hljs-literal">false</span>;
+                <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">1</span>; i &lt;= <span class="hljs-number">7</span>; ++i) {
+                    <span class="hljs-type">int</span> nextDay = (dayOfWeek + i - <span class="hljs-number">1</span>) % <span class="hljs-number">7</span> + <span class="hljs-number">1</span>;
+                    <span class="hljs-keyword">if</span> (repeatDays.<span class="hljs-built_in">contains</span>(nextDay)) {
+                        daysUntil = i;
+                        found = <span class="hljs-literal">true</span>;
+                        <span class="hljs-keyword">break</span>;
+                    }
+                }
+                <span class="hljs-keyword">if</span> (!found) <span class="hljs-keyword">continue</span>;
+            }
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">if</span> (alarmTime &gt; now) {
+                daysUntil = <span class="hljs-number">0</span>;
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">continue</span>;
+            }
+        }
+
+        <span class="hljs-keyword">if</span> (daysUntil &lt; minDaysUntil ||
+            (daysUntil == minDaysUntil &amp;&amp; alarmTime &lt; nextTime)) {
+            nextTime = alarmTime;
+            minDaysUntil = daysUntil;
+        }
+    }
+
+    <span class="hljs-keyword">if</span> (nextTime.<span class="hljs-built_in">isNull</span>()) <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;&quot;</span>;
+
+    <span class="hljs-type">int</span> totalMinutes = minDaysUntil * <span class="hljs-number">24</span> * <span class="hljs-number">60</span>;
+    <span class="hljs-keyword">if</span> (minDaysUntil == <span class="hljs-number">0</span>) {
+        totalMinutes = (nextTime.<span class="hljs-built_in">hour</span>() * <span class="hljs-number">60</span> + nextTime.<span class="hljs-built_in">minute</span>()) -
+                       (now.<span class="hljs-built_in">hour</span>() * <span class="hljs-number">60</span> + now.<span class="hljs-built_in">minute</span>());
+    } <span class="hljs-keyword">else</span> {
+        totalMinutes = minDaysUntil * <span class="hljs-number">24</span> * <span class="hljs-number">60</span> +
+                       (nextTime.<span class="hljs-built_in">hour</span>() * <span class="hljs-number">60</span> + nextTime.<span class="hljs-built_in">minute</span>()) -
+                       (now.<span class="hljs-built_in">hour</span>() * <span class="hljs-number">60</span> + now.<span class="hljs-built_in">minute</span>());
+    }
+
+    <span class="hljs-type">int</span> hours = totalMinutes / <span class="hljs-number">60</span>;
+    <span class="hljs-type">int</span> minutes = totalMinutes % <span class="hljs-number">60</span>;
+
+    QString timeText;
+    <span class="hljs-keyword">if</span> (minDaysUntil == <span class="hljs-number">0</span>) {
+        <span class="hljs-keyword">if</span> (hours == <span class="hljs-number">0</span>) {
+            timeText = <span class="hljs-built_in">QString</span>(<span class="hljs-string">&quot;下次闹钟: %1分钟后&quot;</span>).<span class="hljs-built_in">arg</span>(minutes);
+        } <span class="hljs-keyword">else</span> {
+            timeText = <span class="hljs-built_in">QString</span>(<span class="hljs-string">&quot;下次闹钟: %1小时%2分钟后&quot;</span>).<span class="hljs-built_in">arg</span>(hours).<span class="hljs-built_in">arg</span>(minutes);
+        }
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (minDaysUntil == <span class="hljs-number">1</span>) {
+        timeText = <span class="hljs-built_in">QString</span>(<span class="hljs-string">&quot;下次闹钟: 明天 %1&quot;</span>).<span class="hljs-built_in">arg</span>(nextTime.<span class="hljs-built_in">toString</span>(<span class="hljs-string">&quot;HH:mm&quot;</span>));
+    } <span class="hljs-keyword">else</span> {
+        timeText = <span class="hljs-built_in">QString</span>(<span class="hljs-string">&quot;下次闹钟: %1天后 %2&quot;</span>).<span class="hljs-built_in">arg</span>(minDaysUntil).<span class="hljs-built_in">arg</span>(nextTime.<span class="hljs-built_in">toString</span>(<span class="hljs-string">&quot;HH:mm&quot;</span>));
+    }
+
+    <span class="hljs-keyword">return</span> timeText;
+}
+
+<span class="hljs-function">Alarm *<span class="hljs-title">MainWindow::findAlarmById</span><span class="hljs-params">(<span class="hljs-type">int</span> id)</span>
+</span>{
+    <span class="hljs-keyword">for</span> (Alarm *alarm : m_alarms) {
+        <span class="hljs-keyword">if</span> (alarm-&gt;<span class="hljs-built_in">id</span>() == id) <span class="hljs-keyword">return</span> alarm;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">nullptr</span>;
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::addAlarm</span><span class="hljs-params">()</span>
+</span>{
+    Alarm *newAlarm = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Alarm</span>(m_nextId++, QTime::<span class="hljs-built_in">currentTime</span>().<span class="hljs-built_in">addSecs</span>(<span class="hljs-number">60</span>), <span class="hljs-string">&quot;新闹钟&quot;</span>, <span class="hljs-literal">true</span>, <span class="hljs-keyword">this</span>);
+    <span class="hljs-function">AlarmSettings <span class="hljs-title">dialog</span><span class="hljs-params">(newAlarm, <span class="hljs-keyword">this</span>)</span></span>;
+    <span class="hljs-keyword">if</span> (dialog.<span class="hljs-built_in">exec</span>() == QDialog::Accepted) {
+        m_alarms.<span class="hljs-built_in">append</span>(newAlarm);
+        <span class="hljs-built_in">saveAlarms</span>();
+        <span class="hljs-built_in">updateAlarmList</span>();
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">delete</span> newAlarm;
+        m_nextId--;
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::editAlarm</span><span class="hljs-params">(<span class="hljs-type">int</span> alarmId)</span>
+</span>{
+    Alarm *alarm = <span class="hljs-built_in">findAlarmById</span>(alarmId);
+    <span class="hljs-keyword">if</span> (!alarm) <span class="hljs-keyword">return</span>;
+
+    <span class="hljs-function">AlarmSettings <span class="hljs-title">dialog</span><span class="hljs-params">(alarm, <span class="hljs-keyword">this</span>)</span></span>;
+    <span class="hljs-keyword">if</span> (dialog.<span class="hljs-built_in">exec</span>() == QDialog::Accepted) {
+        <span class="hljs-built_in">saveAlarms</span>();
+        <span class="hljs-built_in">updateAlarmList</span>();
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::toggleAlarm</span><span class="hljs-params">(<span class="hljs-type">int</span> alarmId, <span class="hljs-type">bool</span> enabled)</span>
+</span>{
+    Alarm *alarm = <span class="hljs-built_in">findAlarmById</span>(alarmId);
+    <span class="hljs-keyword">if</span> (alarm) {
+        alarm-&gt;<span class="hljs-built_in">setEnabled</span>(enabled);
+        <span class="hljs-built_in">saveAlarms</span>();
+        <span class="hljs-built_in">updateAlarmList</span>();
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::deleteAlarm</span><span class="hljs-params">(<span class="hljs-type">int</span> alarmId)</span>
+</span>{
+    <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;deleteAlarm called with id:&quot;</span> &lt;&lt; alarmId &lt;&lt; <span class="hljs-string">&quot;total alarms:&quot;</span> &lt;&lt; m_alarms.<span class="hljs-built_in">size</span>();
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; m_alarms.<span class="hljs-built_in">size</span>(); ++i) {
+        <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;  checking alarm&quot;</span> &lt;&lt; i &lt;&lt; <span class="hljs-string">&quot;id:&quot;</span> &lt;&lt; m_alarms[i]-&gt;<span class="hljs-built_in">id</span>();
+        <span class="hljs-keyword">if</span> (m_alarms[i]-&gt;<span class="hljs-built_in">id</span>() == alarmId) {
+            <span class="hljs-keyword">delete</span> m_alarms.<span class="hljs-built_in">takeAt</span>(i);
+            <span class="hljs-built_in">saveAlarms</span>();
+            <span class="hljs-built_in">updateAlarmList</span>();
+            <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;Alarm deleted successfully&quot;</span>;
+            <span class="hljs-keyword">return</span>;
+        }
+    }
+    <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;Alarm not found with id:&quot;</span> &lt;&lt; alarmId;
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::stopRinging</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-keyword">if</span> (m_ringingDialog) {
+        m_ringingDialog-&gt;<span class="hljs-built_in">deleteLater</span>();
+        m_ringingDialog = <span class="hljs-literal">nullptr</span>;
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::onAlarmSnoozed</span><span class="hljs-params">(Alarm *alarm, <span class="hljs-type">int</span> minutes)</span>
+</span>{
+    SnoozedAlarm snoozed;
+    snoozed.alarm = alarm;
+    snoozed.snoozeTime = QTime::<span class="hljs-built_in">currentTime</span>().<span class="hljs-built_in">addSecs</span>(minutes * <span class="hljs-number">60</span>);
+    m_snoozedAlarms.<span class="hljs-built_in">append</span>(snoozed);
+
+    <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;Alarm snoozed for&quot;</span> &lt;&lt; minutes &lt;&lt; <span class="hljs-string">&quot;minutes, will ring at&quot;</span> &lt;&lt; snoozed.snoozeTime.<span class="hljs-built_in">toString</span>(<span class="hljs-string">&quot;HH:mm&quot;</span>);
+
+    <span class="hljs-built_in">stopRinging</span>();
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::checkAlarms</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-keyword">if</span> (m_ringingDialog) <span class="hljs-keyword">return</span>;
+
+    QTime now = QTime::<span class="hljs-built_in">currentTime</span>();
+    QDate today = QDate::<span class="hljs-built_in">currentDate</span>();
+    <span class="hljs-type">int</span> dayOfWeek = today.<span class="hljs-built_in">dayOfWeek</span>();
+
+    <span class="hljs-comment">// 先检查稍后提醒闹钟</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; m_snoozedAlarms.<span class="hljs-built_in">size</span>(); ++i) {
+        SnoozedAlarm snoozed = m_snoozedAlarms[i];
+        <span class="hljs-keyword">if</span> (snoozed.snoozeTime.<span class="hljs-built_in">hour</span>() == now.<span class="hljs-built_in">hour</span>() &amp;&amp; snoozed.snoozeTime.<span class="hljs-built_in">minute</span>() == now.<span class="hljs-built_in">minute</span>()) {
+            m_snoozedAlarms.<span class="hljs-built_in">removeAt</span>(i);
+
+            m_ringingDialog = <span class="hljs-keyword">new</span> <span class="hljs-built_in">AlarmRinging</span>(snoozed.alarm, <span class="hljs-keyword">this</span>);
+            <span class="hljs-built_in">connect</span>(m_ringingDialog, &amp;AlarmRinging::stopped, <span class="hljs-keyword">this</span>, &amp;MainWindow::stopRinging);
+            <span class="hljs-built_in">connect</span>(m_ringingDialog, &amp;AlarmRinging::snoozed, <span class="hljs-keyword">this</span>, &amp;MainWindow::onAlarmSnoozed);
+            m_ringingDialog-&gt;<span class="hljs-built_in">showFullScreen</span>();
+            <span class="hljs-keyword">return</span>;
+        }
+    }
+
+    <span class="hljs-keyword">for</span> (Alarm *alarm : m_alarms) {
+        <span class="hljs-keyword">if</span> (!alarm-&gt;<span class="hljs-built_in">isEnabled</span>()) <span class="hljs-keyword">continue</span>;
+
+        <span class="hljs-keyword">if</span> (alarm-&gt;<span class="hljs-built_in">time</span>().<span class="hljs-built_in">hour</span>() != now.<span class="hljs-built_in">hour</span>() || alarm-&gt;<span class="hljs-built_in">time</span>().<span class="hljs-built_in">minute</span>() != now.<span class="hljs-built_in">minute</span>())
+            <span class="hljs-keyword">continue</span>;
+
+        <span class="hljs-keyword">if</span> (m_triggeredAlarmsToday.<span class="hljs-built_in">contains</span>(alarm-&gt;<span class="hljs-built_in">id</span>()))
+            <span class="hljs-keyword">continue</span>;
+
+        <span class="hljs-keyword">if</span> (alarm-&gt;<span class="hljs-built_in">isRepeating</span>()) {
+            <span class="hljs-keyword">if</span> (!alarm-&gt;<span class="hljs-built_in">repeatDays</span>().<span class="hljs-built_in">contains</span>(dayOfWeek))
+                <span class="hljs-keyword">continue</span>;
+        }
+
+        m_triggeredAlarmsToday.<span class="hljs-built_in">insert</span>(alarm-&gt;<span class="hljs-built_in">id</span>());
+
+        m_ringingDialog = <span class="hljs-keyword">new</span> <span class="hljs-built_in">AlarmRinging</span>(alarm, <span class="hljs-keyword">this</span>);
+        <span class="hljs-built_in">connect</span>(m_ringingDialog, &amp;AlarmRinging::stopped, <span class="hljs-keyword">this</span>, &amp;MainWindow::stopRinging);
+        <span class="hljs-built_in">connect</span>(m_ringingDialog, &amp;AlarmRinging::snoozed, <span class="hljs-keyword">this</span>, &amp;MainWindow::onAlarmSnoozed);
+        m_ringingDialog-&gt;<span class="hljs-built_in">showFullScreen</span>();
+
+        <span class="hljs-keyword">if</span> (!alarm-&gt;<span class="hljs-built_in">isRepeating</span>()) {
+            alarm-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">false</span>);
+            <span class="hljs-built_in">saveAlarms</span>();
+            <span class="hljs-built_in">updateAlarmList</span>();
+        }
+
+        <span class="hljs-keyword">break</span>;
+    }
+}
+</code></pre>
+<p>需要完整代码工程请私信留邮箱。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/rust编程语言代码详细运行编译方法.html">
+      <span>上一篇</span>
+      <strong>Rust编程语言代码详细运行编译方法</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/qt6androidc拍照程序.html">
+      <span>下一篇</span>
+      <strong>QT6AndroidC拍照程序</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/qt6androidc拍照程序.html">QT6AndroidC拍照程序</a></h3>
+        <p class="post-excerpt">该代码实现了一个基于Qt框架的摄像头拍照应用程序。主要功能包括：1) 检查并请求相机权限；2) 初始化摄像头设备，优先选择后置摄像头；3) 提供实时摄像头预览；4) 点击按钮拍照并保存图片。图片会尝试保存到多个可能的位置（如DCIM/Camera、Pictures目录等）。程序还包含状态提示功能，会显示权限请求、摄像头状态、拍照结果等信息。当摄像头错误或保存失败时，会输出相应的错误信息。整个程序通…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.893Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/qt6androidctensorflowlite人脸识别程序.html">QT6AndroidCTensorFlowlite人脸识别程序</a></h3>
+        <p class="post-excerpt">本文聚焦于在QT6框架下，面向Android平台，利用C++与TensorFlow Lite（TFLite）实现的人脸识别程序开发。研究目的在于探索一种跨平台、高性能的移动端人脸识别解决方案，突破传统Java或Python方案在实时性与资源管控上的局限。方法上，程序以QT6的Android JNI接口为桥梁，实现C++业务逻辑与Android系统服务的交互；核心推理引擎采用TFLite的C++ A…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.807Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/编写有内存漏洞的c代码并实现内存注入的示例一个程序注入另一个程序.html">编写有内存漏洞的C代码并实现内存注入的示例一个程序注入另一个程序</a></h3>
+        <p class="post-excerpt">实现思路</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.956Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

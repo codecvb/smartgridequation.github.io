@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>STM32F103C8T6SDcardSPI驱动ILI9341LCDPROTEUS8.0仿真将存储在 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/嵌入式与硬件.html">嵌入式与硬件</a>
+        </nav>
+        <h1 class="post-title">STM32F103C8T6SDcardSPI驱动ILI9341LCDPROTEUS8.0仿真将存储在</h1>
+        <p class="post-deck">本文展示了一个基于STM32微控制器的SD卡文件读取系统。系统通过SPI接口连接SD卡，实现了FAT12文件系统的解析功能。主要功能包括：1) 读取SD卡基本信息(容量、类型)；2) 解析FAT12文件系统的引导扇区参数；3) 搜索并定位指定文件；4) 在ILI9341 LCD屏幕上显示文本文件内容。系统还包含文件列表显示功能，可查看SD卡中的文件信息。程序使用HAL库进行硬件初始化，通过状态指示…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.444Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>46 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-12.html">嵌入式</a>
+          
+            <a class="tag-chip" href="../tags/tag-13.html">物联网</a>
+          
+            <a class="tag-chip" href="../tags/tag-23.html">STM32</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文展示了一个基于STM32微控制器的SD卡文件读取系统。系统通过SPI接口连接SD卡，实现了FAT12文件系统的解析功能。主要功能包括：1) 读取SD卡基本信息(容量、类型)；2) 解析FAT12文件系统的引导扇区参数；3) 搜索并定位指定文件；4) 在ILI9341 LCD屏幕上显示文本文件内容。系统还包含文件列表显示功能，可查看SD卡中的文件信息。程序使用HAL库进行硬件初始化，通过状态指示灯反馈操作状态。该系统实现了从SD卡读取文本文件并显示的基本功能框架。</p>
+<p><img src="../uploads/csdn/stm32f103c8t6sdcardspi%E9%A9%B1%E5%8A%A8ili9341lcdproteus8-0%E4%BB%BF%E7%9C%9F%E5%B0%86%E5%AD%98%E5%82%A8%E5%9C%A8/img-01.png" alt=""></p>
+<p>main.c</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-comment">/* USER CODE BEGIN Header */</span>
+<span class="hljs-comment">/**
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : Main program body
+  ******************************************************************************
+  * @attention
+  *
+  * &lt;h2&gt;&lt;center&gt;&amp;copy; Copyright (c) 2020 STMicroelectronics.
+  * All rights reserved.&lt;/center&gt;&lt;/h2&gt;
+  *
+  * This software component is licensed by ST under BSD 3-Clause license,
+  * the &quot;License&quot;; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  */</span>
+<span class="hljs-comment">/* USER CODE END Header */</span>
+<span class="hljs-comment">/* Includes ------------------------------------------------------------------*/</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;main.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;spi.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;usart.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;gpio.h&quot;</span></span>
+
+<span class="hljs-comment">/* Private includes ----------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN Includes */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;bmp.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;txt.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;ILI9341.h&quot;</span></span>
+<span class="hljs-comment">/* USER CODE END Includes */</span>
+
+<span class="hljs-comment">/* Private typedef -----------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN PTD */</span>
+
+<span class="hljs-comment">/* USER CODE END PTD */</span>
+
+<span class="hljs-comment">/* Private define ------------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN PD */</span>
+<span class="hljs-comment">/* USER CODE END PD */</span>
+
+<span class="hljs-comment">/* Private macro -------------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN PM */</span>
+
+<span class="hljs-comment">/* USER CODE END PM */</span>
+
+<span class="hljs-comment">/* Private variables ---------------------------------------------------------*/</span>
+
+<span class="hljs-comment">/* USER CODE BEGIN PV */</span>
+
+<span class="hljs-comment">/* USER CODE END PV */</span>
+
+<span class="hljs-comment">/* Private function prototypes -----------------------------------------------*/</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">SystemClock_Config</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-comment">/* USER CODE BEGIN PFP */</span>
+
+<span class="hljs-comment">/* USER CODE END PFP */</span>
+
+<span class="hljs-comment">/* Private user code ---------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN 0 */</span>
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">SD_RdWrTest</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+    <span class="hljs-type">int</span> i = <span class="hljs-number">0</span>;
+    <span class="hljs-type">static</span> <span class="hljs-type">uint8_t</span> bufr[SD_SECTOR_SIZE];
+    <span class="hljs-type">static</span> <span class="hljs-type">uint8_t</span> bufw[SD_SECTOR_SIZE];
+
+    <span class="hljs-keyword">for</span>(i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-built_in">sizeof</span>(bufw); i++)
+    {
+        bufr[i] = <span class="hljs-number">0</span>;
+        bufw[i] = i % <span class="hljs-number">0xFF</span>;
+    }
+
+    <span class="hljs-built_in">SD_WriteDisk</span>(bufw, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>);
+    <span class="hljs-built_in">SD_ReadDisk</span>(bufr, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>);
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;# SD Card Read &amp; Write Test %s!\r\n&quot;</span>, <span class="hljs-built_in">memcmp</span>(bufr, bufw, <span class="hljs-built_in">sizeof</span>(bufr)) == <span class="hljs-number">0</span> ? <span class="hljs-string">&quot;Successfully&quot;</span> : <span class="hljs-string">&quot;Failed&quot;</span>);
+}
+
+<span class="hljs-keyword">extern</span> SPI_HandleTypeDef hspi2;
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-type">uint64_t</span> CardSize = <span class="hljs-number">0</span>;
+    <span class="hljs-built_in">HAL_Init</span>();
+    <span class="hljs-built_in">SystemClock_Config</span>();
+    <span class="hljs-built_in">MX_GPIO_Init</span>();
+    <span class="hljs-built_in">MX_USART1_UART_Init</span>();
+    <span class="hljs-built_in">MX_SPI1_Init</span>();
+    <span class="hljs-built_in">MX_SPI2_Init</span>();
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n\r\n####################### HAL Libary SD Card SPI Demo ################################\r\n&quot;</span>);
+
+    <span class="hljs-keyword">while</span>(<span class="hljs-built_in">SD_Initialize</span>() != <span class="hljs-number">0</span>)
+    {
+        <span class="hljs-built_in">HAL_GPIO_TogglePin</span>(LED0_GPIO_Port, LED0_Pin);
+        <span class="hljs-built_in">HAL_Delay</span>(<span class="hljs-number">1000</span>);
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;## [Warining]: sd card not found !\r\n&quot;</span>);
+    }
+
+    CardSize = <span class="hljs-built_in">SD_GetSectorCount</span>();
+    CardSize = CardSize * SD_SECTOR_SIZE / <span class="hljs-number">1024</span> / <span class="hljs-number">1024</span>;
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;# SD Card Type:0x%02X\r\n&quot;</span>, SD_Type);
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;# SD Card Size:%lldMB\r\n&quot;</span>, CardSize);
+
+    <span class="hljs-built_in">ILI9341_begin</span>(&amp;hspi2);
+    <span class="hljs-comment">//ILI9341_fillScreen(ILI9341_GREEN);</span>
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;# LCD Initialized\r\n&quot;</span>);
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;# Displaying 1.TXT...\r\n&quot;</span>);
+    <span class="hljs-keyword">if</span>(<span class="hljs-built_in">TXT_Display</span>(<span class="hljs-string">&quot;1.txt&quot;</span>, &amp;hspi2) == <span class="hljs-number">0</span>)
+    {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;# TXT Display Success!\r\n&quot;</span>);
+    }
+    <span class="hljs-keyword">else</span>
+    {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;# TXT Display Failed!\r\n&quot;</span>);
+    }
+
+		<span class="hljs-built_in">HAL_Delay</span>(<span class="hljs-number">1000</span>);
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;# Displaying 2.BMP...\r\n&quot;</span>);
+    <span class="hljs-keyword">if</span>(<span class="hljs-built_in">BMP_Display</span>(<span class="hljs-string">&quot;2.bmp&quot;</span>, &amp;hspi2) == <span class="hljs-number">0</span>)
+    {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;# BMP Display Success!\r\n&quot;</span>);
+    }
+    <span class="hljs-keyword">else</span>
+    {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;# BMP Display Failed!\r\n&quot;</span>);
+    }
+
+
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>)
+    {
+        <span class="hljs-built_in">HAL_GPIO_TogglePin</span>(LED1_GPIO_Port, LED1_Pin);
+        <span class="hljs-built_in">HAL_Delay</span>(<span class="hljs-number">1000</span>);
+    }
+}
+
+<span class="hljs-comment">/* USER CODE END 0 */</span>
+
+<span class="hljs-comment">/**
+  * @brief  The application entry point.
+  * @retval int
+  */</span>
+
+<span class="hljs-comment">/**
+  * @brief System Clock Configuration
+  * @retval None
+  */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">SystemClock_Config</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {<span class="hljs-number">0</span>};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {<span class="hljs-number">0</span>};
+
+  <span class="hljs-comment">/** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */</span>
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">HAL_RCC_OscConfig</span>(&amp;RCC_OscInitStruct) != HAL_OK)
+  {
+    <span class="hljs-built_in">Error_Handler</span>();
+  }
+
+  <span class="hljs-comment">/** Initializes the CPU, AHB and APB buses clocks
+  */</span>
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">HAL_RCC_ClockConfig</span>(&amp;RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    <span class="hljs-built_in">Error_Handler</span>();
+  }
+}
+
+<span class="hljs-comment">/* USER CODE BEGIN 4 */</span>
+
+<span class="hljs-comment">/* USER CODE END 4 */</span>
+
+<span class="hljs-comment">/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Error_Handler</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+  <span class="hljs-comment">/* USER CODE BEGIN Error_Handler_Debug */</span>
+    <span class="hljs-comment">/* User can add his own implementation to report the HAL error return state */</span>
+
+  <span class="hljs-comment">/* USER CODE END Error_Handler_Debug */</span>
+}
+
+<span class="hljs-meta">#<span class="hljs-keyword">ifdef</span>  USE_FULL_ASSERT</span>
+<span class="hljs-comment">/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">assert_failed</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span> *file, <span class="hljs-type">uint32_t</span> line)</span>
+</span>{
+  <span class="hljs-comment">/* USER CODE BEGIN 6 */</span>
+    <span class="hljs-comment">/* User can add his own implementation to report the file name and line number,
+       tex: printf(&quot;Wrong parameters value: file %s on line %d\r\n&quot;, file, line) */</span>
+  <span class="hljs-comment">/* USER CODE END 6 */</span>
+}
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span> <span class="hljs-comment">/* USE_FULL_ASSERT */</span></span>
+</code></pre>
+<p>txt.c</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;txt.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;mmc_sd.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;ILI9341.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;main.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span>
+
+<span class="hljs-keyword">extern</span> SPI_HandleTypeDef hspi1;
+
+<span class="hljs-comment">// 全局变量保存文件系统参数</span>
+<span class="hljs-type">static</span> <span class="hljs-type">uint32_t</span> g_bytesPerSector = <span class="hljs-number">512</span>;
+<span class="hljs-type">static</span> <span class="hljs-type">uint32_t</span> g_sectorsPerCluster = <span class="hljs-number">1</span>;
+<span class="hljs-type">static</span> <span class="hljs-type">uint32_t</span> g_reservedSectors = <span class="hljs-number">1</span>;
+<span class="hljs-type">static</span> <span class="hljs-type">uint32_t</span> g_sectorsPerFat = <span class="hljs-number">9</span>;
+<span class="hljs-type">static</span> <span class="hljs-type">uint32_t</span> g_rootEntries = <span class="hljs-number">224</span>;
+<span class="hljs-type">static</span> <span class="hljs-type">uint32_t</span> g_fatStart = <span class="hljs-number">1</span>;
+<span class="hljs-type">static</span> <span class="hljs-type">uint32_t</span> g_rootSector = <span class="hljs-number">19</span>;
+<span class="hljs-type">static</span> <span class="hljs-type">uint32_t</span> g_dataStart = <span class="hljs-number">33</span>;
+<span class="hljs-type">static</span> <span class="hljs-type">uint8_t</span> g_numberOfFATs = <span class="hljs-number">2</span>;
+
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">uint8_t</span> <span class="hljs-title">FAT12_ReadBootSector</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span>* bytesPerSector, <span class="hljs-type">uint32_t</span>* sectorsPerFat, <span class="hljs-type">uint32_t</span>* rootEntries, <span class="hljs-type">uint32_t</span>* reservedSectors, <span class="hljs-type">uint32_t</span>* fatStart, <span class="hljs-type">uint32_t</span>* sectorsPerCluster)</span></span>;
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">uint8_t</span> <span class="hljs-title">FAT12_FindFile</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span>* filename, <span class="hljs-type">uint32_t</span>* firstCluster, <span class="hljs-type">uint32_t</span>* size)</span></span>;
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">uint16_t</span> <span class="hljs-title">FAT12_GetFatEntry</span><span class="hljs-params">(<span class="hljs-type">uint16_t</span> cluster)</span></span>;
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">FAT12_ParseBootSector</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span>* buffer)</span></span>;
+
+<span class="hljs-comment">// 简单的延迟函数</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">delay_small</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+    <span class="hljs-keyword">volatile</span> <span class="hljs-type">int</span> i;
+    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">1000</span>; i++);
+}
+
+<span class="hljs-comment">// 解析引导扇区</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">FAT12_ParseBootSector</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span>* buffer)</span> </span>{
+    g_bytesPerSector = buffer[<span class="hljs-number">11</span>] | (buffer[<span class="hljs-number">12</span>] &lt;&lt; <span class="hljs-number">8</span>);
+    g_sectorsPerCluster = buffer[<span class="hljs-number">13</span>];
+    g_reservedSectors = buffer[<span class="hljs-number">14</span>] | (buffer[<span class="hljs-number">15</span>] &lt;&lt; <span class="hljs-number">8</span>);
+    g_numberOfFATs = buffer[<span class="hljs-number">16</span>];
+    g_rootEntries = buffer[<span class="hljs-number">17</span>] | (buffer[<span class="hljs-number">18</span>] &lt;&lt; <span class="hljs-number">8</span>);
+    g_sectorsPerFat = buffer[<span class="hljs-number">22</span>] | (buffer[<span class="hljs-number">23</span>] &lt;&lt; <span class="hljs-number">8</span>);
+
+    <span class="hljs-keyword">if</span> (g_sectorsPerFat == <span class="hljs-number">0</span>) {
+        g_sectorsPerFat = <span class="hljs-number">9</span>;
+    }
+
+    g_fatStart = g_reservedSectors;
+    g_rootSector = g_fatStart + (g_numberOfFATs * g_sectorsPerFat);
+    <span class="hljs-type">uint32_t</span> rootDirSectors = ((g_rootEntries * <span class="hljs-number">32</span>) + (g_bytesPerSector - <span class="hljs-number">1</span>)) / g_bytesPerSector;
+    g_dataStart = g_rootSector + rootDirSectors;
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: BootSector\r\n&quot;</span>);
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;  bps=%lu spc=%lu res=%lu fat=%lu\r\n&quot;</span>,
+           g_bytesPerSector, g_sectorsPerCluster, g_reservedSectors, g_sectorsPerFat);
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;  root=%lu data=%lu\r\n&quot;</span>, g_rootSector, g_dataStart);
+}
+
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">uint8_t</span> <span class="hljs-title">FAT12_ReadBootSector</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span>* bytesPerSector, <span class="hljs-type">uint32_t</span>* sectorsPerFat, <span class="hljs-type">uint32_t</span>* rootEntries, <span class="hljs-type">uint32_t</span>* reservedSectors, <span class="hljs-type">uint32_t</span>* fatStart, <span class="hljs-type">uint32_t</span>* sectorsPerCluster)</span> </span>{
+    <span class="hljs-type">uint8_t</span> buffer[<span class="hljs-number">512</span>];
+    <span class="hljs-type">uint8_t</span> result;
+    <span class="hljs-type">int</span> retry = <span class="hljs-number">3</span>;
+    <span class="hljs-type">int</span> i;
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: RD boot...\r\n&quot;</span>);
+
+    <span class="hljs-keyword">while</span> (retry &gt; <span class="hljs-number">0</span>) {
+        result = <span class="hljs-built_in">SD_ReadDisk</span>(buffer, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+        <span class="hljs-keyword">if</span> (result == <span class="hljs-number">0</span>) <span class="hljs-keyword">break</span>;
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: retry %d\r\n&quot;</span>, retry);
+        <span class="hljs-built_in">delay_small</span>();
+        retry--;
+    }
+
+    <span class="hljs-keyword">if</span> (result != <span class="hljs-number">0</span>) {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: boot fail=%u\r\n&quot;</span>, result);
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: Using defaults\r\n&quot;</span>);
+        g_bytesPerSector = <span class="hljs-number">512</span>;
+        g_sectorsPerCluster = <span class="hljs-number">1</span>;
+        g_reservedSectors = <span class="hljs-number">1</span>;
+        g_sectorsPerFat = <span class="hljs-number">9</span>;
+        g_rootEntries = <span class="hljs-number">224</span>;
+        g_fatStart = <span class="hljs-number">1</span>;
+        g_numberOfFATs = <span class="hljs-number">2</span>;
+        g_rootSector = <span class="hljs-number">19</span>;
+        g_dataStart = <span class="hljs-number">33</span>;
+
+        *bytesPerSector = <span class="hljs-number">512</span>;
+        *sectorsPerCluster = <span class="hljs-number">1</span>;
+        *reservedSectors = <span class="hljs-number">1</span>;
+        *sectorsPerFat = <span class="hljs-number">9</span>;
+        *rootEntries = <span class="hljs-number">224</span>;
+        *fatStart = <span class="hljs-number">1</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    }
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: boot OK, hex:\r\n&quot;</span>);
+
+    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">32</span>; i++) {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%02X &quot;</span>, buffer[i]);
+        <span class="hljs-keyword">if</span> (i == <span class="hljs-number">15</span>) <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n&quot;</span>);
+    }
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n&quot;</span>);
+
+    <span class="hljs-built_in">FAT12_ParseBootSector</span>(buffer);
+
+    *bytesPerSector = g_bytesPerSector;
+    *sectorsPerCluster = g_sectorsPerCluster;
+    *reservedSectors = g_reservedSectors;
+    *sectorsPerFat = g_sectorsPerFat;
+    *rootEntries = g_rootEntries;
+    *fatStart = g_fatStart;
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">uint16_t</span> <span class="hljs-title">FAT12_GetFatEntry</span><span class="hljs-params">(<span class="hljs-type">uint16_t</span> cluster)</span> </span>{
+    <span class="hljs-type">uint8_t</span> fatBuffer[<span class="hljs-number">512</span>];
+    <span class="hljs-type">uint32_t</span> fatOffset;
+    <span class="hljs-type">uint32_t</span> fatSector;
+    <span class="hljs-type">uint16_t</span> entry;
+
+    <span class="hljs-keyword">if</span> (cluster &lt; <span class="hljs-number">2</span>) <span class="hljs-keyword">return</span> <span class="hljs-number">0xFFF</span>;
+
+    fatOffset = cluster + (cluster / <span class="hljs-number">2</span>);
+    fatSector = g_fatStart + fatOffset / <span class="hljs-number">512</span>;
+    <span class="hljs-type">uint16_t</span> offsetInSector = fatOffset % <span class="hljs-number">512</span>;
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">SD_ReadDisk</span>(fatBuffer, fatSector, <span class="hljs-number">1</span>) != <span class="hljs-number">0</span>) {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: FAT read err\r\n&quot;</span>);
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0xFF</span>;
+    }
+
+    entry = fatBuffer[offsetInSector] | (fatBuffer[offsetInSector + <span class="hljs-number">1</span>] &lt;&lt; <span class="hljs-number">8</span>);
+
+    <span class="hljs-keyword">if</span> (cluster % <span class="hljs-number">2</span> == <span class="hljs-number">0</span>) {
+        <span class="hljs-keyword">return</span> entry &amp; <span class="hljs-number">0x0FFF</span>;
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> entry &gt;&gt; <span class="hljs-number">4</span>;
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">uint8_t</span> <span class="hljs-title">FAT12_FindFile</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span>* filename, <span class="hljs-type">uint32_t</span>* firstCluster, <span class="hljs-type">uint32_t</span>* size)</span> </span>{
+    <span class="hljs-type">uint8_t</span> buffer[<span class="hljs-number">512</span>];
+    <span class="hljs-type">uint32_t</span> rootDirSectors;
+    <span class="hljs-type">uint32_t</span> i, j;
+    <span class="hljs-type">char</span> name[<span class="hljs-number">11</span>];
+    <span class="hljs-type">uint32_t</span> nameIdx = <span class="hljs-number">0</span>;
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: FindFile: %s\r\n&quot;</span>, filename);
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: check1\r\n&quot;</span>);
+
+    rootDirSectors = ((g_rootEntries * <span class="hljs-number">32</span>) + (g_bytesPerSector - <span class="hljs-number">1</span>)) / g_bytesPerSector;
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: check2\r\n&quot;</span>);
+
+    <span class="hljs-built_in">memset</span>(name, <span class="hljs-string">&#x27; &#x27;</span>, <span class="hljs-number">11</span>);
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: check3\r\n&quot;</span>);
+    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; filename[i] != <span class="hljs-string">&#x27;\0&#x27;</span> &amp;&amp; i &lt; <span class="hljs-number">8</span> &amp;&amp; filename[i] != <span class="hljs-string">&#x27;.&#x27;</span>; i++) {
+        name[i] = filename[i];
+    }
+    <span class="hljs-keyword">if</span> (filename[i] == <span class="hljs-string">&#x27;.&#x27;</span>) {
+        i++;
+        <span class="hljs-keyword">for</span> (; filename[i] != <span class="hljs-string">&#x27;\0&#x27;</span> &amp;&amp; nameIdx &lt; <span class="hljs-number">3</span>; i++) {
+            name[<span class="hljs-number">8</span> + nameIdx] = filename[i];
+            nameIdx++;
+        }
+    }
+    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">11</span>; i++) {
+        <span class="hljs-keyword">if</span> (name[i] &gt;= <span class="hljs-string">&#x27;a&#x27;</span> &amp;&amp; name[i] &lt;= <span class="hljs-string">&#x27;z&#x27;</span>) {
+            name[i] = name[i] - <span class="hljs-string">&#x27;a&#x27;</span> + <span class="hljs-string">&#x27;A&#x27;</span>;
+        }
+    }
+
+    <span class="hljs-comment">//printf(&quot;TXT: Looking for [%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X]\r\n&quot;,</span>
+    <span class="hljs-comment">//       name[0], name[1], name[2], name[3], name[4], name[5], name[6], name[7], name[8], name[9], name[10]);</span>
+
+    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; rootDirSectors; i++) {
+        <span class="hljs-comment">//printf(&quot;TXT: reading root sector %lu...\r\n&quot;, g_rootSector + i);</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">SD_ReadDisk</span>(buffer, g_rootSector + i, <span class="hljs-number">1</span>) != <span class="hljs-number">0</span>) {
+            <span class="hljs-comment">//printf(&quot;TXT: root%lu read err\r\n&quot;, g_rootSector + i);</span>
+            <span class="hljs-keyword">continue</span>;
+        }
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: root sector read OK\r\n&quot;</span>);
+
+        <span class="hljs-keyword">for</span> (j = <span class="hljs-number">0</span>; j &lt; <span class="hljs-number">16</span>; j++) {
+            <span class="hljs-type">uint8_t</span>* entry = &amp;buffer[j * <span class="hljs-number">32</span>];
+
+            <span class="hljs-keyword">if</span> (entry[<span class="hljs-number">0</span>] == <span class="hljs-number">0x00</span>) {
+                <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: EOF\r\n&quot;</span>);
+                <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+            }
+            <span class="hljs-keyword">if</span> (entry[<span class="hljs-number">0</span>] == <span class="hljs-number">0xE5</span>) <span class="hljs-keyword">continue</span>;
+            <span class="hljs-keyword">if</span> (entry[<span class="hljs-number">11</span>] == <span class="hljs-number">0x0F</span>) <span class="hljs-keyword">continue</span>;
+            <span class="hljs-keyword">if</span> (entry[<span class="hljs-number">11</span>] &amp; <span class="hljs-number">0x08</span>) <span class="hljs-keyword">continue</span>;
+
+            <span class="hljs-keyword">if</span> (<span class="hljs-built_in">memcmp</span>(entry, name, <span class="hljs-number">11</span>) == <span class="hljs-number">0</span>) {
+                *firstCluster = entry[<span class="hljs-number">26</span>] | (entry[<span class="hljs-number">27</span>] &lt;&lt; <span class="hljs-number">8</span>);
+                *size = entry[<span class="hljs-number">28</span>] | (entry[<span class="hljs-number">29</span>] &lt;&lt; <span class="hljs-number">8</span>) | (entry[<span class="hljs-number">30</span>] &lt;&lt; <span class="hljs-number">16</span>) | (entry[<span class="hljs-number">31</span>] &lt;&lt; <span class="hljs-number">24</span>);
+                <span class="hljs-comment">//printf(&quot;TXT: Found! cluster=%lu size=%lu\r\n&quot;, *firstCluster, *size);</span>
+                <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+            }
+        }
+    }
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: Not found\r\n&quot;</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+}
+
+<span class="hljs-function"><span class="hljs-type">uint8_t</span> <span class="hljs-title">TXT_Display</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span>* filename, SPI_HandleTypeDef* hspi)</span> </span>{
+    <span class="hljs-type">uint32_t</span> firstCluster, fileSize;
+    <span class="hljs-type">uint8_t</span> sectorBuffer[<span class="hljs-number">512</span>];
+    <span class="hljs-type">uint16_t</span> currentCluster, nextCluster;
+    <span class="hljs-type">uint32_t</span> sectorInCluster;
+    <span class="hljs-type">uint32_t</span> bytesRead;
+    <span class="hljs-type">uint8_t</span> result;
+    <span class="hljs-type">uint16_t</span> cursorX, cursorY;
+
+    (<span class="hljs-type">void</span>)hspi;
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n========================================\r\n&quot;</span>);
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: Opening: %s\r\n&quot;</span>, filename);
+
+    result = <span class="hljs-built_in">FAT12_FindFile</span>(filename, &amp;firstCluster, &amp;fileSize);
+    <span class="hljs-keyword">if</span> (result != <span class="hljs-number">0</span>) {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: File not found\r\n&quot;</span>);
+        <span class="hljs-built_in">ILI9341_fillScreen</span>(ILI9341_BLACK);
+        <span class="hljs-built_in">ILI9341_setCursor</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-built_in">ILI9341_setTextColor</span>(ILI9341_RED);
+        <span class="hljs-built_in">ILI9341_print</span>(<span class="hljs-string">&quot;File not found!&quot;</span>);
+        <span class="hljs-keyword">return</span> result;
+    }
+
+    <span class="hljs-comment">//printf(&quot;TXT: File cluster=%lu size=%lu\r\n&quot;, firstCluster, fileSize);</span>
+
+    <span class="hljs-built_in">ILI9341_fillScreen</span>(ILI9341_BLACK);
+    <span class="hljs-built_in">ILI9341_setCursor</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    <span class="hljs-built_in">ILI9341_setTextColor</span>(ILI9341_WHITE);
+    <span class="hljs-built_in">ILI9341_setTextSize</span>(<span class="hljs-number">1</span>);
+
+    currentCluster = firstCluster;
+    sectorInCluster = <span class="hljs-number">0</span>;
+    bytesRead = <span class="hljs-number">0</span>;
+    cursorX = <span class="hljs-number">0</span>;
+    cursorY = <span class="hljs-number">0</span>;
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: Reading content...\r\n&quot;</span>);
+
+    <span class="hljs-keyword">while</span> (bytesRead &lt; fileSize) {
+        <span class="hljs-type">uint32_t</span> sector = g_dataStart + (currentCluster - <span class="hljs-number">2</span>) * g_sectorsPerCluster + sectorInCluster;
+
+        result = <span class="hljs-built_in">SD_ReadDisk</span>(sectorBuffer, sector, <span class="hljs-number">1</span>);
+        <span class="hljs-keyword">if</span> (result != <span class="hljs-number">0</span>) {
+            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: sector%lu err\r\n&quot;</span>, sector);
+            <span class="hljs-built_in">delay_small</span>();
+            result = <span class="hljs-built_in">SD_ReadDisk</span>(sectorBuffer, sector, <span class="hljs-number">1</span>);
+            <span class="hljs-keyword">if</span> (result != <span class="hljs-number">0</span>) {
+                <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: retry fail\r\n&quot;</span>);
+                <span class="hljs-keyword">return</span> result;
+            }
+        }
+
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">uint32_t</span> i = <span class="hljs-number">0</span>; i &lt; g_bytesPerSector &amp;&amp; bytesRead &lt; fileSize; i++) {
+            <span class="hljs-type">uint8_t</span> c = sectorBuffer[i];
+            bytesRead++;
+
+            <span class="hljs-keyword">if</span> (c &gt;= <span class="hljs-number">32</span> &amp;&amp; c &lt;= <span class="hljs-number">126</span>) {
+                <span class="hljs-built_in">ILI9341_write</span>(c);
+                cursorX += <span class="hljs-number">6</span>;
+                <span class="hljs-keyword">if</span> (cursorX &gt;= <span class="hljs-number">234</span>) {
+                    cursorX = <span class="hljs-number">0</span>;
+                    cursorY += <span class="hljs-number">8</span>;
+                    <span class="hljs-built_in">ILI9341_setCursor</span>(cursorX, cursorY);
+                }
+            } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (c == <span class="hljs-string">&#x27;\n&#x27;</span>) {
+                cursorX = <span class="hljs-number">0</span>;
+                cursorY += <span class="hljs-number">8</span>;
+                <span class="hljs-built_in">ILI9341_setCursor</span>(cursorX, cursorY);
+                <span class="hljs-keyword">if</span> (cursorY &gt;= <span class="hljs-number">320</span>) {
+                    cursorY = <span class="hljs-number">0</span>;
+                    <span class="hljs-built_in">ILI9341_fillScreen</span>(ILI9341_BLACK);
+                    <span class="hljs-built_in">ILI9341_setCursor</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+                }
+            }
+        }
+
+        sectorInCluster++;
+        <span class="hljs-keyword">if</span> (sectorInCluster &gt;= g_sectorsPerCluster) {
+            sectorInCluster = <span class="hljs-number">0</span>;
+            nextCluster = <span class="hljs-built_in">FAT12_GetFatEntry</span>(currentCluster);
+            <span class="hljs-keyword">if</span> (nextCluster &gt;= <span class="hljs-number">0x0FF8</span> || nextCluster == <span class="hljs-number">0</span>) {
+                <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: EOF cluster\r\n&quot;</span>);
+                <span class="hljs-keyword">break</span>;
+            }
+            currentCluster = nextCluster;
+        }
+
+        <span class="hljs-keyword">if</span> (bytesRead % <span class="hljs-number">512</span> == <span class="hljs-number">0</span>) {
+            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: %lu/%lu bytes\r\n&quot;</span>, bytesRead, fileSize);
+        }
+    }
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n========================================\r\n&quot;</span>);
+    <span class="hljs-comment">//printf(&quot;TXT: Done %lu bytes\r\n&quot;, bytesRead);</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-function"><span class="hljs-type">uint8_t</span> <span class="hljs-title">TXT_ListFiles</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+    <span class="hljs-type">uint8_t</span> buffer[<span class="hljs-number">512</span>];
+    <span class="hljs-type">uint32_t</span> rootDirSectors;
+    <span class="hljs-type">uint32_t</span> i, j;
+    <span class="hljs-type">int</span> fileCount = <span class="hljs-number">0</span>;
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n=== Files ===\r\n&quot;</span>);
+
+    <span class="hljs-type">uint32_t</span> dummy1, dummy2, dummy3, dummy4, dummy5, dummy6;
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">FAT12_ReadBootSector</span>(&amp;dummy1, &amp;dummy2, &amp;dummy3, &amp;dummy4, &amp;dummy5, &amp;dummy6) != <span class="hljs-number">0</span>) {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: boot err\r\n&quot;</span>);
+        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+    }
+
+    rootDirSectors = ((g_rootEntries * <span class="hljs-number">32</span>) + (g_bytesPerSector - <span class="hljs-number">1</span>)) / g_bytesPerSector;
+
+    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; rootDirSectors; i++) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">SD_ReadDisk</span>(buffer, g_rootSector + i, <span class="hljs-number">1</span>) != <span class="hljs-number">0</span>) {
+            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;TXT: root err\r\n&quot;</span>);
+            <span class="hljs-keyword">continue</span>;
+        }
+
+        <span class="hljs-keyword">for</span> (j = <span class="hljs-number">0</span>; j &lt; <span class="hljs-number">16</span>; j++) {
+            <span class="hljs-type">uint8_t</span>* entry = &amp;buffer[j * <span class="hljs-number">32</span>];
+
+            <span class="hljs-keyword">if</span> (entry[<span class="hljs-number">0</span>] == <span class="hljs-number">0x00</span>) {
+                <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Total: %d files\r\n&quot;</span>, fileCount);
+                <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+            }
+            <span class="hljs-keyword">if</span> (entry[<span class="hljs-number">0</span>] == <span class="hljs-number">0xE5</span>) <span class="hljs-keyword">continue</span>;
+            <span class="hljs-keyword">if</span> (entry[<span class="hljs-number">11</span>] == <span class="hljs-number">0x0F</span>) <span class="hljs-keyword">continue</span>;
+            <span class="hljs-keyword">if</span> (entry[<span class="hljs-number">11</span>] &amp; <span class="hljs-number">0x08</span>) <span class="hljs-keyword">continue</span>;
+
+            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;  &quot;</span>);
+            <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> k = <span class="hljs-number">0</span>; k &lt; <span class="hljs-number">8</span>; k++) {
+                <span class="hljs-keyword">if</span> (entry[k] &gt;= <span class="hljs-number">32</span> &amp;&amp; entry[k] &lt;= <span class="hljs-number">126</span>) <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%c&quot;</span>, entry[k]);
+            }
+            <span class="hljs-keyword">if</span> (entry[<span class="hljs-number">8</span>] != <span class="hljs-string">&#x27; &#x27;</span>) {
+                <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;.&quot;</span>);
+                <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> k = <span class="hljs-number">8</span>; k &lt; <span class="hljs-number">11</span>; k++) {
+                    <span class="hljs-keyword">if</span> (entry[k] &gt;= <span class="hljs-number">32</span> &amp;&amp; entry[k] &lt;= <span class="hljs-number">126</span>) <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%c&quot;</span>, entry[k]);
+                }
+            }
+
+            <span class="hljs-type">uint32_t</span> size = entry[<span class="hljs-number">28</span>] | (entry[<span class="hljs-number">29</span>] &lt;&lt; <span class="hljs-number">8</span>) | (entry[<span class="hljs-number">30</span>] &lt;&lt; <span class="hljs-number">16</span>) | (entry[<span class="hljs-number">31</span>] &lt;&lt; <span class="hljs-number">24</span>);
+            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot; - %lu bytes\r\n&quot;</span>, size);
+
+            fileCount++;
+        }
+    }
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Total: %d files\r\n&quot;</span>, fileCount);
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<p>需要源代码请私信，可以打包整个工程。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/stm32f103r6proteus9-0freertos实现双任务流水灯.html">
+      <span>上一篇</span>
+      <strong>STM32F103R6PROTEUS9.0FREERTOS实现双任务流水灯</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/qt6写一个诗词鉴赏朗诵阅读程序智谱清言ai赏析接口.html">
+      <span>下一篇</span>
+      <strong>QT6写一个诗词鉴赏朗诵阅读程序智谱清言AI赏析接口</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/stm32f103zet6sdiofatfs读写sd卡例程读写挂载错误排除.html">STM32F103ZET6SDIOFATFS读写SD卡例程读写挂载错误排除</a></h3>
+        <p class="post-excerpt">一、首先我们要对串口进行重定向（在没有屏幕或者其他提示的情况下方便调试错误），注意在flash config里面勾选microlib。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.552Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/stm32f103zet6ili9341做一个圆形钟表时钟显示精英开发板v2.html">STM32F103ZET6ILI9341做一个圆形钟表时钟显示精英开发板V2</a></h3>
+        <p class="post-excerpt">摘要：本文深入探究了利用 STM32 微控制器驱动 ILI9341 显示屏绘制时钟的技术方案。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.524Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/stm32f103r6proteus9-0freertos实现双任务流水灯.html">STM32F103R6PROTEUS9.0FREERTOS实现双任务流水灯</a></h3>
+        <p class="post-excerpt">本文展示了一个基于STM32F1和FreeRTOS的双LED控制程序。主要内容包括：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.470Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>lvgl智能手表心跳脉搏波动显示数字动态图像 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/嵌入式与硬件.html">嵌入式与硬件</a>
+        </nav>
+        <h1 class="post-title">lvgl智能手表心跳脉搏波动显示数字动态图像</h1>
+        <p class="post-deck">本文实现了一个基于LVGL的智能手表心率监测界面，主要功能包括：1) 动态显示心率数值(65-95随机变化)；2) 双色波纹扩散动画模拟心跳；3) 使用正弦波组合算法生成逼真的心电图波形；4) 可缩放跳动的3D心形图标；5) 圆形表盘UI设计。代码通过定时器驱动动画效果，包括波纹透明度渐变、心电图滚动显示和心形缩放效果。界面采用深灰背景配红白元素，包含心率数值显示区、心电图波形区和动态心形图标，模…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.365Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>23 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-12.html">嵌入式</a>
+          
+            <a class="tag-chip" href="../tags/tag-13.html">物联网</a>
+          
+            <a class="tag-chip" href="../tags/tag-25.html">LVGL</a>
+          
+            <a class="tag-chip" href="../tags/tag-14.html">图像处理</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文实现了一个基于LVGL的智能手表心率监测界面，主要功能包括：1) 动态显示心率数值(65-95随机变化)；2) 双色波纹扩散动画模拟心跳；3) 使用正弦波组合算法生成逼真的心电图波形；4) 可缩放跳动的3D心形图标；5) 圆形表盘UI设计。代码通过定时器驱动动画效果，包括波纹透明度渐变、心电图滚动显示和心形缩放效果。界面采用深灰背景配红白元素，包含心率数值显示区、心电图波形区和动态心形图标，模拟了智能手表的心率监测功能。</p>
+<p><img src="../uploads/csdn/lvgl%E6%99%BA%E8%83%BD%E6%89%8B%E8%A1%A8%E5%BF%83%E8%B7%B3%E8%84%89%E6%90%8F%E6%B3%A2%E5%8A%A8%E6%98%BE%E7%A4%BA%E6%95%B0%E5%AD%97%E5%8A%A8%E6%80%81%E5%9B%BE%E5%83%8F/img-01.gif" alt=""></p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;lvgl/lvgl.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;lvgl/demos/lv_demos.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;lvgl/src/drivers/windows/lv_windows_display.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdlib.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;time.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;math.h&gt;</span></span>
+
+<span class="hljs-comment">/* 定义手表尺寸和颜色 */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> WATCH_SIZE 240</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> WATCH_BG_COLOR lv_color_hex(0x121212)    <span class="hljs-comment">// 手表背景色（深灰）</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> WAVE_COLOR1 lv_color_hex(0xFF5252)       <span class="hljs-comment">// 波纹颜色1（红色）</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> WAVE_COLOR2 lv_color_hex(0xFF8A80)       <span class="hljs-comment">// 波纹颜色2（浅红）</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> TEXT_COLOR lv_color_hex(0xFFFFFF)        <span class="hljs-comment">// 文字颜色（白色）</span></span>
+
+<span class="hljs-comment">/* 全局变量 */</span>
+<span class="hljs-type">static</span> <span class="hljs-type">lv_obj_t</span> *watch_bg;          <span class="hljs-comment">// 手表背景</span>
+<span class="hljs-type">static</span> <span class="hljs-type">lv_obj_t</span> *wave1, *wave2;     <span class="hljs-comment">// 两层波纹</span>
+<span class="hljs-type">static</span> <span class="hljs-type">lv_obj_t</span> *hr_label;          <span class="hljs-comment">// 心率数字标签</span>
+<span class="hljs-type">static</span> <span class="hljs-type">lv_obj_t</span> *ecg_chart;         <span class="hljs-comment">// 心电图线条</span>
+<span class="hljs-type">static</span> <span class="hljs-type">lv_point_precise_t</span> ecg_points[<span class="hljs-number">40</span>];   <span class="hljs-comment">// 心电图点数组</span>
+<span class="hljs-type">static</span> <span class="hljs-type">int</span> current_hr = <span class="hljs-number">78</span>;         <span class="hljs-comment">// 当前心率值</span>
+<span class="hljs-type">static</span> <span class="hljs-type">lv_obj_t</span> *heart_canvas;      <span class="hljs-comment">// 心形画布</span>
+<span class="hljs-type">static</span> <span class="hljs-type">int</span> heart_beat_scale = <span class="hljs-number">100</span>;  <span class="hljs-comment">// 心跳缩放比例</span>
+<span class="hljs-type">static</span> <span class="hljs-type">int</span> heart_beat_dir = <span class="hljs-number">2</span>;      <span class="hljs-comment">// 心跳缩放方向</span>
+
+<span class="hljs-comment">/* 生成柔和的心电图波形数据 - 使用正弦波组合 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">int</span> <span class="hljs-title">generate_ecg_value</span><span class="hljs-params">(<span class="hljs-type">int</span> index)</span>
+</span>{
+    <span class="hljs-type">double</span> t = (index % <span class="hljs-number">60</span>) / <span class="hljs-number">60.0</span> * <span class="hljs-number">2</span> * <span class="hljs-number">3.14159265</span>;  <span class="hljs-comment">// 归一化到0-2π</span>
+    <span class="hljs-type">double</span> value = <span class="hljs-number">0</span>;
+
+    <span class="hljs-comment">/* 基线 */</span>
+    value += <span class="hljs-number">20</span>;
+
+    <span class="hljs-comment">/* P波 - 小正弦波 (柔和的心跳前波) */</span>
+    value += <span class="hljs-number">8</span> * <span class="hljs-built_in">sin</span>(t * <span class="hljs-number">1.0</span>) * <span class="hljs-built_in">exp</span>(-<span class="hljs-built_in">pow</span>((t - <span class="hljs-number">0.8</span>) * <span class="hljs-number">3</span>, <span class="hljs-number">2</span>));
+
+    <span class="hljs-comment">/* QRS波群 - 主心跳 (使用多个正弦波组合) */</span>
+    <span class="hljs-comment">/* Q波 - 小下陷 */</span>
+    value -= <span class="hljs-number">5</span> * <span class="hljs-built_in">exp</span>(-<span class="hljs-built_in">pow</span>((t - <span class="hljs-number">2.5</span>) * <span class="hljs-number">8</span>, <span class="hljs-number">2</span>));
+    <span class="hljs-comment">/* R波 - 高峰 */</span>
+    value += <span class="hljs-number">35</span> * <span class="hljs-built_in">exp</span>(-<span class="hljs-built_in">pow</span>((t - <span class="hljs-number">2.8</span>) * <span class="hljs-number">5</span>, <span class="hljs-number">2</span>));
+    <span class="hljs-comment">/* S波 - 下陷 */</span>
+    value -= <span class="hljs-number">15</span> * <span class="hljs-built_in">exp</span>(-<span class="hljs-built_in">pow</span>((t - <span class="hljs-number">3.1</span>) * <span class="hljs-number">6</span>, <span class="hljs-number">2</span>));
+
+    <span class="hljs-comment">/* T波 - 大正弦波 (心跳后波) */</span>
+    value += <span class="hljs-number">12</span> * <span class="hljs-built_in">sin</span>(t * <span class="hljs-number">0.8</span> + <span class="hljs-number">1.0</span>) * <span class="hljs-built_in">exp</span>(-<span class="hljs-built_in">pow</span>((t - <span class="hljs-number">4.5</span>) * <span class="hljs-number">2</span>, <span class="hljs-number">2</span>));
+
+    <span class="hljs-comment">/* 添加微小噪声使波形更自然 */</span>
+    value += (<span class="hljs-built_in">rand</span>() % <span class="hljs-number">3</span>) - <span class="hljs-number">1</span>;
+
+    <span class="hljs-keyword">return</span> (<span class="hljs-type">int</span>)value;
+}
+
+<span class="hljs-comment">/* 绘制心形到画布 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">draw_heart_shape</span><span class="hljs-params">(<span class="hljs-type">lv_obj_t</span> *canvas, <span class="hljs-type">int</span> size, <span class="hljs-type">lv_color_t</span> color)</span>
+</span>{
+    <span class="hljs-type">lv_draw_rect_dsc_t</span> rect_dsc;
+    <span class="hljs-built_in">lv_draw_rect_dsc_init</span>(&amp;rect_dsc);
+    rect_dsc.bg_color = color;
+    rect_dsc.bg_opa = LV_OPA_COVER;
+    rect_dsc.radius = LV_RADIUS_CIRCLE;
+
+    <span class="hljs-comment">/* 清除画布 */</span>
+    <span class="hljs-built_in">lv_canvas_fill_bg</span>(canvas, <span class="hljs-built_in">lv_color_hex</span>(<span class="hljs-number">0x000000</span>), LV_OPA_TRANSP);
+
+    <span class="hljs-comment">/* 初始化绘制层 */</span>
+    <span class="hljs-type">lv_layer_t</span> layer;
+    <span class="hljs-built_in">lv_canvas_init_layer</span>(canvas, &amp;layer);
+
+    <span class="hljs-comment">/* 使用数学公式绘制心形 */</span>
+    <span class="hljs-comment">/* 心形参数方程: x = 16sin³(t), y = 13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t) */</span>
+    <span class="hljs-type">int</span> center_x = size / <span class="hljs-number">2</span>;
+    <span class="hljs-type">int</span> center_y = size / <span class="hljs-number">2</span> + <span class="hljs-number">2</span>;
+    <span class="hljs-type">float</span> scale = size / <span class="hljs-number">36.0f</span>;
+
+    <span class="hljs-keyword">for</span>(<span class="hljs-type">float</span> t = <span class="hljs-number">0</span>; t &lt; <span class="hljs-number">2</span> * <span class="hljs-number">3.14159265</span>; t += <span class="hljs-number">0.05</span>) {
+        <span class="hljs-type">float</span> x = <span class="hljs-number">16</span> * <span class="hljs-built_in">pow</span>(<span class="hljs-built_in">sin</span>(t), <span class="hljs-number">3</span>);
+        <span class="hljs-type">float</span> y = <span class="hljs-number">13</span> * <span class="hljs-built_in">cos</span>(t) - <span class="hljs-number">5</span> * <span class="hljs-built_in">cos</span>(<span class="hljs-number">2</span>*t) - <span class="hljs-number">2</span> * <span class="hljs-built_in">cos</span>(<span class="hljs-number">3</span>*t) - <span class="hljs-built_in">cos</span>(<span class="hljs-number">4</span>*t);
+
+        <span class="hljs-type">int</span> px = center_x + (<span class="hljs-type">int</span>)(x * scale);
+        <span class="hljs-type">int</span> py = center_y - (<span class="hljs-type">int</span>)(y * scale);  <span class="hljs-comment">/* 翻转Y轴 */</span>
+
+        <span class="hljs-comment">/* 绘制小圆点形成心形 */</span>
+        <span class="hljs-type">lv_area_t</span> area;
+        area.x1 = px - <span class="hljs-number">1</span>;
+        area.y1 = py - <span class="hljs-number">1</span>;
+        area.x2 = px + <span class="hljs-number">1</span>;
+        area.y2 = py + <span class="hljs-number">1</span>;
+        <span class="hljs-built_in">lv_draw_rect</span>(&amp;layer, &amp;rect_dsc, &amp;area);
+    }
+
+    <span class="hljs-comment">/* 完成绘制 */</span>
+    <span class="hljs-built_in">lv_canvas_finish_layer</span>(canvas, &amp;layer);
+}
+
+<span class="hljs-comment">/* 心跳波纹动画定时器回调 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">wave_anim_timer</span><span class="hljs-params">(<span class="hljs-type">lv_timer_t</span> *timer)</span>
+</span>{
+    <span class="hljs-type">static</span> <span class="hljs-type">int</span> angle = <span class="hljs-number">0</span>;
+    <span class="hljs-type">static</span> <span class="hljs-type">int</span> alpha1 = <span class="hljs-number">255</span>, alpha2 = <span class="hljs-number">180</span>;
+    <span class="hljs-type">static</span> <span class="hljs-type">int</span> dir1 = <span class="hljs-number">-5</span>, dir2 = <span class="hljs-number">-3</span>;
+    <span class="hljs-type">static</span> <span class="hljs-type">int</span> ecg_offset = <span class="hljs-number">0</span>;
+
+    <span class="hljs-comment">/* 更新波纹角度（模拟扩散） */</span>
+    angle += <span class="hljs-number">2</span>;
+    <span class="hljs-keyword">if</span>(angle &gt;= <span class="hljs-number">360</span>) angle = <span class="hljs-number">0</span>;
+
+    <span class="hljs-comment">/* 设置波纹角度 */</span>
+    <span class="hljs-built_in">lv_arc_set_angles</span>(wave1, angle, angle + <span class="hljs-number">180</span>);
+    <span class="hljs-built_in">lv_arc_set_angles</span>(wave2, angle + <span class="hljs-number">90</span>, angle + <span class="hljs-number">270</span>);
+
+    <span class="hljs-comment">/* 更新波纹透明度（模拟淡入淡出） */</span>
+    alpha1 += dir1;
+    alpha2 += dir2;
+
+    <span class="hljs-keyword">if</span>(alpha1 &lt;= <span class="hljs-number">50</span>) dir1 = <span class="hljs-number">5</span>;
+    <span class="hljs-keyword">if</span>(alpha1 &gt;= <span class="hljs-number">255</span>) dir1 = <span class="hljs-number">-5</span>;
+    <span class="hljs-keyword">if</span>(alpha2 &lt;= <span class="hljs-number">50</span>) dir2 = <span class="hljs-number">3</span>;
+    <span class="hljs-keyword">if</span>(alpha2 &gt;= <span class="hljs-number">200</span>) dir2 = <span class="hljs-number">-3</span>;
+
+    <span class="hljs-comment">/* 设置透明度 */</span>
+    <span class="hljs-built_in">lv_obj_set_style_opa</span>(wave1, alpha1, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_opa</span>(wave2, alpha2, LV_PART_MAIN);
+
+    <span class="hljs-comment">/* 更新心电图波形 */</span>
+    ecg_offset++;
+    <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">40</span>; i++) {
+        <span class="hljs-type">int</span> value = <span class="hljs-built_in">generate_ecg_value</span>(i + ecg_offset);
+        <span class="hljs-comment">/* 将波形倒置（因为屏幕Y轴向下）并居中 */</span>
+        ecg_points[i].y = <span class="hljs-number">50</span> - value;
+    }
+    <span class="hljs-built_in">lv_line_set_points</span>(ecg_chart, (<span class="hljs-type">const</span> <span class="hljs-type">lv_point_t</span> *)ecg_points, <span class="hljs-number">40</span>);
+
+    <span class="hljs-comment">/* 心跳动画 - 缩放效果 */</span>
+    heart_beat_scale += heart_beat_dir;
+    <span class="hljs-keyword">if</span>(heart_beat_scale &gt;= <span class="hljs-number">110</span>) heart_beat_dir = <span class="hljs-number">-2</span>;
+    <span class="hljs-keyword">if</span>(heart_beat_scale &lt;= <span class="hljs-number">100</span>) heart_beat_dir = <span class="hljs-number">2</span>;
+
+    <span class="hljs-comment">/* 应用缩放 */</span>
+    <span class="hljs-type">int</span> new_size = (<span class="hljs-number">30</span> * heart_beat_scale) / <span class="hljs-number">100</span>;
+    <span class="hljs-built_in">lv_obj_set_size</span>(heart_canvas, new_size, new_size);
+    <span class="hljs-built_in">lv_obj_center</span>(heart_canvas);
+    <span class="hljs-built_in">lv_obj_align</span>(heart_canvas, LV_ALIGN_CENTER, <span class="hljs-number">0</span>, <span class="hljs-number">75</span>);
+
+    <span class="hljs-comment">/* 随机更新心率值（模拟真实心率变化） */</span>
+    <span class="hljs-type">static</span> <span class="hljs-type">int</span> cnt = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">if</span>(++cnt &gt;= <span class="hljs-number">20</span>) {
+        cnt = <span class="hljs-number">0</span>;
+        current_hr = <span class="hljs-number">65</span> + <span class="hljs-built_in">rand</span>() % <span class="hljs-number">30</span>;  <span class="hljs-comment">// 心率范围 65-95</span>
+        <span class="hljs-type">char</span> buf[<span class="hljs-number">8</span>];
+        <span class="hljs-built_in">snprintf</span>(buf, <span class="hljs-built_in">sizeof</span>(buf), <span class="hljs-string">&quot;%d&quot;</span>, current_hr);
+        <span class="hljs-built_in">lv_label_set_text</span>(hr_label, buf);
+    }
+}
+
+<span class="hljs-comment">/* 创建智能手表心率界面 */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">create_watch_hr_ui</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+    <span class="hljs-comment">/* 1. 创建手表背景（圆形容器） */</span>
+    watch_bg = <span class="hljs-built_in">lv_obj_create</span>(<span class="hljs-built_in">lv_scr_act</span>());
+    <span class="hljs-built_in">lv_obj_set_size</span>(watch_bg, WATCH_SIZE, WATCH_SIZE);
+    <span class="hljs-built_in">lv_obj_center</span>(watch_bg);
+    <span class="hljs-built_in">lv_obj_set_style_radius</span>(watch_bg, LV_RADIUS_CIRCLE, LV_PART_MAIN);  <span class="hljs-comment">// 设置为圆形</span>
+    <span class="hljs-built_in">lv_obj_set_style_bg_color</span>(watch_bg, WATCH_BG_COLOR, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_border_width</span>(watch_bg, <span class="hljs-number">2</span>, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_border_color</span>(watch_bg, TEXT_COLOR, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_border_opa</span>(watch_bg, <span class="hljs-number">50</span>, LV_PART_MAIN);
+
+    <span class="hljs-comment">/* 2. 创建第一层心跳波纹（使用arc模拟） */</span>
+    wave1 = <span class="hljs-built_in">lv_arc_create</span>(watch_bg);
+    <span class="hljs-built_in">lv_obj_set_size</span>(wave1, WATCH_SIZE * <span class="hljs-number">0.7</span>, WATCH_SIZE * <span class="hljs-number">0.7</span>);
+    <span class="hljs-built_in">lv_obj_center</span>(wave1);
+    <span class="hljs-built_in">lv_arc_set_angles</span>(wave1, <span class="hljs-number">0</span>, <span class="hljs-number">180</span>);
+    <span class="hljs-built_in">lv_arc_set_bg_angles</span>(wave1, <span class="hljs-number">0</span>, <span class="hljs-number">360</span>);
+    <span class="hljs-built_in">lv_obj_set_style_arc_color</span>(wave1, WAVE_COLOR1, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_arc_width</span>(wave1, <span class="hljs-number">8</span>, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_arc_opa</span>(wave1, <span class="hljs-number">255</span>, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_arc_set_mode</span>(wave1, LV_ARC_MODE_NORMAL);
+    <span class="hljs-built_in">lv_obj_add_flag</span>(wave1, LV_OBJ_FLAG_HIDDEN);  <span class="hljs-comment">// 隐藏背景圆弧</span>
+    <span class="hljs-built_in">lv_obj_clear_flag</span>(wave1, LV_OBJ_FLAG_CLICKABLE);  <span class="hljs-comment">// 禁用点击</span>
+
+    <span class="hljs-comment">/* 3. 创建第二层心跳波纹 */</span>
+    wave2 = <span class="hljs-built_in">lv_arc_create</span>(watch_bg);
+    <span class="hljs-built_in">lv_obj_set_size</span>(wave2, WATCH_SIZE * <span class="hljs-number">0.8</span>, WATCH_SIZE * <span class="hljs-number">0.8</span>);
+    <span class="hljs-built_in">lv_obj_center</span>(wave2);
+    <span class="hljs-built_in">lv_arc_set_angles</span>(wave2, <span class="hljs-number">90</span>, <span class="hljs-number">270</span>);
+    <span class="hljs-built_in">lv_arc_set_bg_angles</span>(wave2, <span class="hljs-number">0</span>, <span class="hljs-number">360</span>);
+    <span class="hljs-built_in">lv_obj_set_style_arc_color</span>(wave2, WAVE_COLOR2, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_arc_width</span>(wave2, <span class="hljs-number">6</span>, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_arc_opa</span>(wave2, <span class="hljs-number">180</span>, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_add_flag</span>(wave2, LV_OBJ_FLAG_HIDDEN);
+    <span class="hljs-built_in">lv_obj_clear_flag</span>(wave2, LV_OBJ_FLAG_CLICKABLE);
+
+    <span class="hljs-comment">/* 4. 创建心率数字显示标签 */</span>
+    hr_label = <span class="hljs-built_in">lv_label_create</span>(watch_bg);
+    <span class="hljs-built_in">lv_label_set_text</span>(hr_label, <span class="hljs-string">&quot;78&quot;</span>);
+    <span class="hljs-built_in">lv_obj_set_style_text_font</span>(hr_label, &amp;lv_font_montserrat_48, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_text_color</span>(hr_label, TEXT_COLOR, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_align</span>(hr_label, LV_ALIGN_CENTER, <span class="hljs-number">0</span>, <span class="hljs-number">-25</span>);
+
+    <span class="hljs-comment">/* 5. 创建心电图波形线条 */</span>
+    ecg_chart = <span class="hljs-built_in">lv_line_create</span>(watch_bg);
+    <span class="hljs-comment">/* 初始化心电图点 */</span>
+    <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">40</span>; i++) {
+        ecg_points[i].x = i * <span class="hljs-number">4</span>;  <span class="hljs-comment">// X轴间距</span>
+        ecg_points[i].y = <span class="hljs-number">50</span>;     <span class="hljs-comment">// 初始Y位置（居中）</span>
+    }
+    <span class="hljs-built_in">lv_line_set_points</span>(ecg_chart, (<span class="hljs-type">const</span> <span class="hljs-type">lv_point_t</span> *)ecg_points, <span class="hljs-number">40</span>);
+    <span class="hljs-built_in">lv_obj_set_style_line_color</span>(ecg_chart, WAVE_COLOR1, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_line_width</span>(ecg_chart, <span class="hljs-number">2</span>, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_size</span>(ecg_chart, <span class="hljs-number">160</span>, <span class="hljs-number">100</span>);
+    <span class="hljs-built_in">lv_obj_align</span>(ecg_chart, LV_ALIGN_CENTER, <span class="hljs-number">0</span>, <span class="hljs-number">35</span>);
+
+    <span class="hljs-comment">/* 6. 创建心形画布 */</span>
+    heart_canvas = <span class="hljs-built_in">lv_canvas_create</span>(watch_bg);
+    <span class="hljs-built_in">lv_obj_set_size</span>(heart_canvas, <span class="hljs-number">32</span>, <span class="hljs-number">32</span>);
+
+    <span class="hljs-comment">/* 分配画布缓冲区 */</span>
+    <span class="hljs-type">static</span> <span class="hljs-type">lv_color_t</span> heart_buf[<span class="hljs-number">32</span> * <span class="hljs-number">32</span>];
+    <span class="hljs-built_in">lv_canvas_set_buffer</span>(heart_canvas, heart_buf, <span class="hljs-number">32</span>, <span class="hljs-number">32</span>, LV_COLOR_FORMAT_NATIVE);
+
+    <span class="hljs-comment">/* 绘制心形 */</span>
+    <span class="hljs-built_in">draw_heart_shape</span>(heart_canvas, <span class="hljs-number">32</span>, WAVE_COLOR1);
+
+    <span class="hljs-comment">/* 设置心形位置 */</span>
+    <span class="hljs-built_in">lv_obj_align</span>(heart_canvas, LV_ALIGN_CENTER, <span class="hljs-number">0</span>, <span class="hljs-number">75</span>);
+
+    <span class="hljs-comment">/* 添加发光效果 */</span>
+    <span class="hljs-built_in">lv_obj_set_style_shadow_width</span>(heart_canvas, <span class="hljs-number">15</span>, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_color</span>(heart_canvas, WAVE_COLOR1, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_opa</span>(heart_canvas, LV_OPA_70, LV_PART_MAIN);
+    <span class="hljs-built_in">lv_obj_set_style_shadow_spread</span>(heart_canvas, <span class="hljs-number">5</span>, LV_PART_MAIN);
+
+    <span class="hljs-comment">/* 6. 创建定时器驱动动画（20ms刷新一次） */</span>
+    <span class="hljs-built_in">srand</span>(<span class="hljs-built_in">time</span>(<span class="hljs-literal">NULL</span>));  <span class="hljs-comment">// 初始化随机数种子</span>
+    <span class="hljs-built_in">lv_timer_create</span>(wave_anim_timer, <span class="hljs-number">20</span>, <span class="hljs-literal">NULL</span>);
+}
+
+<span class="hljs-comment">/* LVGL初始化和主函数适配 */</span>
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+    <span class="hljs-comment">/* 1. LVGL初始化（Code::Blocks环境） */</span>
+    <span class="hljs-built_in">lv_init</span>();
+
+    <span class="hljs-comment">/* 2. 初始化Windows显示驱动（LVGL v9 Windows后端） */</span>
+    <span class="hljs-built_in">lv_windows_create_display</span>(
+        <span class="hljs-string">L&quot;LVGL Watch HR Demo&quot;</span>,  <span class="hljs-comment">// 窗口标题</span>
+        WATCH_SIZE * <span class="hljs-number">2</span>,         <span class="hljs-comment">// 水平分辨率</span>
+        WATCH_SIZE * <span class="hljs-number">2</span>,         <span class="hljs-comment">// 垂直分辨率</span>
+        <span class="hljs-number">100</span>,                    <span class="hljs-comment">// 缩放级别（100%）</span>
+        <span class="hljs-literal">false</span>,                  <span class="hljs-comment">// 不允许DPI覆盖</span>
+        <span class="hljs-literal">true</span>                    <span class="hljs-comment">// 模拟器模式</span>
+    );
+
+    <span class="hljs-comment">/* 3. 创建手表心率UI */</span>
+    <span class="hljs-built_in">create_watch_hr_ui</span>();
+
+    <span class="hljs-comment">/* 4. LVGL主循环 - 需要调用lv_timer_handler来处理定时器和刷新 */</span>
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+        <span class="hljs-built_in">lv_timer_handler</span>();  <span class="hljs-comment">// 处理LVGL定时器（包括动画和屏幕刷新）</span>
+        <span class="hljs-built_in">Sleep</span>(<span class="hljs-number">5</span>);           <span class="hljs-comment">// 延时5ms</span>
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/qt6使用opengl库画两个不同外形的立方体1.html">
+      <span>上一篇</span>
+      <strong>QT6使用OpenGL库画两个不同外形的立方体1</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/lvgl8制作大学生校园课程表课表成绩计时提醒功能界面.html">
+      <span>下一篇</span>
+      <strong>LVGL8制作大学生校园课程表课表成绩计时提醒功能界面</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/windows系统下codeblocks的lvgl智能穿戴手表圆形界面代码.html">windows系统下codeblocks的lvgl智能穿戴手表圆形界面代码</a></h3>
+        <p class="post-excerpt">windows系统下codeblocks的lvgl智能穿戴手表圆形界面代码（需要点需添加联系方式）</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.606Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/模仿微信发送消息界面traecn版qt6.html">模仿微信发送消息界面traecn版QT6</a></h3>
+        <p class="post-excerpt">本文介绍了一个基于Qt框架的微信克隆应用主窗口实现。该应用采用左右布局设计，左侧为聊天列表（包含搜索栏和联系人列表），右侧为聊天窗口堆栈。通过QListWidget管理联系人列表，QStackedWidget实现多聊天窗口切换，并支持点击联系人切换对应聊天界面。代码展示了UI初始化、示例联系人创建和信号槽连接等核心功能实现，为开发类微信应用提供了基础框架参考。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.779Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/手搓一个qt6candroid版本的tcp调试软件.html">手搓一个QT6CANDROID版本的TCP调试软件</a></h3>
+        <p class="post-excerpt">文章摘要： 这是一个基于Qt框架开发的TCP调试工具程序，包含MainWindow类和TCP通信功能。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.723Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

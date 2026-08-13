@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>凸包问题Graham扫描算法MATLAB · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/算法与数据结构.html">算法与数据结构</a>
+        </nav>
+        <h1 class="post-title">凸包问题Graham扫描算法MATLAB</h1>
+        <p class="post-deck">算法要解决的问题</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.498Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>5 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-6.html">数学</a>
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <h4 id="uploads-csdn-凸包问题graham扫描算法matlab-img-01-jpeg" class="prose-heading"><img src="../uploads/csdn/%E5%87%B8%E5%8C%85%E9%97%AE%E9%A2%98graham%E6%89%AB%E6%8F%8F%E7%AE%97%E6%B3%95matlab/img-01.jpeg" alt=""></h4>
+<h4 id="算法要解决的问题" class="prose-heading">算法要解决的问题</h4>
+<p>Graham 扫描算法要解决的问题是在给定一组二维平面上的点集时，找出能够完全包含这些点的最小凸多边形，这个最小凸多边形就是这些点的凸包。在很多实际场景中，我们可能只关注一个点集的最外层边界，而凸包算法就可以帮助我们高效地确定这个边界。</p>
+<p>例如，在计算机图形学里，为了减少碰撞检测的计算量，会用凸包来近似表示一个复杂图形的边界；在地理信息系统中，计算一些地理区域内离散点的凸包，能够快速确定这些区域的大致范围；在机器人路径规划方面，凸包可以用来定义机器人可活动区域的边界。</p>
+<h4 id="凸包算法的定义" class="prose-heading">凸包算法的定义</h4>
+<p>凸包算法是一类用于计算点集凸包的算法。凸包在二维平面上可以直观地理解为：想象在平面上钉了许多钉子，这些钉子代表给定的点集，然后用一根橡皮筋把所有钉子都套住，当橡皮筋收紧后，它所形成的形状就是这些钉子（点集）的凸包。</p>
+<p>从数学定义来讲，对于一个点集 S，其凸包是包含 S 的最小凸集。所谓凸集，是指对于集合内任意两点 A 和 B，连接这两点的线段上的所有点都在该集合内。</p>
+<p>凸包算法的目的就是通过特定的计算步骤，从给定的点集中找出那些构成凸包边界的点，并且按照一定的顺序（通常是顺时针或逆时针）将这些点连接起来，形成一个封闭的凸多边形。常见的凸包算法除了 Graham 扫描算法，还有 Jarvis 步进法、QuickHull 算法等，不同算法在时间复杂度、空间复杂度以及适用场景上各有优劣。</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% 生成随机点</span>
+n = <span class="hljs-number">20</span>; <span class="hljs-comment">% 点的数量</span>
+points = <span class="hljs-built_in">rand</span>(n, <span class="hljs-number">2</span>);
+
+<span class="hljs-comment">% 找到y坐标最小的点作为起始点</span>
+[y_min, idx] = <span class="hljs-built_in">min</span>(points(:, <span class="hljs-number">2</span>));
+p0 = points(idx, :);
+
+<span class="hljs-comment">% 计算其他点相对于p0的极角</span>
+angles = <span class="hljs-built_in">atan2</span>(points(:, <span class="hljs-number">2</span>) - p0(<span class="hljs-number">2</span>), points(:, <span class="hljs-number">1</span>) - p0(<span class="hljs-number">1</span>));
+
+<span class="hljs-comment">% 根据极角对所有点进行排序</span>
+[~, sorted_idx] = <span class="hljs-built_in">sort</span>(angles);
+sorted_points = points(sorted_idx, :);
+
+<span class="hljs-comment">% 初始化栈</span>
+stack = <span class="hljs-built_in">zeros</span>(n, <span class="hljs-number">2</span>);
+stack(<span class="hljs-number">1</span>, :) = p0;
+stack(<span class="hljs-number">2</span>, :) = sorted_points(<span class="hljs-number">1</span>, :);
+top = <span class="hljs-number">2</span>;
+
+<span class="hljs-comment">% 进行Graham扫描</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">2</span>:n
+    <span class="hljs-keyword">while</span> top &gt; <span class="hljs-number">1</span> &amp;&amp; orientation(stack(top - <span class="hljs-number">1</span>, :), stack(top, :), sorted_points(<span class="hljs-built_in">i</span>, :)) &lt;= <span class="hljs-number">0</span>
+        top = top - <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">end</span>
+    top = top + <span class="hljs-number">1</span>;
+    stack(top, :) = sorted_points(<span class="hljs-built_in">i</span>, :);
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 截取栈中有效的部分</span>
+hull = stack(<span class="hljs-number">1</span>:top, :);
+
+<span class="hljs-comment">% 可视化</span>
+<span class="hljs-built_in">figure</span>;
+<span class="hljs-built_in">hold</span> on;
+<span class="hljs-built_in">plot</span>(points(:, <span class="hljs-number">1</span>), points(:, <span class="hljs-number">2</span>), <span class="hljs-string">&#x27;bo&#x27;</span>, <span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>, <span class="hljs-string">&#x27;b&#x27;</span>); <span class="hljs-comment">% 绘制所有点</span>
+<span class="hljs-built_in">plot</span>(hull(:, <span class="hljs-number">1</span>), hull(:, <span class="hljs-number">2</span>), <span class="hljs-string">&#x27;r-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>); <span class="hljs-comment">% 绘制凸包</span>
+<span class="hljs-built_in">plot</span>([hull(top, <span class="hljs-number">1</span>), hull(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>)], [hull(top, <span class="hljs-number">2</span>), hull(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)], <span class="hljs-string">&#x27;r-&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>); <span class="hljs-comment">% 闭合凸包</span>
+title(<span class="hljs-string">&#x27;Graham扫描算法生成的凸包&#x27;</span>);
+xlabel(<span class="hljs-string">&#x27;X&#x27;</span>);
+ylabel(<span class="hljs-string">&#x27;Y&#x27;</span>);
+axis equal;
+<span class="hljs-built_in">hold</span> off;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">orient</span> = <span class="hljs-title">orientation</span><span class="hljs-params">(p, q, r)</span></span>
+    val = (q(<span class="hljs-number">2</span>) - p(<span class="hljs-number">2</span>)) * (r(<span class="hljs-number">1</span>) - q(<span class="hljs-number">1</span>)) - (q(<span class="hljs-number">1</span>) - p(<span class="hljs-number">1</span>)) * (r(<span class="hljs-number">2</span>) - q(<span class="hljs-number">2</span>));
+    <span class="hljs-keyword">if</span> val == <span class="hljs-number">0</span>
+        orient = <span class="hljs-number">0</span>; <span class="hljs-comment">% 共线</span>
+    <span class="hljs-keyword">elseif</span> val &gt; <span class="hljs-number">0</span>
+        orient = <span class="hljs-number">1</span>; <span class="hljs-comment">% 顺时针</span>
+    <span class="hljs-keyword">else</span>
+        orient = <span class="hljs-number">2</span>; <span class="hljs-comment">% 逆时针</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#uploads-csdn-凸包问题graham扫描算法matlab-img-01-jpeg">![](/uploads/csdn/凸包问题graham扫描算法matlab/img-01.jpeg)</a>
+          
+            <a class="toc-level-4" href="#算法要解决的问题">算法要解决的问题</a>
+          
+            <a class="toc-level-4" href="#凸包算法的定义">凸包算法的定义</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/基于levy飞行粒子群优化算法的微电网优化调度.html">
+      <span>上一篇</span>
+      <strong>基于Levy飞行粒子群优化算法的微电网优化调度</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/什么是哈希表详解c哈希表.html">
+      <span>下一篇</span>
+      <strong>什么是哈希表详解c哈希表</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/物理竞赛书籍按层级堆叠求质心的问题附带matlab仿真代码和数学求导过程.html">物理竞赛书籍按层级堆叠求质心的问题附带MATLAB仿真代码和数学求导过程</a></h3>
+        <p class="post-excerpt">三、MATLAB 仿真：可视化堆叠与质心计算</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.661Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/利用代码程序计算数学函数的泰勒展开式matlab推导函数泰勒展开式python推导函数泰勒展开式.html">利用代码程序计算数学函数的泰勒展开式MATLAB推导函数泰勒展开式Python推导函数泰勒展开式</a></h3>
+        <p class="post-excerpt">以下代码均经过博主验证</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.916Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Python录制高清视频录制软件电脑windows版 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">Python录制高清视频录制软件电脑windows版</h1>
+        <p class="post-deck">本文介绍了一个基于Python的高清视频录制工具，使用OpenCV、Tkinter和PyAudio等库实现。该工具提供以下功能：1) 多摄像头选择和实时预览；2) 可调节分辨率(640x480/1280x720/1920x1080)和帧率(15/24/30/60fps)；3) 支持音频录制；4) 可选GPU加速预览；5) 直观的用户界面包含摄像头预览、参数设置和录制控制。工具采用多线程处理视频采集…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.300Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>58 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文介绍了一个基于Python的高清视频录制工具，使用OpenCV、Tkinter和PyAudio等库实现。该工具提供以下功能：1) 多摄像头选择和实时预览；2) 可调节分辨率(640x480/1280x720/1920x1080)和帧率(15/24/30/60fps)；3) 支持音频录制；4) 可选GPU加速预览；5) 直观的用户界面包含摄像头预览、参数设置和录制控制。工具采用多线程处理视频采集、音频录制和界面更新，确保流畅操作体验。系统会自动检测可用设备和GPU支持，并提供错误处理和资源清理机制。</p>
+<p><img src="../uploads/csdn/python%E5%BD%95%E5%88%B6%E9%AB%98%E6%B8%85%E8%A7%86%E9%A2%91%E5%BD%95%E5%88%B6%E8%BD%AF%E4%BB%B6%E7%94%B5%E8%84%91windows%E7%89%88/img-01.png" alt=""></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> cv2
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> tkinter <span class="hljs-keyword">as</span> tk
+<span class="hljs-keyword">from</span> tkinter <span class="hljs-keyword">import</span> ttk
+<span class="hljs-keyword">from</span> tkinter <span class="hljs-keyword">import</span> filedialog
+<span class="hljs-keyword">from</span> PIL <span class="hljs-keyword">import</span> Image, ImageTk
+<span class="hljs-keyword">import</span> threading
+<span class="hljs-keyword">import</span> time
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">import</span> wave
+<span class="hljs-keyword">import</span> pyaudio
+<span class="hljs-keyword">import</span> queue
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">VideoRecorder</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, root</span>):
+        <span class="hljs-variable language_">self</span>.root = root
+        <span class="hljs-variable language_">self</span>.root.title(<span class="hljs-string">&quot;高清视频录制工具&quot;</span>)
+        <span class="hljs-variable language_">self</span>.root.geometry(<span class="hljs-string">&quot;1000x700&quot;</span>)
+        <span class="hljs-variable language_">self</span>.root.resizable(<span class="hljs-literal">True</span>, <span class="hljs-literal">True</span>)
+
+        <span class="hljs-comment"># 设置主题</span>
+        <span class="hljs-variable language_">self</span>.style = ttk.Style()
+        <span class="hljs-variable language_">self</span>.style.theme_use(<span class="hljs-string">&#x27;clam&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.style.configure(<span class="hljs-string">&#x27;TButton&#x27;</span>, font=(<span class="hljs-string">&#x27;Arial&#x27;</span>, <span class="hljs-number">12</span>), padding=<span class="hljs-number">10</span>)
+        <span class="hljs-variable language_">self</span>.style.configure(<span class="hljs-string">&#x27;TLabel&#x27;</span>, font=(<span class="hljs-string">&#x27;Arial&#x27;</span>, <span class="hljs-number">12</span>))
+
+        <span class="hljs-comment"># 变量</span>
+        <span class="hljs-variable language_">self</span>.cap = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.out = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.preview_cap = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.recording = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.camera_index = <span class="hljs-number">0</span>
+        <span class="hljs-variable language_">self</span>.frame_rate = <span class="hljs-number">30</span>
+        <span class="hljs-variable language_">self</span>.resolution = (<span class="hljs-number">1280</span>, <span class="hljs-number">720</span>)
+        <span class="hljs-variable language_">self</span>.codec = cv2.VideoWriter_fourcc(*<span class="hljs-string">&#x27;XVID&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.output_file = <span class="hljs-string">&quot;output_video.avi&quot;</span>
+        <span class="hljs-variable language_">self</span>.thread = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.current_preview_camera = -<span class="hljs-number">1</span>
+        <span class="hljs-variable language_">self</span>.current_preview_resolution = <span class="hljs-literal">None</span>
+
+        <span class="hljs-comment"># 音频相关变量</span>
+        <span class="hljs-variable language_">self</span>.audio = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.audio_stream = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.audio_thread = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.audio_frames = []
+        <span class="hljs-variable language_">self</span>.audio_device_index = -<span class="hljs-number">1</span>
+        <span class="hljs-variable language_">self</span>.audio_channels = <span class="hljs-number">2</span>
+        <span class="hljs-variable language_">self</span>.audio_sample_rate = <span class="hljs-number">44100</span>
+        <span class="hljs-variable language_">self</span>.audio_sample_width = <span class="hljs-number">2</span>
+
+        <span class="hljs-comment"># 预览相关变量</span>
+        <span class="hljs-variable language_">self</span>.preview_thread = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.preview_running = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.frame_queue = queue.Queue(maxsize=<span class="hljs-number">5</span>)  <span class="hljs-comment"># 增加队列大小</span>
+        <span class="hljs-variable language_">self</span>.use_gpu = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.gpu_available = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.preview_lock = threading.Lock()
+        <span class="hljs-variable language_">self</span>.current_frame = <span class="hljs-literal">None</span>  <span class="hljs-comment"># 存储当前帧用于预览</span>
+
+        <span class="hljs-comment"># 创建主框架</span>
+        <span class="hljs-variable language_">self</span>.main_frame = ttk.Frame(root, padding=<span class="hljs-number">20</span>)
+        <span class="hljs-variable language_">self</span>.main_frame.pack(fill=tk.BOTH, expand=<span class="hljs-literal">True</span>)
+
+        <span class="hljs-comment"># 左侧：视频显示区域</span>
+        <span class="hljs-variable language_">self</span>.video_frame = ttk.LabelFrame(<span class="hljs-variable language_">self</span>.main_frame, text=<span class="hljs-string">&quot;摄像头预览&quot;</span>, padding=<span class="hljs-number">10</span>)
+        <span class="hljs-variable language_">self</span>.video_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=<span class="hljs-literal">True</span>, padx=<span class="hljs-number">10</span>, pady=<span class="hljs-number">10</span>)
+
+        <span class="hljs-variable language_">self</span>.canvas = tk.Canvas(<span class="hljs-variable language_">self</span>.video_frame, bg=<span class="hljs-string">&quot;#2c3e50&quot;</span>)
+        <span class="hljs-variable language_">self</span>.canvas.pack(fill=tk.BOTH, expand=<span class="hljs-literal">True</span>)
+
+        <span class="hljs-comment"># 右侧：控制面板</span>
+        <span class="hljs-variable language_">self</span>.control_frame = ttk.LabelFrame(<span class="hljs-variable language_">self</span>.main_frame, text=<span class="hljs-string">&quot;控制面板&quot;</span>, padding=<span class="hljs-number">10</span>)
+        <span class="hljs-variable language_">self</span>.control_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=<span class="hljs-number">10</span>, pady=<span class="hljs-number">10</span>)
+
+        <span class="hljs-comment"># 摄像头选择</span>
+        ttk.Label(<span class="hljs-variable language_">self</span>.control_frame, text=<span class="hljs-string">&quot;摄像头选择：&quot;</span>).pack(pady=<span class="hljs-number">5</span>, anchor=tk.W)
+        <span class="hljs-variable language_">self</span>.camera_var = tk.StringVar()
+        <span class="hljs-variable language_">self</span>.camera_combobox = ttk.Combobox(<span class="hljs-variable language_">self</span>.control_frame, textvariable=<span class="hljs-variable language_">self</span>.camera_var, width=<span class="hljs-number">20</span>)
+        <span class="hljs-variable language_">self</span>.camera_combobox.pack(pady=<span class="hljs-number">5</span>, fill=tk.X)
+        <span class="hljs-variable language_">self</span>.camera_combobox.bind(<span class="hljs-string">&quot;&lt;&lt;ComboboxSelected&gt;&gt;&quot;</span>, <span class="hljs-variable language_">self</span>.on_camera_change)
+
+        <span class="hljs-comment"># 音频设备选择</span>
+        ttk.Label(<span class="hljs-variable language_">self</span>.control_frame, text=<span class="hljs-string">&quot;录音设备：&quot;</span>).pack(pady=<span class="hljs-number">5</span>, anchor=tk.W)
+        <span class="hljs-variable language_">self</span>.audio_var = tk.StringVar()
+        <span class="hljs-variable language_">self</span>.audio_combobox = ttk.Combobox(<span class="hljs-variable language_">self</span>.control_frame, textvariable=<span class="hljs-variable language_">self</span>.audio_var, width=<span class="hljs-number">20</span>)
+        <span class="hljs-variable language_">self</span>.audio_combobox.pack(pady=<span class="hljs-number">5</span>, fill=tk.X)
+
+        <span class="hljs-comment"># GPU加速选项</span>
+        <span class="hljs-variable language_">self</span>.gpu_var = tk.BooleanVar(value=<span class="hljs-literal">False</span>)
+        <span class="hljs-variable language_">self</span>.gpu_checkbox = ttk.Checkbutton(<span class="hljs-variable language_">self</span>.control_frame, text=<span class="hljs-string">&quot;使用GPU加速预览&quot;</span>, variable=<span class="hljs-variable language_">self</span>.gpu_var, command=<span class="hljs-variable language_">self</span>.toggle_gpu)
+        <span class="hljs-variable language_">self</span>.gpu_checkbox.pack(pady=<span class="hljs-number">5</span>, anchor=tk.W)
+
+        <span class="hljs-comment"># 分辨率选择</span>
+        ttk.Label(<span class="hljs-variable language_">self</span>.control_frame, text=<span class="hljs-string">&quot;分辨率：&quot;</span>).pack(pady=<span class="hljs-number">5</span>, anchor=tk.W)
+        <span class="hljs-variable language_">self</span>.resolution_var = tk.StringVar(value=<span class="hljs-string">&quot;1280x720&quot;</span>)
+        resolution_options = [<span class="hljs-string">&quot;640x480&quot;</span>, <span class="hljs-string">&quot;1280x720&quot;</span>, <span class="hljs-string">&quot;1920x1080&quot;</span>]
+        <span class="hljs-variable language_">self</span>.resolution_combobox = ttk.Combobox(<span class="hljs-variable language_">self</span>.control_frame, textvariable=<span class="hljs-variable language_">self</span>.resolution_var, values=resolution_options, width=<span class="hljs-number">20</span>)
+        <span class="hljs-variable language_">self</span>.resolution_combobox.pack(pady=<span class="hljs-number">5</span>, fill=tk.X)
+        <span class="hljs-variable language_">self</span>.resolution_combobox.bind(<span class="hljs-string">&quot;&lt;&lt;ComboboxSelected&gt;&gt;&quot;</span>, <span class="hljs-variable language_">self</span>.on_resolution_change)
+
+        <span class="hljs-comment"># 帧率选择</span>
+        ttk.Label(<span class="hljs-variable language_">self</span>.control_frame, text=<span class="hljs-string">&quot;帧率：&quot;</span>).pack(pady=<span class="hljs-number">5</span>, anchor=tk.W)
+        <span class="hljs-variable language_">self</span>.fps_var = tk.StringVar(value=<span class="hljs-string">&quot;30&quot;</span>)
+        fps_options = [<span class="hljs-string">&quot;15&quot;</span>, <span class="hljs-string">&quot;24&quot;</span>, <span class="hljs-string">&quot;30&quot;</span>, <span class="hljs-string">&quot;60&quot;</span>]
+        <span class="hljs-variable language_">self</span>.fps_combobox = ttk.Combobox(<span class="hljs-variable language_">self</span>.control_frame, textvariable=<span class="hljs-variable language_">self</span>.fps_var, values=fps_options, width=<span class="hljs-number">20</span>)
+        <span class="hljs-variable language_">self</span>.fps_combobox.pack(pady=<span class="hljs-number">5</span>, fill=tk.X)
+
+        <span class="hljs-comment"># 输出文件选择</span>
+        ttk.Label(<span class="hljs-variable language_">self</span>.control_frame, text=<span class="hljs-string">&quot;输出文件：&quot;</span>).pack(pady=<span class="hljs-number">5</span>, anchor=tk.W)
+        <span class="hljs-variable language_">self</span>.file_frame = ttk.Frame(<span class="hljs-variable language_">self</span>.control_frame)
+        <span class="hljs-variable language_">self</span>.file_frame.pack(fill=tk.X, pady=<span class="hljs-number">5</span>)
+        <span class="hljs-variable language_">self</span>.file_entry = ttk.Entry(<span class="hljs-variable language_">self</span>.file_frame, textvariable=tk.StringVar(value=<span class="hljs-variable language_">self</span>.output_file), width=<span class="hljs-number">15</span>)
+        <span class="hljs-variable language_">self</span>.file_entry.pack(side=tk.LEFT, fill=tk.X, expand=<span class="hljs-literal">True</span>)
+        <span class="hljs-variable language_">self</span>.browse_button = ttk.Button(<span class="hljs-variable language_">self</span>.file_frame, text=<span class="hljs-string">&quot;浏览&quot;</span>, command=<span class="hljs-variable language_">self</span>.browse_file)
+        <span class="hljs-variable language_">self</span>.browse_button.pack(side=tk.RIGHT, padx=<span class="hljs-number">5</span>)
+
+        <span class="hljs-comment"># 录制时间显示</span>
+        <span class="hljs-variable language_">self</span>.time_var = tk.StringVar(value=<span class="hljs-string">&quot;00:00:00&quot;</span>)
+        ttk.Label(<span class="hljs-variable language_">self</span>.control_frame, text=<span class="hljs-string">&quot;录制时间：&quot;</span>).pack(pady=<span class="hljs-number">5</span>, anchor=tk.W)
+        ttk.Label(<span class="hljs-variable language_">self</span>.control_frame, textvariable=<span class="hljs-variable language_">self</span>.time_var, font=(<span class="hljs-string">&#x27;Arial&#x27;</span>, <span class="hljs-number">14</span>, <span class="hljs-string">&#x27;bold&#x27;</span>)).pack(pady=<span class="hljs-number">5</span>, fill=tk.X)
+
+        <span class="hljs-comment"># 控制按钮</span>
+        <span class="hljs-variable language_">self</span>.button_frame = ttk.Frame(<span class="hljs-variable language_">self</span>.control_frame)
+        <span class="hljs-variable language_">self</span>.button_frame.pack(fill=tk.X, pady=<span class="hljs-number">20</span>)
+
+        <span class="hljs-variable language_">self</span>.start_button = ttk.Button(<span class="hljs-variable language_">self</span>.button_frame, text=<span class="hljs-string">&quot;开始录制&quot;</span>, command=<span class="hljs-variable language_">self</span>.start_recording, style=<span class="hljs-string">&#x27;TButton&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.start_button.pack(side=tk.LEFT, fill=tk.X, expand=<span class="hljs-literal">True</span>, padx=<span class="hljs-number">5</span>)
+
+        <span class="hljs-variable language_">self</span>.stop_button = ttk.Button(<span class="hljs-variable language_">self</span>.button_frame, text=<span class="hljs-string">&quot;停止录制&quot;</span>, command=<span class="hljs-variable language_">self</span>.stop_recording, state=tk.DISABLED, style=<span class="hljs-string">&#x27;TButton&#x27;</span>)
+        <span class="hljs-variable language_">self</span>.stop_button.pack(side=tk.RIGHT, fill=tk.X, expand=<span class="hljs-literal">True</span>, padx=<span class="hljs-number">5</span>)
+
+        <span class="hljs-comment"># 状态信息</span>
+        <span class="hljs-variable language_">self</span>.status_var = tk.StringVar(value=<span class="hljs-string">&quot;就绪&quot;</span>)
+        ttk.Label(<span class="hljs-variable language_">self</span>.control_frame, text=<span class="hljs-string">&quot;状态：&quot;</span>).pack(pady=<span class="hljs-number">5</span>, anchor=tk.W)
+        <span class="hljs-variable language_">self</span>.status_label = ttk.Label(<span class="hljs-variable language_">self</span>.control_frame, textvariable=<span class="hljs-variable language_">self</span>.status_var, font=(<span class="hljs-string">&#x27;Arial&#x27;</span>, <span class="hljs-number">10</span>), foreground=<span class="hljs-string">&quot;green&quot;</span>)
+        <span class="hljs-variable language_">self</span>.status_label.pack(pady=<span class="hljs-number">5</span>, fill=tk.X)
+
+        <span class="hljs-comment"># 初始化</span>
+        <span class="hljs-variable language_">self</span>.detect_cameras()
+        <span class="hljs-variable language_">self</span>.detect_audio_devices()
+        <span class="hljs-variable language_">self</span>.check_gpu_available()
+        <span class="hljs-variable language_">self</span>.start_preview_thread()
+        <span class="hljs-variable language_">self</span>.update_preview()
+
+        <span class="hljs-comment"># 关闭窗口时的处理</span>
+        <span class="hljs-variable language_">self</span>.root.protocol(<span class="hljs-string">&quot;WM_DELETE_WINDOW&quot;</span>, <span class="hljs-variable language_">self</span>.on_closing)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">check_gpu_available</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(cv2, <span class="hljs-string">&#x27;cuda&#x27;</span>) <span class="hljs-keyword">and</span> cv2.cuda.getCudaEnabledDeviceCount() &gt; <span class="hljs-number">0</span>:
+                <span class="hljs-variable language_">self</span>.gpu_available = <span class="hljs-literal">True</span>
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-variable language_">self</span>.gpu_available = <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">except</span>:
+            <span class="hljs-variable language_">self</span>.gpu_available = <span class="hljs-literal">False</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">detect_cameras</span>(<span class="hljs-params">self</span>):
+        cameras = []
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">5</span>):
+            cap = cv2.VideoCapture(i)
+            <span class="hljs-keyword">if</span> cap.isOpened():
+                cameras.append(<span class="hljs-string">f&quot;摄像头 <span class="hljs-subst">{i}</span>&quot;</span>)
+                cap.release()
+        <span class="hljs-keyword">if</span> cameras:
+            <span class="hljs-variable language_">self</span>.camera_combobox[<span class="hljs-string">&#x27;values&#x27;</span>] = cameras
+            <span class="hljs-variable language_">self</span>.camera_combobox.current(<span class="hljs-number">0</span>)
+            <span class="hljs-variable language_">self</span>.on_camera_change(<span class="hljs-literal">None</span>)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-variable language_">self</span>.status_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;未检测到摄像头&quot;</span>)
+            <span class="hljs-variable language_">self</span>.status_label.config(foreground=<span class="hljs-string">&quot;red&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">detect_audio_devices</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-variable language_">self</span>.audio = pyaudio.PyAudio()
+            audio_devices = []
+            <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.audio.get_device_count()):
+                device_info = <span class="hljs-variable language_">self</span>.audio.get_device_info_by_index(i)
+                <span class="hljs-keyword">if</span> device_info.get(<span class="hljs-string">&#x27;maxInputChannels&#x27;</span>, <span class="hljs-number">0</span>) &gt; <span class="hljs-number">0</span>:
+                    audio_devices.append(<span class="hljs-string">f&quot;<span class="hljs-subst">{device_info[<span class="hljs-string">&#x27;name&#x27;</span>]}</span> (设备 <span class="hljs-subst">{i}</span>)&quot;</span>)
+
+            <span class="hljs-keyword">if</span> audio_devices:
+                <span class="hljs-variable language_">self</span>.audio_combobox[<span class="hljs-string">&#x27;values&#x27;</span>] = audio_devices
+                <span class="hljs-variable language_">self</span>.audio_combobox.current(<span class="hljs-number">0</span>)
+                <span class="hljs-variable language_">self</span>.audio_device_index = <span class="hljs-built_in">int</span>(audio_devices[<span class="hljs-number">0</span>].split(<span class="hljs-string">&#x27;设备 &#x27;</span>)[<span class="hljs-number">1</span>][:-<span class="hljs-number">1</span>])
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-variable language_">self</span>.audio_combobox.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;无录音设备&quot;</span>)
+                <span class="hljs-variable language_">self</span>.audio_device_index = -<span class="hljs-number">1</span>
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            <span class="hljs-variable language_">self</span>.audio_combobox.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;无录音设备&quot;</span>)
+            <span class="hljs-variable language_">self</span>.audio_device_index = -<span class="hljs-number">1</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">toggle_gpu</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.use_gpu = <span class="hljs-variable language_">self</span>.gpu_var.get()
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.use_gpu <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.gpu_available:
+            <span class="hljs-variable language_">self</span>.gpu_var.<span class="hljs-built_in">set</span>(<span class="hljs-literal">False</span>)
+            <span class="hljs-variable language_">self</span>.use_gpu = <span class="hljs-literal">False</span>
+            <span class="hljs-variable language_">self</span>.status_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;GPU不可用，切换为CPU模式&quot;</span>)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-variable language_">self</span>.status_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;GPU加速已启用&quot;</span> <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.use_gpu <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;CPU模式&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_camera_change</span>(<span class="hljs-params">self, event</span>):
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-variable language_">self</span>.camera_index = <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.camera_var.get().split()[<span class="hljs-number">1</span>])
+            <span class="hljs-variable language_">self</span>.restart_preview_camera()
+        <span class="hljs-keyword">except</span>:
+            <span class="hljs-keyword">pass</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_resolution_change</span>(<span class="hljs-params">self, event</span>):
+        <span class="hljs-variable language_">self</span>.restart_preview_camera()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">restart_preview_camera</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">with</span> <span class="hljs-variable language_">self</span>.preview_lock:
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.preview_cap:
+                <span class="hljs-variable language_">self</span>.preview_cap.release()
+                <span class="hljs-variable language_">self</span>.preview_cap = <span class="hljs-literal">None</span>
+            <span class="hljs-variable language_">self</span>.current_preview_camera = -<span class="hljs-number">1</span>
+            <span class="hljs-variable language_">self</span>.current_preview_resolution = <span class="hljs-literal">None</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">browse_file</span>(<span class="hljs-params">self</span>):
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=<span class="hljs-string">&quot;.avi&quot;</span>,
+            filetypes=[(<span class="hljs-string">&quot;AVI视频&quot;</span>, <span class="hljs-string">&quot;*.avi&quot;</span>), (<span class="hljs-string">&quot;MP4视频&quot;</span>, <span class="hljs-string">&quot;*.mp4&quot;</span>), (<span class="hljs-string">&quot;所有文件&quot;</span>, <span class="hljs-string">&quot;*.*&quot;</span>)]
+        )
+        <span class="hljs-keyword">if</span> file_path:
+            <span class="hljs-variable language_">self</span>.file_entry.delete(<span class="hljs-number">0</span>, tk.END)
+            <span class="hljs-variable language_">self</span>.file_entry.insert(<span class="hljs-number">0</span>, file_path)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">start_recording</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.start_button.config(state=tk.DISABLED)
+        <span class="hljs-variable language_">self</span>.status_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;正在初始化...&quot;</span>)
+        <span class="hljs-variable language_">self</span>.status_label.config(foreground=<span class="hljs-string">&quot;orange&quot;</span>)
+
+        <span class="hljs-keyword">def</span> <span class="hljs-title function_">init_recording</span>():
+            <span class="hljs-keyword">try</span>:
+                camera_index = <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.camera_var.get().split()[<span class="hljs-number">1</span>])
+                width, height = <span class="hljs-built_in">map</span>(<span class="hljs-built_in">int</span>, <span class="hljs-variable language_">self</span>.resolution_var.get().split(<span class="hljs-string">&#x27;x&#x27;</span>))
+                frame_rate = <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.fps_var.get())
+                output_file = <span class="hljs-variable language_">self</span>.file_entry.get()
+
+                <span class="hljs-comment"># 录制专用摄像头</span>
+                cap = cv2.VideoCapture(camera_index)
+                <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> cap.isOpened():
+                    <span class="hljs-keyword">raise</span> Exception(<span class="hljs-string">&quot;无法打开摄像头&quot;</span>)
+
+                cap.<span class="hljs-built_in">set</span>(cv2.CAP_PROP_FRAME_WIDTH, width)
+                cap.<span class="hljs-built_in">set</span>(cv2.CAP_PROP_FRAME_HEIGHT, height)
+                cap.<span class="hljs-built_in">set</span>(cv2.CAP_PROP_FPS, frame_rate)
+
+                out = cv2.VideoWriter(output_file, <span class="hljs-variable language_">self</span>.codec, frame_rate, (width, height))
+                <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> out.isOpened():
+                    cap.release()
+                    <span class="hljs-keyword">raise</span> Exception(<span class="hljs-string">&quot;无法创建视频文件&quot;</span>)
+
+                <span class="hljs-comment"># 音频初始化</span>
+                audio_stream = <span class="hljs-literal">None</span>
+                audio = <span class="hljs-literal">None</span>
+                <span class="hljs-variable language_">self</span>.audio_frames.clear()
+
+                <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.audio_device_index != -<span class="hljs-number">1</span>:
+                    <span class="hljs-keyword">try</span>:
+                        audio = pyaudio.PyAudio()
+                        audio_stream = audio.<span class="hljs-built_in">open</span>(
+                            <span class="hljs-built_in">format</span>=pyaudio.paInt16,
+                            channels=<span class="hljs-variable language_">self</span>.audio_channels,
+                            rate=<span class="hljs-variable language_">self</span>.audio_sample_rate,
+                            <span class="hljs-built_in">input</span>=<span class="hljs-literal">True</span>,
+                            input_device_index=<span class="hljs-variable language_">self</span>.audio_device_index,
+                            frames_per_buffer=<span class="hljs-number">1024</span>
+                        )
+                    <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+                        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;音频初始化失败: <span class="hljs-subst">{e}</span>&quot;</span>)
+                        <span class="hljs-keyword">if</span> audio_stream:
+                            audio_stream.close()
+                        <span class="hljs-keyword">if</span> audio:
+                            audio.terminate()
+                        audio = <span class="hljs-literal">None</span>
+                        audio_stream = <span class="hljs-literal">None</span>
+
+                <span class="hljs-comment"># 赋值</span>
+                <span class="hljs-variable language_">self</span>.cap = cap
+                <span class="hljs-variable language_">self</span>.out = out
+                <span class="hljs-variable language_">self</span>.audio = audio
+                <span class="hljs-variable language_">self</span>.audio_stream = audio_stream
+                <span class="hljs-variable language_">self</span>.recording = <span class="hljs-literal">True</span>
+                <span class="hljs-variable language_">self</span>.start_time = time.time()
+                <span class="hljs-variable language_">self</span>.output_file = output_file
+
+                <span class="hljs-comment"># 启动录制线程（同时负责预览）</span>
+                <span class="hljs-variable language_">self</span>.thread = threading.Thread(target=<span class="hljs-variable language_">self</span>.record_and_preview)
+                <span class="hljs-variable language_">self</span>.thread.daemon = <span class="hljs-literal">True</span>
+                <span class="hljs-variable language_">self</span>.thread.start()
+
+                <span class="hljs-comment"># 启动音频线程</span>
+                <span class="hljs-keyword">if</span> audio_stream <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+                    <span class="hljs-variable language_">self</span>.audio_thread = threading.Thread(target=<span class="hljs-variable language_">self</span>.record_audio)
+                    <span class="hljs-variable language_">self</span>.audio_thread.daemon = <span class="hljs-literal">True</span>
+                    <span class="hljs-variable language_">self</span>.audio_thread.start()
+
+                <span class="hljs-variable language_">self</span>.root.after(<span class="hljs-number">0</span>, <span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.stop_button.config(state=tk.NORMAL))
+                <span class="hljs-variable language_">self</span>.root.after(<span class="hljs-number">0</span>, <span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.status_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;录制中（含音频）&quot;</span> <span class="hljs-keyword">if</span> audio_stream <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;录制中（无音频）&quot;</span>))
+                <span class="hljs-variable language_">self</span>.root.after(<span class="hljs-number">0</span>, <span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.status_label.config(foreground=<span class="hljs-string">&quot;red&quot;</span>))
+
+                <span class="hljs-comment"># 停止独立的预览线程，因为录制线程会负责预览</span>
+                <span class="hljs-variable language_">self</span>.preview_running = <span class="hljs-literal">False</span>
+                <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.preview_thread:
+                    <span class="hljs-variable language_">self</span>.preview_thread.join(timeout=<span class="hljs-number">1</span>)
+
+            <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+                <span class="hljs-variable language_">self</span>.cleanup_resources()
+                <span class="hljs-variable language_">self</span>.root.after(<span class="hljs-number">0</span>, <span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.status_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">f&quot;错误：<span class="hljs-subst">{<span class="hljs-built_in">str</span>(e)}</span>&quot;</span>))
+                <span class="hljs-variable language_">self</span>.root.after(<span class="hljs-number">0</span>, <span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.status_label.config(foreground=<span class="hljs-string">&quot;red&quot;</span>))
+                <span class="hljs-variable language_">self</span>.root.after(<span class="hljs-number">0</span>, <span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.start_button.config(state=tk.NORMAL))
+
+        threading.Thread(target=init_recording, daemon=<span class="hljs-literal">True</span>).start()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">record_and_preview</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;录制线程同时负责预览&quot;&quot;&quot;</span>
+        last_frame_time = time.time()
+        frame_interval = <span class="hljs-number">1.0</span> / <span class="hljs-variable language_">self</span>.frame_rate
+        preview_interval = <span class="hljs-number">1.0</span> / <span class="hljs-number">30</span>  <span class="hljs-comment"># 预览帧率30fps</span>
+        last_preview_time = time.time()
+
+        <span class="hljs-keyword">while</span> <span class="hljs-variable language_">self</span>.recording:
+            ret, frame = <span class="hljs-variable language_">self</span>.cap.read()
+            <span class="hljs-keyword">if</span> ret:
+                <span class="hljs-comment"># 写入视频文件</span>
+                <span class="hljs-variable language_">self</span>.out.write(frame)
+
+                <span class="hljs-comment"># 更新时间显示</span>
+                elapsed = <span class="hljs-built_in">int</span>(time.time() - <span class="hljs-variable language_">self</span>.start_time)
+                h = elapsed // <span class="hljs-number">3600</span>
+                m = (elapsed % <span class="hljs-number">3600</span>) // <span class="hljs-number">60</span>
+                s = elapsed % <span class="hljs-number">60</span>
+                <span class="hljs-variable language_">self</span>.root.after(<span class="hljs-number">0</span>, <span class="hljs-keyword">lambda</span>: <span class="hljs-variable language_">self</span>.time_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{h:02d}</span>:<span class="hljs-subst">{m:02d}</span>:<span class="hljs-subst">{s:02d}</span>&quot;</span>))
+
+                <span class="hljs-comment"># 处理预览帧</span>
+                current_time = time.time()
+                <span class="hljs-keyword">if</span> current_time - last_preview_time &gt;= preview_interval:
+                    <span class="hljs-comment"># 复制帧用于预览（避免修改原帧）</span>
+                    preview_frame = frame.copy()
+
+                    <span class="hljs-comment"># 颜色转换</span>
+                    <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.use_gpu <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.gpu_available:
+                        <span class="hljs-keyword">try</span>:
+                            gpu_mat = cv2.cuda_GpuMat()
+                            gpu_mat.upload(preview_frame)
+                            gpu_rgb = cv2.cuda.cvtColor(gpu_mat, cv2.COLOR_BGR2RGB)
+                            preview_frame = gpu_rgb.download()
+                        <span class="hljs-keyword">except</span>:
+                            preview_frame = cv2.cvtColor(preview_frame, cv2.COLOR_BGR2RGB)
+                    <span class="hljs-keyword">else</span>:
+                        preview_frame = cv2.cvtColor(preview_frame, cv2.COLOR_BGR2RGB)
+
+                    <span class="hljs-comment"># 放入预览队列</span>
+                    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.frame_queue.full():
+                        <span class="hljs-keyword">try</span>:
+                            <span class="hljs-variable language_">self</span>.frame_queue.put_nowait(preview_frame)
+                        <span class="hljs-keyword">except</span>:
+                            <span class="hljs-keyword">pass</span>
+
+                    last_preview_time = current_time
+
+                <span class="hljs-comment"># 控制录制帧率</span>
+                sleep_time = frame_interval - (current_time - last_frame_time)
+                <span class="hljs-keyword">if</span> sleep_time &gt; <span class="hljs-number">0</span>:
+                    time.sleep(sleep_time)
+                last_frame_time = current_time
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-comment"># 读取失败，稍后重试</span>
+                time.sleep(<span class="hljs-number">0.001</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">record_audio</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">while</span> <span class="hljs-variable language_">self</span>.recording:
+            <span class="hljs-keyword">try</span>:
+                data = <span class="hljs-variable language_">self</span>.audio_stream.read(<span class="hljs-number">1024</span>, exception_on_overflow=<span class="hljs-literal">False</span>)
+                <span class="hljs-variable language_">self</span>.audio_frames.append(data)
+            <span class="hljs-keyword">except</span>:
+                <span class="hljs-keyword">break</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">stop_recording</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.recording = <span class="hljs-literal">False</span>
+        time.sleep(<span class="hljs-number">0.5</span>)
+
+        <span class="hljs-variable language_">self</span>.cleanup_resources()
+
+        <span class="hljs-comment"># 保存音频</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.audio_device_index != -<span class="hljs-number">1</span> <span class="hljs-keyword">and</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.audio_frames) &gt; <span class="hljs-number">0</span>:
+            audio_file = os.path.splitext(<span class="hljs-variable language_">self</span>.output_file)[<span class="hljs-number">0</span>] + <span class="hljs-string">&quot;_audio.wav&quot;</span>
+            <span class="hljs-keyword">try</span>:
+                wf = wave.<span class="hljs-built_in">open</span>(audio_file, <span class="hljs-string">&#x27;wb&#x27;</span>)
+                wf.setnchannels(<span class="hljs-variable language_">self</span>.audio_channels)
+                wf.setsampwidth(<span class="hljs-variable language_">self</span>.audio_sample_width)
+                wf.setframerate(<span class="hljs-variable language_">self</span>.audio_sample_rate)
+                wf.writeframes(<span class="hljs-string">b&#x27;&#x27;</span>.join(<span class="hljs-variable language_">self</span>.audio_frames))
+                wf.close()
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;音频已保存到: <span class="hljs-subst">{audio_file}</span>&quot;</span>)
+            <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;保存音频失败: <span class="hljs-subst">{e}</span>&quot;</span>)
+
+        <span class="hljs-variable language_">self</span>.start_button.config(state=tk.NORMAL)
+        <span class="hljs-variable language_">self</span>.stop_button.config(state=tk.DISABLED)
+        <span class="hljs-variable language_">self</span>.status_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;录制完成&quot;</span>)
+        <span class="hljs-variable language_">self</span>.status_label.config(foreground=<span class="hljs-string">&quot;green&quot;</span>)
+        <span class="hljs-variable language_">self</span>.time_var.<span class="hljs-built_in">set</span>(<span class="hljs-string">&quot;00:00:00&quot;</span>)
+
+        <span class="hljs-comment"># 重新启动独立的预览线程</span>
+        <span class="hljs-variable language_">self</span>.preview_running = <span class="hljs-literal">True</span>
+        <span class="hljs-variable language_">self</span>.start_preview_thread()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">cleanup_resources</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.out:
+            <span class="hljs-variable language_">self</span>.out.release()
+            <span class="hljs-variable language_">self</span>.out = <span class="hljs-literal">None</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.cap:
+            <span class="hljs-variable language_">self</span>.cap.release()
+            <span class="hljs-variable language_">self</span>.cap = <span class="hljs-literal">None</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.audio_stream:
+            <span class="hljs-keyword">try</span>:
+                <span class="hljs-variable language_">self</span>.audio_stream.stop_stream()
+                <span class="hljs-variable language_">self</span>.audio_stream.close()
+            <span class="hljs-keyword">except</span>:
+                <span class="hljs-keyword">pass</span>
+            <span class="hljs-variable language_">self</span>.audio_stream = <span class="hljs-literal">None</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.audio:
+            <span class="hljs-variable language_">self</span>.audio.terminate()
+            <span class="hljs-variable language_">self</span>.audio = <span class="hljs-literal">None</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">start_preview_thread</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.preview_running:
+            <span class="hljs-variable language_">self</span>.preview_running = <span class="hljs-literal">True</span>
+            <span class="hljs-variable language_">self</span>.preview_thread = threading.Thread(target=<span class="hljs-variable language_">self</span>.preview_loop, daemon=<span class="hljs-literal">True</span>)
+            <span class="hljs-variable language_">self</span>.preview_thread.start()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">preview_loop</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;独立的预览循环（非录制状态）&quot;&quot;&quot;</span>
+        last_preview_time = time.time()
+        preview_interval = <span class="hljs-number">1.0</span> / <span class="hljs-number">30</span>
+
+        <span class="hljs-keyword">while</span> <span class="hljs-variable language_">self</span>.preview_running:
+            <span class="hljs-comment"># 只在非录制状态下进行独立预览</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.recording:
+                <span class="hljs-keyword">try</span>:
+                    <span class="hljs-keyword">with</span> <span class="hljs-variable language_">self</span>.preview_lock:
+                        w, h = <span class="hljs-built_in">map</span>(<span class="hljs-built_in">int</span>, <span class="hljs-variable language_">self</span>.resolution_var.get().split(<span class="hljs-string">&#x27;x&#x27;</span>))
+
+                        <span class="hljs-comment"># 检查是否需要重新初始化摄像头</span>
+                        <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">self</span>.current_preview_camera != <span class="hljs-variable language_">self</span>.camera_index <span class="hljs-keyword">or</span>
+                            <span class="hljs-variable language_">self</span>.current_preview_resolution != (w, h) <span class="hljs-keyword">or</span>
+                            <span class="hljs-variable language_">self</span>.preview_cap <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.preview_cap.isOpened()):
+
+                            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.preview_cap:
+                                <span class="hljs-variable language_">self</span>.preview_cap.release()
+
+                            <span class="hljs-variable language_">self</span>.preview_cap = cv2.VideoCapture(<span class="hljs-variable language_">self</span>.camera_index)
+                            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.preview_cap <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.preview_cap.isOpened():
+                                <span class="hljs-variable language_">self</span>.preview_cap.<span class="hljs-built_in">set</span>(cv2.CAP_PROP_FRAME_WIDTH, w)
+                                <span class="hljs-variable language_">self</span>.preview_cap.<span class="hljs-built_in">set</span>(cv2.CAP_PROP_FRAME_HEIGHT, h)
+                                <span class="hljs-variable language_">self</span>.current_preview_camera = <span class="hljs-variable language_">self</span>.camera_index
+                                <span class="hljs-variable language_">self</span>.current_preview_resolution = (w, h)
+
+                        <span class="hljs-comment"># 读取帧</span>
+                        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.preview_cap <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.preview_cap.isOpened():
+                            ret, frame = <span class="hljs-variable language_">self</span>.preview_cap.read()
+                            <span class="hljs-keyword">if</span> ret:
+                                <span class="hljs-comment"># 颜色转换</span>
+                                <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.use_gpu <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.gpu_available:
+                                    <span class="hljs-keyword">try</span>:
+                                        gpu_mat = cv2.cuda_GpuMat()
+                                        gpu_mat.upload(frame)
+                                        gpu_rgb = cv2.cuda.cvtColor(gpu_mat, cv2.COLOR_BGR2RGB)
+                                        frame = gpu_rgb.download()
+                                    <span class="hljs-keyword">except</span>:
+                                        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                                <span class="hljs-keyword">else</span>:
+                                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+                                <span class="hljs-comment"># 放入队列</span>
+                                <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.frame_queue.full():
+                                    <span class="hljs-keyword">try</span>:
+                                        <span class="hljs-variable language_">self</span>.frame_queue.put_nowait(frame)
+                                    <span class="hljs-keyword">except</span>:
+                                        <span class="hljs-keyword">pass</span>
+                <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+                    <span class="hljs-keyword">pass</span>
+
+                <span class="hljs-comment"># 控制预览帧率</span>
+                current_time = time.time()
+                sleep_time = preview_interval - (current_time - last_preview_time)
+                <span class="hljs-keyword">if</span> sleep_time &gt; <span class="hljs-number">0</span>:
+                    time.sleep(sleep_time)
+                last_preview_time = current_time
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-comment"># 录制中，休眠以节省CPU</span>
+                time.sleep(<span class="hljs-number">0.05</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update_preview</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;更新预览显示&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.frame_queue.empty():
+                frame = <span class="hljs-variable language_">self</span>.frame_queue.get_nowait()
+
+                <span class="hljs-comment"># 获取画布大小并调整显示</span>
+                cw = <span class="hljs-variable language_">self</span>.canvas.winfo_width()
+                ch = <span class="hljs-variable language_">self</span>.canvas.winfo_height()
+                <span class="hljs-keyword">if</span> cw &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> ch &gt; <span class="hljs-number">0</span>:
+                    fh, fw = frame.shape[:<span class="hljs-number">2</span>]
+                    ar = fw / fh
+                    canvas_ar = cw / ch
+
+                    <span class="hljs-keyword">if</span> canvas_ar &gt; ar:
+                        nh = ch
+                        nw = <span class="hljs-built_in">int</span>(nh * ar)
+                    <span class="hljs-keyword">else</span>:
+                        nw = cw
+                        nh = <span class="hljs-built_in">int</span>(nw / ar)
+
+                    <span class="hljs-comment"># 缩放图像</span>
+                    <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.use_gpu <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.gpu_available:
+                        <span class="hljs-keyword">try</span>:
+                            gpu_mat = cv2.cuda_GpuMat()
+                            gpu_mat.upload(frame)
+                            gpu_resized = cv2.cuda.resize(gpu_mat, (nw, nh))
+                            frame = gpu_resized.download()
+                        <span class="hljs-keyword">except</span>:
+                            frame = cv2.resize(frame, (nw, nh))
+                    <span class="hljs-keyword">else</span>:
+                        frame = cv2.resize(frame, (nw, nh))
+
+                <span class="hljs-comment"># 转换为ImageTk</span>
+                img = Image.fromarray(frame)
+                imgtk = ImageTk.PhotoImage(img)
+
+                cw = <span class="hljs-variable language_">self</span>.canvas.winfo_width()
+                ch = <span class="hljs-variable language_">self</span>.canvas.winfo_height()
+                fw, fh = img.size
+                x = (cw - fw) // <span class="hljs-number">2</span>
+                y = (ch - fh) // <span class="hljs-number">2</span>
+
+                <span class="hljs-variable language_">self</span>.canvas.delete(<span class="hljs-string">&quot;all&quot;</span>)
+                <span class="hljs-variable language_">self</span>.canvas.create_image(x, y, anchor=tk.NW, image=imgtk)
+                <span class="hljs-variable language_">self</span>.canvas.photo = imgtk
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            <span class="hljs-keyword">pass</span>
+        <span class="hljs-keyword">finally</span>:
+            <span class="hljs-variable language_">self</span>.root.after(<span class="hljs-number">30</span>, <span class="hljs-variable language_">self</span>.update_preview)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_closing</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.preview_running = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.recording = <span class="hljs-literal">False</span>
+        time.sleep(<span class="hljs-number">0.2</span>)
+
+        <span class="hljs-keyword">with</span> <span class="hljs-variable language_">self</span>.preview_lock:
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.preview_cap:
+                <span class="hljs-variable language_">self</span>.preview_cap.release()
+
+        <span class="hljs-variable language_">self</span>.cleanup_resources()
+        <span class="hljs-variable language_">self</span>.root.destroy()
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    root = tk.Tk()
+    app = VideoRecorder(root)
+    root.mainloop()
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/python桌球游戏.html">
+      <span>上一篇</span>
+      <strong>Python桌球游戏</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/python将彩色视频转换为黑白视频mp4-格式可选.html">
+      <span>下一篇</span>
+      <strong>Python将彩色视频转换为黑白视频MP4 格式可选</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

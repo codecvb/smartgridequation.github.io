@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>模仿微信发送消息界面traecn版QT6 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/嵌入式与硬件.html">嵌入式与硬件</a>
+        </nav>
+        <h1 class="post-title">模仿微信发送消息界面traecn版QT6</h1>
+        <p class="post-deck">本文介绍了一个基于Qt框架的微信克隆应用主窗口实现。该应用采用左右布局设计，左侧为聊天列表（包含搜索栏和联系人列表），右侧为聊天窗口堆栈。通过QListWidget管理联系人列表，QStackedWidget实现多聊天窗口切换，并支持点击联系人切换对应聊天界面。代码展示了UI初始化、示例联系人创建和信号槽连接等核心功能实现，为开发类微信应用提供了基础框架参考。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.779Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>10 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-12.html">嵌入式</a>
+          
+            <a class="tag-chip" href="../tags/tag-13.html">物联网</a>
+          
+            <a class="tag-chip" href="../tags/tag-17.html">QT6</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文介绍了一个基于Qt框架的微信克隆应用主窗口实现。该应用采用左右布局设计，左侧为聊天列表（包含搜索栏和联系人列表），右侧为聊天窗口堆栈。通过QListWidget管理联系人列表，QStackedWidget实现多聊天窗口切换，并支持点击联系人切换对应聊天界面。代码展示了UI初始化、示例联系人创建和信号槽连接等核心功能实现，为开发类微信应用提供了基础框架参考。</p>
+<p><img src="../uploads/csdn/%E6%A8%A1%E4%BB%BF%E5%BE%AE%E4%BF%A1%E5%8F%91%E9%80%81%E6%B6%88%E6%81%AF%E7%95%8C%E9%9D%A2traecn%E7%89%88qt6/img-01.png" alt=""></p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;mainwindow.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;ui_mainwindow.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;chatlistitem.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QHBoxLayout&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QVBoxLayout&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QPushButton&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QLineEdit&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QLabel&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QListWidgetItem&gt;</span></span>
+
+MainWindow::<span class="hljs-built_in">MainWindow</span>(QWidget *parent)
+    : <span class="hljs-built_in">QMainWindow</span>(parent)
+{
+    <span class="hljs-built_in">setupUI</span>();
+    <span class="hljs-built_in">createSampleChats</span>();
+    <span class="hljs-built_in">connectSignalsSlots</span>();
+}
+
+MainWindow::~<span class="hljs-built_in">MainWindow</span>()
+{
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::setupUI</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-comment">// 设置窗口标题和大小</span>
+    <span class="hljs-built_in">setWindowTitle</span>(<span class="hljs-string">&quot;WeChatClone&quot;</span>);
+    <span class="hljs-built_in">setMinimumSize</span>(<span class="hljs-number">900</span>, <span class="hljs-number">600</span>);
+
+    <span class="hljs-comment">// 创建中央部件和主布局</span>
+    QWidget *centralWidget = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QWidget</span>(<span class="hljs-keyword">this</span>);
+    QHBoxLayout *mainLayout = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QHBoxLayout</span>(centralWidget);
+    mainLayout-&gt;<span class="hljs-built_in">setContentsMargins</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+    mainLayout-&gt;<span class="hljs-built_in">setSpacing</span>(<span class="hljs-number">0</span>);
+
+    <span class="hljs-comment">// 左侧聊天列表</span>
+    chatListWidget = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QListWidget</span>(<span class="hljs-keyword">this</span>);
+    chatListWidget-&gt;<span class="hljs-built_in">setMaximumWidth</span>(<span class="hljs-number">300</span>);
+    chatListWidget-&gt;<span class="hljs-built_in">setMinimumWidth</span>(<span class="hljs-number">280</span>);
+    chatListWidget-&gt;<span class="hljs-built_in">setStyleSheet</span>(<span class="hljs-string">&quot;QListWidget { border-right: 1px solid #e0e0e0; }&quot;</span>);
+    chatListWidget-&gt;<span class="hljs-built_in">setSelectionMode</span>(QAbstractItemView::SingleSelection);
+    chatListWidget-&gt;<span class="hljs-built_in">setSpacing</span>(<span class="hljs-number">1</span>);
+
+    <span class="hljs-comment">// 添加搜索栏</span>
+    QWidget *searchWidget = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QWidget</span>(chatListWidget);
+    QHBoxLayout *searchLayout = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QHBoxLayout</span>(searchWidget);
+    QLineEdit *searchEdit = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QLineEdit</span>(searchWidget);
+    searchEdit-&gt;<span class="hljs-built_in">setPlaceholderText</span>(<span class="hljs-string">&quot;搜索&quot;</span>);
+    searchEdit-&gt;<span class="hljs-built_in">setStyleSheet</span>(<span class="hljs-string">&quot;QLineEdit { border-radius: 15px; padding: 5px 10px; background-color: #f5f5f5; }&quot;</span>);
+    searchLayout-&gt;<span class="hljs-built_in">addWidget</span>(searchEdit);
+    searchWidget-&gt;<span class="hljs-built_in">setFixedHeight</span>(<span class="hljs-number">50</span>);
+
+    <span class="hljs-comment">// 添加搜索栏到列表顶部</span>
+    chatListWidget-&gt;<span class="hljs-built_in">setItemWidget</span>(<span class="hljs-keyword">new</span> <span class="hljs-built_in">QListWidgetItem</span>(chatListWidget), searchWidget);
+
+    <span class="hljs-comment">// 右侧聊天窗口堆栈</span>
+    chatStackWidget = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QStackedWidget</span>(<span class="hljs-keyword">this</span>);
+    chatStackWidget-&gt;<span class="hljs-built_in">setMinimumSize</span>(<span class="hljs-number">600</span>, <span class="hljs-number">500</span>);
+
+    <span class="hljs-comment">// 添加到主布局</span>
+    mainLayout-&gt;<span class="hljs-built_in">addWidget</span>(chatListWidget);
+    mainLayout-&gt;<span class="hljs-built_in">addWidget</span>(chatStackWidget);
+
+    <span class="hljs-built_in">setCentralWidget</span>(centralWidget);
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::createSampleChats</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-comment">// 创建一些示例聊天 - 简化版本</span>
+    <span class="hljs-comment">// 用户名使用字母替代，群聊使用聊天群1、聊天群2等格式</span>
+    QStringList contacts = {<span class="hljs-string">&quot;UserA&quot;</span>, <span class="hljs-string">&quot;UserB&quot;</span>, <span class="hljs-string">&quot;UserC&quot;</span>, <span class="hljs-string">&quot;UserD&quot;</span>, <span class="hljs-string">&quot;聊天群1&quot;</span>, <span class="hljs-string">&quot;聊天群2&quot;</span>, <span class="hljs-string">&quot;聊天群3&quot;</span>, <span class="hljs-string">&quot;UserE&quot;</span>};
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> QString &amp;contact : contacts) {
+        <span class="hljs-comment">// 创建聊天列表项</span>
+        ChatListItem *listItem = <span class="hljs-keyword">new</span> <span class="hljs-built_in">ChatListItem</span>(contact, <span class="hljs-keyword">this</span>);
+        listItem-&gt;<span class="hljs-built_in">setMessage</span>(<span class="hljs-string">&quot;新消息&quot;</span>);
+        listItem-&gt;<span class="hljs-built_in">setTime</span>(<span class="hljs-string">&quot;12:00&quot;</span>);
+
+        QListWidgetItem *item = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QListWidgetItem</span>(chatListWidget);
+        item-&gt;<span class="hljs-built_in">setSizeHint</span>(listItem-&gt;<span class="hljs-built_in">sizeHint</span>());
+        item-&gt;<span class="hljs-built_in">setData</span>(Qt::UserRole, contact); <span class="hljs-comment">// 存储联系人名称作为Item的数据</span>
+        chatListWidget-&gt;<span class="hljs-built_in">setItemWidget</span>(item, listItem);
+
+        <span class="hljs-comment">// 创建对应的聊天窗口</span>
+        ChatWidget *chatWidget = <span class="hljs-keyword">new</span> <span class="hljs-built_in">ChatWidget</span>(contact, <span class="hljs-keyword">this</span>);
+        chatStackWidget-&gt;<span class="hljs-built_in">addWidget</span>(chatWidget);
+        chatWidgets[contact] = chatWidget;
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::connectSignalsSlots</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-built_in">connect</span>(chatListWidget, &amp;QListWidget::itemClicked, <span class="hljs-keyword">this</span>, &amp;MainWindow::onChatListItemClicked);
+}
+
+<span class="hljs-comment">// 暂时移除更新聊天列表项的功能</span>
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::onChatListItemClicked</span><span class="hljs-params">(QListWidgetItem *item)</span>
+</span>{
+    <span class="hljs-comment">// 跳过搜索栏项</span>
+    <span class="hljs-keyword">if</span> (chatListWidget-&gt;<span class="hljs-built_in">row</span>(item) == <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span>;
+
+    <span class="hljs-comment">// 从Item数据中获取联系人名称</span>
+    QString contactName = item-&gt;<span class="hljs-built_in">data</span>(Qt::UserRole).<span class="hljs-built_in">toString</span>();
+
+    <span class="hljs-keyword">if</span> (!contactName.<span class="hljs-built_in">isEmpty</span>() &amp;&amp; chatWidgets.<span class="hljs-built_in">contains</span>(contactName)) {
+        <span class="hljs-comment">// 切换到对应的聊天窗口</span>
+        <span class="hljs-type">int</span> index = chatStackWidget-&gt;<span class="hljs-built_in">indexOf</span>(chatWidgets[contactName]);
+        chatStackWidget-&gt;<span class="hljs-built_in">setCurrentIndex</span>(index);
+        <span class="hljs-built_in">setWindowTitle</span>(contactName);
+
+        <span class="hljs-comment">// 高亮选中的项</span>
+        item-&gt;<span class="hljs-built_in">setSelected</span>(<span class="hljs-literal">true</span>);
+        chatListWidget-&gt;<span class="hljs-built_in">scrollToItem</span>(item, QAbstractItemView::EnsureVisible);
+    }
+}
+</code></pre>
+<p>需要源码请私信或者留下邮箱！</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/c最小二乘法.html">
+      <span>上一篇</span>
+      <strong>c最小二乘法</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/智慧农业与物联网.html">
+      <span>下一篇</span>
+      <strong>智慧农业与物联网</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/手搓一个qt6candroid版本的tcp调试软件.html">手搓一个QT6CANDROID版本的TCP调试软件</a></h3>
+        <p class="post-excerpt">文章摘要： 这是一个基于Qt框架开发的TCP调试工具程序，包含MainWindow类和TCP通信功能。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.723Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/qt6使用opengl库画两个不同外形的立方体1.html">QT6使用OpenGL库画两个不同外形的立方体1</a></h3>
+        <p class="post-excerpt">QT6 使用OpenGL库画两个不同外形的立方体</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.389Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于arduino的冰导热系数智能测量装置及影响因素研究.html">基于Arduino的冰导热系数智能测量装置及影响因素研究</a></h3>
+        <p class="post-excerpt">![](/uploads/csdn/基于arduino的冰导热系数智能测量装置及影响因素研究/img-01.jpeg)![](/uploads/csdn/基于arduino的冰导热系数智能测量装置及影响因素研究/img-02.jpeg)![](/uploads/csdn/基于arduino的冰导热系数智能测量装置及影响因素研究/img-03.jpeg)![]…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.690Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

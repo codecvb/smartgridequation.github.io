@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>LeetCode128.最长连续序列C解答 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/算法与数据结构.html">算法与数据结构</a>
+        </nav>
+        <h1 class="post-title">LeetCode128.最长连续序列C解答</h1>
+        <p class="post-deck">128\. 最长连续序列</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.364Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>7 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-18.html">算法</a>
+          
+            <a class="tag-chip" href="../tags/tag-9.html">C</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p><a href="https://leetcode.cn/problems/longest-consecutive-sequence/" title="128. 最长连续序列">128. 最长连续序列</a></p>
+<p>给定一个未排序的整数数组 <code>nums</code> ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。</p>
+<p>请你设计并实现时间复杂度为 <code>O(n)</code> 的算法解决此问题。</p>
+<p><strong>示例 1：</strong></p>
+<pre class="hljs"><code>&lt;strong&gt;输入：&lt;/strong&gt;nums = [100,4,200,1,3,2]
+&lt;strong&gt;输出：&lt;/strong&gt;4
+&lt;strong&gt;解释：&lt;/strong&gt;最长数字连续序列是 [1, 2, 3, 4]。它的长度为 4。
+</code></pre>
+<p><strong>示例 2：</strong></p>
+<pre class="hljs"><code>&lt;strong&gt;输入：&lt;/strong&gt;nums = [0,3,7,2,5,8,4,6,0,1]
+&lt;strong&gt;输出：&lt;/strong&gt;9
+
+&lt;strong&gt;示例 3：&lt;/strong&gt;
+</code></pre>
+<pre class="hljs"><code>&lt;strong&gt;输入：&lt;/strong&gt;nums = [1,0,1,2]
+&lt;strong&gt;输出：&lt;/strong&gt;3
+</code></pre>
+<h4 id="解题思路" class="prose-heading">解题思路</h4>
+<p>要在 O (n) 时间复杂度内解决这个问题，核心思路是利用<strong>哈希集合</strong>快速查找元素，避免重复计算：</p>
+<ol>
+<li>首先将数组所有元素存入哈希集合，实现 O (1) 时间的存在性检查；</li>
+<li>遍历每个元素，仅当当前元素是 “连续序列的起点”（即<code>num-1</code>不在集合中）时，才向后查找连续数字（<code>num+1</code>, <code>num+2</code>…），统计序列长度；</li>
+<li>记录所有连续序列的最大长度，即为答案。</li>
+</ol>
+<p>这种方式确保每个元素最多被访问两次（一次遍历，一次作为连续序列的后续元素），整体时间复杂度为 O (n)。</p>
+<h4 id="c-代码实现" class="prose-heading">C++ 代码实现</h4>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;unordered_set&gt;</span></span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Solution</span> {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">longestConsecutive</span><span class="hljs-params">(vector&lt;<span class="hljs-type">int</span>&gt;&amp; nums)</span> </span>{
+        <span class="hljs-comment">// 1. 将数组元素存入哈希集合，去重且支持O(1)查找</span>
+        <span class="hljs-function">unordered_set&lt;<span class="hljs-type">int</span>&gt; <span class="hljs-title">numSet</span><span class="hljs-params">(nums.begin(), nums.end())</span></span>;
+        <span class="hljs-type">int</span> maxLength = <span class="hljs-number">0</span>;
+
+        <span class="hljs-comment">// 2. 遍历每个元素，寻找连续序列的起点</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> num : numSet) {
+            <span class="hljs-comment">// 仅当num是起点（num-1不存在）时，才统计连续长度</span>
+            <span class="hljs-keyword">if</span> (numSet.<span class="hljs-built_in">find</span>(num - <span class="hljs-number">1</span>) == numSet.<span class="hljs-built_in">end</span>()) {
+                <span class="hljs-type">int</span> currentNum = num;
+                <span class="hljs-type">int</span> currentLength = <span class="hljs-number">1</span>;
+
+                <span class="hljs-comment">// 向后查找连续数字</span>
+                <span class="hljs-keyword">while</span> (numSet.<span class="hljs-built_in">find</span>(currentNum + <span class="hljs-number">1</span>) != numSet.<span class="hljs-built_in">end</span>()) {
+                    currentNum++;
+                    currentLength++;
+                }
+
+                <span class="hljs-comment">// 更新最大长度</span>
+                maxLength = <span class="hljs-built_in">max</span>(maxLength, currentLength);
+            }
+        }
+
+        <span class="hljs-keyword">return</span> maxLength;
+    }
+};
+
+<span class="hljs-comment">// 测试用例</span>
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    Solution solution;
+
+    <span class="hljs-comment">// 示例1</span>
+    vector&lt;<span class="hljs-type">int</span>&gt; nums1 = {<span class="hljs-number">100</span>,<span class="hljs-number">4</span>,<span class="hljs-number">200</span>,<span class="hljs-number">1</span>,<span class="hljs-number">3</span>,<span class="hljs-number">2</span>};
+    cout &lt;&lt; <span class="hljs-string">&quot;示例1输出：&quot;</span> &lt;&lt; solution.<span class="hljs-built_in">longestConsecutive</span>(nums1) &lt;&lt; endl; <span class="hljs-comment">// 预期4</span>
+
+    <span class="hljs-comment">// 示例2</span>
+    vector&lt;<span class="hljs-type">int</span>&gt; nums2 = {<span class="hljs-number">0</span>,<span class="hljs-number">3</span>,<span class="hljs-number">7</span>,<span class="hljs-number">2</span>,<span class="hljs-number">5</span>,<span class="hljs-number">8</span>,<span class="hljs-number">4</span>,<span class="hljs-number">6</span>,<span class="hljs-number">0</span>,<span class="hljs-number">1</span>};
+    cout &lt;&lt; <span class="hljs-string">&quot;示例2输出：&quot;</span> &lt;&lt; solution.<span class="hljs-built_in">longestConsecutive</span>(nums2) &lt;&lt; endl; <span class="hljs-comment">// 预期9</span>
+
+    <span class="hljs-comment">// 示例3</span>
+    vector&lt;<span class="hljs-type">int</span>&gt; nums3 = {<span class="hljs-number">1</span>,<span class="hljs-number">0</span>,<span class="hljs-number">1</span>,<span class="hljs-number">2</span>};
+    cout &lt;&lt; <span class="hljs-string">&quot;示例3输出：&quot;</span> &lt;&lt; solution.<span class="hljs-built_in">longestConsecutive</span>(nums3) &lt;&lt; endl; <span class="hljs-comment">// 预期3</span>
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<h4 id="代码解释" class="prose-heading">代码解释</h4>
+<ol>
+<li><strong>哈希集合初始化</strong>：<code>unordered_set numSet(nums.begin(), nums.end())</code> 将数组元素存入集合，自动去重，且<code>find</code>操作时间复杂度为 O (1)；</li>
+<li><strong>遍历集合找起点</strong>：对每个元素<code>num</code>，检查<code>num-1</code>是否存在，若不存在则说明<code>num</code>是连续序列的起点；</li>
+<li><strong>统计连续长度</strong>：从起点开始，循环查找<code>num+1</code>、<code>num+2</code>…，直到找不到为止，记录当前序列长度；</li>
+<li><strong>更新最大长度</strong>：每次统计完一个序列后，对比并更新全局最大长度；</li>
+<li><strong>测试用例</strong>：主函数中验证了题目给出的三个示例，确保代码正确性。</li>
+</ol>
+<h4 id="复杂度分析" class="prose-heading">复杂度分析</h4>
+<ul>
+<li><strong>时间复杂度</strong>：O (n)。每个元素最多被访问两次（一次遍历，一次作为连续序列的后续元素），哈希集合的查找操作是 O (1)；</li>
+<li><strong>空间复杂度</strong>：O (n)。哈希集合需要存储所有元素，最坏情况下占用 O (n) 空间。</li>
+</ul>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#解题思路">解题思路</a>
+          
+            <a class="toc-level-4" href="#c-代码实现">C++ 代码实现</a>
+          
+            <a class="toc-level-4" href="#代码解释">代码解释</a>
+          
+            <a class="toc-level-4" href="#复杂度分析">复杂度分析</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/leetcode49-字母异位组合c解法.html">
+      <span>上一篇</span>
+      <strong>LeetCode49.字母异位组合C解法</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/c解决一个简单的图论问题最小生成树以prim算法为例.html">
+      <span>下一篇</span>
+      <strong>C解决一个简单的图论问题最小生成树以Prim算法为例</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/leetcode49-字母异位组合c解法.html">LeetCode49.字母异位组合C解法</a></h3>
+        <p class="post-excerpt">给你一个字符串数组，请你将 字母异位词 组合在一起。可以按任意顺序返回结果列表。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.395Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/c解决一个简单的图论问题最小生成树以prim算法为例.html">C解决一个简单的图论问题最小生成树以Prim算法为例</a></h3>
+        <p class="post-excerpt">使用 C++ 解决一个简单的图论问题 —— 最小生成树（以 Prim 算法为例），并且使用 Graphviz 库来生成结果图。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.332Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/蚁群算法是一种模拟蚂蚁觅食行为的优化算法适合用于解决旅行商问题tsp.html">蚁群算法是一种模拟蚂蚁觅食行为的优化算法适合用于解决旅行商问题TSP</a></h3>
+        <p class="post-excerpt">蚁群算法是一种模拟蚂蚁觅食行为的优化算法，适合用于解决旅行商问题（TSP）。以下是使用 MATLAB 实现蚁群算法解决 50 个城市 TSP 问题的代码：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.633Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

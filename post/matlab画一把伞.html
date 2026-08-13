@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>MATLAB画一把伞 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/matlab-仿真.html">MATLAB 仿真</a>
+        </nav>
+        <h1 class="post-title">MATLAB画一把伞</h1>
+        <p class="post-deck">Matlab</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.034Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>4 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p><img src="../uploads/csdn/matlab%E7%94%BB%E4%B8%80%E6%8A%8A%E4%BC%9E/img-01.jpeg" alt=""></p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">% 伞的参数</span>
+
+num_ribs = <span class="hljs-number">5</span>; <span class="hljs-comment">% 伞骨数量修改为5</span>
+
+R = <span class="hljs-number">1</span>; <span class="hljs-comment">% 伞的半径</span>
+
+height = <span class="hljs-number">0.5</span>; <span class="hljs-comment">% 伞的高度</span>
+
+handle_length = <span class="hljs-number">2</span>; <span class="hljs-comment">% 伞柄长度</span>
+
+semicircle_radius = <span class="hljs-number">0.26</span>; <span class="hljs-comment">% 伞柄末端半圆的半径</span>
+
+<span class="hljs-comment">% 生成伞叶网格</span>
+
+theta = <span class="hljs-built_in">linspace</span>(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>*<span class="hljs-built_in">pi</span>, <span class="hljs-number">100</span>);
+
+phi = <span class="hljs-built_in">linspace</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">pi</span>/<span class="hljs-number">2</span>, <span class="hljs-number">50</span>);
+
+[Theta, Phi] = <span class="hljs-built_in">meshgrid</span>(theta, phi);
+
+<span class="hljs-comment">% 计算伞叶的坐标</span>
+
+X = R * <span class="hljs-built_in">cos</span>(Theta) .* <span class="hljs-built_in">sin</span>(Phi);
+
+Y = R * <span class="hljs-built_in">sin</span>(Theta) .* <span class="hljs-built_in">sin</span>(Phi);
+
+Z = height * <span class="hljs-built_in">cos</span>(Phi);
+
+<span class="hljs-comment">% 给伞叶添加一些随机波动，模拟褶皱</span>
+
+noise = <span class="hljs-number">0.009</span> * <span class="hljs-built_in">randn</span>(<span class="hljs-built_in">size</span>(Z));
+
+Z = Z + noise;
+
+<span class="hljs-comment">% 绘制伞叶</span>
+
+<span class="hljs-built_in">figure</span>;
+
+surf(X, Y, Z, <span class="hljs-string">&#x27;FaceColor&#x27;</span>, <span class="hljs-string">&#x27;interp&#x27;</span>, <span class="hljs-string">&#x27;EdgeColor&#x27;</span>, <span class="hljs-string">&#x27;none&#x27;</span>);
+
+<span class="hljs-built_in">hold</span> on
+
+<span class="hljs-comment">% 绘制伞骨</span>
+
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:num_ribs
+
+theta_rib = (<span class="hljs-built_in">i</span> - <span class="hljs-number">1</span>) * <span class="hljs-number">2</span>*<span class="hljs-built_in">pi</span> / num_ribs;
+
+x_rib = R * <span class="hljs-built_in">cos</span>(theta_rib) * <span class="hljs-built_in">sin</span>(phi);
+
+y_rib = R * <span class="hljs-built_in">sin</span>(theta_rib) * <span class="hljs-built_in">sin</span>(phi);
+
+z_rib = height * <span class="hljs-built_in">cos</span>(phi);
+
+<span class="hljs-built_in">plot3</span>(x_rib, y_rib, z_rib, <span class="hljs-string">&#x27;k&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>);
+
+<span class="hljs-built_in">hold</span> on
+
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">% 绘制伞柄</span>
+
+x_handle = [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>];
+
+y_handle = [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>];
+
+z_handle = [<span class="hljs-number">0</span>, -handle_length+<span class="hljs-number">0.5</span>];
+
+<span class="hljs-built_in">plot3</span>(x_handle, y_handle, z_handle+[<span class="hljs-number">0.5</span>,<span class="hljs-number">0.5</span>], <span class="hljs-string">&#x27;k&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">3</span>);
+
+<span class="hljs-built_in">hold</span> on
+
+x_handle = [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>];
+
+y_handle = [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>];
+
+z_handle = [<span class="hljs-number">0</span>, handle_length*<span class="hljs-number">0.1</span>];
+
+<span class="hljs-built_in">plot3</span>(x_handle, y_handle, z_handle+[<span class="hljs-number">0.5</span>,<span class="hljs-number">0.5</span>], <span class="hljs-string">&#x27;k&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">3</span>);
+
+<span class="hljs-built_in">hold</span> on
+
+<span class="hljs-comment">% 绘制伞柄末端的半圆</span>
+
+semicircle_theta = <span class="hljs-built_in">linspace</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">pi</span>, <span class="hljs-number">50</span>);
+
+x_semicircle = semicircle_radius * <span class="hljs-built_in">cos</span>(semicircle_theta);
+
+y_semicircle = -handle_length * <span class="hljs-built_in">ones</span>(<span class="hljs-built_in">size</span>(semicircle_theta));
+
+z_semicircle = -semicircle_radius * <span class="hljs-built_in">sin</span>(semicircle_theta);
+
+<span class="hljs-built_in">plot3</span>(x_semicircle+<span class="hljs-number">0.15</span>+<span class="hljs-number">0.12</span>, y_semicircle+<span class="hljs-number">2</span>, z_semicircle<span class="hljs-number">-1</span>, <span class="hljs-string">&#x27;k&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">3</span>);
+
+<span class="hljs-comment">% 设置视角和坐标轴</span>
+
+axis equal;
+
+view(<span class="hljs-number">3</span>);
+
+box on;
+
+camlight;
+
+lighting gouraud;
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/matlab画出3d的常见复杂有机分子和矿物的分子结构.html">
+      <span>上一篇</span>
+      <strong>MATLAB画出3d的常见复杂有机分子和矿物的分子结构</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/matlab汽车行驶过程避障模拟简化.html">
+      <span>下一篇</span>
+      <strong>MATLAB汽车行驶过程避障模拟简化</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/凸包问题graham扫描算法matlab.html">凸包问题Graham扫描算法MATLAB</a></h3>
+        <p class="post-excerpt">算法要解决的问题</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.498Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

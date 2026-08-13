@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>使用pandapower计算ieee33模型潮流计算并给出ui界面展示 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/编程技术.html">编程技术</a>
+        </nav>
+        <h1 class="post-title">使用pandapower计算ieee33模型潮流计算并给出ui界面展示</h1>
+        <p class="post-deck">本文介绍了一个基于Python的IEEE33节点潮流计算系统，使用pandapower进行电力网络分析，并结合Tkinter开发图形用户界面。系统主要功能包括：加载IEEE33标准测试模型、执行潮流计算、显示网络拓扑结构、查看计算结果表格和电压分布曲线。程序采用模块化设计，包含网络信息展示、拓扑可视化、结果表格和电压曲线四个主要功能模块。拓扑图采用圆形布局，通过颜色和线宽直观反映线路负载率和节点电…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.732Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>47 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-26.html">编程</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文介绍了一个基于Python的IEEE33节点潮流计算系统，使用pandapower进行电力网络分析，并结合Tkinter开发图形用户界面。系统主要功能包括：加载IEEE33标准测试模型、执行潮流计算、显示网络拓扑结构、查看计算结果表格和电压分布曲线。程序采用模块化设计，包含网络信息展示、拓扑可视化、结果表格和电压曲线四个主要功能模块。拓扑图采用圆形布局，通过颜色和线宽直观反映线路负载率和节点电压状态，同时提供详细的统计信息和图例说明。电压曲线功能可自动识别异常电压节点并标注数值。该系统为配电网分析提供了直观的可视化工具，便于工程师快速评估网络运行状态。</p>
+<p><img src="../uploads/csdn/%E4%BD%BF%E7%94%A8pandapower%E8%AE%A1%E7%AE%97ieee33%E6%A8%A1%E5%9E%8B%E6%BD%AE%E6%B5%81%E8%AE%A1%E7%AE%97%E5%B9%B6%E7%BB%99%E5%87%BAui%E7%95%8C%E9%9D%A2%E5%B1%95%E7%A4%BA/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/%E4%BD%BF%E7%94%A8pandapower%E8%AE%A1%E7%AE%97ieee33%E6%A8%A1%E5%9E%8B%E6%BD%AE%E6%B5%81%E8%AE%A1%E7%AE%97%E5%B9%B6%E7%BB%99%E5%87%BAui%E7%95%8C%E9%9D%A2%E5%B1%95%E7%A4%BA/img-02.png" alt=""></p>
+<p><img src="../uploads/csdn/%E4%BD%BF%E7%94%A8pandapower%E8%AE%A1%E7%AE%97ieee33%E6%A8%A1%E5%9E%8B%E6%BD%AE%E6%B5%81%E8%AE%A1%E7%AE%97%E5%B9%B6%E7%BB%99%E5%87%BAui%E7%95%8C%E9%9D%A2%E5%B1%95%E7%A4%BA/img-03.png" alt=""></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> pandapower <span class="hljs-keyword">as</span> pp
+<span class="hljs-keyword">import</span> pandapower.networks <span class="hljs-keyword">as</span> pn
+<span class="hljs-keyword">import</span> pandapower.plotting <span class="hljs-keyword">as</span> pplot
+<span class="hljs-keyword">import</span> tkinter <span class="hljs-keyword">as</span> tk
+<span class="hljs-keyword">from</span> tkinter <span class="hljs-keyword">import</span> ttk, messagebox
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> matplotlib.backends.backend_tkagg <span class="hljs-keyword">import</span> FigureCanvasTkAgg
+<span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">from</span> font_config <span class="hljs-keyword">import</span> setup_chinese_font
+
+setup_chinese_font()
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">IEEE33PowerFlowApp</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, root</span>):
+        <span class="hljs-variable language_">self</span>.root = root
+        <span class="hljs-variable language_">self</span>.root.title(<span class="hljs-string">&quot;IEEE33节点潮流计算系统&quot;</span>)
+        <span class="hljs-variable language_">self</span>.root.geometry(<span class="hljs-string">&quot;1400x900&quot;</span>)
+
+        <span class="hljs-variable language_">self</span>.net = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.setup_ui()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">setup_ui</span>(<span class="hljs-params">self</span>):
+        main_frame = ttk.Frame(<span class="hljs-variable language_">self</span>.root, padding=<span class="hljs-string">&quot;10&quot;</span>)
+        main_frame.grid(row=<span class="hljs-number">0</span>, column=<span class="hljs-number">0</span>, sticky=(tk.W, tk.E, tk.N, tk.S))
+
+        <span class="hljs-variable language_">self</span>.root.columnconfigure(<span class="hljs-number">0</span>, weight=<span class="hljs-number">1</span>)
+        <span class="hljs-variable language_">self</span>.root.rowconfigure(<span class="hljs-number">0</span>, weight=<span class="hljs-number">1</span>)
+        main_frame.columnconfigure(<span class="hljs-number">1</span>, weight=<span class="hljs-number">1</span>)
+        main_frame.rowconfigure(<span class="hljs-number">1</span>, weight=<span class="hljs-number">1</span>)
+
+        control_frame = ttk.LabelFrame(main_frame, text=<span class="hljs-string">&quot;控制面板&quot;</span>, padding=<span class="hljs-string">&quot;10&quot;</span>)
+        control_frame.grid(row=<span class="hljs-number">0</span>, column=<span class="hljs-number">0</span>, columnspan=<span class="hljs-number">2</span>, sticky=(tk.W, tk.E), pady=<span class="hljs-number">5</span>)
+
+        ttk.Button(control_frame, text=<span class="hljs-string">&quot;加载IEEE33模型&quot;</span>, command=<span class="hljs-variable language_">self</span>.load_ieee33).pack(side=tk.LEFT, padx=<span class="hljs-number">5</span>)
+        ttk.Button(control_frame, text=<span class="hljs-string">&quot;执行潮流计算&quot;</span>, command=<span class="hljs-variable language_">self</span>.run_powerflow).pack(side=tk.LEFT, padx=<span class="hljs-number">5</span>)
+        ttk.Button(control_frame, text=<span class="hljs-string">&quot;显示网络拓扑&quot;</span>, command=<span class="hljs-variable language_">self</span>.show_topology).pack(side=tk.LEFT, padx=<span class="hljs-number">5</span>)
+        ttk.Button(control_frame, text=<span class="hljs-string">&quot;显示结果表格&quot;</span>, command=<span class="hljs-variable language_">self</span>.show_results_table).pack(side=tk.LEFT, padx=<span class="hljs-number">5</span>)
+        ttk.Button(control_frame, text=<span class="hljs-string">&quot;显示电压曲线&quot;</span>, command=<span class="hljs-variable language_">self</span>.show_voltage_curve).pack(side=tk.LEFT, padx=<span class="hljs-number">5</span>)
+
+        notebook = ttk.Notebook(main_frame)
+        notebook.grid(row=<span class="hljs-number">1</span>, column=<span class="hljs-number">0</span>, columnspan=<span class="hljs-number">2</span>, sticky=(tk.W, tk.E, tk.N, tk.S), pady=<span class="hljs-number">5</span>)
+
+        <span class="hljs-variable language_">self</span>.info_frame = ttk.Frame(notebook)
+        notebook.add(<span class="hljs-variable language_">self</span>.info_frame, text=<span class="hljs-string">&quot;网络信息&quot;</span>)
+
+        <span class="hljs-variable language_">self</span>.topology_frame = ttk.Frame(notebook)
+        notebook.add(<span class="hljs-variable language_">self</span>.topology_frame, text=<span class="hljs-string">&quot;网络拓扑&quot;</span>)
+
+        <span class="hljs-variable language_">self</span>.results_frame = ttk.Frame(notebook)
+        notebook.add(<span class="hljs-variable language_">self</span>.results_frame, text=<span class="hljs-string">&quot;计算结果&quot;</span>)
+
+        <span class="hljs-variable language_">self</span>.voltage_frame = ttk.Frame(notebook)
+        notebook.add(<span class="hljs-variable language_">self</span>.voltage_frame, text=<span class="hljs-string">&quot;电压曲线&quot;</span>)
+
+        <span class="hljs-variable language_">self</span>.setup_info_tab()
+        <span class="hljs-variable language_">self</span>.setup_topology_tab()
+        <span class="hljs-variable language_">self</span>.setup_results_tab()
+        <span class="hljs-variable language_">self</span>.setup_voltage_tab()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">setup_info_tab</span>(<span class="hljs-params">self</span>):
+        info_text = tk.Text(<span class="hljs-variable language_">self</span>.info_frame, wrap=tk.WORD, width=<span class="hljs-number">80</span>, height=<span class="hljs-number">30</span>)
+        scrollbar = ttk.Scrollbar(<span class="hljs-variable language_">self</span>.info_frame, orient=tk.VERTICAL, command=info_text.yview)
+        info_text.configure(yscrollcommand=scrollbar.<span class="hljs-built_in">set</span>)
+
+        info_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=<span class="hljs-literal">True</span>)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        <span class="hljs-variable language_">self</span>.info_text = info_text
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">setup_topology_tab</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.topology_fig = plt.Figure(figsize=(<span class="hljs-number">12</span>, <span class="hljs-number">8</span>))
+        <span class="hljs-variable language_">self</span>.topology_canvas = FigureCanvasTkAgg(<span class="hljs-variable language_">self</span>.topology_fig, master=<span class="hljs-variable language_">self</span>.topology_frame)
+        <span class="hljs-variable language_">self</span>.topology_canvas.get_tk_widget().pack(fill=tk.BOTH, expand=<span class="hljs-literal">True</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">setup_results_tab</span>(<span class="hljs-params">self</span>):
+        results_notebook = ttk.Notebook(<span class="hljs-variable language_">self</span>.results_frame)
+        results_notebook.pack(fill=tk.BOTH, expand=<span class="hljs-literal">True</span>)
+
+        <span class="hljs-variable language_">self</span>.bus_frame = ttk.Frame(results_notebook)
+        results_notebook.add(<span class="hljs-variable language_">self</span>.bus_frame, text=<span class="hljs-string">&quot;节点数据&quot;</span>)
+
+        <span class="hljs-variable language_">self</span>.line_frame = ttk.Frame(results_notebook)
+        results_notebook.add(<span class="hljs-variable language_">self</span>.line_frame, text=<span class="hljs-string">&quot;线路数据&quot;</span>)
+
+        <span class="hljs-variable language_">self</span>.load_frame = ttk.Frame(results_notebook)
+        results_notebook.add(<span class="hljs-variable language_">self</span>.load_frame, text=<span class="hljs-string">&quot;负荷数据&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">setup_voltage_tab</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.voltage_fig = plt.Figure(figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">6</span>))
+        <span class="hljs-variable language_">self</span>.voltage_canvas = FigureCanvasTkAgg(<span class="hljs-variable language_">self</span>.voltage_fig, master=<span class="hljs-variable language_">self</span>.voltage_frame)
+        <span class="hljs-variable language_">self</span>.voltage_canvas.get_tk_widget().pack(fill=tk.BOTH, expand=<span class="hljs-literal">True</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">load_ieee33</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-variable language_">self</span>.net = pn.case33bw()
+            <span class="hljs-variable language_">self</span>.display_network_info()
+            messagebox.showinfo(<span class="hljs-string">&quot;成功&quot;</span>, <span class="hljs-string">&quot;IEEE33模型加载成功！&quot;</span>)
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            messagebox.showerror(<span class="hljs-string">&quot;错误&quot;</span>, <span class="hljs-string">f&quot;加载模型失败: <span class="hljs-subst">{<span class="hljs-built_in">str</span>(e)}</span>&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">display_network_info</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.net <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-variable language_">self</span>.info_text.delete(<span class="hljs-number">1.0</span>, tk.END)
+            <span class="hljs-variable language_">self</span>.info_text.insert(tk.END, <span class="hljs-string">&quot;尚未加载IEEE33模型，请先加载模型。&quot;</span>)
+            <span class="hljs-keyword">return</span>
+
+        info = []
+        info.append(<span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">60</span>)
+        info.append(<span class="hljs-string">&quot;IEEE33节点配电网模型信息&quot;</span>)
+        info.append(<span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">60</span>)
+        info.append(<span class="hljs-string">f&quot;\n节点数量: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(self.net.bus)}</span>&quot;</span>)
+        info.append(<span class="hljs-string">f&quot;线路数量: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(self.net.line)}</span>&quot;</span>)
+        info.append(<span class="hljs-string">f&quot;负荷数量: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(self.net.load)}</span>&quot;</span>)
+        info.append(<span class="hljs-string">f&quot;发电机数量: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(self.net.gen)}</span>&quot;</span>)
+        info.append(<span class="hljs-string">f&quot;变压器数量: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(self.net.trafo)}</span>&quot;</span>)
+        info.append(<span class="hljs-string">f&quot;开关数量: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(self.net.switch)}</span>&quot;</span>)
+
+        info.append(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">60</span>)
+        info.append(<span class="hljs-string">&quot;系统参数&quot;</span>)
+        info.append(<span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">60</span>)
+        info.append(<span class="hljs-string">f&quot;基准电压: <span class="hljs-subst">{self.net.bus.vn_kv.iloc[<span class="hljs-number">0</span>]}</span> kV&quot;</span>)
+        info.append(<span class="hljs-string">f&quot;基准频率: <span class="hljs-subst">{self.net.f_hz}</span> Hz&quot;</span>)
+
+        info.append(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">60</span>)
+        info.append(<span class="hljs-string">&quot;节点信息 (前10个)&quot;</span>)
+        info.append(<span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">60</span>)
+        info.append(<span class="hljs-variable language_">self</span>.net.bus.head(<span class="hljs-number">10</span>).to_string())
+
+        info.append(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">60</span>)
+        info.append(<span class="hljs-string">&quot;线路信息 (前10条)&quot;</span>)
+        info.append(<span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">60</span>)
+        info.append(<span class="hljs-variable language_">self</span>.net.line.head(<span class="hljs-number">10</span>).to_string())
+
+        info.append(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">60</span>)
+        info.append(<span class="hljs-string">&quot;负荷信息 (前10个)&quot;</span>)
+        info.append(<span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">60</span>)
+        info.append(<span class="hljs-variable language_">self</span>.net.load.head(<span class="hljs-number">10</span>).to_string())
+
+        <span class="hljs-variable language_">self</span>.info_text.delete(<span class="hljs-number">1.0</span>, tk.END)
+        <span class="hljs-variable language_">self</span>.info_text.insert(tk.END, <span class="hljs-string">&quot;\n&quot;</span>.join(info))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">run_powerflow</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.net <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            messagebox.showerror(<span class="hljs-string">&quot;错误&quot;</span>, <span class="hljs-string">&quot;请先加载IEEE33模型！&quot;</span>)
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-keyword">try</span>:
+            pp.runpp(<span class="hljs-variable language_">self</span>.net)
+            <span class="hljs-variable language_">self</span>.display_results()
+            <span class="hljs-comment"># 自动更新拓扑图显示潮流结果</span>
+            <span class="hljs-variable language_">self</span>.show_topology_with_results()
+            messagebox.showinfo(<span class="hljs-string">&quot;成功&quot;</span>, <span class="hljs-string">&quot;潮流计算完成！&quot;</span>)
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            messagebox.showerror(<span class="hljs-string">&quot;错误&quot;</span>, <span class="hljs-string">f&quot;潮流计算失败: <span class="hljs-subst">{<span class="hljs-built_in">str</span>(e)}</span>&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">display_results</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.net <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">return</span>
+
+        bus_results = <span class="hljs-variable language_">self</span>.net.bus.copy()
+        bus_results[<span class="hljs-string">&#x27;电压幅值(p.u.)&#x27;</span>] = <span class="hljs-variable language_">self</span>.net.res_bus.vm_pu
+        bus_results[<span class="hljs-string">&#x27;电压相角(°)&#x27;</span>] = <span class="hljs-variable language_">self</span>.net.res_bus.va_degree
+        bus_results[<span class="hljs-string">&#x27;有功功率(kW)&#x27;</span>] = <span class="hljs-variable language_">self</span>.net.res_bus.p_mw * <span class="hljs-number">1000</span>
+        bus_results[<span class="hljs-string">&#x27;无功功率(kvar)&#x27;</span>] = <span class="hljs-variable language_">self</span>.net.res_bus.q_mvar * <span class="hljs-number">1000</span>
+
+        line_results = <span class="hljs-variable language_">self</span>.net.line.copy()
+        line_results[<span class="hljs-string">&#x27;有功功率始端(kW)&#x27;</span>] = <span class="hljs-variable language_">self</span>.net.res_line.p_from_mw * <span class="hljs-number">1000</span>
+        line_results[<span class="hljs-string">&#x27;无功功率始端(kvar)&#x27;</span>] = <span class="hljs-variable language_">self</span>.net.res_line.q_from_mvar * <span class="hljs-number">1000</span>
+        line_results[<span class="hljs-string">&#x27;有功功率末端(kW)&#x27;</span>] = <span class="hljs-variable language_">self</span>.net.res_line.p_to_mw * <span class="hljs-number">1000</span>
+        line_results[<span class="hljs-string">&#x27;无功功率末端(kvar)&#x27;</span>] = <span class="hljs-variable language_">self</span>.net.res_line.q_to_mvar * <span class="hljs-number">1000</span>
+        line_results[<span class="hljs-string">&#x27;电流(A)&#x27;</span>] = <span class="hljs-variable language_">self</span>.net.res_line.i_from_ka * <span class="hljs-number">1000</span>
+        line_results[<span class="hljs-string">&#x27;线路损耗(kW)&#x27;</span>] = <span class="hljs-variable language_">self</span>.net.res_line.pl_mw * <span class="hljs-number">1000</span>
+
+        load_results = <span class="hljs-variable language_">self</span>.net.load.copy()
+        load_results[<span class="hljs-string">&#x27;有功负荷(kW)&#x27;</span>] = <span class="hljs-variable language_">self</span>.net.res_load.p_mw * <span class="hljs-number">1000</span>
+        load_results[<span class="hljs-string">&#x27;无功负荷(kvar)&#x27;</span>] = <span class="hljs-variable language_">self</span>.net.res_load.q_mvar * <span class="hljs-number">1000</span>
+
+        <span class="hljs-variable language_">self</span>.display_dataframe(<span class="hljs-variable language_">self</span>.bus_frame, bus_results, <span class="hljs-string">&quot;节点潮流计算结果&quot;</span>)
+        <span class="hljs-variable language_">self</span>.display_dataframe(<span class="hljs-variable language_">self</span>.line_frame, line_results, <span class="hljs-string">&quot;线路潮流计算结果&quot;</span>)
+        <span class="hljs-variable language_">self</span>.display_dataframe(<span class="hljs-variable language_">self</span>.load_frame, load_results, <span class="hljs-string">&quot;负荷潮流计算结果&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">display_dataframe</span>(<span class="hljs-params">self, parent, df, title</span>):
+        <span class="hljs-keyword">for</span> widget <span class="hljs-keyword">in</span> parent.winfo_children():
+            widget.destroy()
+
+        frame = ttk.Frame(parent)
+        frame.pack(fill=tk.BOTH, expand=<span class="hljs-literal">True</span>)
+
+        ttk.Label(frame, text=title, font=(<span class="hljs-string">&#x27;Arial&#x27;</span>, <span class="hljs-number">12</span>, <span class="hljs-string">&#x27;bold&#x27;</span>)).pack(pady=<span class="hljs-number">5</span>)
+
+        <span class="hljs-comment"># 创建Treeview和滚动条</span>
+        tree_frame = ttk.Frame(frame)
+        tree_frame.pack(fill=tk.BOTH, expand=<span class="hljs-literal">True</span>)
+
+        tree = ttk.Treeview(tree_frame)
+        tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=<span class="hljs-literal">True</span>)
+
+        scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=tree.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        tree.configure(yscrollcommand=scrollbar.<span class="hljs-built_in">set</span>)
+
+        <span class="hljs-comment"># 水平滚动条</span>
+        h_scrollbar = ttk.Scrollbar(frame, orient=tk.HORIZONTAL, command=tree.xview)
+        h_scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
+        tree.configure(xscrollcommand=h_scrollbar.<span class="hljs-built_in">set</span>)
+
+        tree[<span class="hljs-string">&quot;columns&quot;</span>] = <span class="hljs-built_in">list</span>(df.columns)
+        tree[<span class="hljs-string">&quot;show&quot;</span>] = <span class="hljs-string">&quot;headings&quot;</span>
+
+        <span class="hljs-keyword">for</span> col <span class="hljs-keyword">in</span> df.columns:
+            tree.heading(col, text=col)
+            tree.column(col, width=<span class="hljs-number">100</span>, anchor=tk.CENTER)
+
+        <span class="hljs-keyword">for</span> idx, row <span class="hljs-keyword">in</span> df.iterrows():
+            tree.insert(<span class="hljs-string">&quot;&quot;</span>, tk.END, values=<span class="hljs-built_in">list</span>(row))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">show_topology</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.net <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            messagebox.showerror(<span class="hljs-string">&quot;错误&quot;</span>, <span class="hljs-string">&quot;请先加载IEEE33模型！&quot;</span>)
+            <span class="hljs-keyword">return</span>
+        <span class="hljs-variable language_">self</span>.show_topology_with_results()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">show_topology_with_results</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;显示带有潮流结果的网络拓扑图&quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.topology_fig.clear()
+
+        <span class="hljs-comment"># 创建两个子图：拓扑图和图例</span>
+        gs = <span class="hljs-variable language_">self</span>.topology_fig.add_gridspec(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, width_ratios=[<span class="hljs-number">4</span>, <span class="hljs-number">1</span>])
+        ax = <span class="hljs-variable language_">self</span>.topology_fig.add_subplot(gs[<span class="hljs-number">0</span>])
+        legend_ax = <span class="hljs-variable language_">self</span>.topology_fig.add_subplot(gs[<span class="hljs-number">1</span>])
+        legend_ax.axis(<span class="hljs-string">&#x27;off&#x27;</span>)
+
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-comment"># 获取节点位置（使用圆形布局）</span>
+            n_buses = <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.net.bus)
+            theta = np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>*np.pi, n_buses, endpoint=<span class="hljs-literal">False</span>)
+            radius = <span class="hljs-number">5</span>
+            bus_positions = {}
+
+            <span class="hljs-comment"># 创建节点坐标（圆形布局）</span>
+            <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(n_buses):
+                x = radius * np.cos(theta[i])
+                y = radius * np.sin(theta[i])
+                bus_positions[i] = (x, y)
+
+            <span class="hljs-comment"># 绘制线路</span>
+            <span class="hljs-keyword">for</span> idx, line <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.net.line.iterrows():
+                from_bus = line[<span class="hljs-string">&#x27;from_bus&#x27;</span>]
+                to_bus = line[<span class="hljs-string">&#x27;to_bus&#x27;</span>]
+
+                <span class="hljs-keyword">if</span> from_bus <span class="hljs-keyword">in</span> bus_positions <span class="hljs-keyword">and</span> to_bus <span class="hljs-keyword">in</span> bus_positions:
+                    x_coords = [bus_positions[from_bus][<span class="hljs-number">0</span>], bus_positions[to_bus][<span class="hljs-number">0</span>]]
+                    y_coords = [bus_positions[from_bus][<span class="hljs-number">1</span>], bus_positions[to_bus][<span class="hljs-number">1</span>]]
+
+                    <span class="hljs-comment"># 根据线路负载率设置颜色</span>
+                    <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(<span class="hljs-variable language_">self</span>.net, <span class="hljs-string">&#x27;res_line&#x27;</span>) <span class="hljs-keyword">and</span> idx <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.net.res_line.index:
+                        loading = <span class="hljs-built_in">abs</span>(<span class="hljs-variable language_">self</span>.net.res_line.loc[idx, <span class="hljs-string">&#x27;i_from_ka&#x27;</span>] * <span class="hljs-number">1000</span> / <span class="hljs-number">400</span>)  <span class="hljs-comment"># 假设额定电流400A</span>
+                        <span class="hljs-keyword">if</span> loading &lt; <span class="hljs-number">0.5</span>:
+                            color = <span class="hljs-string">&#x27;green&#x27;</span>
+                        <span class="hljs-keyword">elif</span> loading &lt; <span class="hljs-number">0.8</span>:
+                            color = <span class="hljs-string">&#x27;orange&#x27;</span>
+                        <span class="hljs-keyword">else</span>:
+                            color = <span class="hljs-string">&#x27;red&#x27;</span>
+                        line_width = <span class="hljs-number">1</span> + loading
+                    <span class="hljs-keyword">else</span>:
+                        color = <span class="hljs-string">&#x27;blue&#x27;</span>
+                        line_width = <span class="hljs-number">1</span>
+
+                    ax.plot(x_coords, y_coords, color=color, linewidth=line_width,
+                           alpha=<span class="hljs-number">0.7</span>, zorder=<span class="hljs-number">1</span>)
+
+            <span class="hljs-comment"># 绘制节点</span>
+            <span class="hljs-keyword">for</span> bus_id, pos <span class="hljs-keyword">in</span> bus_positions.items():
+                <span class="hljs-comment"># 根据电压幅值设置节点颜色</span>
+                <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(<span class="hljs-variable language_">self</span>.net, <span class="hljs-string">&#x27;res_bus&#x27;</span>) <span class="hljs-keyword">and</span> bus_id <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.net.res_bus.index:
+                    v_pu = <span class="hljs-variable language_">self</span>.net.res_bus.loc[bus_id, <span class="hljs-string">&#x27;vm_pu&#x27;</span>]
+                    <span class="hljs-keyword">if</span> v_pu &lt; <span class="hljs-number">0.95</span>:
+                        color = <span class="hljs-string">&#x27;red&#x27;</span>
+                        size = <span class="hljs-number">80</span>
+                    <span class="hljs-keyword">elif</span> v_pu &gt; <span class="hljs-number">1.05</span>:
+                        color = <span class="hljs-string">&#x27;orange&#x27;</span>
+                        size = <span class="hljs-number">80</span>
+                    <span class="hljs-keyword">else</span>:
+                        color = <span class="hljs-string">&#x27;green&#x27;</span>
+                        size = <span class="hljs-number">60</span>
+                <span class="hljs-keyword">else</span>:
+                    color = <span class="hljs-string">&#x27;blue&#x27;</span>
+                    size = <span class="hljs-number">50</span>
+
+                scatter = ax.scatter(pos[<span class="hljs-number">0</span>], pos[<span class="hljs-number">1</span>], c=color, s=size,
+                                    zorder=<span class="hljs-number">2</span>, edgecolors=<span class="hljs-string">&#x27;black&#x27;</span>, linewidth=<span class="hljs-number">1</span>)
+
+                <span class="hljs-comment"># 添加节点编号标签</span>
+                ax.annotate(<span class="hljs-built_in">str</span>(bus_id), (pos[<span class="hljs-number">0</span>], pos[<span class="hljs-number">1</span>]),
+                           xytext=(<span class="hljs-number">5</span>, <span class="hljs-number">5</span>), textcoords=<span class="hljs-string">&#x27;offset points&#x27;</span>,
+                           fontsize=<span class="hljs-number">8</span>, bbox=<span class="hljs-built_in">dict</span>(boxstyle=<span class="hljs-string">&#x27;round,pad=0.2&#x27;</span>,
+                                                facecolor=<span class="hljs-string">&#x27;white&#x27;</span>, alpha=<span class="hljs-number">0.7</span>))
+
+            <span class="hljs-comment"># 设置标题和标签</span>
+            ax.set_title(<span class="hljs-string">&quot;IEEE33节点配电网潮流分布图&quot;</span>, fontsize=<span class="hljs-number">14</span>, fontweight=<span class="hljs-string">&#x27;bold&#x27;</span>, pad=<span class="hljs-number">20</span>)
+            ax.set_xlabel(<span class="hljs-string">&#x27;X 坐标&#x27;</span>, fontsize=<span class="hljs-number">10</span>)
+            ax.set_ylabel(<span class="hljs-string">&#x27;Y 坐标&#x27;</span>, fontsize=<span class="hljs-number">10</span>)
+            ax.grid(<span class="hljs-literal">True</span>, alpha=<span class="hljs-number">0.3</span>)
+            ax.set_aspect(<span class="hljs-string">&#x27;equal&#x27;</span>)
+
+            <span class="hljs-comment"># 绘制图例</span>
+            legend_elements = []
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(<span class="hljs-variable language_">self</span>.net, <span class="hljs-string">&#x27;res_bus&#x27;</span>):
+                legend_elements.extend([
+                    plt.Line2D([<span class="hljs-number">0</span>], [<span class="hljs-number">0</span>], marker=<span class="hljs-string">&#x27;o&#x27;</span>, color=<span class="hljs-string">&#x27;w&#x27;</span>, markerfacecolor=<span class="hljs-string">&#x27;green&#x27;</span>,
+                              markersize=<span class="hljs-number">10</span>, label=<span class="hljs-string">&#x27;电压正常 (0.95-1.05 p.u.)&#x27;</span>),
+                    plt.Line2D([<span class="hljs-number">0</span>], [<span class="hljs-number">0</span>], marker=<span class="hljs-string">&#x27;o&#x27;</span>, color=<span class="hljs-string">&#x27;w&#x27;</span>, markerfacecolor=<span class="hljs-string">&#x27;orange&#x27;</span>,
+                              markersize=<span class="hljs-number">10</span>, label=<span class="hljs-string">&#x27;电压偏高 (&gt;1.05 p.u.)&#x27;</span>),
+                    plt.Line2D([<span class="hljs-number">0</span>], [<span class="hljs-number">0</span>], marker=<span class="hljs-string">&#x27;o&#x27;</span>, color=<span class="hljs-string">&#x27;w&#x27;</span>, markerfacecolor=<span class="hljs-string">&#x27;red&#x27;</span>,
+                              markersize=<span class="hljs-number">10</span>, label=<span class="hljs-string">&#x27;电压偏低 (&lt;0.95 p.u.)&#x27;</span>),
+                ])
+
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(<span class="hljs-variable language_">self</span>.net, <span class="hljs-string">&#x27;res_line&#x27;</span>):
+                legend_elements.extend([
+                    plt.Line2D([<span class="hljs-number">0</span>], [<span class="hljs-number">0</span>], color=<span class="hljs-string">&#x27;green&#x27;</span>, linewidth=<span class="hljs-number">2</span>, label=<span class="hljs-string">&#x27;线路轻载 (&lt;50%)&#x27;</span>),
+                    plt.Line2D([<span class="hljs-number">0</span>], [<span class="hljs-number">0</span>], color=<span class="hljs-string">&#x27;orange&#x27;</span>, linewidth=<span class="hljs-number">2</span>, label=<span class="hljs-string">&#x27;线路中载 (50%-80%)&#x27;</span>),
+                    plt.Line2D([<span class="hljs-number">0</span>], [<span class="hljs-number">0</span>], color=<span class="hljs-string">&#x27;red&#x27;</span>, linewidth=<span class="hljs-number">2</span>, label=<span class="hljs-string">&#x27;线路重载 (&gt;80%)&#x27;</span>),
+                ])
+
+            legend_ax.legend(handles=legend_elements, loc=<span class="hljs-string">&#x27;center&#x27;</span>,
+                           fontsize=<span class="hljs-number">9</span>, frameon=<span class="hljs-literal">True</span>)
+
+            <span class="hljs-comment"># 添加网络统计信息</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(<span class="hljs-variable language_">self</span>.net, <span class="hljs-string">&#x27;res_bus&#x27;</span>):
+                v_min = <span class="hljs-variable language_">self</span>.net.res_bus.vm_pu.<span class="hljs-built_in">min</span>()
+                v_max = <span class="hljs-variable language_">self</span>.net.res_bus.vm_pu.<span class="hljs-built_in">max</span>()
+                v_mean = <span class="hljs-variable language_">self</span>.net.res_bus.vm_pu.mean()
+
+                info_text = <span class="hljs-string">f&quot;网络统计信息:\n\n&quot;</span>
+                info_text += <span class="hljs-string">f&quot;最低电压: <span class="hljs-subst">{v_min:<span class="hljs-number">.3</span>f}</span> p.u.\n&quot;</span>
+                info_text += <span class="hljs-string">f&quot;最高电压: <span class="hljs-subst">{v_max:<span class="hljs-number">.3</span>f}</span> p.u.\n&quot;</span>
+                info_text += <span class="hljs-string">f&quot;平均电压: <span class="hljs-subst">{v_mean:<span class="hljs-number">.3</span>f}</span> p.u.\n&quot;</span>
+
+                <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(<span class="hljs-variable language_">self</span>.net, <span class="hljs-string">&#x27;res_line&#x27;</span>):
+                    total_loss = <span class="hljs-variable language_">self</span>.net.res_line.pl_mw.<span class="hljs-built_in">sum</span>() * <span class="hljs-number">1000</span>
+                    info_text += <span class="hljs-string">f&quot;总网损: <span class="hljs-subst">{total_loss:<span class="hljs-number">.2</span>f}</span> kW\n&quot;</span>
+
+                <span class="hljs-comment"># 统计各电压等级节点数量</span>
+                n_low = <span class="hljs-built_in">sum</span>(<span class="hljs-variable language_">self</span>.net.res_bus.vm_pu &lt; <span class="hljs-number">0.95</span>)
+                n_normal = <span class="hljs-built_in">sum</span>((<span class="hljs-variable language_">self</span>.net.res_bus.vm_pu &gt;= <span class="hljs-number">0.95</span>) &amp; (<span class="hljs-variable language_">self</span>.net.res_bus.vm_pu &lt;= <span class="hljs-number">1.05</span>))
+                n_high = <span class="hljs-built_in">sum</span>(<span class="hljs-variable language_">self</span>.net.res_bus.vm_pu &gt; <span class="hljs-number">1.05</span>)
+
+                info_text += <span class="hljs-string">f&quot;\n电压质量统计:\n&quot;</span>
+                info_text += <span class="hljs-string">f&quot;正常节点: <span class="hljs-subst">{n_normal}</span>\n&quot;</span>
+                info_text += <span class="hljs-string">f&quot;偏低节点: <span class="hljs-subst">{n_low}</span>\n&quot;</span>
+                info_text += <span class="hljs-string">f&quot;偏高节点: <span class="hljs-subst">{n_high}</span>\n&quot;</span>
+
+                ax.text(<span class="hljs-number">0.02</span>, <span class="hljs-number">0.98</span>, info_text, transform=ax.transAxes,
+                       fontsize=<span class="hljs-number">9</span>, verticalalignment=<span class="hljs-string">&#x27;top&#x27;</span>,
+                       bbox=<span class="hljs-built_in">dict</span>(boxstyle=<span class="hljs-string">&#x27;round&#x27;</span>, facecolor=<span class="hljs-string">&#x27;wheat&#x27;</span>, alpha=<span class="hljs-number">0.8</span>))
+
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            error_msg = <span class="hljs-string">f&quot;拓扑图生成失败\n错误信息: <span class="hljs-subst">{<span class="hljs-built_in">str</span>(e)}</span>&quot;</span>
+            ax.text(<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>, error_msg, ha=<span class="hljs-string">&#x27;center&#x27;</span>, va=<span class="hljs-string">&#x27;center&#x27;</span>,
+                   fontsize=<span class="hljs-number">12</span>, color=<span class="hljs-string">&#x27;red&#x27;</span>)
+            ax.set_title(<span class="hljs-string">&quot;IEEE33节点配电网拓扑图&quot;</span>, fontsize=<span class="hljs-number">14</span>, fontweight=<span class="hljs-string">&#x27;bold&#x27;</span>)
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;拓扑图绘制错误: <span class="hljs-subst">{<span class="hljs-built_in">str</span>(e)}</span>&quot;</span>)
+
+        <span class="hljs-variable language_">self</span>.topology_fig.tight_layout()
+        <span class="hljs-variable language_">self</span>.topology_canvas.draw()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">show_results_table</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.net <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            messagebox.showerror(<span class="hljs-string">&quot;错误&quot;</span>, <span class="hljs-string">&quot;请先加载IEEE33模型！&quot;</span>)
+            <span class="hljs-keyword">return</span>
+        <span class="hljs-variable language_">self</span>.display_results()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">show_voltage_curve</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.net <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            messagebox.showerror(<span class="hljs-string">&quot;错误&quot;</span>, <span class="hljs-string">&quot;请先加载IEEE33模型！&quot;</span>)
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-variable language_">self</span>.voltage_fig.clear()
+        ax = <span class="hljs-variable language_">self</span>.voltage_fig.add_subplot(<span class="hljs-number">111</span>)
+
+        bus_voltages = <span class="hljs-variable language_">self</span>.net.res_bus.vm_pu.values
+        bus_indices = <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(bus_voltages))
+
+        <span class="hljs-comment"># 绘制电压曲线</span>
+        line = ax.plot(bus_indices, bus_voltages, <span class="hljs-string">&#x27;b-o&#x27;</span>, linewidth=<span class="hljs-number">2</span>,
+                      markersize=<span class="hljs-number">6</span>, label=<span class="hljs-string">&#x27;电压幅值&#x27;</span>, zorder=<span class="hljs-number">2</span>)
+
+        <span class="hljs-comment"># 添加参考线</span>
+        ax.axhline(y=<span class="hljs-number">1.0</span>, color=<span class="hljs-string">&#x27;r&#x27;</span>, linestyle=<span class="hljs-string">&#x27;--&#x27;</span>, linewidth=<span class="hljs-number">1</span>,
+                  label=<span class="hljs-string">&#x27;额定电压&#x27;</span>, alpha=<span class="hljs-number">0.7</span>)
+        ax.axhline(y=<span class="hljs-number">0.95</span>, color=<span class="hljs-string">&#x27;orange&#x27;</span>, linestyle=<span class="hljs-string">&#x27;--&#x27;</span>, linewidth=<span class="hljs-number">1</span>,
+                  label=<span class="hljs-string">&#x27;下限(0.95 p.u.)&#x27;</span>, alpha=<span class="hljs-number">0.7</span>)
+        ax.axhline(y=<span class="hljs-number">1.05</span>, color=<span class="hljs-string">&#x27;orange&#x27;</span>, linestyle=<span class="hljs-string">&#x27;--&#x27;</span>, linewidth=<span class="hljs-number">1</span>,
+                  label=<span class="hljs-string">&#x27;上限(1.05 p.u.)&#x27;</span>, alpha=<span class="hljs-number">0.7</span>)
+
+        <span class="hljs-comment"># 填充电压正常区域</span>
+        ax.fill_between(bus_indices, <span class="hljs-number">0.95</span>, <span class="hljs-number">1.05</span>, alpha=<span class="hljs-number">0.2</span>, color=<span class="hljs-string">&#x27;green&#x27;</span>,
+                        label=<span class="hljs-string">&#x27;正常范围&#x27;</span>)
+
+        <span class="hljs-comment"># 标注异常电压节点</span>
+        <span class="hljs-keyword">for</span> i, v <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(bus_voltages):
+            <span class="hljs-keyword">if</span> v &lt; <span class="hljs-number">0.95</span> <span class="hljs-keyword">or</span> v &gt; <span class="hljs-number">1.05</span>:
+                ax.plot(i, v, <span class="hljs-string">&#x27;ro&#x27;</span>, markersize=<span class="hljs-number">8</span>, zorder=<span class="hljs-number">3</span>)
+                ax.annotate(<span class="hljs-string">f&#x27;<span class="hljs-subst">{v:<span class="hljs-number">.3</span>f}</span>&#x27;</span>, (i, v), textcoords=<span class="hljs-string">&quot;offset points&quot;</span>,
+                           xytext=(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>), ha=<span class="hljs-string">&#x27;center&#x27;</span>, fontsize=<span class="hljs-number">8</span>,
+                           bbox=<span class="hljs-built_in">dict</span>(boxstyle=<span class="hljs-string">&#x27;round,pad=0.2&#x27;</span>,
+                                    facecolor=<span class="hljs-string">&#x27;yellow&#x27;</span>, alpha=<span class="hljs-number">0.7</span>))
+
+        ax.set_xlabel(<span class="hljs-string">&#x27;节点编号&#x27;</span>, fontsize=<span class="hljs-number">12</span>)
+        ax.set_ylabel(<span class="hljs-string">&#x27;电压幅值 (p.u.)&#x27;</span>, fontsize=<span class="hljs-number">12</span>)
+        ax.set_title(<span class="hljs-string">&#x27;IEEE33节点电压分布曲线&#x27;</span>, fontsize=<span class="hljs-number">14</span>, fontweight=<span class="hljs-string">&#x27;bold&#x27;</span>)
+        ax.grid(<span class="hljs-literal">True</span>, alpha=<span class="hljs-number">0.3</span>)
+        ax.legend(fontsize=<span class="hljs-number">9</span>, loc=<span class="hljs-string">&#x27;best&#x27;</span>)
+        ax.set_ylim([<span class="hljs-number">0.9</span>, <span class="hljs-number">1.1</span>])
+        ax.set_xlim([-<span class="hljs-number">0.5</span>, <span class="hljs-built_in">len</span>(bus_indices)-<span class="hljs-number">0.5</span>])
+
+        <span class="hljs-comment"># 设置x轴刻度</span>
+        ax.set_xticks(np.arange(<span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(bus_indices), <span class="hljs-number">2</span>))
+
+        <span class="hljs-comment"># 添加统计信息</span>
+        v_min = np.<span class="hljs-built_in">min</span>(bus_voltages)
+        v_min_node = np.argmin(bus_voltages)
+        v_max = np.<span class="hljs-built_in">max</span>(bus_voltages)
+        v_max_node = np.argmax(bus_voltages)
+
+        info_text = <span class="hljs-string">f&quot;最低电压: <span class="hljs-subst">{v_min:<span class="hljs-number">.3</span>f}</span> p.u. (节点 <span class="hljs-subst">{v_min_node}</span>)\n&quot;</span>
+        info_text += <span class="hljs-string">f&quot;最高电压: <span class="hljs-subst">{v_max:<span class="hljs-number">.3</span>f}</span> p.u. (节点 <span class="hljs-subst">{v_max_node}</span>)&quot;</span>
+
+        ax.text(<span class="hljs-number">0.02</span>, <span class="hljs-number">0.02</span>, info_text, transform=ax.transAxes,
+               fontsize=<span class="hljs-number">9</span>, verticalalignment=<span class="hljs-string">&#x27;bottom&#x27;</span>,
+               bbox=<span class="hljs-built_in">dict</span>(boxstyle=<span class="hljs-string">&#x27;round&#x27;</span>, facecolor=<span class="hljs-string">&#x27;wheat&#x27;</span>, alpha=<span class="hljs-number">0.8</span>))
+
+        <span class="hljs-variable language_">self</span>.voltage_fig.tight_layout()
+        <span class="hljs-variable language_">self</span>.voltage_canvas.draw()
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    root = tk.Tk()
+    app = IEEE33PowerFlowApp(root)
+    root.mainloop()
+
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    main()
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <span class="pager-placeholder"></span>
+  
+  
+    <a class="pager-item right" href="../post/一个月的阴晴圆缺变化回弹html仿真.html">
+      <span>下一篇</span>
+      <strong>一个月的阴晴圆缺变化回弹HTML仿真</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/2的100次方mod5用代码怎么计算.html">2的100次方mod5用代码怎么计算</a></h3>
+        <p class="post-excerpt">在 Python 中，你可以使用内置的 pow() 函数来高效地计算幂运算和取模运算。以下是计算 2 的 100 次方对 5 取模的代码：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.666Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

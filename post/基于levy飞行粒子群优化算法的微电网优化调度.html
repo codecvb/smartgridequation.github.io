@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>基于Levy飞行粒子群优化算法的微电网优化调度 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/算法与数据结构.html">算法与数据结构</a>
+        </nav>
+        <h1 class="post-title">基于Levy飞行粒子群优化算法的微电网优化调度</h1>
+        <p class="post-deck">本文提出了一种基于Levy飞行粒子群优化（LFPSO）的微电网优化调度模型。该模型综合考虑经济成本和环境成本，通过优化光伏、风电、燃料电池、微型燃气轮机、柴油发电机和蓄电池等设备的出力，实现微电网24小时最优运行。研究对比了削峰填谷和模糊逻辑两种蓄电池控制策略，结果表明模糊逻辑策略能进一步降低总成本。系统包含负荷预测、可再生能源发电预测、设备参数设置和约束条件处理等功能模块，采用加权目标函数平衡经…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.532Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>64 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-18.html">算法</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文提出了一种基于Levy飞行粒子群优化（LFPSO）的微电网优化调度模型。该模型综合考虑经济成本和环境成本，通过优化光伏、风电、燃料电池、微型燃气轮机、柴油发电机和蓄电池等设备的出力，实现微电网24小时最优运行。研究对比了削峰填谷和模糊逻辑两种蓄电池控制策略，结果表明模糊逻辑策略能进一步降低总成本。系统包含负荷预测、可再生能源发电预测、设备参数设置和约束条件处理等功能模块，采用加权目标函数平衡经济性和环保性。仿真结果显示，该优化模型能有效协调各类发电设备，在满足功率平衡和设备运行约束的同时实现成本最小化。</p>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8Elevy%E9%A3%9E%E8%A1%8C%E7%B2%92%E5%AD%90%E7%BE%A4%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95%E7%9A%84%E5%BE%AE%E7%94%B5%E7%BD%91%E4%BC%98%E5%8C%96%E8%B0%83%E5%BA%A6/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8Elevy%E9%A3%9E%E8%A1%8C%E7%B2%92%E5%AD%90%E7%BE%A4%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95%E7%9A%84%E5%BE%AE%E7%94%B5%E7%BD%91%E4%BC%98%E5%8C%96%E8%B0%83%E5%BA%A6/img-02.jpeg" alt=""><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8Elevy%E9%A3%9E%E8%A1%8C%E7%B2%92%E5%AD%90%E7%BE%A4%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95%E7%9A%84%E5%BE%AE%E7%94%B5%E7%BD%91%E4%BC%98%E5%8C%96%E8%B0%83%E5%BA%A6/img-03.jpeg" alt=""><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8Elevy%E9%A3%9E%E8%A1%8C%E7%B2%92%E5%AD%90%E7%BE%A4%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95%E7%9A%84%E5%BE%AE%E7%94%B5%E7%BD%91%E4%BC%98%E5%8C%96%E8%B0%83%E5%BA%A6/img-04.jpeg" alt=""><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8Elevy%E9%A3%9E%E8%A1%8C%E7%B2%92%E5%AD%90%E7%BE%A4%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95%E7%9A%84%E5%BE%AE%E7%94%B5%E7%BD%91%E4%BC%98%E5%8C%96%E8%B0%83%E5%BA%A6/img-05.jpeg" alt=""><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8Elevy%E9%A3%9E%E8%A1%8C%E7%B2%92%E5%AD%90%E7%BE%A4%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95%E7%9A%84%E5%BE%AE%E7%94%B5%E7%BD%91%E4%BC%98%E5%8C%96%E8%B0%83%E5%BA%A6/img-06.jpeg" alt=""><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8Elevy%E9%A3%9E%E8%A1%8C%E7%B2%92%E5%AD%90%E7%BE%A4%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95%E7%9A%84%E5%BE%AE%E7%94%B5%E7%BD%91%E4%BC%98%E5%8C%96%E8%B0%83%E5%BA%A6/img-07.jpeg" alt=""><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8Elevy%E9%A3%9E%E8%A1%8C%E7%B2%92%E5%AD%90%E7%BE%A4%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95%E7%9A%84%E5%BE%AE%E7%94%B5%E7%BD%91%E4%BC%98%E5%8C%96%E8%B0%83%E5%BA%A6/img-08.jpeg" alt=""><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8Elevy%E9%A3%9E%E8%A1%8C%E7%B2%92%E5%AD%90%E7%BE%A4%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95%E7%9A%84%E5%BE%AE%E7%94%B5%E7%BD%91%E4%BC%98%E5%8C%96%E8%B0%83%E5%BA%A6/img-09.jpeg" alt=""><img src="../uploads/csdn/%E5%9F%BA%E4%BA%8Elevy%E9%A3%9E%E8%A1%8C%E7%B2%92%E5%AD%90%E7%BE%A4%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95%E7%9A%84%E5%BE%AE%E7%94%B5%E7%BD%91%E4%BC%98%E5%8C%96%E8%B0%83%E5%BA%A6/img-10.jpeg" alt=""></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+<span class="hljs-keyword">from</span> datetime <span class="hljs-keyword">import</span> datetime, timedelta
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> scipy.special <span class="hljs-keyword">import</span> gamma
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MicrogridOptimization</span>:
+    <span class="hljs-string">&quot;&quot;&quot;
+    Microgrid Optimization Scheduling Model
+    Based on paper &quot;Microgrid Optimal Dispatch Based on Levy Flight Particle Swarm Optimization&quot;
+    &quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;Initialize microgrid parameters&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># Device parameters (Table 6 in paper)</span>
+        <span class="hljs-variable language_">self</span>.devices = {
+            <span class="hljs-string">&#x27;PV&#x27;</span>: {<span class="hljs-string">&#x27;min&#x27;</span>: <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;max&#x27;</span>: <span class="hljs-number">50</span>, <span class="hljs-string">&#x27;operation_cost&#x27;</span>: <span class="hljs-number">0.0103</span>, <span class="hljs-string">&#x27;fuel_cost&#x27;</span>: <span class="hljs-number">0</span>},
+            <span class="hljs-string">&#x27;WT&#x27;</span>: {<span class="hljs-string">&#x27;min&#x27;</span>: <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;max&#x27;</span>: <span class="hljs-number">70</span>, <span class="hljs-string">&#x27;operation_cost&#x27;</span>: <span class="hljs-number">0.0450</span>, <span class="hljs-string">&#x27;fuel_cost&#x27;</span>: <span class="hljs-number">0</span>},
+            <span class="hljs-string">&#x27;FC&#x27;</span>: {<span class="hljs-string">&#x27;min&#x27;</span>: <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;max&#x27;</span>: <span class="hljs-number">65</span>, <span class="hljs-string">&#x27;operation_cost&#x27;</span>: <span class="hljs-number">0.0293</span>, <span class="hljs-string">&#x27;fuel_cost&#x27;</span>: <span class="hljs-number">0.2435</span>},
+            <span class="hljs-string">&#x27;MT&#x27;</span>: {<span class="hljs-string">&#x27;min&#x27;</span>: <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;max&#x27;</span>: <span class="hljs-number">65</span>, <span class="hljs-string">&#x27;operation_cost&#x27;</span>: <span class="hljs-number">0.0419</span>, <span class="hljs-string">&#x27;fuel_cost&#x27;</span>: <span class="hljs-number">0.4090</span>},
+            <span class="hljs-string">&#x27;DE&#x27;</span>: {<span class="hljs-string">&#x27;min&#x27;</span>: <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;max&#x27;</span>: <span class="hljs-number">50</span>, <span class="hljs-string">&#x27;operation_cost&#x27;</span>: <span class="hljs-number">0.1258</span>, <span class="hljs-string">&#x27;fuel_cost&#x27;</span>: <span class="hljs-number">0.6031</span>},
+            <span class="hljs-string">&#x27;BT&#x27;</span>: {<span class="hljs-string">&#x27;min&#x27;</span>: -<span class="hljs-number">30</span>, <span class="hljs-string">&#x27;max&#x27;</span>: <span class="hljs-number">30</span>, <span class="hljs-string">&#x27;operation_cost&#x27;</span>: <span class="hljs-number">0.005</span>}  <span class="hljs-comment"># 蓄电池充放电</span>
+        }
+
+        <span class="hljs-comment"># Pollutant treatment costs (Table 5 in paper)</span>
+        <span class="hljs-variable language_">self</span>.pollution_costs = {
+            <span class="hljs-string">&#x27;CO2&#x27;</span>: <span class="hljs-number">0.088</span>,
+            <span class="hljs-string">&#x27;NOX&#x27;</span>: <span class="hljs-number">26.46</span>,
+            <span class="hljs-string">&#x27;SO2&#x27;</span>: <span class="hljs-number">6.237</span>
+        }
+
+        <span class="hljs-comment"># Emission factors (unit: kg/kWh)</span>
+        <span class="hljs-variable language_">self</span>.emission_factors = {
+            <span class="hljs-string">&#x27;FC&#x27;</span>: {<span class="hljs-string">&#x27;CO2&#x27;</span>: <span class="hljs-number">1.596</span>, <span class="hljs-string">&#x27;NOX&#x27;</span>: <span class="hljs-number">0.440</span>, <span class="hljs-string">&#x27;SO2&#x27;</span>: <span class="hljs-number">0.008</span>},
+            <span class="hljs-string">&#x27;MT&#x27;</span>: {<span class="hljs-string">&#x27;CO2&#x27;</span>: <span class="hljs-number">1.432</span>, <span class="hljs-string">&#x27;NOX&#x27;</span>: <span class="hljs-number">0.030</span>, <span class="hljs-string">&#x27;SO2&#x27;</span>: <span class="hljs-number">0.006</span>},
+            <span class="hljs-string">&#x27;DE&#x27;</span>: {<span class="hljs-string">&#x27;CO2&#x27;</span>: <span class="hljs-number">1.078</span>, <span class="hljs-string">&#x27;NOX&#x27;</span>: <span class="hljs-number">21.8</span>, <span class="hljs-string">&#x27;SO2&#x27;</span>: <span class="hljs-number">0.454</span>},
+            <span class="hljs-string">&#x27;Grid&#x27;</span>: {<span class="hljs-string">&#x27;CO2&#x27;</span>: <span class="hljs-number">23.0</span>, <span class="hljs-string">&#x27;NOX&#x27;</span>: <span class="hljs-number">3.6</span>, <span class="hljs-string">&#x27;SO2&#x27;</span>: <span class="hljs-number">4.54</span>},
+            <span class="hljs-string">&#x27;PV&#x27;</span>: {<span class="hljs-string">&#x27;CO2&#x27;</span>: <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;NOX&#x27;</span>: <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;SO2&#x27;</span>: <span class="hljs-number">0</span>},
+            <span class="hljs-string">&#x27;WT&#x27;</span>: {<span class="hljs-string">&#x27;CO2&#x27;</span>: <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;NOX&#x27;</span>: <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;SO2&#x27;</span>: <span class="hljs-number">0</span>}
+        }
+
+        <span class="hljs-comment"># Time settings (24 hours)</span>
+        <span class="hljs-variable language_">self</span>.time_steps = <span class="hljs-number">24</span>
+        <span class="hljs-variable language_">self</span>.time_labels = [<span class="hljs-string">f&#x27;<span class="hljs-subst">{h:02d}</span>:00&#x27;</span> <span class="hljs-keyword">for</span> h <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">24</span>)]
+
+        <span class="hljs-comment"># Electricity prices (Table 7 in paper)</span>
+        <span class="hljs-variable language_">self</span>.grid_price = {
+            <span class="hljs-string">&#x27;peak&#x27;</span>: {<span class="hljs-string">&#x27;buy&#x27;</span>: <span class="hljs-number">1.56</span>, <span class="hljs-string">&#x27;sell&#x27;</span>: <span class="hljs-number">1.28</span>},     <span class="hljs-comment"># Peak: 10:00-15:00, 19:00-22:00</span>
+            <span class="hljs-string">&#x27;normal&#x27;</span>: {<span class="hljs-string">&#x27;buy&#x27;</span>: <span class="hljs-number">0.70</span>, <span class="hljs-string">&#x27;sell&#x27;</span>: <span class="hljs-number">0.54</span>},   <span class="hljs-comment"># Normal: 7:00-9:00, 16:00-18:00</span>
+            <span class="hljs-string">&#x27;valley&#x27;</span>: {<span class="hljs-string">&#x27;buy&#x27;</span>: <span class="hljs-number">0.43</span>, <span class="hljs-string">&#x27;sell&#x27;</span>: <span class="hljs-number">0.32</span>}    <span class="hljs-comment"># Valley: 23:00-6:00</span>
+        }
+
+        <span class="hljs-comment"># Generate forecast data (refer to Figure 2 in paper)</span>
+        <span class="hljs-variable language_">self</span>.load_profile = <span class="hljs-variable language_">self</span>.generate_load_profile()
+        <span class="hljs-variable language_">self</span>.pv_profile = <span class="hljs-variable language_">self</span>.generate_pv_profile()
+        <span class="hljs-variable language_">self</span>.wt_profile = <span class="hljs-variable language_">self</span>.generate_wind_profile()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">generate_load_profile</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;Generate load forecast curve&quot;&quot;&quot;</span>
+        base_load = [<span class="hljs-number">0.8</span>, <span class="hljs-number">0.75</span>, <span class="hljs-number">0.7</span>, <span class="hljs-number">0.65</span>, <span class="hljs-number">0.6</span>, <span class="hljs-number">0.7</span>, <span class="hljs-number">0.9</span>, <span class="hljs-number">1.1</span>,  <span class="hljs-comment"># 0-7h</span>
+                     <span class="hljs-number">1.2</span>, <span class="hljs-number">1.3</span>, <span class="hljs-number">1.4</span>, <span class="hljs-number">1.5</span>, <span class="hljs-number">1.6</span>, <span class="hljs-number">1.7</span>, <span class="hljs-number">1.6</span>, <span class="hljs-number">1.5</span>,    <span class="hljs-comment"># 8-15h</span>
+                     <span class="hljs-number">1.6</span>, <span class="hljs-number">1.7</span>, <span class="hljs-number">1.8</span>, <span class="hljs-number">1.9</span>, <span class="hljs-number">1.7</span>, <span class="hljs-number">1.5</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">1.0</span>]     <span class="hljs-comment"># 16-23h</span>
+        <span class="hljs-keyword">return</span> np.array(base_load) * <span class="hljs-number">100</span>  <span class="hljs-comment"># kW</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">generate_pv_profile</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;Generate PV forecast curve&quot;&quot;&quot;</span>
+        pv = np.zeros(<span class="hljs-number">24</span>)
+        <span class="hljs-comment"># Daytime with sunlight</span>
+        <span class="hljs-keyword">for</span> hour <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">6</span>, <span class="hljs-number">19</span>):
+            <span class="hljs-keyword">if</span> hour &lt; <span class="hljs-number">9</span> <span class="hljs-keyword">or</span> hour &gt; <span class="hljs-number">16</span>:
+                pv[hour] = <span class="hljs-number">20</span> + <span class="hljs-number">5</span> * np.random.randn()
+            <span class="hljs-keyword">else</span>:
+                pv[hour] = <span class="hljs-number">40</span> + <span class="hljs-number">10</span> * np.random.randn()
+        <span class="hljs-keyword">return</span> pv
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">generate_wind_profile</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;Generate wind forecast curve&quot;&quot;&quot;</span>
+        wt = <span class="hljs-number">30</span> + <span class="hljs-number">10</span> * np.sin(np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">4</span>*np.pi, <span class="hljs-number">24</span>)) + <span class="hljs-number">5</span> * np.random.randn(<span class="hljs-number">24</span>)
+        <span class="hljs-keyword">return</span> np.clip(wt, <span class="hljs-number">0</span>, <span class="hljs-number">70</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_grid_price</span>(<span class="hljs-params">self, hour</span>):
+        <span class="hljs-string">&quot;&quot;&quot;Get electricity price for specified time&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-number">10</span> &lt;= hour &lt; <span class="hljs-number">15</span>) <span class="hljs-keyword">or</span> (<span class="hljs-number">19</span> &lt;= hour &lt; <span class="hljs-number">22</span>):
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.grid_price[<span class="hljs-string">&#x27;peak&#x27;</span>]
+        <span class="hljs-keyword">elif</span> (<span class="hljs-number">7</span> &lt;= hour &lt; <span class="hljs-number">9</span>) <span class="hljs-keyword">or</span> (<span class="hljs-number">16</span> &lt;= hour &lt; <span class="hljs-number">18</span>):
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.grid_price[<span class="hljs-string">&#x27;normal&#x27;</span>]
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.grid_price[<span class="hljs-string">&#x27;valley&#x27;</span>]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">calculate_economic_cost</span>(<span class="hljs-params">self, power_outputs</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        计算经济成本（论文公式7）
+        power_outputs: 各设备的出力矩阵 (设备数 × 时间步)
+        &quot;&quot;&quot;</span>
+        total_cost = <span class="hljs-number">0</span>
+
+        <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.time_steps):
+            <span class="hljs-comment"># 各设备的燃料成本和运维成本</span>
+            <span class="hljs-keyword">for</span> device, params <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.devices.items():
+                <span class="hljs-keyword">if</span> device == <span class="hljs-string">&#x27;BT&#x27;</span>:
+                    <span class="hljs-comment"># 蓄电池只有运维成本</span>
+                    total_cost += (params[<span class="hljs-string">&#x27;operation_cost&#x27;</span>] *
+                                 <span class="hljs-built_in">abs</span>(power_outputs[device][t]))
+                <span class="hljs-keyword">elif</span> device <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;PV&#x27;</span>, <span class="hljs-string">&#x27;WT&#x27;</span>]:
+                    <span class="hljs-comment"># 可再生能源只有运维成本</span>
+                    total_cost += (params[<span class="hljs-string">&#x27;operation_cost&#x27;</span>] *
+                                 power_outputs[device][t])
+                <span class="hljs-keyword">else</span>:
+                    <span class="hljs-comment"># 传统发电机有燃料和运维成本</span>
+                    total_cost += ((params[<span class="hljs-string">&#x27;operation_cost&#x27;</span>] +
+                                  params[<span class="hljs-string">&#x27;fuel_cost&#x27;</span>]) *
+                                 power_outputs[device][t])
+
+            <span class="hljs-comment"># 与电网的交互成本</span>
+            grid_power = power_outputs[<span class="hljs-string">&#x27;Grid&#x27;</span>][t]
+            <span class="hljs-keyword">if</span> grid_power &gt; <span class="hljs-number">0</span>:
+                <span class="hljs-comment"># 从电网购电</span>
+                price_info = <span class="hljs-variable language_">self</span>.get_grid_price(t)
+                total_cost += price_info[<span class="hljs-string">&#x27;buy&#x27;</span>] * grid_power
+            <span class="hljs-keyword">elif</span> grid_power &lt; <span class="hljs-number">0</span>:
+                <span class="hljs-comment"># 向电网售电</span>
+                price_info = <span class="hljs-variable language_">self</span>.get_grid_price(t)
+                total_cost += price_info[<span class="hljs-string">&#x27;sell&#x27;</span>] * grid_power
+                <span class="hljs-comment"># 售电为收入，所以成本为负</span>
+
+        <span class="hljs-keyword">return</span> total_cost
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">calculate_environmental_cost</span>(<span class="hljs-params">self, power_outputs</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        计算环境成本（论文公式8）
+        &quot;&quot;&quot;</span>
+        total_cost = <span class="hljs-number">0</span>
+
+        <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.time_steps):
+            <span class="hljs-comment"># 各设备的污染物处理成本</span>
+            <span class="hljs-keyword">for</span> device <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.devices.keys():
+                <span class="hljs-keyword">if</span> device <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;Grid&#x27;</span>, <span class="hljs-string">&#x27;BT&#x27;</span>]:  <span class="hljs-comment"># BT没有排放</span>
+                    power = power_outputs[device][t]
+                    <span class="hljs-keyword">for</span> pollutant, cost <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.pollution_costs.items():
+                        emission_factor = <span class="hljs-variable language_">self</span>.emission_factors[device].get(pollutant, <span class="hljs-number">0</span>)
+                        total_cost += cost * emission_factor * power
+
+            <span class="hljs-comment"># 电网的污染物处理成本</span>
+            grid_power = power_outputs[<span class="hljs-string">&#x27;Grid&#x27;</span>][t]
+            <span class="hljs-keyword">if</span> grid_power &gt; <span class="hljs-number">0</span>:
+                <span class="hljs-keyword">for</span> pollutant, cost <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.pollution_costs.items():
+                    emission_factor = <span class="hljs-variable language_">self</span>.emission_factors[<span class="hljs-string">&#x27;Grid&#x27;</span>][pollutant]
+                    total_cost += cost * emission_factor * grid_power
+
+        <span class="hljs-keyword">return</span> total_cost
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">check_constraints</span>(<span class="hljs-params">self, power_outputs</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        检查约束条件是否满足
+        返回：是否满足约束，违反程度
+        &quot;&quot;&quot;</span>
+        violations = <span class="hljs-number">0</span>
+
+        <span class="hljs-comment"># 1. 功率平衡约束（论文公式9）</span>
+        <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.time_steps):
+            total_generation = <span class="hljs-built_in">sum</span>(power_outputs[device][t]
+                                 <span class="hljs-keyword">for</span> device <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.devices.keys())
+            total_generation += power_outputs[<span class="hljs-string">&#x27;Grid&#x27;</span>][t]
+
+            <span class="hljs-comment"># 忽略输电损耗（简化）</span>
+            balance_violation = <span class="hljs-built_in">abs</span>(total_generation - <span class="hljs-variable language_">self</span>.load_profile[t])
+            violations += balance_violation
+
+            <span class="hljs-keyword">if</span> balance_violation &gt; <span class="hljs-number">1</span>:  <span class="hljs-comment"># 允许1kW的误差</span>
+                <span class="hljs-comment"># print(f&quot;功率不平衡在时刻{t}: {balance_violation:.2f} kW&quot;)</span>
+                <span class="hljs-keyword">pass</span>
+
+        <span class="hljs-comment"># 2. 设备出力约束（论文公式10-12）</span>
+        <span class="hljs-keyword">for</span> device, params <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.devices.items():
+            <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.time_steps):
+                power = power_outputs[device][t]
+
+                <span class="hljs-keyword">if</span> power &lt; params[<span class="hljs-string">&#x27;min&#x27;</span>]:
+                    violations += (params[<span class="hljs-string">&#x27;min&#x27;</span>] - power) * <span class="hljs-number">10</span>  <span class="hljs-comment"># 惩罚系数</span>
+                <span class="hljs-keyword">elif</span> power &gt; params[<span class="hljs-string">&#x27;max&#x27;</span>]:
+                    violations += (power - params[<span class="hljs-string">&#x27;max&#x27;</span>]) * <span class="hljs-number">10</span>
+
+        <span class="hljs-comment"># 3. 电网功率约束（假设最大为150kW）</span>
+        <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.time_steps):
+            grid_power = power_outputs[<span class="hljs-string">&#x27;Grid&#x27;</span>][t]
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">abs</span>(grid_power) &gt; <span class="hljs-number">150</span>:
+                violations += (<span class="hljs-built_in">abs</span>(grid_power) - <span class="hljs-number">150</span>) * <span class="hljs-number">10</span>
+
+        <span class="hljs-keyword">return</span> violations
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">objective_function</span>(<span class="hljs-params">self, x</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        目标函数（论文公式6）
+        x: 决策变量向量，包含所有设备在所有时刻的出力
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 重塑决策变量为矩阵形式</span>
+        n_devices = <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.devices) + <span class="hljs-number">1</span>  <span class="hljs-comment"># 加上电网</span>
+        power_outputs = {}
+
+        idx = <span class="hljs-number">0</span>
+        <span class="hljs-keyword">for</span> device <span class="hljs-keyword">in</span> <span class="hljs-built_in">list</span>(<span class="hljs-variable language_">self</span>.devices.keys()) + [<span class="hljs-string">&#x27;Grid&#x27;</span>]:
+            power_outputs[device] = x[idx:idx+<span class="hljs-variable language_">self</span>.time_steps]
+            idx += <span class="hljs-variable language_">self</span>.time_steps
+
+        <span class="hljs-comment"># 计算总成本</span>
+        economic_cost = <span class="hljs-variable language_">self</span>.calculate_economic_cost(power_outputs)
+        environmental_cost = <span class="hljs-variable language_">self</span>.calculate_environmental_cost(power_outputs)
+
+        <span class="hljs-comment"># 加权总成本（论文中φ=μ=0.5）</span>
+        total_cost = <span class="hljs-number">0.5</span> * economic_cost + <span class="hljs-number">0.5</span> * environmental_cost
+
+        <span class="hljs-comment"># 约束违反惩罚</span>
+        constraint_violation = <span class="hljs-variable language_">self</span>.check_constraints(power_outputs)
+
+        <span class="hljs-comment"># 目标值 = 总成本 + 惩罚项</span>
+        objective_value = total_cost + <span class="hljs-number">1000</span> * constraint_violation
+
+        <span class="hljs-keyword">return</span> objective_value
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">decode_solution</span>(<span class="hljs-params">self, best_x</span>):
+        <span class="hljs-string">&quot;&quot;&quot;解码最优解&quot;&quot;&quot;</span>
+        power_outputs = {}
+        idx = <span class="hljs-number">0</span>
+
+        <span class="hljs-keyword">for</span> device <span class="hljs-keyword">in</span> <span class="hljs-built_in">list</span>(<span class="hljs-variable language_">self</span>.devices.keys()) + [<span class="hljs-string">&#x27;Grid&#x27;</span>]:
+            power_outputs[device] = best_x[idx:idx+<span class="hljs-variable language_">self</span>.time_steps]
+            idx += <span class="hljs-variable language_">self</span>.time_steps
+
+        <span class="hljs-keyword">return</span> power_outputs
+
+<span class="hljs-comment"># ===========================================================</span>
+<span class="hljs-comment"># 蓄电池控制策略</span>
+<span class="hljs-comment"># ===========================================================</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">BatteryControlStrategy</span>:
+    <span class="hljs-string">&quot;&quot;&quot;蓄电池控制策略基类&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, capacity=<span class="hljs-number">100</span>, max_power=<span class="hljs-number">30</span></span>):
+        <span class="hljs-variable language_">self</span>.capacity = capacity  <span class="hljs-comment"># kWh</span>
+        <span class="hljs-variable language_">self</span>.max_power = max_power  <span class="hljs-comment"># kW</span>
+        <span class="hljs-variable language_">self</span>.soc = <span class="hljs-number">0.5</span>  <span class="hljs-comment"># 初始SOC为50%</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update_soc</span>(<span class="hljs-params">self, power, time_interval=<span class="hljs-number">1</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;更新蓄电池的SOC&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># power &gt; 0: 放电, power &lt; 0: 充电</span>
+        energy_change = power * time_interval  <span class="hljs-comment"># kWh</span>
+        soc_change = energy_change / <span class="hljs-variable language_">self</span>.capacity
+
+        <span class="hljs-variable language_">self</span>.soc -= soc_change  <span class="hljs-comment"># 放电时SOC减少</span>
+        <span class="hljs-variable language_">self</span>.soc = <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">min</span>(<span class="hljs-number">1</span>, <span class="hljs-variable language_">self</span>.soc))  <span class="hljs-comment"># 限制在[0, 1]</span>
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.soc
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">PeakShavingControl</span>(<span class="hljs-title class_ inherited__">BatteryControlStrategy</span>):
+    <span class="hljs-string">&quot;&quot;&quot;削峰填谷控制策略&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">decide_action</span>(<span class="hljs-params">self, load, hour, price_info</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        决定蓄电池的充放电功率
+        返回：充电功率（负值），放电功率（正值）
+        &quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-number">10</span> &lt;= hour &lt; <span class="hljs-number">15</span> <span class="hljs-keyword">or</span> <span class="hljs-number">19</span> &lt;= hour &lt; <span class="hljs-number">22</span>:
+            <span class="hljs-comment"># 峰时段：放电</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.soc &gt; <span class="hljs-number">0.3</span>:
+                discharge_power = <span class="hljs-built_in">min</span>(<span class="hljs-variable language_">self</span>.max_power, load * <span class="hljs-number">0.3</span>)
+                <span class="hljs-keyword">return</span> discharge_power
+        <span class="hljs-keyword">elif</span> <span class="hljs-number">23</span> &lt;= hour <span class="hljs-keyword">or</span> hour &lt; <span class="hljs-number">6</span>:
+            <span class="hljs-comment"># 谷时段：充电</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.soc &lt; <span class="hljs-number">0.8</span>:
+                charge_power = -<span class="hljs-built_in">min</span>(<span class="hljs-variable language_">self</span>.max_power, <span class="hljs-number">20</span>)  <span class="hljs-comment"># 充电</span>
+                <span class="hljs-keyword">return</span> charge_power
+
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>  <span class="hljs-comment"># 不动作</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">FuzzyLogicControl</span>(<span class="hljs-title class_ inherited__">BatteryControlStrategy</span>):
+    <span class="hljs-string">&quot;&quot;&quot;模糊逻辑控制策略（简化的模糊规则实现）&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">decide_action</span>(<span class="hljs-params">self, load, hour, price_info</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        基于简化的模糊规则决定蓄电池动作
+        输入：实时电价(RP)、SOC
+        输出：充放电功率
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 获取电价水平</span>
+        buy_price = price_info[<span class="hljs-string">&#x27;buy&#x27;</span>]
+
+        <span class="hljs-comment"># 电价模糊化</span>
+        <span class="hljs-keyword">if</span> buy_price &lt; <span class="hljs-number">0.5</span>:
+            rp_level = <span class="hljs-string">&#x27;low&#x27;</span>
+        <span class="hljs-keyword">elif</span> buy_price &lt; <span class="hljs-number">1.0</span>:
+            rp_level = <span class="hljs-string">&#x27;medium&#x27;</span>
+        <span class="hljs-keyword">else</span>:
+            rp_level = <span class="hljs-string">&#x27;high&#x27;</span>
+
+        <span class="hljs-comment"># SOC模糊化</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.soc &lt; <span class="hljs-number">0.3</span>:
+            soc_level = <span class="hljs-string">&#x27;low&#x27;</span>
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.soc &lt; <span class="hljs-number">0.7</span>:
+            soc_level = <span class="hljs-string">&#x27;medium&#x27;</span>
+        <span class="hljs-keyword">else</span>:
+            soc_level = <span class="hljs-string">&#x27;high&#x27;</span>
+
+        <span class="hljs-comment"># 简化的模糊规则（基于论文表4）</span>
+        <span class="hljs-keyword">if</span> rp_level == <span class="hljs-string">&#x27;high&#x27;</span> <span class="hljs-keyword">and</span> soc_level == <span class="hljs-string">&#x27;high&#x27;</span>:
+            <span class="hljs-comment"># 高电价高SOC：大功率放电</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-built_in">min</span>(<span class="hljs-variable language_">self</span>.max_power, <span class="hljs-number">0.5</span> * <span class="hljs-variable language_">self</span>.capacity * <span class="hljs-variable language_">self</span>.soc)
+        <span class="hljs-keyword">elif</span> rp_level == <span class="hljs-string">&#x27;low&#x27;</span> <span class="hljs-keyword">and</span> soc_level == <span class="hljs-string">&#x27;low&#x27;</span>:
+            <span class="hljs-comment"># 低电价低SOC：大功率充电</span>
+            <span class="hljs-keyword">return</span> -<span class="hljs-built_in">min</span>(<span class="hljs-variable language_">self</span>.max_power, <span class="hljs-number">0.5</span> * <span class="hljs-variable language_">self</span>.capacity * (<span class="hljs-number">1</span> - <span class="hljs-variable language_">self</span>.soc))
+        <span class="hljs-keyword">elif</span> rp_level == <span class="hljs-string">&#x27;high&#x27;</span> <span class="hljs-keyword">and</span> soc_level == <span class="hljs-string">&#x27;medium&#x27;</span>:
+            <span class="hljs-comment"># 高电价中SOC：中等功率放电</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-built_in">min</span>(<span class="hljs-number">0.5</span> * <span class="hljs-variable language_">self</span>.max_power, <span class="hljs-number">0.3</span> * <span class="hljs-variable language_">self</span>.capacity * <span class="hljs-variable language_">self</span>.soc)
+        <span class="hljs-keyword">elif</span> rp_level == <span class="hljs-string">&#x27;low&#x27;</span> <span class="hljs-keyword">and</span> soc_level == <span class="hljs-string">&#x27;medium&#x27;</span>:
+            <span class="hljs-comment"># 低电价中SOC：中等功率充电</span>
+            <span class="hljs-keyword">return</span> -<span class="hljs-built_in">min</span>(<span class="hljs-number">0.5</span> * <span class="hljs-variable language_">self</span>.max_power, <span class="hljs-number">0.3</span> * <span class="hljs-variable language_">self</span>.capacity * (<span class="hljs-number">1</span> - <span class="hljs-variable language_">self</span>.soc))
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+
+<span class="hljs-comment"># ===========================================================</span>
+<span class="hljs-comment"># Levy Flight Particle Swarm Optimization (LFPSO)</span>
+<span class="hljs-comment"># ===========================================================</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">LFPSO</span>:
+    <span class="hljs-string">&quot;&quot;&quot;
+    Levy Flight Particle Swarm Optimization Algorithm
+    基于Levy飞行的粒子群优化算法
+    &quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, n_particles=<span class="hljs-number">30</span>, n_dim=<span class="hljs-number">10</span>, max_iter=<span class="hljs-number">100</span>,
+                 w=<span class="hljs-number">0.7</span>, c1=<span class="hljs-number">1.5</span>, c2=<span class="hljs-number">1.5</span>, alpha=<span class="hljs-number">0.1</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        初始化LFPSO算法
+
+        Args:
+            n_particles: 粒子数量
+            n_dim: 决策变量维度
+            max_iter: 最大迭代次数
+            w: 惯性权重
+            c1: 个体学习因子
+            c2: 社会学习因子
+            alpha: Levy飞行步长参数
+        &quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.n_particles = n_particles
+        <span class="hljs-variable language_">self</span>.n_dim = n_dim
+        <span class="hljs-variable language_">self</span>.max_iter = max_iter
+        <span class="hljs-variable language_">self</span>.w = w
+        <span class="hljs-variable language_">self</span>.c1 = c1
+        <span class="hljs-variable language_">self</span>.c2 = c2
+        <span class="hljs-variable language_">self</span>.alpha = alpha
+
+        <span class="hljs-comment"># 粒子位置和速度</span>
+        <span class="hljs-variable language_">self</span>.positions = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.velocities = <span class="hljs-literal">None</span>
+
+        <span class="hljs-comment"># 个体最优和全局最优</span>
+        <span class="hljs-variable language_">self</span>.pbest_positions = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.pbest_values = np.full(n_particles, np.inf)
+        <span class="hljs-variable language_">self</span>.gbest_position = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.gbest_value = np.inf
+
+        <span class="hljs-comment"># 收敛历史</span>
+        <span class="hljs-variable language_">self</span>.gbest_history = []
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">initialize</span>(<span class="hljs-params">self, bounds</span>):
+        <span class="hljs-string">&quot;&quot;&quot;初始化粒子位置和速度&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 初始化位置（在边界内随机）</span>
+        <span class="hljs-variable language_">self</span>.positions = np.zeros((<span class="hljs-variable language_">self</span>.n_particles, <span class="hljs-variable language_">self</span>.n_dim))
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.n_dim):
+            min_val, max_val = bounds[i]
+            <span class="hljs-variable language_">self</span>.positions[:, i] = np.random.uniform(min_val, max_val, <span class="hljs-variable language_">self</span>.n_particles)
+
+        <span class="hljs-comment"># 初始化速度</span>
+        <span class="hljs-variable language_">self</span>.velocities = np.random.uniform(-<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, (<span class="hljs-variable language_">self</span>.n_particles, <span class="hljs-variable language_">self</span>.n_dim))
+
+        <span class="hljs-comment"># 初始化个体最优</span>
+        <span class="hljs-variable language_">self</span>.pbest_positions = <span class="hljs-variable language_">self</span>.positions.copy()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">levy_flight</span>(<span class="hljs-params">self, beta=<span class="hljs-number">1.5</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        生成Levy飞行步长
+        使用Mantegna算法
+
+        Args:
+            beta: Levy指数，通常在[1, 3]之间
+
+        Returns:
+            Levy飞行步长向量
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 生成服从正态分布的随机数</span>
+        u = np.random.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-variable language_">self</span>.n_dim)
+        v = np.random.normal(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-variable language_">self</span>.n_dim)
+
+        <span class="hljs-comment"># 计算sigma</span>
+        sigma_u = np.power(np.<span class="hljs-built_in">abs</span>(gamma(<span class="hljs-number">1</span> + beta) * np.sin(np.pi * beta / <span class="hljs-number">2</span>) /
+                               (gamma((<span class="hljs-number">1</span> + beta) / <span class="hljs-number">2</span>) * beta * np.power(<span class="hljs-number">2</span>, (beta - <span class="hljs-number">1</span>) / <span class="hljs-number">2</span>))),
+                          <span class="hljs-number">1</span> / beta)
+        sigma_v = <span class="hljs-number">1</span>
+
+        <span class="hljs-comment"># Levy步长</span>
+        step = u * sigma_u / (np.power(np.<span class="hljs-built_in">abs</span>(v), <span class="hljs-number">1</span> / beta))
+
+        <span class="hljs-keyword">return</span> step
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update_particles</span>(<span class="hljs-params">self, bounds</span>):
+        <span class="hljs-string">&quot;&quot;&quot;更新粒子位置和速度&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 生成Levy飞行步长</span>
+        levy_step = <span class="hljs-variable language_">self</span>.levy_flight()
+
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.n_particles):
+            <span class="hljs-comment"># 标准PSO速度更新</span>
+            r1 = np.random.rand(<span class="hljs-variable language_">self</span>.n_dim)
+            r2 = np.random.rand(<span class="hljs-variable language_">self</span>.n_dim)
+
+            cognitive = <span class="hljs-variable language_">self</span>.c1 * r1 * (<span class="hljs-variable language_">self</span>.pbest_positions[i] - <span class="hljs-variable language_">self</span>.positions[i])
+            social = <span class="hljs-variable language_">self</span>.c2 * r2 * (<span class="hljs-variable language_">self</span>.gbest_position - <span class="hljs-variable language_">self</span>.positions[i])
+
+            <span class="hljs-comment"># 加入Levy飞行项</span>
+            levy_term = <span class="hljs-variable language_">self</span>.alpha * levy_step
+
+            <span class="hljs-comment"># 更新速度</span>
+            <span class="hljs-variable language_">self</span>.velocities[i] = (<span class="hljs-variable language_">self</span>.w * <span class="hljs-variable language_">self</span>.velocities[i] +
+                                cognitive + social + levy_term)
+
+            <span class="hljs-comment"># 更新位置</span>
+            <span class="hljs-variable language_">self</span>.positions[i] += <span class="hljs-variable language_">self</span>.velocities[i]
+
+            <span class="hljs-comment"># 边界处理</span>
+            <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.n_dim):
+                min_val, max_val = bounds[j]
+                <span class="hljs-variable language_">self</span>.positions[i, j] = np.clip(<span class="hljs-variable language_">self</span>.positions[i, j], min_val, max_val)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">optimize</span>(<span class="hljs-params">self, objective_func, bounds, verbose=<span class="hljs-literal">False</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        运行优化算法
+
+        Args:
+            objective_func: 目标函数
+            bounds: 变量边界列表 [(min1, max1), (min2, max2), ...]
+            verbose: 是否打印进度信息
+
+        Returns:
+            best_position: 最优位置
+            best_value: 最优值
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 初始化</span>
+        <span class="hljs-variable language_">self</span>.initialize(bounds)
+
+        <span class="hljs-comment"># 评估初始粒子</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.n_particles):
+            value = objective_func(<span class="hljs-variable language_">self</span>.positions[i])
+            <span class="hljs-variable language_">self</span>.pbest_values[i] = value
+
+            <span class="hljs-keyword">if</span> value &lt; <span class="hljs-variable language_">self</span>.gbest_value:
+                <span class="hljs-variable language_">self</span>.gbest_value = value
+                <span class="hljs-variable language_">self</span>.gbest_position = <span class="hljs-variable language_">self</span>.positions[i].copy()
+
+        <span class="hljs-variable language_">self</span>.gbest_history.append(<span class="hljs-variable language_">self</span>.gbest_value)
+
+        <span class="hljs-comment"># 主循环</span>
+        <span class="hljs-keyword">for</span> iteration <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.max_iter):
+            <span class="hljs-comment"># 更新粒子</span>
+            <span class="hljs-variable language_">self</span>.update_particles(bounds)
+
+            <span class="hljs-comment"># 评估新位置</span>
+            <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.n_particles):
+                value = objective_func(<span class="hljs-variable language_">self</span>.positions[i])
+
+                <span class="hljs-comment"># 更新个体最优</span>
+                <span class="hljs-keyword">if</span> value &lt; <span class="hljs-variable language_">self</span>.pbest_values[i]:
+                    <span class="hljs-variable language_">self</span>.pbest_values[i] = value
+                    <span class="hljs-variable language_">self</span>.pbest_positions[i] = <span class="hljs-variable language_">self</span>.positions[i].copy()
+
+                    <span class="hljs-comment"># 更新全局最优</span>
+                    <span class="hljs-keyword">if</span> value &lt; <span class="hljs-variable language_">self</span>.gbest_value:
+                        <span class="hljs-variable language_">self</span>.gbest_value = value
+                        <span class="hljs-variable language_">self</span>.gbest_position = <span class="hljs-variable language_">self</span>.positions[i].copy()
+
+            <span class="hljs-comment"># 记录收敛历史</span>
+            <span class="hljs-variable language_">self</span>.gbest_history.append(<span class="hljs-variable language_">self</span>.gbest_value)
+
+            <span class="hljs-comment"># Print progress</span>
+            <span class="hljs-keyword">if</span> verbose <span class="hljs-keyword">and</span> (iteration + <span class="hljs-number">1</span>) % <span class="hljs-number">100</span> == <span class="hljs-number">0</span>:
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  Iteration <span class="hljs-subst">{iteration + <span class="hljs-number">1</span>}</span>/<span class="hljs-subst">{self.max_iter}</span>, Best Value: <span class="hljs-subst">{self.gbest_value:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.gbest_position, <span class="hljs-variable language_">self</span>.gbest_value
+
+<span class="hljs-comment"># ===========================================================</span>
+<span class="hljs-comment"># 微电网优化调度主程序</span>
+<span class="hljs-comment"># ===========================================================</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">optimize_microgrid</span>(<span class="hljs-params">battery_strategy=<span class="hljs-string">&#x27;peak_shaving&#x27;</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    运行微电网优化调度
+
+    Args:
+        battery_strategy: 蓄电池控制策略
+            &#x27;peak_shaving&#x27; - 削峰填谷
+            &#x27;fuzzy_logic&#x27; - 模糊逻辑控制
+    &quot;&quot;&quot;</span>
+    strategy_name = <span class="hljs-string">&quot;Peak Shaving&quot;</span> <span class="hljs-keyword">if</span> battery_strategy == <span class="hljs-string">&#x27;peak_shaving&#x27;</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;Fuzzy Logic&quot;</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nRunning Microgrid Optimization (Battery Strategy: <span class="hljs-subst">{strategy_name}</span>)&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">60</span>)
+
+    <span class="hljs-comment"># 1. 创建微电网模型</span>
+    microgrid = MicrogridOptimization()
+
+    <span class="hljs-comment"># 2. 选择蓄电池控制策略</span>
+    <span class="hljs-keyword">if</span> battery_strategy == <span class="hljs-string">&#x27;peak_shaving&#x27;</span>:
+        battery_control = PeakShavingControl(capacity=<span class="hljs-number">100</span>, max_power=<span class="hljs-number">30</span>)
+    <span class="hljs-keyword">else</span>:
+        battery_control = FuzzyLogicControl(capacity=<span class="hljs-number">100</span>, max_power=<span class="hljs-number">30</span>)
+
+    <span class="hljs-comment"># 3. 设置LFPSO参数</span>
+    n_devices = <span class="hljs-built_in">len</span>(microgrid.devices) + <span class="hljs-number">1</span>  <span class="hljs-comment"># 所有设备 + 电网</span>
+    n_dim = n_devices * microgrid.time_steps  <span class="hljs-comment"># 决策变量维度</span>
+
+    <span class="hljs-comment"># 定义变量边界</span>
+    bounds = []
+    <span class="hljs-keyword">for</span> device <span class="hljs-keyword">in</span> <span class="hljs-built_in">list</span>(microgrid.devices.keys()) + [<span class="hljs-string">&#x27;Grid&#x27;</span>]:
+        <span class="hljs-keyword">if</span> device == <span class="hljs-string">&#x27;Grid&#x27;</span>:
+            <span class="hljs-comment"># 电网交互功率限制</span>
+            min_power, max_power = -<span class="hljs-number">150</span>, <span class="hljs-number">150</span>
+        <span class="hljs-keyword">else</span>:
+            min_power = microgrid.devices[device][<span class="hljs-string">&#x27;min&#x27;</span>]
+            max_power = microgrid.devices[device][<span class="hljs-string">&#x27;max&#x27;</span>]
+
+        bounds.extend([(min_power, max_power)] * microgrid.time_steps)
+
+    <span class="hljs-comment"># 4. 运行LFPSO优化</span>
+    lfpso = LFPSO(n_particles=<span class="hljs-number">60</span>, n_dim=n_dim, max_iter=<span class="hljs-number">2000</span>)
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Starting optimization...&quot;</span>)
+    start_time = datetime.now()
+
+    best_position, best_value = lfpso.optimize(
+        microgrid.objective_function,
+        bounds,
+        verbose=<span class="hljs-literal">True</span>
+    )
+
+    elapsed_time = (datetime.now() - start_time).total_seconds()
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nOptimization completed!&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Total runtime: <span class="hljs-subst">{elapsed_time:<span class="hljs-number">.2</span>f}</span> seconds&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Optimal total cost: <span class="hljs-subst">{best_value:<span class="hljs-number">.2</span>f}</span> Yuan&quot;</span>)
+
+    <span class="hljs-comment"># 5. 解码最优解</span>
+    optimal_schedule = microgrid.decode_solution(best_position)
+
+    <span class="hljs-comment"># 6. 计算详细成本</span>
+    economic_cost = microgrid.calculate_economic_cost(optimal_schedule)
+    environmental_cost = microgrid.calculate_environmental_cost(optimal_schedule)
+    total_cost = <span class="hljs-number">0.5</span> * economic_cost + <span class="hljs-number">0.5</span> * environmental_cost
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nDetailed Cost Analysis:&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  Economic cost: <span class="hljs-subst">{economic_cost:<span class="hljs-number">.2</span>f}</span> Yuan&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  Environmental cost: <span class="hljs-subst">{environmental_cost:<span class="hljs-number">.2</span>f}</span> Yuan&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  Weighted total cost: <span class="hljs-subst">{total_cost:<span class="hljs-number">.2</span>f}</span> Yuan&quot;</span>)
+
+    <span class="hljs-keyword">return</span> optimal_schedule, lfpso.gbest_history
+
+<span class="hljs-comment"># ===========================================================</span>
+<span class="hljs-comment"># 结果可视化</span>
+<span class="hljs-comment"># ===========================================================</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">plot_results</span>(<span class="hljs-params">schedule1, schedule2, history1, history2</span>):
+    <span class="hljs-string">&quot;&quot;&quot;绘制两种策略的对比结果&quot;&quot;&quot;</span>
+    fig, axes = plt.subplots(<span class="hljs-number">3</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">15</span>, <span class="hljs-number">12</span>))
+
+    <span class="hljs-comment"># 策略1：削峰填谷</span>
+    ax = axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>]
+    hours = <span class="hljs-built_in">range</span>(<span class="hljs-number">24</span>)
+    devices = [<span class="hljs-string">&#x27;PV&#x27;</span>, <span class="hljs-string">&#x27;WT&#x27;</span>, <span class="hljs-string">&#x27;FC&#x27;</span>, <span class="hljs-string">&#x27;MT&#x27;</span>, <span class="hljs-string">&#x27;DE&#x27;</span>, <span class="hljs-string">&#x27;BT&#x27;</span>, <span class="hljs-string">&#x27;Grid&#x27;</span>]
+
+    bottom = np.zeros(<span class="hljs-number">24</span>)
+    <span class="hljs-keyword">for</span> device <span class="hljs-keyword">in</span> devices:
+        <span class="hljs-keyword">if</span> device <span class="hljs-keyword">in</span> schedule1:
+            ax.bar(hours, schedule1[device], bottom=bottom, label=device, alpha=<span class="hljs-number">0.7</span>)
+            bottom += schedule1[device]
+
+    ax.plot(hours, microgrid.load_profile, <span class="hljs-string">&#x27;k--&#x27;</span>, linewidth=<span class="hljs-number">2</span>, label=<span class="hljs-string">&#x27;Load&#x27;</span>)
+    ax.set_xlabel(<span class="hljs-string">&#x27;Time (hour)&#x27;</span>)
+    ax.set_ylabel(<span class="hljs-string">&#x27;Power (kW)&#x27;</span>)
+    ax.set_title(<span class="hljs-string">&#x27;Strategy 1: Peak Shaving - Device Output&#x27;</span>)
+    ax.legend(ncol=<span class="hljs-number">3</span>, fontsize=<span class="hljs-number">8</span>)
+    ax.grid(<span class="hljs-literal">True</span>, alpha=<span class="hljs-number">0.3</span>)
+
+    <span class="hljs-comment"># 策略2：模糊逻辑控制</span>
+    ax = axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>]
+    bottom = np.zeros(<span class="hljs-number">24</span>)
+    <span class="hljs-keyword">for</span> device <span class="hljs-keyword">in</span> devices:
+        <span class="hljs-keyword">if</span> device <span class="hljs-keyword">in</span> schedule2:
+            ax.bar(hours, schedule2[device], bottom=bottom, label=device, alpha=<span class="hljs-number">0.7</span>)
+            bottom += schedule2[device]
+
+    ax.plot(hours, microgrid.load_profile, <span class="hljs-string">&#x27;k--&#x27;</span>, linewidth=<span class="hljs-number">2</span>, label=<span class="hljs-string">&#x27;Load&#x27;</span>)
+    ax.set_xlabel(<span class="hljs-string">&#x27;Time (hour)&#x27;</span>)
+    ax.set_ylabel(<span class="hljs-string">&#x27;Power (kW)&#x27;</span>)
+    ax.set_title(<span class="hljs-string">&#x27;Strategy 2: Fuzzy Logic Control - Device Output&#x27;</span>)
+    ax.legend(ncol=<span class="hljs-number">3</span>, fontsize=<span class="hljs-number">8</span>)
+    ax.grid(<span class="hljs-literal">True</span>, alpha=<span class="hljs-number">0.3</span>)
+
+    <span class="hljs-comment"># Convergence curves</span>
+    ax = axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>]
+    ax.plot(history1, <span class="hljs-string">&#x27;b-&#x27;</span>, linewidth=<span class="hljs-number">2</span>, label=<span class="hljs-string">&#x27;Strategy 1&#x27;</span>)
+    ax.set_xlabel(<span class="hljs-string">&#x27;Iteration&#x27;</span>)
+    ax.set_ylabel(<span class="hljs-string">&#x27;Total Cost (Yuan)&#x27;</span>)
+    ax.set_title(<span class="hljs-string">&#x27;Strategy 1: Convergence Curve&#x27;</span>)
+    ax.grid(<span class="hljs-literal">True</span>, alpha=<span class="hljs-number">0.3</span>)
+    ax.legend()
+
+    ax = axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>]
+    ax.plot(history2, <span class="hljs-string">&#x27;r-&#x27;</span>, linewidth=<span class="hljs-number">2</span>, label=<span class="hljs-string">&#x27;Strategy 2&#x27;</span>)
+    ax.set_xlabel(<span class="hljs-string">&#x27;Iteration&#x27;</span>)
+    ax.set_ylabel(<span class="hljs-string">&#x27;Total Cost (Yuan)&#x27;</span>)
+    ax.set_title(<span class="hljs-string">&#x27;Strategy 2: Convergence Curve&#x27;</span>)
+    ax.grid(<span class="hljs-literal">True</span>, alpha=<span class="hljs-number">0.3</span>)
+    ax.legend()
+
+    <span class="hljs-comment"># Cost comparison</span>
+    ax = axes[<span class="hljs-number">2</span>, <span class="hljs-number">0</span>]
+    costs = [history1[-<span class="hljs-number">1</span>], history2[-<span class="hljs-number">1</span>]]
+    strategies = [<span class="hljs-string">&#x27;Peak Shaving&#x27;</span>, <span class="hljs-string">&#x27;Fuzzy Logic&#x27;</span>]
+    bars = ax.bar(strategies, costs, color=[<span class="hljs-string">&#x27;blue&#x27;</span>, <span class="hljs-string">&#x27;red&#x27;</span>], alpha=<span class="hljs-number">0.7</span>)
+    ax.set_ylabel(<span class="hljs-string">&#x27;Total Cost (Yuan)&#x27;</span>)
+    ax.set_title(<span class="hljs-string">&#x27;Total Cost Comparison of Two Strategies&#x27;</span>)
+    ax.grid(<span class="hljs-literal">True</span>, alpha=<span class="hljs-number">0.3</span>, axis=<span class="hljs-string">&#x27;y&#x27;</span>)
+
+    <span class="hljs-comment"># Display values on bar chart</span>
+    <span class="hljs-keyword">for</span> bar, cost <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(bars, costs):
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/<span class="hljs-number">2.</span>, height,
+                <span class="hljs-string">f&#x27;<span class="hljs-subst">{cost:<span class="hljs-number">.1</span>f}</span> Yuan&#x27;</span>, ha=<span class="hljs-string">&#x27;center&#x27;</span>, va=<span class="hljs-string">&#x27;bottom&#x27;</span>)
+
+    <span class="hljs-comment"># Forecast power curves</span>
+    ax = axes[<span class="hljs-number">2</span>, <span class="hljs-number">1</span>]
+    hours = <span class="hljs-built_in">range</span>(<span class="hljs-number">24</span>)
+    ax.plot(hours, microgrid.load_profile, <span class="hljs-string">&#x27;k-&#x27;</span>, linewidth=<span class="hljs-number">2</span>, label=<span class="hljs-string">&#x27;Load&#x27;</span>)
+    ax.plot(hours, microgrid.pv_profile, <span class="hljs-string">&#x27;y-&#x27;</span>, linewidth=<span class="hljs-number">2</span>, label=<span class="hljs-string">&#x27;PV&#x27;</span>)
+    ax.plot(hours, microgrid.wt_profile, <span class="hljs-string">&#x27;g-&#x27;</span>, linewidth=<span class="hljs-number">2</span>, label=<span class="hljs-string">&#x27;Wind&#x27;</span>)
+    ax.fill_between(hours, <span class="hljs-number">0</span>, microgrid.load_profile, alpha=<span class="hljs-number">0.2</span>, color=<span class="hljs-string">&#x27;gray&#x27;</span>)
+    ax.set_xlabel(<span class="hljs-string">&#x27;Time (hour)&#x27;</span>)
+    ax.set_ylabel(<span class="hljs-string">&#x27;Power (kW)&#x27;</span>)
+    ax.set_title(<span class="hljs-string">&#x27;Load and Renewable Energy Forecast&#x27;</span>)
+    ax.legend()
+    ax.grid(<span class="hljs-literal">True</span>, alpha=<span class="hljs-number">0.3</span>)
+
+    plt.tight_layout()
+    plt.savefig(<span class="hljs-string">&#x27;microgrid_optimization_results.png&#x27;</span>, dpi=<span class="hljs-number">300</span>, bbox_inches=<span class="hljs-string">&#x27;tight&#x27;</span>)
+    plt.show()
+
+<span class="hljs-comment"># ===========================================================</span>
+<span class="hljs-comment"># 主程序</span>
+<span class="hljs-comment"># ===========================================================</span>
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Microgrid Optimization Scheduling Simulation System&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">60</span>)
+
+    <span class="hljs-comment"># Display forecast data</span>
+    microgrid = MicrogridOptimization()
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\nForecast Data:&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;-&quot;</span> * <span class="hljs-number">40</span>)
+    data = pd.DataFrame({
+        <span class="hljs-string">&#x27;Time&#x27;</span>: microgrid.time_labels,
+        <span class="hljs-string">&#x27;Load(kW)&#x27;</span>: microgrid.load_profile,
+        <span class="hljs-string">&#x27;PV(kW)&#x27;</span>: microgrid.pv_profile,
+        <span class="hljs-string">&#x27;Wind(kW)&#x27;</span>: microgrid.wt_profile
+    })
+    <span class="hljs-built_in">print</span>(data.<span class="hljs-built_in">round</span>(<span class="hljs-number">1</span>).to_string(index=<span class="hljs-literal">False</span>))
+
+    <span class="hljs-comment"># Run two strategies</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\nRunning Strategy 1: Peak Shaving Control...&quot;</span>)
+    schedule1, history1 = optimize_microgrid(<span class="hljs-string">&#x27;peak_shaving&#x27;</span>)
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\nRunning Strategy 2: Fuzzy Logic Control...&quot;</span>)
+    schedule2, history2 = optimize_microgrid(<span class="hljs-string">&#x27;fuzzy_logic&#x27;</span>)
+
+    <span class="hljs-comment"># Calculate cost improvement</span>
+    cost1 = history1[-<span class="hljs-number">1</span>]
+    cost2 = history2[-<span class="hljs-number">1</span>]
+    improvement = (cost1 - cost2) / cost1 * <span class="hljs-number">100</span>
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Results Comparison:&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  Strategy 1 (Peak Shaving) Total Cost: <span class="hljs-subst">{cost1:<span class="hljs-number">.2</span>f}</span> Yuan&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  Strategy 2 (Fuzzy Logic) Total Cost: <span class="hljs-subst">{cost2:<span class="hljs-number">.2</span>f}</span> Yuan&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  Cost Reduction: <span class="hljs-subst">{improvement:<span class="hljs-number">.2</span>f}</span>%&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+
+    <span class="hljs-comment"># Plot results</span>
+    plot_results(schedule1, schedule2, history1, history2)
+
+    <span class="hljs-comment"># Display detailed scheduling plan</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\nDetailed 24-hour Scheduling Plan (Strategy 2 - Fuzzy Logic):&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;-&quot;</span> * <span class="hljs-number">80</span>)
+
+    <span class="hljs-comment"># Create scheduling table</span>
+    schedule_df = pd.DataFrame({
+        <span class="hljs-string">&#x27;Time&#x27;</span>: microgrid.time_labels,
+        <span class="hljs-string">&#x27;Load(kW)&#x27;</span>: microgrid.load_profile.<span class="hljs-built_in">round</span>(<span class="hljs-number">1</span>),
+        <span class="hljs-string">&#x27;PV(kW)&#x27;</span>: schedule2[<span class="hljs-string">&#x27;PV&#x27;</span>].<span class="hljs-built_in">round</span>(<span class="hljs-number">1</span>),
+        <span class="hljs-string">&#x27;Wind(kW)&#x27;</span>: schedule2[<span class="hljs-string">&#x27;WT&#x27;</span>].<span class="hljs-built_in">round</span>(<span class="hljs-number">1</span>),
+        <span class="hljs-string">&#x27;FC(kW)&#x27;</span>: schedule2[<span class="hljs-string">&#x27;FC&#x27;</span>].<span class="hljs-built_in">round</span>(<span class="hljs-number">1</span>),
+        <span class="hljs-string">&#x27;MT(kW)&#x27;</span>: schedule2[<span class="hljs-string">&#x27;MT&#x27;</span>].<span class="hljs-built_in">round</span>(<span class="hljs-number">1</span>),
+        <span class="hljs-string">&#x27;DE(kW)&#x27;</span>: schedule2[<span class="hljs-string">&#x27;DE&#x27;</span>].<span class="hljs-built_in">round</span>(<span class="hljs-number">1</span>),
+        <span class="hljs-string">&#x27;BT(kW)&#x27;</span>: schedule2[<span class="hljs-string">&#x27;BT&#x27;</span>].<span class="hljs-built_in">round</span>(<span class="hljs-number">1</span>),
+        <span class="hljs-string">&#x27;Grid(kW)&#x27;</span>: schedule2[<span class="hljs-string">&#x27;Grid&#x27;</span>].<span class="hljs-built_in">round</span>(<span class="hljs-number">1</span>),
+    })
+
+    <span class="hljs-built_in">print</span>(schedule_df.to_string(index=<span class="hljs-literal">False</span>))
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/最小子序和应该怎么求解.html">
+      <span>上一篇</span>
+      <strong>最小子序和应该怎么求解</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/凸包问题graham扫描算法matlab.html">
+      <span>下一篇</span>
+      <strong>凸包问题Graham扫描算法MATLAB</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/蚁群算法是一种模拟蚂蚁觅食行为的优化算法适合用于解决旅行商问题tsp.html">蚁群算法是一种模拟蚂蚁觅食行为的优化算法适合用于解决旅行商问题TSP</a></h3>
+        <p class="post-excerpt">蚁群算法是一种模拟蚂蚁觅食行为的优化算法，适合用于解决旅行商问题（TSP）。以下是使用 MATLAB 实现蚁群算法解决 50 个城市 TSP 问题的代码：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.633Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/什么是哈希表详解c哈希表.html">什么是哈希表详解c哈希表</a></h3>
+        <p class="post-excerpt">什么是哈希表？</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.463Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/为什么new分配在堆上函数变量在栈上递归调用时栈内存的变化过程.html">为什么new分配在堆上函数变量在栈上递归调用时栈内存的变化过程</a></h3>
+        <p class="post-excerpt">在 C++ 里，new 运算符分配的内存位于堆上，而函数的局部变量存于栈上，这是由它们各自的特性和设计目的决定的，下面为你详细解释：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.430Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

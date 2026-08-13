@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Python月球地球太阳三天体联动一个月的月相图 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">Python月球地球太阳三天体联动一个月的月相图</h1>
+        <p class="post-deck">本文介绍了一个使用Python Matplotlib库创建的月相变化动画程序。该程序通过绘制地球、月球轨道和太阳光照，模拟展示了月球绕地球公转时不同位置呈现的月相变化（包括新月、上弦月、满月等下弦月等）。动画采用红色月球配合白色受光面的视觉效果，准确表现了月相变化的原理。程序设置了120帧动画循环，每帧计算月球轨道角度和相应月相名称，最终输出为GIF格式的月相变化演示动画。该实现结合了天文学知识和…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.202Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>13 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文介绍了一个使用Python Matplotlib库创建的月相变化动画程序。该程序通过绘制地球、月球轨道和太阳光照，模拟展示了月球绕地球公转时不同位置呈现的月相变化（包括新月、上弦月、满月等下弦月等）。动画采用红色月球配合白色受光面的视觉效果，准确表现了月相变化的原理。程序设置了120帧动画循环，每帧计算月球轨道角度和相应月相名称，最终输出为GIF格式的月相变化演示动画。该实现结合了天文学知识和数据可视化技术，为理解月相变化提供了直观的教学工具。</p>
+<p><img src="../uploads/csdn/python%E6%9C%88%E7%90%83%E5%9C%B0%E7%90%83%E5%A4%AA%E9%98%B3%E4%B8%89%E5%A4%A9%E4%BD%93%E8%81%94%E5%8A%A8%E4%B8%80%E4%B8%AA%E6%9C%88%E7%9A%84%E6%9C%88%E7%9B%B8%E5%9B%BE/img-01.jpeg" alt=""></p>
+<p><img src="../uploads/csdn/python%E6%9C%88%E7%90%83%E5%9C%B0%E7%90%83%E5%A4%AA%E9%98%B3%E4%B8%89%E5%A4%A9%E4%BD%93%E8%81%94%E5%8A%A8%E4%B8%80%E4%B8%AA%E6%9C%88%E7%9A%84%E6%9C%88%E7%9B%B8%E5%9B%BE/img-02.gif" alt=""></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> matplotlib.patches <span class="hljs-keyword">import</span> Circle
+<span class="hljs-keyword">from</span> matplotlib.animation <span class="hljs-keyword">import</span> FuncAnimation, PillowWriter
+<span class="hljs-keyword">from</span> matplotlib <span class="hljs-keyword">import</span> rcParams
+
+<span class="hljs-comment"># 中文字体</span>
+rcParams[<span class="hljs-string">&quot;font.sans-serif&quot;</span>] = [<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-string">&quot;Microsoft YaHei&quot;</span>, <span class="hljs-string">&quot;Arial Unicode MS&quot;</span>]
+rcParams[<span class="hljs-string">&quot;axes.unicode_minus&quot;</span>] = <span class="hljs-literal">False</span>
+
+<span class="hljs-comment"># ----------------------------</span>
+<span class="hljs-comment"># 参数设置</span>
+<span class="hljs-comment"># ----------------------------</span>
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">8</span>, <span class="hljs-number">8</span>))
+ax.set_aspect(<span class="hljs-string">&quot;equal&quot;</span>)
+ax.set_xlim(-<span class="hljs-number">4.2</span>, <span class="hljs-number">4.8</span>)
+ax.set_ylim(-<span class="hljs-number">4.2</span>, <span class="hljs-number">4.2</span>)
+ax.axis(<span class="hljs-string">&quot;off&quot;</span>)
+
+orbit_r = <span class="hljs-number">2.8</span>
+earth_r = <span class="hljs-number">0.5</span>
+moon_r = <span class="hljs-number">0.28</span>
+sun_x, sun_y = <span class="hljs-number">4.2</span>, <span class="hljs-number">3.0</span>
+frames = <span class="hljs-number">120</span>
+
+<span class="hljs-comment"># ----------------------------</span>
+<span class="hljs-comment"># 绘制“红色月球 + 白色投影”</span>
+<span class="hljs-comment"># ----------------------------</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">draw_moon_red_white</span>(<span class="hljs-params">ax, x, y, r, phase_deg</span>):
+    <span class="hljs-comment"># 红色底盘</span>
+    ax.add_patch(Circle((x, y), r, color=<span class="hljs-string">&quot;#CC0000&quot;</span>, ec=<span class="hljs-string">&quot;black&quot;</span>, lw=<span class="hljs-number">1.2</span>))
+
+    <span class="hljs-comment"># 新月</span>
+    <span class="hljs-keyword">if</span> phase_deg == <span class="hljs-number">0</span>:
+        <span class="hljs-keyword">return</span>
+
+    <span class="hljs-comment"># 满月：整颗变白</span>
+    <span class="hljs-keyword">if</span> phase_deg == <span class="hljs-number">180</span>:
+        ax.add_patch(Circle((x, y), r, color=<span class="hljs-string">&quot;white&quot;</span>, ec=<span class="hljs-string">&quot;black&quot;</span>, lw=<span class="hljs-number">1.2</span>))
+        <span class="hljs-keyword">return</span>
+
+    <span class="hljs-comment"># 白色“投影/受光面”</span>
+    phi = np.deg2rad(phase_deg)
+
+    <span class="hljs-keyword">if</span> phase_deg &lt; <span class="hljs-number">180</span>:
+        <span class="hljs-comment"># 盈月：右侧白</span>
+        ax.add_patch(Circle((x, y), r, color=<span class="hljs-string">&quot;white&quot;</span>, ec=<span class="hljs-string">&quot;none&quot;</span>))
+        shift = r * np.cos(phi)
+        ax.add_patch(Circle((x - shift, y), r, color=<span class="hljs-string">&quot;#CC0000&quot;</span>, ec=<span class="hljs-string">&quot;none&quot;</span>))
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-comment"># 亏月：左侧白</span>
+        ax.add_patch(Circle((x, y), r, color=<span class="hljs-string">&quot;white&quot;</span>, ec=<span class="hljs-string">&quot;none&quot;</span>))
+        shift = r * np.cos(np.pi - phi)
+        ax.add_patch(Circle((x + shift, y), r, color=<span class="hljs-string">&quot;#CC0000&quot;</span>, ec=<span class="hljs-string">&quot;none&quot;</span>))
+
+    <span class="hljs-comment"># 外轮廓</span>
+    ax.add_patch(Circle((x, y), r, fill=<span class="hljs-literal">False</span>, ec=<span class="hljs-string">&quot;black&quot;</span>, lw=<span class="hljs-number">1.2</span>))
+
+<span class="hljs-comment"># ----------------------------</span>
+<span class="hljs-comment"># 月相文字</span>
+<span class="hljs-comment"># ----------------------------</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">get_phase_name</span>(<span class="hljs-params">angle_deg</span>):
+    <span class="hljs-keyword">if</span> angle_deg &lt; <span class="hljs-number">22.5</span> <span class="hljs-keyword">or</span> angle_deg &gt;= <span class="hljs-number">337.5</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;新月&quot;</span>
+    <span class="hljs-keyword">elif</span> angle_deg &lt; <span class="hljs-number">67.5</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;蛾眉月&quot;</span>
+    <span class="hljs-keyword">elif</span> angle_deg &lt; <span class="hljs-number">112.5</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;上弦月&quot;</span>
+    <span class="hljs-keyword">elif</span> angle_deg &lt; <span class="hljs-number">157.5</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;盈凸月&quot;</span>
+    <span class="hljs-keyword">elif</span> angle_deg &lt; <span class="hljs-number">202.5</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;满月&quot;</span>
+    <span class="hljs-keyword">elif</span> angle_deg &lt; <span class="hljs-number">247.5</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;亏凸月&quot;</span>
+    <span class="hljs-keyword">elif</span> angle_deg &lt; <span class="hljs-number">292.5</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;下弦月&quot;</span>
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;亏眉月&quot;</span>
+
+<span class="hljs-comment"># ----------------------------</span>
+<span class="hljs-comment"># 动画更新函数</span>
+<span class="hljs-comment"># ----------------------------</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">frame</span>):
+    ax.clear()
+    ax.set_aspect(<span class="hljs-string">&quot;equal&quot;</span>)
+    ax.set_xlim(-<span class="hljs-number">4.2</span>, <span class="hljs-number">4.8</span>)
+    ax.set_ylim(-<span class="hljs-number">4.2</span>, <span class="hljs-number">4.2</span>)
+    ax.axis(<span class="hljs-string">&quot;off&quot;</span>)
+    ax.set_facecolor(<span class="hljs-string">&quot;white&quot;</span>)
+
+    <span class="hljs-comment"># 当前月球轨道角度</span>
+    angle_deg = frame * <span class="hljs-number">360</span> / frames
+    theta = np.deg2rad(angle_deg)
+
+    <span class="hljs-comment"># 月球位置</span>
+    moon_x = orbit_r * np.cos(theta)
+    moon_y = orbit_r * np.sin(theta)
+
+    <span class="hljs-comment"># 月相角：0°新月，180°满月</span>
+    phase_deg = angle_deg <span class="hljs-keyword">if</span> angle_deg &lt;= <span class="hljs-number">180</span> <span class="hljs-keyword">else</span> <span class="hljs-number">360</span> - angle_deg
+
+    <span class="hljs-comment"># 太阳光</span>
+    ax.annotate(
+        <span class="hljs-string">&quot;&quot;</span>,
+        xy=(-<span class="hljs-number">3.0</span>, <span class="hljs-number">3.0</span>),
+        xytext=(<span class="hljs-number">4.0</span>, <span class="hljs-number">3.0</span>),
+        arrowprops=<span class="hljs-built_in">dict</span>(arrowstyle=<span class="hljs-string">&quot;-&gt;&quot;</span>, lw=<span class="hljs-number">2.5</span>, color=<span class="hljs-string">&quot;orange&quot;</span>)
+    )
+    ax.text(<span class="hljs-number">4.05</span>, <span class="hljs-number">3.15</span>, <span class="hljs-string">&quot;太阳光&quot;</span>, color=<span class="hljs-string">&quot;orange&quot;</span>, fontsize=<span class="hljs-number">12</span>, ha=<span class="hljs-string">&quot;right&quot;</span>)
+
+    <span class="hljs-comment"># 太阳</span>
+    sun = Circle((sun_x, sun_y), <span class="hljs-number">0.35</span>, color=<span class="hljs-string">&quot;gold&quot;</span>, ec=<span class="hljs-string">&quot;black&quot;</span>, lw=<span class="hljs-number">1.2</span>)
+    ax.add_patch(sun)
+    ax.text(sun_x, sun_y, <span class="hljs-string">&quot;太阳&quot;</span>, ha=<span class="hljs-string">&quot;center&quot;</span>, va=<span class="hljs-string">&quot;center&quot;</span>, fontsize=<span class="hljs-number">11</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>)
+
+    <span class="hljs-comment"># 地球</span>
+    earth = Circle((<span class="hljs-number">0</span>, <span class="hljs-number">0</span>), earth_r, color=<span class="hljs-string">&quot;#2E86DE&quot;</span>, ec=<span class="hljs-string">&quot;black&quot;</span>, lw=<span class="hljs-number">1.5</span>)
+    ax.add_patch(earth)
+    ax.text(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-string">&quot;地球&quot;</span>, ha=<span class="hljs-string">&quot;center&quot;</span>, va=<span class="hljs-string">&quot;center&quot;</span>, color=<span class="hljs-string">&quot;white&quot;</span>, fontsize=<span class="hljs-number">13</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>)
+
+    <span class="hljs-comment"># 轨道</span>
+    orbit = Circle((<span class="hljs-number">0</span>, <span class="hljs-number">0</span>), orbit_r, fill=<span class="hljs-literal">False</span>, ls=<span class="hljs-string">&quot;--&quot;</span>, ec=<span class="hljs-string">&quot;gray&quot;</span>, lw=<span class="hljs-number">1.2</span>)
+    ax.add_patch(orbit)
+
+    <span class="hljs-comment"># 地月连线</span>
+    ax.plot([<span class="hljs-number">0</span>, moon_x], [<span class="hljs-number">0</span>, moon_y], color=<span class="hljs-string">&quot;gray&quot;</span>, lw=<span class="hljs-number">1</span>, ls=<span class="hljs-string">&quot;:&quot;</span>)
+
+    <span class="hljs-comment"># 月球</span>
+    draw_moon_red_white(ax, moon_x, moon_y, moon_r, phase_deg)
+    ax.text(moon_x, moon_y - <span class="hljs-number">0.45</span>, <span class="hljs-string">&quot;月球&quot;</span>, ha=<span class="hljs-string">&quot;center&quot;</span>, va=<span class="hljs-string">&quot;top&quot;</span>, fontsize=<span class="hljs-number">11</span>)
+
+    <span class="hljs-comment"># 文字说明</span>
+    phase_text = get_phase_name(angle_deg)
+    ax.text(-<span class="hljs-number">4.0</span>, <span class="hljs-number">3.6</span>, <span class="hljs-string">f&quot;月相动画：<span class="hljs-subst">{phase_text}</span>&quot;</span>, fontsize=<span class="hljs-number">15</span>, weight=<span class="hljs-string">&quot;bold&quot;</span>)
+    ax.text(<span class="hljs-number">2.1</span>, -<span class="hljs-number">3.7</span>, <span class="hljs-string">f&quot;月球轨道角度：<span class="hljs-subst">{<span class="hljs-built_in">int</span>(angle_deg)}</span>°&quot;</span>, fontsize=<span class="hljs-number">11</span>)
+
+    <span class="hljs-comment"># 轨道方向箭头</span>
+    ax.annotate(
+        <span class="hljs-string">&quot;&quot;</span>,
+        xy=(orbit_r * np.cos(np.deg2rad(<span class="hljs-number">70</span>)), orbit_r * np.sin(np.deg2rad(<span class="hljs-number">70</span>))),
+        xytext=(orbit_r * np.cos(np.deg2rad(<span class="hljs-number">30</span>)), orbit_r * np.sin(np.deg2rad(<span class="hljs-number">30</span>))),
+        arrowprops=<span class="hljs-built_in">dict</span>(arrowstyle=<span class="hljs-string">&quot;-&gt;&quot;</span>, lw=<span class="hljs-number">1.8</span>, color=<span class="hljs-string">&quot;black&quot;</span>)
+    )
+
+<span class="hljs-comment"># ----------------------------</span>
+<span class="hljs-comment"># 生成 GIF</span>
+<span class="hljs-comment"># ----------------------------</span>
+anim = FuncAnimation(fig, update, frames=frames, interval=<span class="hljs-number">80</span>)
+gif_name = <span class="hljs-string">&quot;moon_phase_red_white.gif&quot;</span>
+anim.save(gif_name, writer=PillowWriter(fps=<span class="hljs-number">12</span>))
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;已生成动画文件：<span class="hljs-subst">{gif_name}</span>&quot;</span>)
+plt.close(fig)
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/一种导弹追踪算法的matlab仿真实现.html">
+      <span>上一篇</span>
+      <strong>一种导弹追踪算法的MATLAB仿真实现</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/matlab计算理想情况下每节火车车厢所受到的力并用构图的形式画出由10节车厢组成的火车受力图包含数.html">
+      <span>下一篇</span>
+      <strong>MATLAB计算理想情况下每节火车车厢所受到的力并用构图的形式画出由10节车厢组成的火车受力图包含数</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

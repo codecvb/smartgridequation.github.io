@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Python使用RRT算法进行无人机路径规划空中飞行 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">Python使用RRT算法进行无人机路径规划空中飞行</h1>
+        <p class="post-deck">RRT（快速探索随机树，Rapidly-exploring Random Tree）是一种用于高维空间路径规划的概率型算法，由 Steven M. LaValle 于 1998 年提出。它通过随机采样空间点并逐步构建 &#34;树&#34; 状结构来探索未知环境，特别适合解决复杂障碍物环境中的路径规划问题。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.713Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>46 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-5.html">人工智能</a>
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>RRT（快速探索随机树，Rapidly-exploring Random Tree）是一种用于高维空间路径规划的概率型算法，由 Steven M. LaValle 于 1998 年提出。它通过随机采样空间点并逐步构建 “树” 状结构来探索未知环境，特别适合解决复杂障碍物环境中的路径规划问题。</p>
+<p>效果如下</p>
+<p><img src="../uploads/csdn/python%E4%BD%BF%E7%94%A8rrt%E7%AE%97%E6%B3%95%E8%BF%9B%E8%A1%8C%E6%97%A0%E4%BA%BA%E6%9C%BA%E8%B7%AF%E5%BE%84%E8%A7%84%E5%88%92%E7%A9%BA%E4%B8%AD%E9%A3%9E%E8%A1%8C/img-01.png" alt=""></p>
+<h4 id="一-rrt-算法核心原理" class="prose-heading"><strong>一、RRT 算法核心原理</strong></h4>
+<p>RRT 的核心思想是<strong>通过随机采样逐步构建一棵覆盖自由空间的树</strong>，最终连接起点和终点。算法流程可概括为：</p>
+<ol>
+<li><strong>初始化</strong>：以起点为根节点创建一棵树。</li>
+<li><strong>随机采样</strong>：在搜索空间中随机生成一个点（目标点有小概率被直接采样，加速收敛）。</li>
+<li>** nearest 搜索 **：在已有树中找到距离随机点最近的节点。</li>
+<li><strong>扩展树</strong>：从最近节点向随机点方向延伸固定步长，生成新节点。</li>
+<li><strong>碰撞检测</strong>：检查新节点与最近节点之间的路径是否碰撞障碍物。</li>
+<li><strong>添加节点</strong>：若路径无碰撞，则将新节点加入树中，并记录其父节点。</li>
+<li><strong>终止条件</strong>：当新节点足够接近目标点且路径无碰撞时，算法终止，通过回溯父节点提取路径。</li>
+</ol>
+<h4 id="二-关键数学知识" class="prose-heading"><strong>二、关键数学知识</strong></h4>
+<h5 id="1-欧氏距离-euclidean-distance" class="prose-heading">1. <strong>欧氏距离（Euclidean Distance）</strong></h5>
+<p>用于计算空间中两点的直线距离，是 RRT 中 “找最近节点” 和 “扩展步长” 的基础。</p>
+<ul>
+<li></li>
+</ul>
+<pre><code>**3D 空间距离公式**：
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>![](/uploads/csdn/python使用rrt算法进行无人机路径规划空中飞行/img-02.png)
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**作用**：
+
+
+-   判断节点是否接近目标（终止条件）。
+-   确定从最近节点向随机点延伸的方向和步长。
+</code></pre>
+<h5 id="2-向量运算与线性插值" class="prose-heading">2. <strong>向量运算与线性插值</strong></h5>
+<p>用于从 “最近节点” 向 “随机点” 扩展新节点（steer 操作）。</p>
+<ul>
+<li></li>
+</ul>
+<pre><code>**单位向量**：
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>![](/uploads/csdn/python使用rrt算法进行无人机路径规划空中飞行/img-03.png)
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**线性插值（生成新节点）**：
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>![](/uploads/csdn/python使用rrt算法进行无人机路径规划空中飞行/img-04.png)
+</code></pre>
+<h5 id="3-碰撞检测-几何相交判断" class="prose-heading">3. <strong>碰撞检测（几何相交判断）</strong></h5>
+<p>判断两点之间的线段是否与障碍物碰撞，是确保路径可行性的核心。</p>
+<ul>
+<li></li>
+</ul>
+<pre><code>**原理**
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>![](/uploads/csdn/python使用rrt算法进行无人机路径规划空中飞行/img-05.png)
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**线段到点的最短距离计算**：![](/uploads/csdn/python使用rrt算法进行无人机路径规划空中飞行/img-06.png)
+</code></pre>
+<h5 id="4-概率与随机性" class="prose-heading">4. <strong>概率与随机性</strong></h5>
+<p>RRT 的探索能力依赖于随机采样，体现为：</p>
+<ul>
+<li></li>
+</ul>
+<pre><code>**随机采样策略**：在搜索空间边界内均匀随机生成点，数学上可表示为：
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>![](/uploads/csdn/python使用rrt算法进行无人机路径规划空中飞行/img-07.png)
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**偏向目标的采样**：以小概率（如 10%）直接采样目标点，加速向目标方向探索，数学上表示为：
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>![](/uploads/csdn/python使用rrt算法进行无人机路径规划空中飞行/img-08.png)
+</code></pre>
+<h4 id="三-rrt-的扩展-rrt" class="prose-heading"><strong>三、RRT 的扩展：RRT</strong>*</h4>
+<p>RRT * 是 RRT 的优化版本，通过<strong>重布线（Rewire）</strong> 过程优化路径质量，核心数学思想是：</p>
+<ol>
+<li><strong>邻居搜索</strong>：在新节点周围一定半径内寻找所有邻居节点。</li>
+<li><strong>最优父节点选择</strong>：对每个邻居节点，计算经过该邻居到新节点的总成本（路径长度），选择成本最小的邻居作为父节点。</li>
+<li><strong>重布线</strong>：对于每个邻居节点，若经过新节点的路径成本更低，则更新邻居的父节点为新节点，实现路径优化。</li>
+</ol>
+<p>成本计算公式为：</p>
+<p><img src="../uploads/csdn/python%E4%BD%BF%E7%94%A8rrt%E7%AE%97%E6%B3%95%E8%BF%9B%E8%A1%8C%E6%97%A0%E4%BA%BA%E6%9C%BA%E8%B7%AF%E5%BE%84%E8%A7%84%E5%88%92%E7%A9%BA%E4%B8%AD%E9%A3%9E%E8%A1%8C/img-09.png" alt=""></p>
+<h4 id="四-总结" class="prose-heading"><strong>四、总结</strong></h4>
+<p>RRT 算法通过<strong>随机采样、最近邻搜索、向量扩展、碰撞检测</strong>四大步骤实现路径规划，核心数学基础包括：</p>
+<ul>
+<li>欧氏距离计算（用于距离度量）</li>
+<li>向量运算与线性插值（用于节点扩展）</li>
+<li>几何相交判断（用于碰撞检测）</li>
+<li>概率分布（用于空间探索）</li>
+</ul>
+<p>相比 A<em>等基于网格的算法，RRT 在高维空间（如 3D 无人机路径规划）中效率更高，且无需预先生成环境地图，适合动态未知环境。而 RRT</em>通过优化父节点选择，进一步提升了路径的最优性。</p>
+<p>代码如下</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3D
+<span class="hljs-keyword">from</span> matplotlib.animation <span class="hljs-keyword">import</span> FuncAnimation
+<span class="hljs-keyword">import</span> math
+<span class="hljs-keyword">import</span> random
+<span class="hljs-keyword">import</span> time
+
+<span class="hljs-comment"># 设置随机种子，保证结果可复现</span>
+np.random.seed(<span class="hljs-number">42</span>)
+random.seed(<span class="hljs-number">42</span>)
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Node</span>:
+    <span class="hljs-string">&quot;&quot;&quot;RRT*算法中的节点类&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x, y, z</span>):
+        <span class="hljs-variable language_">self</span>.x = x
+        <span class="hljs-variable language_">self</span>.y = y
+        <span class="hljs-variable language_">self</span>.z = z
+        <span class="hljs-variable language_">self</span>.parent = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.cost = <span class="hljs-number">0.0</span>  <span class="hljs-comment"># 从起点到当前节点的成本</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">distance</span>(<span class="hljs-params">self, other</span>):
+        <span class="hljs-string">&quot;&quot;&quot;计算与另一个节点的欧氏距离&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">return</span> math.sqrt((<span class="hljs-variable language_">self</span>.x - other.x)**<span class="hljs-number">2</span> +
+                         (<span class="hljs-variable language_">self</span>.y - other.y)** <span class="hljs-number">2</span> +
+                         (<span class="hljs-variable language_">self</span>.z - other.z)** <span class="hljs-number">2</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_coordinates</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;返回节点的坐标 tuple&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">return</span> (<span class="hljs-variable language_">self</span>.x, <span class="hljs-variable language_">self</span>.y, <span class="hljs-variable language_">self</span>.z)
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">RRTStar</span>:
+    <span class="hljs-string">&quot;&quot;&quot;3D RRT*算法实现&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self,
+                 start,
+                 goal,
+                 obstacles,
+                 obstacle_radius,
+                 space_bounds,
+                 max_iter=<span class="hljs-number">1000</span>,
+                 step_size=<span class="hljs-number">0.5</span>,
+                 goal_radius=<span class="hljs-number">1.0</span>,
+                 neighbor_radius=<span class="hljs-number">2.0</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        参数初始化
+        start: 起点坐标 (x, y, z)
+        goal: 终点坐标 (x, y, z)
+        obstacles: 障碍物列表，每个元素为(x, y, z)
+        obstacle_radius: 障碍物半径
+        space_bounds: 空间边界 [(x_min, x_max), (y_min, y_max), (z_min, z_max)]
+        max_iter: 最大迭代次数
+        step_size: 步长
+        goal_radius: 到达目标的判定半径
+        neighbor_radius: 邻居节点搜索半径
+        &quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.start = Node(start[<span class="hljs-number">0</span>], start[<span class="hljs-number">1</span>], start[<span class="hljs-number">2</span>])
+        <span class="hljs-variable language_">self</span>.goal = Node(goal[<span class="hljs-number">0</span>], goal[<span class="hljs-number">1</span>], goal[<span class="hljs-number">2</span>])
+        <span class="hljs-variable language_">self</span>.obstacles = [Node(obs[<span class="hljs-number">0</span>], obs[<span class="hljs-number">1</span>], obs[<span class="hljs-number">2</span>]) <span class="hljs-keyword">for</span> obs <span class="hljs-keyword">in</span> obstacles]
+        <span class="hljs-variable language_">self</span>.obstacle_radius = obstacle_radius
+        <span class="hljs-variable language_">self</span>.space_bounds = space_bounds
+        <span class="hljs-variable language_">self</span>.max_iter = max_iter
+        <span class="hljs-variable language_">self</span>.step_size = step_size
+        <span class="hljs-variable language_">self</span>.goal_radius = goal_radius
+        <span class="hljs-variable language_">self</span>.neighbor_radius = neighbor_radius
+
+        <span class="hljs-comment"># 初始化节点列表</span>
+        <span class="hljs-variable language_">self</span>.nodes = [<span class="hljs-variable language_">self</span>.start]
+        <span class="hljs-variable language_">self</span>.found_goal = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.best_goal_node = <span class="hljs-literal">None</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_random_node</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;在搜索空间中随机生成一个节点&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> random.random() &lt; <span class="hljs-number">0.1</span>:  <span class="hljs-comment"># 10%的概率直接生成目标节点，加速收敛</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.goal
+
+        x = random.uniform(<span class="hljs-variable language_">self</span>.space_bounds[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>], <span class="hljs-variable language_">self</span>.space_bounds[<span class="hljs-number">0</span>][<span class="hljs-number">1</span>])
+        y = random.uniform(<span class="hljs-variable language_">self</span>.space_bounds[<span class="hljs-number">1</span>][<span class="hljs-number">0</span>], <span class="hljs-variable language_">self</span>.space_bounds[<span class="hljs-number">1</span>][<span class="hljs-number">1</span>])
+        z = random.uniform(<span class="hljs-variable language_">self</span>.space_bounds[<span class="hljs-number">2</span>][<span class="hljs-number">0</span>], <span class="hljs-variable language_">self</span>.space_bounds[<span class="hljs-number">2</span>][<span class="hljs-number">1</span>])
+        <span class="hljs-keyword">return</span> Node(x, y, z)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">nearest_node</span>(<span class="hljs-params">self, random_node</span>):
+        <span class="hljs-string">&quot;&quot;&quot;找到与随机节点最近的节点&quot;&quot;&quot;</span>
+        min_dist = <span class="hljs-built_in">float</span>(<span class="hljs-string">&#x27;inf&#x27;</span>)
+        nearest_node = <span class="hljs-literal">None</span>
+
+        <span class="hljs-keyword">for</span> node <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.nodes:
+            dist = node.distance(random_node)
+            <span class="hljs-keyword">if</span> dist &lt; min_dist:
+                min_dist = dist
+                nearest_node = node
+
+        <span class="hljs-keyword">return</span> nearest_node
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">steer</span>(<span class="hljs-params">self, from_node, to_node</span>):
+        <span class="hljs-string">&quot;&quot;&quot;从from_node向to_node移动step_size距离，生成新节点&quot;&quot;&quot;</span>
+        dist = from_node.distance(to_node)
+
+        <span class="hljs-comment"># 如果距离小于步长，直接返回目标节点</span>
+        <span class="hljs-keyword">if</span> dist &lt;= <span class="hljs-variable language_">self</span>.step_size:
+            <span class="hljs-keyword">return</span> Node(to_node.x, to_node.y, to_node.z)
+
+        <span class="hljs-comment"># 否则按比例移动</span>
+        ratio = <span class="hljs-variable language_">self</span>.step_size / dist
+        x = from_node.x + (to_node.x - from_node.x) * ratio
+        y = from_node.y + (to_node.y - from_node.y) * ratio
+        z = from_node.z + (to_node.z - from_node.z) * ratio
+        <span class="hljs-keyword">return</span> Node(x, y, z)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">is_collision_free</span>(<span class="hljs-params">self, node1, node2</span>):
+        <span class="hljs-string">&quot;&quot;&quot;检查两个节点之间的路径是否无碰撞&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 采样路径上的点进行碰撞检测</span>
+        num_samples = <span class="hljs-number">10</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_samples + <span class="hljs-number">1</span>):
+            ratio = i / num_samples
+            x = node1.x + (node2.x - node1.x) * ratio
+            y = node1.y + (node2.y - node1.y) * ratio
+            z = node1.z + (node2.z - node1.z) * ratio
+            sample_node = Node(x, y, z)
+
+            <span class="hljs-comment"># 检查与每个障碍物的距离</span>
+            <span class="hljs-keyword">for</span> obs <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.obstacles:
+                <span class="hljs-keyword">if</span> sample_node.distance(obs) &lt; <span class="hljs-variable language_">self</span>.obstacle_radius:
+                    <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">find_neighbors</span>(<span class="hljs-params">self, new_node</span>):
+        <span class="hljs-string">&quot;&quot;&quot;找到新节点附近的所有邻居节点&quot;&quot;&quot;</span>
+        neighbors = []
+        <span class="hljs-keyword">for</span> node <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.nodes:
+            <span class="hljs-keyword">if</span> new_node.distance(node) &lt; <span class="hljs-variable language_">self</span>.neighbor_radius:
+                neighbors.append(node)
+        <span class="hljs-keyword">return</span> neighbors
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">choose_parent</span>(<span class="hljs-params">self, new_node, neighbors</span>):
+        <span class="hljs-string">&quot;&quot;&quot;从邻居节点中选择最优父节点&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> neighbors:
+            <span class="hljs-keyword">return</span>
+
+        <span class="hljs-comment"># 初始成本设为从起点到新节点的成本</span>
+        min_cost = <span class="hljs-built_in">float</span>(<span class="hljs-string">&#x27;inf&#x27;</span>)
+        best_parent = <span class="hljs-literal">None</span>
+
+        <span class="hljs-keyword">for</span> neighbor <span class="hljs-keyword">in</span> neighbors:
+            <span class="hljs-comment"># 检查邻居到新节点的路径是否无碰撞</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.is_collision_free(neighbor, new_node):
+                <span class="hljs-comment"># 计算经过该邻居到新节点的总成本</span>
+                total_cost = neighbor.cost + neighbor.distance(new_node)
+
+                <span class="hljs-comment"># 更新最小成本和最优父节点</span>
+                <span class="hljs-keyword">if</span> total_cost &lt; min_cost:
+                    min_cost = total_cost
+                    best_parent = neighbor
+
+        <span class="hljs-comment"># 设置最优父节点和成本</span>
+        <span class="hljs-keyword">if</span> best_parent <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            new_node.parent = best_parent
+            new_node.cost = min_cost
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">rewire</span>(<span class="hljs-params">self, new_node, neighbors</span>):
+        <span class="hljs-string">&quot;&quot;&quot;重新布线，优化已有路径&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">for</span> neighbor <span class="hljs-keyword">in</span> neighbors:
+            <span class="hljs-comment"># 检查新节点到邻居的路径是否无碰撞</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.is_collision_free(new_node, neighbor):
+                <span class="hljs-comment"># 计算经过新节点到邻居的总成本</span>
+                new_cost = new_node.cost + new_node.distance(neighbor)
+
+                <span class="hljs-comment"># 如果新路径成本更低，则更新邻居的父节点</span>
+                <span class="hljs-keyword">if</span> new_cost &lt; neighbor.cost:
+                    neighbor.parent = new_node
+                    neighbor.cost = new_cost
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">extract_path</span>(<span class="hljs-params">self, node</span>):
+        <span class="hljs-string">&quot;&quot;&quot;从目标节点回溯到起点，提取路径&quot;&quot;&quot;</span>
+        path = []
+        current_node = node
+
+        <span class="hljs-keyword">while</span> current_node <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            path.append(current_node.get_coordinates())
+            current_node = current_node.parent
+
+        <span class="hljs-comment"># 反转路径，从起点到目标</span>
+        <span class="hljs-keyword">return</span> path[::-<span class="hljs-number">1</span>]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">planning</span>(<span class="hljs-params">self, verbose=<span class="hljs-literal">True</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;执行RRT*路径规划&quot;&quot;&quot;</span>
+        start_time = time.time()
+
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.max_iter):
+            <span class="hljs-comment"># 生成随机节点</span>
+            random_node = <span class="hljs-variable language_">self</span>.get_random_node()
+
+            <span class="hljs-comment"># 找到最近的节点</span>
+            nearest = <span class="hljs-variable language_">self</span>.nearest_node(random_node)
+
+            <span class="hljs-comment"># 生成新节点</span>
+            new_node = <span class="hljs-variable language_">self</span>.steer(nearest, random_node)
+
+            <span class="hljs-comment"># 检查新节点是否在自由空间（无碰撞）</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.is_collision_free(nearest, new_node):
+                <span class="hljs-comment"># 找到新节点的邻居</span>
+                neighbors = <span class="hljs-variable language_">self</span>.find_neighbors(new_node)
+
+                <span class="hljs-comment"># 选择最优父节点</span>
+                <span class="hljs-variable language_">self</span>.choose_parent(new_node, neighbors)
+
+                <span class="hljs-comment"># 添加新节点到节点列表</span>
+                <span class="hljs-variable language_">self</span>.nodes.append(new_node)
+
+                <span class="hljs-comment"># 重新布线</span>
+                <span class="hljs-variable language_">self</span>.rewire(new_node, neighbors)
+
+                <span class="hljs-comment"># 检查是否到达目标附近</span>
+                <span class="hljs-keyword">if</span> new_node.distance(<span class="hljs-variable language_">self</span>.goal) &lt; <span class="hljs-variable language_">self</span>.goal_radius:
+                    <span class="hljs-comment"># 尝试直接连接到目标</span>
+                    <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.is_collision_free(new_node, <span class="hljs-variable language_">self</span>.goal):
+                        <span class="hljs-variable language_">self</span>.goal.parent = new_node
+                        <span class="hljs-variable language_">self</span>.goal.cost = new_node.cost + new_node.distance(<span class="hljs-variable language_">self</span>.goal)
+                        <span class="hljs-variable language_">self</span>.nodes.append(<span class="hljs-variable language_">self</span>.goal)
+                        <span class="hljs-variable language_">self</span>.found_goal = <span class="hljs-literal">True</span>
+                        <span class="hljs-variable language_">self</span>.best_goal_node = <span class="hljs-variable language_">self</span>.goal
+
+                        <span class="hljs-keyword">if</span> verbose:
+                            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;在第 <span class="hljs-subst">{i+<span class="hljs-number">1</span>}</span> 次迭代找到目标！&quot;</span>)
+                        <span class="hljs-keyword">break</span>
+
+                <span class="hljs-comment"># 更新最佳目标节点（即使尚未到达目标半径内）</span>
+                <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.found_goal:
+                    dist_to_goal = new_node.distance(<span class="hljs-variable language_">self</span>.goal)
+                    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">self</span>.best_goal_node <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span>
+                        dist_to_goal &lt; <span class="hljs-variable language_">self</span>.best_goal_node.distance(<span class="hljs-variable language_">self</span>.goal)):
+                        <span class="hljs-variable language_">self</span>.best_goal_node = new_node
+
+        <span class="hljs-comment"># 计算规划时间</span>
+        planning_time = time.time() - start_time
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.found_goal:
+            path = <span class="hljs-variable language_">self</span>.extract_path(<span class="hljs-variable language_">self</span>.goal)
+            <span class="hljs-keyword">if</span> verbose:
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;路径规划完成，总长度: <span class="hljs-subst">{self.goal.cost:<span class="hljs-number">.2</span>f}</span>，耗时: <span class="hljs-subst">{planning_time:<span class="hljs-number">.4</span>f}</span>秒&quot;</span>)
+            <span class="hljs-keyword">return</span> path, planning_time
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">if</span> verbose:
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;未找到完整路径，返回当前最优路径，耗时: <span class="hljs-subst">{planning_time:<span class="hljs-number">.4</span>f}</span>秒&quot;</span>)
+            <span class="hljs-comment"># 返回当前最接近目标的路径</span>
+            path = <span class="hljs-variable language_">self</span>.extract_path(<span class="hljs-variable language_">self</span>.best_goal_node)
+            <span class="hljs-keyword">return</span> path, planning_time
+
+<span class="hljs-comment"># 无人机环境</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">DroneEnvironment</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self,
+                 start_pos=[<span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>],
+                 goal_pos=[<span class="hljs-number">10.0</span>, <span class="hljs-number">10.0</span>, <span class="hljs-number">5.0</span>],
+                 obstacle_radius=<span class="hljs-number">0.8</span>,
+                 num_obstacles=<span class="hljs-number">8</span></span>):
+        <span class="hljs-comment"># 确保起点和终点为float64类型</span>
+        <span class="hljs-variable language_">self</span>.start_pos = np.array(start_pos, dtype=np.float64)
+        <span class="hljs-variable language_">self</span>.goal_pos = np.array(goal_pos, dtype=np.float64)
+        <span class="hljs-variable language_">self</span>.obstacle_radius = obstacle_radius
+
+        <span class="hljs-comment"># 生成随机障碍物</span>
+        <span class="hljs-variable language_">self</span>.obstacles = <span class="hljs-variable language_">self</span>._generate_obstacles(num_obstacles)
+
+        <span class="hljs-comment"># 定义空间边界（比起点和终点稍大）</span>
+        <span class="hljs-variable language_">self</span>.space_bounds = [
+            (<span class="hljs-built_in">min</span>(start_pos[<span class="hljs-number">0</span>], goal_pos[<span class="hljs-number">0</span>]) - <span class="hljs-number">2</span>, <span class="hljs-built_in">max</span>(start_pos[<span class="hljs-number">0</span>], goal_pos[<span class="hljs-number">0</span>]) + <span class="hljs-number">2</span>),
+            (<span class="hljs-built_in">min</span>(start_pos[<span class="hljs-number">1</span>], goal_pos[<span class="hljs-number">1</span>]) - <span class="hljs-number">2</span>, <span class="hljs-built_in">max</span>(start_pos[<span class="hljs-number">1</span>], goal_pos[<span class="hljs-number">1</span>]) + <span class="hljs-number">2</span>),
+            (<span class="hljs-built_in">min</span>(start_pos[<span class="hljs-number">2</span>], goal_pos[<span class="hljs-number">2</span>]) - <span class="hljs-number">2</span>, <span class="hljs-built_in">max</span>(start_pos[<span class="hljs-number">2</span>], goal_pos[<span class="hljs-number">2</span>]) + <span class="hljs-number">2</span>)
+        ]
+
+        <span class="hljs-comment"># 路径</span>
+        <span class="hljs-variable language_">self</span>.path = []
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_generate_obstacles</span>(<span class="hljs-params">self, num_obstacles</span>):
+        <span class="hljs-string">&quot;&quot;&quot;生成随机障碍物，确保不会出现在起点或终点附近&quot;&quot;&quot;</span>
+        obstacles = []
+
+        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_obstacles):
+            <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+                x = np.random.uniform(<span class="hljs-built_in">min</span>(<span class="hljs-variable language_">self</span>.start_pos[<span class="hljs-number">0</span>], <span class="hljs-variable language_">self</span>.goal_pos[<span class="hljs-number">0</span>]),
+                                     <span class="hljs-built_in">max</span>(<span class="hljs-variable language_">self</span>.start_pos[<span class="hljs-number">0</span>], <span class="hljs-variable language_">self</span>.goal_pos[<span class="hljs-number">0</span>]))
+                y = np.random.uniform(<span class="hljs-built_in">min</span>(<span class="hljs-variable language_">self</span>.start_pos[<span class="hljs-number">1</span>], <span class="hljs-variable language_">self</span>.goal_pos[<span class="hljs-number">1</span>]),
+                                     <span class="hljs-built_in">max</span>(<span class="hljs-variable language_">self</span>.start_pos[<span class="hljs-number">1</span>], <span class="hljs-variable language_">self</span>.goal_pos[<span class="hljs-number">1</span>]))
+                z = np.random.uniform(<span class="hljs-built_in">min</span>(<span class="hljs-variable language_">self</span>.start_pos[<span class="hljs-number">2</span>], <span class="hljs-variable language_">self</span>.goal_pos[<span class="hljs-number">2</span>]),
+                                     <span class="hljs-built_in">max</span>(<span class="hljs-variable language_">self</span>.start_pos[<span class="hljs-number">2</span>], <span class="hljs-variable language_">self</span>.goal_pos[<span class="hljs-number">2</span>]) + <span class="hljs-number">2</span>)
+
+                pos = np.array([x, y, z], dtype=np.float64)
+                dist_to_start = np.linalg.norm(pos - <span class="hljs-variable language_">self</span>.start_pos)
+                dist_to_goal = np.linalg.norm(pos - <span class="hljs-variable language_">self</span>.goal_pos)
+
+                <span class="hljs-comment"># 确保障碍物不会太靠近起点或终点</span>
+                <span class="hljs-keyword">if</span> (dist_to_start &gt; <span class="hljs-number">2</span> * <span class="hljs-variable language_">self</span>.obstacle_radius <span class="hljs-keyword">and</span>
+                    dist_to_goal &gt; <span class="hljs-number">2</span> * <span class="hljs-variable language_">self</span>.obstacle_radius):
+                    obstacles.append(pos)
+                    <span class="hljs-keyword">break</span>
+
+        <span class="hljs-keyword">return</span> np.array(obstacles, dtype=np.float64)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">plan_path</span>(<span class="hljs-params">self, max_iter=<span class="hljs-number">1000</span>, step_size=<span class="hljs-number">0.5</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;使用RRT*算法规划路径&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 创建RRT*规划器</span>
+        rrt_star = RRTStar(
+            start=<span class="hljs-variable language_">self</span>.start_pos,
+            goal=<span class="hljs-variable language_">self</span>.goal_pos,
+            obstacles=<span class="hljs-variable language_">self</span>.obstacles,
+            obstacle_radius=<span class="hljs-variable language_">self</span>.obstacle_radius,
+            space_bounds=<span class="hljs-variable language_">self</span>.space_bounds,
+            max_iter=max_iter,
+            step_size=step_size
+        )
+
+        <span class="hljs-comment"># 执行路径规划</span>
+        <span class="hljs-variable language_">self</span>.path, planning_time = rrt_star.planning()
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.path, planning_time
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">self, ax=<span class="hljs-literal">None</span>, show_tree=<span class="hljs-literal">False</span>, rrt_star=<span class="hljs-literal">None</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;绘制环境和路径&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> ax <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            fig = plt.figure(figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">8</span>))
+            ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+        <span class="hljs-comment"># 绘制起点和终点</span>
+        ax.scatter(<span class="hljs-variable language_">self</span>.start_pos[<span class="hljs-number">0</span>], <span class="hljs-variable language_">self</span>.start_pos[<span class="hljs-number">1</span>], <span class="hljs-variable language_">self</span>.start_pos[<span class="hljs-number">2</span>],
+                  color=<span class="hljs-string">&#x27;green&#x27;</span>, s=<span class="hljs-number">150</span>, marker=<span class="hljs-string">&#x27;o&#x27;</span>, label=<span class="hljs-string">&#x27;Start&#x27;</span>)
+        ax.scatter(<span class="hljs-variable language_">self</span>.goal_pos[<span class="hljs-number">0</span>], <span class="hljs-variable language_">self</span>.goal_pos[<span class="hljs-number">1</span>], <span class="hljs-variable language_">self</span>.goal_pos[<span class="hljs-number">2</span>],
+                  color=<span class="hljs-string">&#x27;red&#x27;</span>, s=<span class="hljs-number">150</span>, marker=<span class="hljs-string">&#x27;*&#x27;</span>, label=<span class="hljs-string">&#x27;Goal&#x27;</span>)
+
+        <span class="hljs-comment"># 绘制障碍物</span>
+        <span class="hljs-keyword">for</span> obstacle <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.obstacles:
+            u, v = np.mgrid[<span class="hljs-number">0</span>:<span class="hljs-number">2</span>*np.pi:<span class="hljs-number">20j</span>, <span class="hljs-number">0</span>:np.pi:<span class="hljs-number">10j</span>]
+            x = obstacle[<span class="hljs-number">0</span>] + <span class="hljs-variable language_">self</span>.obstacle_radius * np.cos(u) * np.sin(v)
+            y = obstacle[<span class="hljs-number">1</span>] + <span class="hljs-variable language_">self</span>.obstacle_radius * np.sin(u) * np.sin(v)
+            z = obstacle[<span class="hljs-number">2</span>] + <span class="hljs-variable language_">self</span>.obstacle_radius * np.cos(v)
+            ax.plot_surface(x, y, z, color=<span class="hljs-string">&#x27;gray&#x27;</span>, alpha=<span class="hljs-number">0.5</span>)
+
+        <span class="hljs-comment"># 绘制路径</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.path) &gt; <span class="hljs-number">1</span>:
+            path = np.array(<span class="hljs-variable language_">self</span>.path)
+            ax.plot(path[:, <span class="hljs-number">0</span>], path[:, <span class="hljs-number">1</span>], path[:, <span class="hljs-number">2</span>],
+                   color=<span class="hljs-string">&#x27;blue&#x27;</span>, linewidth=<span class="hljs-number">3</span>, label=<span class="hljs-string">&#x27;Path&#x27;</span>)
+
+        <span class="hljs-comment"># 如果需要，绘制RRT*树</span>
+        <span class="hljs-keyword">if</span> show_tree <span class="hljs-keyword">and</span> rrt_star <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">for</span> node <span class="hljs-keyword">in</span> rrt_star.nodes:
+                <span class="hljs-keyword">if</span> node.parent <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+                    ax.plot([node.x, node.parent.x],
+                           [node.y, node.parent.y],
+                           [node.z, node.parent.z],
+                           color=<span class="hljs-string">&#x27;lightgray&#x27;</span>, linewidth=<span class="hljs-number">1</span>, alpha=<span class="hljs-number">0.5</span>)
+
+        ax.set_xlabel(<span class="hljs-string">&#x27;X&#x27;</span>)
+        ax.set_ylabel(<span class="hljs-string">&#x27;Y&#x27;</span>)
+        ax.set_zlabel(<span class="hljs-string">&#x27;Z&#x27;</span>)
+        ax.set_title(<span class="hljs-string">&#x27;3D Drone Path Planning with RRT*&#x27;</span>)
+        ax.legend()
+
+        <span class="hljs-keyword">if</span> ax <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            plt.show()
+
+        <span class="hljs-keyword">return</span> ax
+
+<span class="hljs-comment"># 动画展示无人机路径</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">animate_drone_path</span>(<span class="hljs-params">env</span>):
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> env.path:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;没有路径可展示，请先规划路径&quot;</span>)
+        <span class="hljs-keyword">return</span>
+
+    path = np.array(env.path)
+
+    fig = plt.figure(figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">8</span>))
+    ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+    <span class="hljs-comment"># 设置坐标轴范围</span>
+    ax.set_xlim([<span class="hljs-built_in">min</span>(path[:,<span class="hljs-number">0</span>].<span class="hljs-built_in">min</span>(), env.start_pos[<span class="hljs-number">0</span>], env.goal_pos[<span class="hljs-number">0</span>])-<span class="hljs-number">1</span>,
+                 <span class="hljs-built_in">max</span>(path[:,<span class="hljs-number">0</span>].<span class="hljs-built_in">max</span>(), env.start_pos[<span class="hljs-number">0</span>], env.goal_pos[<span class="hljs-number">0</span>])+<span class="hljs-number">1</span>])
+    ax.set_ylim([<span class="hljs-built_in">min</span>(path[:,<span class="hljs-number">1</span>].<span class="hljs-built_in">min</span>(), env.start_pos[<span class="hljs-number">1</span>], env.goal_pos[<span class="hljs-number">1</span>])-<span class="hljs-number">1</span>,
+                 <span class="hljs-built_in">max</span>(path[:,<span class="hljs-number">1</span>].<span class="hljs-built_in">max</span>(), env.start_pos[<span class="hljs-number">1</span>], env.goal_pos[<span class="hljs-number">1</span>])+<span class="hljs-number">1</span>])
+    ax.set_zlim([<span class="hljs-built_in">min</span>(path[:,<span class="hljs-number">2</span>].<span class="hljs-built_in">min</span>(), env.start_pos[<span class="hljs-number">2</span>], env.goal_pos[<span class="hljs-number">2</span>])-<span class="hljs-number">1</span>,
+                 <span class="hljs-built_in">max</span>(path[:,<span class="hljs-number">2</span>].<span class="hljs-built_in">max</span>(), env.start_pos[<span class="hljs-number">2</span>], env.goal_pos[<span class="hljs-number">2</span>])+<span class="hljs-number">1</span>])
+
+    ax.set_xlabel(<span class="hljs-string">&#x27;X&#x27;</span>)
+    ax.set_ylabel(<span class="hljs-string">&#x27;Y&#x27;</span>)
+    ax.set_zlabel(<span class="hljs-string">&#x27;Z&#x27;</span>)
+    ax.set_title(<span class="hljs-string">&#x27;Drone Path Animation&#x27;</span>)
+
+    <span class="hljs-comment"># 绘制起点、终点和障碍物</span>
+    ax.scatter(env.start_pos[<span class="hljs-number">0</span>], env.start_pos[<span class="hljs-number">1</span>], env.start_pos[<span class="hljs-number">2</span>],
+              color=<span class="hljs-string">&#x27;green&#x27;</span>, s=<span class="hljs-number">150</span>, marker=<span class="hljs-string">&#x27;o&#x27;</span>, label=<span class="hljs-string">&#x27;Start&#x27;</span>)
+    ax.scatter(env.goal_pos[<span class="hljs-number">0</span>], env.goal_pos[<span class="hljs-number">1</span>], env.goal_pos[<span class="hljs-number">2</span>],
+              color=<span class="hljs-string">&#x27;red&#x27;</span>, s=<span class="hljs-number">150</span>, marker=<span class="hljs-string">&#x27;*&#x27;</span>, label=<span class="hljs-string">&#x27;Goal&#x27;</span>)
+
+    <span class="hljs-keyword">for</span> obstacle <span class="hljs-keyword">in</span> env.obstacles:
+        u, v = np.mgrid[<span class="hljs-number">0</span>:<span class="hljs-number">2</span>*np.pi:<span class="hljs-number">20j</span>, <span class="hljs-number">0</span>:np.pi:<span class="hljs-number">10j</span>]
+        x = obstacle[<span class="hljs-number">0</span>] + env.obstacle_radius * np.cos(u) * np.sin(v)
+        y = obstacle[<span class="hljs-number">1</span>] + env.obstacle_radius * np.sin(u) * np.sin(v)
+        z = obstacle[<span class="hljs-number">2</span>] + env.obstacle_radius * np.cos(v)
+        ax.plot_surface(x, y, z, color=<span class="hljs-string">&#x27;gray&#x27;</span>, alpha=<span class="hljs-number">0.5</span>)
+
+    <span class="hljs-comment"># 初始化路径和无人机位置</span>
+    path_line, = ax.plot([], [], [], color=<span class="hljs-string">&#x27;blue&#x27;</span>, linewidth=<span class="hljs-number">3</span>, label=<span class="hljs-string">&#x27;Path&#x27;</span>)
+    drone_marker, = ax.plot([], [], [], <span class="hljs-string">&#x27;bo&#x27;</span>, markersize=<span class="hljs-number">10</span>)
+
+    ax.legend()
+
+    <span class="hljs-comment"># 动画更新函数</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">frame</span>):
+        <span class="hljs-keyword">if</span> frame &lt; <span class="hljs-built_in">len</span>(path):
+            path_line.set_data(path[:frame+<span class="hljs-number">1</span>, <span class="hljs-number">0</span>], path[:frame+<span class="hljs-number">1</span>, <span class="hljs-number">1</span>])
+            path_line.set_3d_properties(path[:frame+<span class="hljs-number">1</span>, <span class="hljs-number">2</span>])
+            drone_marker.set_data(path[frame, <span class="hljs-number">0</span>], path[frame, <span class="hljs-number">1</span>])
+            drone_marker.set_3d_properties(path[frame, <span class="hljs-number">2</span>])
+        <span class="hljs-keyword">return</span> path_line, drone_marker
+
+    <span class="hljs-comment"># 创建动画</span>
+    anim = FuncAnimation(fig, update, frames=<span class="hljs-built_in">len</span>(path), interval=<span class="hljs-number">50</span>, blit=<span class="hljs-literal">True</span>)
+    plt.show()
+
+    <span class="hljs-keyword">return</span> anim
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    <span class="hljs-comment"># 创建环境</span>
+    env = DroneEnvironment(
+        start_pos=[<span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>],
+        goal_pos=[<span class="hljs-number">15.0</span>, <span class="hljs-number">15.0</span>, <span class="hljs-number">5.0</span>],
+        obstacle_radius=<span class="hljs-number">0.8</span>,
+        num_obstacles=<span class="hljs-number">30</span>
+    )
+
+    <span class="hljs-comment"># 规划路径（可以调整max_iter和step_size来平衡速度和路径质量）</span>
+    path, planning_time = env.plan_path(max_iter=<span class="hljs-number">800</span>, step_size=<span class="hljs-number">0.8</span>)
+
+    <span class="hljs-comment"># 可视化结果</span>
+    fig = plt.figure(figsize=(<span class="hljs-number">12</span>, <span class="hljs-number">10</span>))
+    ax = fig.add_subplot(<span class="hljs-number">111</span>, projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+
+    <span class="hljs-comment"># 创建RRT*对象用于可视化树（如果需要）</span>
+    rrt_star = RRTStar(
+        start=env.start_pos,
+        goal=env.goal_pos,
+        obstacles=env.obstacles,
+        obstacle_radius=env.obstacle_radius,
+        space_bounds=env.space_bounds
+    )
+    <span class="hljs-comment"># 重新规划一次以获取树结构（实际应用中不需要）</span>
+    _, _ = rrt_star.planning(verbose=<span class="hljs-literal">False</span>)
+
+    <span class="hljs-comment"># 渲染环境，设置show_tree=True可以显示完整的RRT*树</span>
+    env.render(ax, show_tree=<span class="hljs-literal">False</span>, rrt_star=rrt_star)
+    plt.show()
+
+    <span class="hljs-comment"># 创建动画展示</span>
+    animate_drone_path(env)
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#一-rrt-算法核心原理">**一、RRT 算法核心原理**</a>
+          
+            <a class="toc-level-4" href="#二-关键数学知识">**二、关键数学知识**</a>
+          
+            <a class="toc-level-5" href="#1-欧氏距离-euclidean-distance">1. **欧氏距离（Euclidean Distance）**</a>
+          
+            <a class="toc-level-5" href="#2-向量运算与线性插值">2. **向量运算与线性插值**</a>
+          
+            <a class="toc-level-5" href="#3-碰撞检测-几何相交判断">3. **碰撞检测（几何相交判断）**</a>
+          
+            <a class="toc-level-5" href="#4-概率与随机性">4. **概率与随机性**</a>
+          
+            <a class="toc-level-4" href="#三-rrt-的扩展-rrt">**三、RRT 的扩展：RRT**\*</a>
+          
+            <a class="toc-level-4" href="#四-总结">**四、总结**</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/python图像变清晰与锐化调整对比度高斯滤波除躁卷积锐化中值滤波钝化神经网络变清晰.html">
+      <span>上一篇</span>
+      <strong>Python图像变清晰与锐化调整对比度高斯滤波除躁卷积锐化中值滤波钝化神经网络变清晰</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/matlab实现神经网络的ocr识别.html">
+      <span>下一篇</span>
+      <strong>MATLAB实现神经网络的OCR识别</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/详细案例说明ai所用的算法列出公式用python代码说明用法.html">详细案例说明AI所用的算法列出公式用Python代码说明用法</a></h3>
+        <p class="post-excerpt">我们来详细拆解一个最经典、最基础的 AI 算法 ——线性回归 (Linear Regression)。它是理解几乎所有更复杂 AI 模型（如神经网络）的基石。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.312Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/无人机表演点云路径规划python版.html">无人机表演点云路径规划Python版</a></h3>
+        <p class="post-excerpt">摘要：本文介绍了一个无人机表演路径规划系统，支持加载两个TXT格式的点云数据文件进行路径规划。系统采用PyQt5框架开发3D可视化界面，包含点云加载、路径优化、动画控制等功能模块。核心算法通过KD树实现点云匹配和路径优化，支持多种插值方式生成平滑动画。系统可调整无人机数量、大小、颜色等参数，提供3D可视化视图和轨迹显示功能，适用于大型无人机编队表演的路径规划需求。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.134Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/yolopython实现多种物体识别时钟水杯小熊路人车辆.html">YOLOpython实现多种物体识别时钟水杯小熊路人车辆</a></h3>
+        <p class="post-excerpt">本文介绍了一个基于YOLO的目标检测类ObjectDetector，支持YOLOv8标准模型和YOLO-World自定义模型。该类提供了两种模型加载方式：标准YOLOv8模型（80类）和可自定义检测类别的YOLO-World模型。主要功能包括模型自动加载和单张图片检测，能够输出检测目标的类别、数量和平均置信度，并保存检测结果图像。使用示例展示了如何初始化检测器并进行图片检测。该实现具有自动回退机制…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.835Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

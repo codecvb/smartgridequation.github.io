@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>仿真模拟两颗卫星的自主交会对接过程Python版 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">仿真模拟两颗卫星的自主交会对接过程Python版</h1>
+        <p class="post-deck">摘要：本文实现了一个基于LQR控制的航天器交会对接仿真系统。系统模拟了初始高度差50km、轨道平面倾角差30°的追踪航天器向目标航天器的自主接近过程。通过求解连续时间代数Riccati方程设计最优控制器，采用四阶龙格库塔法进行轨道动力学积分，并实现了LVLH坐标系下的相对运动控制。仿真结果显示系统能在5个轨道周期内完成对接，最终相对距离小于100米，速度差小于1m/s。可视化部分展示了3D轨迹、推…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.260Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>23 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+            <a class="tag-chip" href="../tags/tag-15.html">卫星</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>摘要：本文实现了一个基于LQR控制的航天器交会对接仿真系统。系统模拟了初始高度差50km、轨道平面倾角差30°的追踪航天器向目标航天器的自主接近过程。通过求解连续时间代数Riccati方程设计最优控制器，采用四阶龙格库塔法进行轨道动力学积分，并实现了LVLH坐标系下的相对运动控制。仿真结果显示系统能在5个轨道周期内完成对接，最终相对距离小于100米，速度差小于1m/s。可视化部分展示了3D轨迹、推力分量时域曲线和相对距离对数变化图，验证了控制算法的有效性。</p>
+<p><img src="../uploads/csdn/%E4%BB%BF%E7%9C%9F%E6%A8%A1%E6%8B%9F%E4%B8%A4%E9%A2%97%E5%8D%AB%E6%98%9F%E7%9A%84%E8%87%AA%E4%B8%BB%E4%BA%A4%E4%BC%9A%E5%AF%B9%E6%8E%A5%E8%BF%87%E7%A8%8Bpython%E7%89%88/img-01.png" alt=""></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">from</span> scipy.linalg <span class="hljs-keyword">import</span> solve_continuous_are
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> mpl_toolkits.mplot3d <span class="hljs-keyword">import</span> Axes3D
+
+<span class="hljs-comment"># =============================================================================</span>
+<span class="hljs-comment"># Constants and orbit parameters</span>
+<span class="hljs-comment"># =============================================================================</span>
+mu = <span class="hljs-number">3.986004418e5</span>       <span class="hljs-comment"># Earth gravitational parameter [km^3/s^2]</span>
+R_earth = <span class="hljs-number">6371.0</span>         <span class="hljs-comment"># Earth radius [km]</span>
+
+<span class="hljs-comment"># Target: circular equatorial orbit at 400 km altitude</span>
+a_t = R_earth + <span class="hljs-number">400.0</span>            <span class="hljs-comment"># semi-major axis [km]</span>
+i_t = <span class="hljs-number">0.0</span>                        <span class="hljs-comment"># equatorial plane</span>
+n   = np.sqrt(mu / a_t**<span class="hljs-number">3</span>)       <span class="hljs-comment"># mean motion [rad/s]</span>
+T   = <span class="hljs-number">2</span>*np.pi / n
+
+<span class="hljs-comment"># Chaser: 50 km higher orbit, plane inclined by 30 deg relative to equator</span>
+a_c = a_t + <span class="hljs-number">50.0</span>                 <span class="hljs-comment"># 50 km altitude difference</span>
+i_c = np.deg2rad(<span class="hljs-number">30.0</span>)           <span class="hljs-comment"># 30 deg plane inclination difference</span>
+
+<span class="hljs-comment"># Initial true anomalies (both at ascending node at t=0)</span>
+f0_t = <span class="hljs-number">0.0</span>
+f0_c = <span class="hljs-number">0.0</span>
+
+<span class="hljs-comment"># =============================================================================</span>
+<span class="hljs-comment"># Orbit propagation utilities</span>
+<span class="hljs-comment"># =============================================================================</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">oe2eci</span>(<span class="hljs-params">a, e, inc, raan, argp, f</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Convert Keplerian orbital elements to ECI position and velocity.&quot;&quot;&quot;</span>
+    r_pf = a * (<span class="hljs-number">1</span> - e**<span class="hljs-number">2</span>) / (<span class="hljs-number">1</span> + e*np.cos(f))
+    p_pf = np.array([r_pf*np.cos(f), r_pf*np.sin(f), <span class="hljs-number">0.0</span>])
+    v_pf = np.sqrt(mu/(a*(<span class="hljs-number">1</span> - e**<span class="hljs-number">2</span>))) * np.array([-np.sin(f), e+np.cos(f), <span class="hljs-number">0.0</span>])
+
+    R_raan = np.array([[np.cos(raan), -np.sin(raan), <span class="hljs-number">0</span>],
+                       [np.sin(raan),  np.cos(raan), <span class="hljs-number">0</span>],
+                       [<span class="hljs-number">0</span>,             <span class="hljs-number">0</span>,            <span class="hljs-number">1</span>]])
+    R_inc  = np.array([[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>,             <span class="hljs-number">0</span>],
+                       [<span class="hljs-number">0</span>, np.cos(inc), -np.sin(inc)],
+                       [<span class="hljs-number">0</span>, np.sin(inc),  np.cos(inc)]])
+    R_argp = np.array([[np.cos(argp), -np.sin(argp), <span class="hljs-number">0</span>],
+                       [np.sin(argp),  np.cos(argp), <span class="hljs-number">0</span>],
+                       [<span class="hljs-number">0</span>,             <span class="hljs-number">0</span>,            <span class="hljs-number">1</span>]])
+    R = R_raan @ R_inc @ R_argp
+    <span class="hljs-keyword">return</span> R @ p_pf, R @ v_pf
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">lvlh_basis</span>(<span class="hljs-params">r, v</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Return rotation matrix from ECI to LVLH (rows are basis vectors).&quot;&quot;&quot;</span>
+    e_x = r / np.linalg.norm(r)
+    h   = np.cross(r, v)
+    e_z = h / np.linalg.norm(h)
+    e_y = np.cross(e_z, e_x)
+    <span class="hljs-keyword">return</span> np.vstack([e_x, e_y, e_z])
+
+<span class="hljs-comment"># Initial states</span>
+r_t0, v_t0 = oe2eci(a_t, <span class="hljs-number">0.0</span>, i_t, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, f0_t)
+r_c0, v_c0 = oe2eci(a_c, <span class="hljs-number">0.0</span>, i_c, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, f0_c)
+
+<span class="hljs-comment"># =============================================================================</span>
+<span class="hljs-comment"># LQR controller design based on target circular orbit</span>
+<span class="hljs-comment"># =============================================================================</span>
+A = np.zeros((<span class="hljs-number">6</span>,<span class="hljs-number">6</span>))
+A[<span class="hljs-number">0</span>,<span class="hljs-number">3</span>] = <span class="hljs-number">1.0</span>
+A[<span class="hljs-number">1</span>,<span class="hljs-number">4</span>] = <span class="hljs-number">1.0</span>
+A[<span class="hljs-number">2</span>,<span class="hljs-number">5</span>] = <span class="hljs-number">1.0</span>
+A[<span class="hljs-number">3</span>,<span class="hljs-number">0</span>] = <span class="hljs-number">3</span>*n**<span class="hljs-number">2</span>
+A[<span class="hljs-number">3</span>,<span class="hljs-number">4</span>] = <span class="hljs-number">2</span>*n
+A[<span class="hljs-number">4</span>,<span class="hljs-number">3</span>] = -<span class="hljs-number">2</span>*n
+A[<span class="hljs-number">5</span>,<span class="hljs-number">2</span>] = -n**<span class="hljs-number">2</span>
+B = np.zeros((<span class="hljs-number">6</span>,<span class="hljs-number">3</span>))
+B[<span class="hljs-number">3</span>,<span class="hljs-number">0</span>] = B[<span class="hljs-number">4</span>,<span class="hljs-number">1</span>] = B[<span class="hljs-number">5</span>,<span class="hljs-number">2</span>] = <span class="hljs-number">1.0</span>
+
+<span class="hljs-comment"># Tuning: larger penalty on state, smaller on control to handle large initial offset</span>
+Q = np.diag([<span class="hljs-number">1.0</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>])
+R = np.diag([<span class="hljs-number">1e2</span>, <span class="hljs-number">1e2</span>, <span class="hljs-number">1e2</span>])        <span class="hljs-comment"># allow larger control acceleration</span>
+S = solve_continuous_are(A, B, Q, R)
+K = np.linalg.inv(R) @ B.T @ S
+
+<span class="hljs-comment"># =============================================================================</span>
+<span class="hljs-comment"># Simulation settings</span>
+<span class="hljs-comment"># =============================================================================</span>
+dt = <span class="hljs-number">5.0</span>                   <span class="hljs-comment"># integration step [s]</span>
+tmax = <span class="hljs-number">5.0</span> * T             <span class="hljs-comment"># allow up to 5 orbits for convergence</span>
+dock_dist = <span class="hljs-number">0.1</span>            <span class="hljs-comment"># km</span>
+dock_vel  = <span class="hljs-number">0.001</span>          <span class="hljs-comment"># km/s</span>
+thrust_limit = <span class="hljs-number">0.1</span>         <span class="hljs-comment"># km/s^2 (approx 10 g) – prevent numerical blow-up</span>
+
+r_c, v_c = r_c0.copy(), v_c0.copy()
+t = <span class="hljs-number">0.0</span>
+
+t_hist, r_c_hist, r_t_hist, u_lvlh_hist = [], [], [], []
+
+<span class="hljs-keyword">while</span> t &lt; tmax:
+    <span class="hljs-comment"># Target state</span>
+    f_t = f0_t + n*t
+    r_t, v_t = oe2eci(a_t, <span class="hljs-number">0.0</span>, i_t, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, f_t)
+
+    <span class="hljs-comment"># Relative state in LVLH</span>
+    R_lvlh = lvlh_basis(r_t, v_t)
+    dr_eci = r_c - r_t
+    dv_eci = v_c - v_t
+    rho     = R_lvlh @ dr_eci
+    rho_dot = R_lvlh @ dv_eci - np.cross([<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,n], rho)
+    x_lvlh = np.concatenate([rho, rho_dot])
+
+    <span class="hljs-comment"># Control in LVLH (clipped)</span>
+    u_lvlh_raw = -K @ x_lvlh
+    u_norm = np.linalg.norm(u_lvlh_raw)
+    <span class="hljs-keyword">if</span> u_norm &gt; thrust_limit:
+        u_lvlh = u_lvlh_raw * (thrust_limit / u_norm)
+    <span class="hljs-keyword">else</span>:
+        u_lvlh = u_lvlh_raw
+    u_eci = R_lvlh.T @ u_lvlh
+
+    <span class="hljs-comment"># Log data</span>
+    t_hist.append(t)
+    r_c_hist.append(r_c.copy())
+    r_t_hist.append(r_t.copy())
+    u_lvlh_hist.append(u_lvlh.copy())
+
+    <span class="hljs-comment"># Check docking condition</span>
+    <span class="hljs-keyword">if</span> np.linalg.norm(dr_eci) &lt; dock_dist <span class="hljs-keyword">and</span> np.linalg.norm(dv_eci) &lt; dock_vel:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Docking achieved at t = <span class="hljs-subst">{t:<span class="hljs-number">.1</span>f}</span> s&quot;</span>)
+        <span class="hljs-keyword">break</span>
+
+    <span class="hljs-comment"># RK4 integration of chaser (full two-body + control)</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">accel</span>(<span class="hljs-params">r, v, u</span>):
+        <span class="hljs-keyword">return</span> -mu * r / np.linalg.norm(r)**<span class="hljs-number">3</span> + u
+    k1v = v_c
+    k1a = accel(r_c, v_c, u_eci)
+    k2v = v_c + <span class="hljs-number">0.5</span>*dt*k1a
+    k2a = accel(r_c + <span class="hljs-number">0.5</span>*dt*k1v, k2v, u_eci)
+    k3v = v_c + <span class="hljs-number">0.5</span>*dt*k2a
+    k3a = accel(r_c + <span class="hljs-number">0.5</span>*dt*k2v, k3v, u_eci)
+    k4v = v_c + dt*k3a
+    k4a = accel(r_c + dt*k3v, k4v, u_eci)
+    r_c += dt/<span class="hljs-number">6</span> * (k1v + <span class="hljs-number">2</span>*k2v + <span class="hljs-number">2</span>*k3v + k4v)
+    v_c += dt/<span class="hljs-number">6</span> * (k1a + <span class="hljs-number">2</span>*k2a + <span class="hljs-number">2</span>*k3a + k4a)
+    t += dt
+
+<span class="hljs-comment"># Convert to arrays</span>
+t_arr = np.array(t_hist)
+r_c_arr = np.array(r_c_hist)
+r_t_arr = np.array(r_t_hist)
+u_lvlh_arr = np.array(u_lvlh_hist)
+
+<span class="hljs-comment"># =============================================================================</span>
+<span class="hljs-comment"># Visualization</span>
+<span class="hljs-comment"># =============================================================================</span>
+plt.rcParams.update({<span class="hljs-string">&#x27;font.size&#x27;</span>: <span class="hljs-number">10</span>})
+fig = plt.figure(figsize=(<span class="hljs-number">16</span>, <span class="hljs-number">12</span>))
+
+<span class="hljs-comment"># ---- 3D trajectory with zoom on final approach ----</span>
+ax1 = fig.add_subplot(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, (<span class="hljs-number">1</span>,<span class="hljs-number">2</span>), projection=<span class="hljs-string">&#x27;3d&#x27;</span>)
+<span class="hljs-comment"># Earth globe</span>
+u = np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>*np.pi, <span class="hljs-number">40</span>)
+v = np.linspace(<span class="hljs-number">0</span>, np.pi, <span class="hljs-number">20</span>)
+x_e = R_earth * np.outer(np.cos(u), np.sin(v))
+y_e = R_earth * np.outer(np.sin(u), np.sin(v))
+z_e = R_earth * np.outer(np.ones_like(u), np.cos(v))
+ax1.plot_surface(x_e, y_e, z_e, color=<span class="hljs-string">&#x27;lightblue&#x27;</span>, alpha=<span class="hljs-number">0.15</span>, edgecolor=<span class="hljs-string">&#x27;none&#x27;</span>)
+
+<span class="hljs-comment"># Target orbit (full circle)</span>
+f_plot = np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>*np.pi, <span class="hljs-number">300</span>)
+r_target_orbit = np.array([oe2eci(a_t,<span class="hljs-number">0</span>,i_t,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,f)[<span class="hljs-number">0</span>] <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> f_plot])
+ax1.plot(r_target_orbit[:,<span class="hljs-number">0</span>], r_target_orbit[:,<span class="hljs-number">1</span>], r_target_orbit[:,<span class="hljs-number">2</span>],
+         <span class="hljs-string">&#x27;gray&#x27;</span>, linestyle=<span class="hljs-string">&#x27;:&#x27;</span>, linewidth=<span class="hljs-number">0.8</span>, label=<span class="hljs-string">&#x27;Target orbit&#x27;</span>)
+
+<span class="hljs-comment"># Chaser trajectory (full)</span>
+ax1.plot(r_c_arr[:,<span class="hljs-number">0</span>], r_c_arr[:,<span class="hljs-number">1</span>], r_c_arr[:,<span class="hljs-number">2</span>],
+         <span class="hljs-string">&#x27;r-&#x27;</span>, linewidth=<span class="hljs-number">0.8</span>, label=<span class="hljs-string">&#x27;Chaser full path&#x27;</span>)
+
+<span class="hljs-comment"># Highlight final approach segment (last 20% of data points)</span>
+n_approach = <span class="hljs-built_in">max</span>(<span class="hljs-built_in">len</span>(r_c_arr)//<span class="hljs-number">5</span>, <span class="hljs-number">2</span>)
+ax1.plot(r_c_arr[-n_approach:,<span class="hljs-number">0</span>], r_c_arr[-n_approach:,<span class="hljs-number">1</span>], r_c_arr[-n_approach:,<span class="hljs-number">2</span>],
+         <span class="hljs-string">&#x27;b-&#x27;</span>, linewidth=<span class="hljs-number">2.0</span>, label=<span class="hljs-string">&#x27;Final approach&#x27;</span>)
+ax1.plot(r_t_arr[-n_approach:,<span class="hljs-number">0</span>], r_t_arr[-n_approach:,<span class="hljs-number">1</span>], r_t_arr[-n_approach:,<span class="hljs-number">2</span>],
+         <span class="hljs-string">&#x27;c-&#x27;</span>, linewidth=<span class="hljs-number">2.0</span>, label=<span class="hljs-string">&#x27;Target during approach&#x27;</span>)
+
+<span class="hljs-comment"># Markers</span>
+ax1.scatter(*r_c_arr[<span class="hljs-number">0</span>],  c=<span class="hljs-string">&#x27;red&#x27;</span>, marker=<span class="hljs-string">&#x27;o&#x27;</span>, s=<span class="hljs-number">40</span>, label=<span class="hljs-string">&#x27;Chaser start&#x27;</span>)
+ax1.scatter(*r_c_arr[-<span class="hljs-number">1</span>], c=<span class="hljs-string">&#x27;green&#x27;</span>, marker=<span class="hljs-string">&#x27;*&#x27;</span>, s=<span class="hljs-number">100</span>, label=<span class="hljs-string">&#x27;Docking point&#x27;</span>)
+
+<span class="hljs-comment"># Zoom box around the target at final time</span>
+center = r_t_arr[-<span class="hljs-number">1</span>]
+span = <span class="hljs-number">80.0</span>   <span class="hljs-comment"># km</span>
+ax1.set_xlim(center[<span class="hljs-number">0</span>]-span, center[<span class="hljs-number">0</span>]+span)
+ax1.set_ylim(center[<span class="hljs-number">1</span>]-span, center[<span class="hljs-number">1</span>]+span)
+ax1.set_zlim(center[<span class="hljs-number">2</span>]-span, center[<span class="hljs-number">2</span>]+span)
+ax1.set_xlabel(<span class="hljs-string">&#x27;X [km]&#x27;</span>); ax1.set_ylabel(<span class="hljs-string">&#x27;Y [km]&#x27;</span>); ax1.set_zlabel(<span class="hljs-string">&#x27;Z [km]&#x27;</span>)
+ax1.set_title(<span class="hljs-string">&#x27;Rendezvous Trajectory – 30° plane difference, 50 km altitude gap&#x27;</span>)
+ax1.legend(loc=<span class="hljs-string">&#x27;upper left&#x27;</span>)
+
+<span class="hljs-comment"># ---- Thrust vs time (LVLH components) ----</span>
+ax2 = fig.add_subplot(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>)
+ax2.plot(t_arr, u_lvlh_arr[:,<span class="hljs-number">0</span>]*<span class="hljs-number">1e3</span>, <span class="hljs-string">&#x27;r-&#x27;</span>, label=<span class="hljs-string">&#x27;$a_x$ (radial)&#x27;</span>)
+ax2.plot(t_arr, u_lvlh_arr[:,<span class="hljs-number">1</span>]*<span class="hljs-number">1e3</span>, <span class="hljs-string">&#x27;g-&#x27;</span>, label=<span class="hljs-string">&#x27;$a_y$ (along-track)&#x27;</span>)
+ax2.plot(t_arr, u_lvlh_arr[:,<span class="hljs-number">2</span>]*<span class="hljs-number">1e3</span>, <span class="hljs-string">&#x27;b-&#x27;</span>, label=<span class="hljs-string">&#x27;$a_z$ (cross-track)&#x27;</span>)
+ax2.set_xlabel(<span class="hljs-string">&#x27;Time [s]&#x27;</span>)
+ax2.set_ylabel(<span class="hljs-string">&#x27;Acceleration [mm/s$^2$]&#x27;</span>)
+ax2.set_title(<span class="hljs-string">&#x27;LVLH Thrust Components vs Time&#x27;</span>)
+ax2.legend(); ax2.grid(<span class="hljs-literal">True</span>)
+
+<span class="hljs-comment"># ---- Relative range (log scale) ----</span>
+ax3 = fig.add_subplot(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>)
+dist = np.linalg.norm(r_c_arr - r_t_arr, axis=<span class="hljs-number">1</span>)
+ax3.semilogy(t_arr, dist, <span class="hljs-string">&#x27;k-&#x27;</span>)
+ax3.axhline(y=dock_dist, color=<span class="hljs-string">&#x27;gray&#x27;</span>, linestyle=<span class="hljs-string">&#x27;--&#x27;</span>, label=<span class="hljs-string">&#x27;Docking threshold&#x27;</span>)
+ax3.set_xlabel(<span class="hljs-string">&#x27;Time [s]&#x27;</span>)
+ax3.set_ylabel(<span class="hljs-string">&#x27;Relative distance [km]&#x27;</span>)
+ax3.set_title(<span class="hljs-string">&#x27;Range vs Time&#x27;</span>)
+ax3.legend(); ax3.grid(<span class="hljs-literal">True</span>)
+
+plt.tight_layout()
+plt.show()
+</code></pre>
+<p><img src="../uploads/csdn/%E4%BB%BF%E7%9C%9F%E6%A8%A1%E6%8B%9F%E4%B8%A4%E9%A2%97%E5%8D%AB%E6%98%9F%E7%9A%84%E8%87%AA%E4%B8%BB%E4%BA%A4%E4%BC%9A%E5%AF%B9%E6%8E%A5%E8%BF%87%E7%A8%8Bpython%E7%89%88/img-02.png" alt=""></p>
+<p><img src="../uploads/csdn/%E4%BB%BF%E7%9C%9F%E6%A8%A1%E6%8B%9F%E4%B8%A4%E9%A2%97%E5%8D%AB%E6%98%9F%E7%9A%84%E8%87%AA%E4%B8%BB%E4%BA%A4%E4%BC%9A%E5%AF%B9%E6%8E%A5%E8%BF%87%E7%A8%8Bpython%E7%89%88/img-03.png" alt=""></p>
+<p><img src="../uploads/csdn/%E4%BB%BF%E7%9C%9F%E6%A8%A1%E6%8B%9F%E4%B8%A4%E9%A2%97%E5%8D%AB%E6%98%9F%E7%9A%84%E8%87%AA%E4%B8%BB%E4%BA%A4%E4%BC%9A%E5%AF%B9%E6%8E%A5%E8%BF%87%E7%A8%8Bpython%E7%89%88/img-04.png" alt=""></p>
+<p><img src="../uploads/csdn/%E4%BB%BF%E7%9C%9F%E6%A8%A1%E6%8B%9F%E4%B8%A4%E9%A2%97%E5%8D%AB%E6%98%9F%E7%9A%84%E8%87%AA%E4%B8%BB%E4%BA%A4%E4%BC%9A%E5%AF%B9%E6%8E%A5%E8%BF%87%E7%A8%8Bpython%E7%89%88/img-05.png" alt=""></p>
+<p><img src="../uploads/csdn/%E4%BB%BF%E7%9C%9F%E6%A8%A1%E6%8B%9F%E4%B8%A4%E9%A2%97%E5%8D%AB%E6%98%9F%E7%9A%84%E8%87%AA%E4%B8%BB%E4%BA%A4%E4%BC%9A%E5%AF%B9%E6%8E%A5%E8%BF%87%E7%A8%8Bpython%E7%89%88/img-06.png" alt=""></p>
+<p><img src="../uploads/csdn/%E4%BB%BF%E7%9C%9F%E6%A8%A1%E6%8B%9F%E4%B8%A4%E9%A2%97%E5%8D%AB%E6%98%9F%E7%9A%84%E8%87%AA%E4%B8%BB%E4%BA%A4%E4%BC%9A%E5%AF%B9%E6%8E%A5%E8%BF%87%E7%A8%8Bpython%E7%89%88/img-07.png" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/刚体完全弹性碰撞中e1的简单证明.html">
+      <span>上一篇</span>
+      <strong>刚体完全弹性碰撞中e1的简单证明</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/一种导弹追踪算法的matlab仿真实现.html">
+      <span>下一篇</span>
+      <strong>一种导弹追踪算法的MATLAB仿真实现</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

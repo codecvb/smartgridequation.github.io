@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>受限三体问题中围绕三角形点的运动具有辐射性异质主天体及环绕带状结构 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">受限三体问题中围绕三角形点的运动具有辐射性异质主天体及环绕带状结构</h1>
+        <p class="post-deck">摘要：本文通过Python实现了圆形限制性三体问题(CR3BP)的数值模拟，研究了三个双星系统(Archid、Xi Bootis和Kruger 60)的三角拉格朗日点(L4和L5)附近的轨道动力学。程序使用SciPy求解微分方程，计算了等边三角形构型的拉格朗日点位置，并在这些点附近施加微小扰动模拟轨道运动。结果显示，所有三个双星系统的三角点附近都存在周期性轨道，验证了拉格朗日点在限制性三体问题中的…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.404Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>10 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>摘要：本文通过Python实现了圆形限制性三体问题(CR3BP)的数值模拟，研究了三个双星系统(Archid、Xi Bootis和Kruger 60)的三角拉格朗日点(L4和L5)附近的轨道动力学。程序使用SciPy求解微分方程，计算了等边三角形构型的拉格朗日点位置，并在这些点附近施加微小扰动模拟轨道运动。结果显示，所有三个双星系统的三角点附近都存在周期性轨道，验证了拉格朗日点在限制性三体问题中的稳定性特性。研究采用无量纲化处理，可视化呈现了主星、次星、三角点及附近轨道的空间分布关系。</p>
+<p><img src="../uploads/csdn/%E5%8F%97%E9%99%90%E4%B8%89%E4%BD%93%E9%97%AE%E9%A2%98%E4%B8%AD%E5%9B%B4%E7%BB%95%E4%B8%89%E8%A7%92%E5%BD%A2%E7%82%B9%E7%9A%84%E8%BF%90%E5%8A%A8%E5%85%B7%E6%9C%89%E8%BE%90%E5%B0%84%E6%80%A7%E5%BC%82%E8%B4%A8%E4%B8%BB%E5%A4%A9%E4%BD%93%E5%8F%8A%E7%8E%AF%E7%BB%95%E5%B8%A6%E7%8A%B6%E7%BB%93%E6%9E%84/img-01.jpeg" alt=""></p>
+<p><img src="../uploads/csdn/%E5%8F%97%E9%99%90%E4%B8%89%E4%BD%93%E9%97%AE%E9%A2%98%E4%B8%AD%E5%9B%B4%E7%BB%95%E4%B8%89%E8%A7%92%E5%BD%A2%E7%82%B9%E7%9A%84%E8%BF%90%E5%8A%A8%E5%85%B7%E6%9C%89%E8%BE%90%E5%B0%84%E6%80%A7%E5%BC%82%E8%B4%A8%E4%B8%BB%E5%A4%A9%E4%BD%93%E5%8F%8A%E7%8E%AF%E7%BB%95%E5%B8%A6%E7%8A%B6%E7%BB%93%E6%9E%84/img-02.jpeg" alt=""><img src="../uploads/csdn/%E5%8F%97%E9%99%90%E4%B8%89%E4%BD%93%E9%97%AE%E9%A2%98%E4%B8%AD%E5%9B%B4%E7%BB%95%E4%B8%89%E8%A7%92%E5%BD%A2%E7%82%B9%E7%9A%84%E8%BF%90%E5%8A%A8%E5%85%B7%E6%9C%89%E8%BE%90%E5%B0%84%E6%80%A7%E5%BC%82%E8%B4%A8%E4%B8%BB%E5%A4%A9%E4%BD%93%E5%8F%8A%E7%8E%AF%E7%BB%95%E5%B8%A6%E7%8A%B6%E7%BB%93%E6%9E%84/img-03.jpeg" alt=""><img src="../uploads/csdn/%E5%8F%97%E9%99%90%E4%B8%89%E4%BD%93%E9%97%AE%E9%A2%98%E4%B8%AD%E5%9B%B4%E7%BB%95%E4%B8%89%E8%A7%92%E5%BD%A2%E7%82%B9%E7%9A%84%E8%BF%90%E5%8A%A8%E5%85%B7%E6%9C%89%E8%BE%90%E5%B0%84%E6%80%A7%E5%BC%82%E8%B4%A8%E4%B8%BB%E5%A4%A9%E4%BD%93%E5%8F%8A%E7%8E%AF%E7%BB%95%E5%B8%A6%E7%8A%B6%E7%BB%93%E6%9E%84/img-04.jpeg" alt=""><img src="../uploads/csdn/%E5%8F%97%E9%99%90%E4%B8%89%E4%BD%93%E9%97%AE%E9%A2%98%E4%B8%AD%E5%9B%B4%E7%BB%95%E4%B8%89%E8%A7%92%E5%BD%A2%E7%82%B9%E7%9A%84%E8%BF%90%E5%8A%A8%E5%85%B7%E6%9C%89%E8%BE%90%E5%B0%84%E6%80%A7%E5%BC%82%E8%B4%A8%E4%B8%BB%E5%A4%A9%E4%BD%93%E5%8F%8A%E7%8E%AF%E7%BB%95%E5%B8%A6%E7%8A%B6%E7%BB%93%E6%9E%84/img-05.jpeg" alt=""><img src="../uploads/csdn/%E5%8F%97%E9%99%90%E4%B8%89%E4%BD%93%E9%97%AE%E9%A2%98%E4%B8%AD%E5%9B%B4%E7%BB%95%E4%B8%89%E8%A7%92%E5%BD%A2%E7%82%B9%E7%9A%84%E8%BF%90%E5%8A%A8%E5%85%B7%E6%9C%89%E8%BE%90%E5%B0%84%E6%80%A7%E5%BC%82%E8%B4%A8%E4%B8%BB%E5%A4%A9%E4%BD%93%E5%8F%8A%E7%8E%AF%E7%BB%95%E5%B8%A6%E7%8A%B6%E7%BB%93%E6%9E%84/img-06.jpeg" alt=""><img src="../uploads/csdn/%E5%8F%97%E9%99%90%E4%B8%89%E4%BD%93%E9%97%AE%E9%A2%98%E4%B8%AD%E5%9B%B4%E7%BB%95%E4%B8%89%E8%A7%92%E5%BD%A2%E7%82%B9%E7%9A%84%E8%BF%90%E5%8A%A8%E5%85%B7%E6%9C%89%E8%BE%90%E5%B0%84%E6%80%A7%E5%BC%82%E8%B4%A8%E4%B8%BB%E5%A4%A9%E4%BD%93%E5%8F%8A%E7%8E%AF%E7%BB%95%E5%B8%A6%E7%8A%B6%E7%BB%93%E6%9E%84/img-07.jpeg" alt=""><img src="../uploads/csdn/%E5%8F%97%E9%99%90%E4%B8%89%E4%BD%93%E9%97%AE%E9%A2%98%E4%B8%AD%E5%9B%B4%E7%BB%95%E4%B8%89%E8%A7%92%E5%BD%A2%E7%82%B9%E7%9A%84%E8%BF%90%E5%8A%A8%E5%85%B7%E6%9C%89%E8%BE%90%E5%B0%84%E6%80%A7%E5%BC%82%E8%B4%A8%E4%B8%BB%E5%A4%A9%E4%BD%93%E5%8F%8A%E7%8E%AF%E7%BB%95%E5%B8%A6%E7%8A%B6%E7%BB%93%E6%9E%84/img-08.jpeg" alt=""><img src="../uploads/csdn/%E5%8F%97%E9%99%90%E4%B8%89%E4%BD%93%E9%97%AE%E9%A2%98%E4%B8%AD%E5%9B%B4%E7%BB%95%E4%B8%89%E8%A7%92%E5%BD%A2%E7%82%B9%E7%9A%84%E8%BF%90%E5%8A%A8%E5%85%B7%E6%9C%89%E8%BE%90%E5%B0%84%E6%80%A7%E5%BC%82%E8%B4%A8%E4%B8%BB%E5%A4%A9%E4%BD%93%E5%8F%8A%E7%8E%AF%E7%BB%95%E5%B8%A6%E7%8A%B6%E7%BB%93%E6%9E%84/img-09.jpeg" alt=""><img src="../uploads/csdn/%E5%8F%97%E9%99%90%E4%B8%89%E4%BD%93%E9%97%AE%E9%A2%98%E4%B8%AD%E5%9B%B4%E7%BB%95%E4%B8%89%E8%A7%92%E5%BD%A2%E7%82%B9%E7%9A%84%E8%BF%90%E5%8A%A8%E5%85%B7%E6%9C%89%E8%BE%90%E5%B0%84%E6%80%A7%E5%BC%82%E8%B4%A8%E4%B8%BB%E5%A4%A9%E4%BD%93%E5%8F%8A%E7%8E%AF%E7%BB%95%E5%B8%A6%E7%8A%B6%E7%BB%93%E6%9E%84/img-10.jpeg" alt="">Python代码</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">from</span> scipy.integrate <span class="hljs-keyword">import</span> solve_ivp
+
+<span class="hljs-comment"># ---------------- 物理与数学参数 ------------------</span>
+<span class="hljs-comment"># 论文提供的三双星系统质量比mu，部分参数简化</span>
+binaries = {
+    <span class="hljs-string">&quot;Archid&quot;</span>: {<span class="hljs-string">&quot;mu&quot;</span>: <span class="hljs-number">0.3942</span>, <span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;Archid&quot;</span>},
+    <span class="hljs-string">&quot;Xi_Bootis&quot;</span>: {<span class="hljs-string">&quot;mu&quot;</span>: <span class="hljs-number">0.49</span>, <span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;Xi Bootis&quot;</span>},
+    <span class="hljs-string">&quot;Kruger_60&quot;</span>: {<span class="hljs-string">&quot;mu&quot;</span>: <span class="hljs-number">0.4433</span>, <span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;Kruger 60&quot;</span>},
+}
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">cr3bp_eq</span>(<span class="hljs-params">t, Y, mu</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    CR3BP标准模型的微分方程
+    输入：
+      t: 时间（无量纲）
+      Y: 状态向量[x, y, vx, vy]
+      mu: 质量比
+    输出：
+      [vx, vy, ax, ay]
+    &quot;&quot;&quot;</span>
+    x, y, vx, vy = Y
+    r1 = np.sqrt((x + mu)**<span class="hljs-number">2</span> + y**<span class="hljs-number">2</span>)
+    r2 = np.sqrt((x - <span class="hljs-number">1</span> + mu)**<span class="hljs-number">2</span> + y**<span class="hljs-number">2</span>)
+
+    ax = <span class="hljs-number">2</span> * vy + x - (<span class="hljs-number">1</span> - mu)*(x + mu)/r1**<span class="hljs-number">3</span> - mu*(x - <span class="hljs-number">1</span> + mu)/r2**<span class="hljs-number">3</span>
+    ay = -<span class="hljs-number">2</span> * vx + y - (<span class="hljs-number">1</span> - mu)*y/r1**<span class="hljs-number">3</span> - mu*y/r2**<span class="hljs-number">3</span>
+    <span class="hljs-keyword">return</span> [vx, vy, ax, ay]
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">lagrange_triangular_points</span>(<span class="hljs-params">mu</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    计算R3BP的两个三角拉格朗日点L4和L5坐标
+    L4和L5是等边三角形顶点，坐标为(0.5 - mu, ± sqrt(3)/2)
+    &quot;&quot;&quot;</span>
+    xL = <span class="hljs-number">0.5</span> - mu
+    yL = np.sqrt(<span class="hljs-number">3</span>) / <span class="hljs-number">2</span>
+    <span class="hljs-keyword">return</span> (xL, yL), (xL, -yL)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">simulate_orbit_around_point</span>(<span class="hljs-params">mu, point, duration=<span class="hljs-number">10</span>, dt=<span class="hljs-number">0.01</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    在三角点附近模拟短暂轨迹，考察附近运动趋势
+    起始条件为三角点坐标加上微小扰动
+    &quot;&quot;&quot;</span>
+    t_eval = np.arange(<span class="hljs-number">0</span>, duration, dt)
+    <span class="hljs-comment"># 在原点加扰动速度，模拟环绕运动</span>
+    v_perturb = <span class="hljs-number">0.05</span>
+    y0 = [point[<span class="hljs-number">0</span>], point[<span class="hljs-number">1</span>], <span class="hljs-number">0</span>, v_perturb]
+    sol = solve_ivp(cr3bp_eq, [<span class="hljs-number">0</span>, duration], y0, args=(mu,), t_eval=t_eval, rtol=<span class="hljs-number">1e-9</span>, atol=<span class="hljs-number">1e-9</span>)
+    <span class="hljs-keyword">return</span> sol
+
+<span class="hljs-comment"># ---------------- 主程序 ------------------</span>
+
+plt.figure(figsize=(<span class="hljs-number">18</span>, <span class="hljs-number">5</span>))
+
+<span class="hljs-keyword">for</span> i, (key, param) <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(binaries.items(), <span class="hljs-number">1</span>):
+    mu = param[<span class="hljs-string">&quot;mu&quot;</span>]
+    name = param[<span class="hljs-string">&quot;name&quot;</span>]
+
+    <span class="hljs-comment"># 获取三角点</span>
+    L4, L5 = lagrange_triangular_points(mu)
+
+    <span class="hljs-comment"># 轨迹模拟</span>
+    sol_L4 = simulate_orbit_around_point(mu, L4)
+    sol_L5 = simulate_orbit_around_point(mu, L5)
+
+    <span class="hljs-comment"># 画板设置</span>
+    ax = plt.subplot(<span class="hljs-number">1</span>,<span class="hljs-number">3</span>,i)
+
+    <span class="hljs-comment"># 质量主体位置（主星在-x=mu）</span>
+    ax.scatter(-mu, <span class="hljs-number">0</span>, color=<span class="hljs-string">&#x27;blue&#x27;</span>, label=<span class="hljs-string">&quot;Primary (mass 1-$\mu$)&quot;</span>, s=<span class="hljs-number">100</span>)
+    ax.scatter(<span class="hljs-number">1</span>-mu, <span class="hljs-number">0</span>, color=<span class="hljs-string">&#x27;red&#x27;</span>, label=<span class="hljs-string">f&quot;Secondary ($\mu$)&quot;</span>, s=<span class="hljs-number">50</span>)
+
+    <span class="hljs-comment"># 三角点位置</span>
+    ax.scatter([L4[<span class="hljs-number">0</span>], L5[<span class="hljs-number">0</span>]], [L4[<span class="hljs-number">1</span>], L5[<span class="hljs-number">1</span>]], color=<span class="hljs-string">&#x27;green&#x27;</span>, s=<span class="hljs-number">80</span>, label=<span class="hljs-string">&#x27;Triangular Points L4, L5&#x27;</span>)
+
+    <span class="hljs-comment"># 模拟轨迹</span>
+    ax.plot(sol_L4.y[<span class="hljs-number">0</span>], sol_L4.y[<span class="hljs-number">1</span>], <span class="hljs-string">&#x27;g--&#x27;</span>, linewidth=<span class="hljs-number">1.5</span>, label=<span class="hljs-string">&#x27;Orbit around L4&#x27;</span>)
+    ax.plot(sol_L5.y[<span class="hljs-number">0</span>], sol_L5.y[<span class="hljs-number">1</span>], <span class="hljs-string">&#x27;g-&#x27;</span>, linewidth=<span class="hljs-number">1.5</span>, label=<span class="hljs-string">&#x27;Orbit around L5&#x27;</span>)
+
+    ax.set_title(<span class="hljs-string">f&quot;<span class="hljs-subst">{name}</span> System\n$\mu$ = <span class="hljs-subst">{mu:<span class="hljs-number">.4</span>f}</span>&quot;</span>, fontsize=<span class="hljs-number">14</span>)
+    ax.set_xlabel(<span class="hljs-string">&#x27;x (normalized)&#x27;</span>)
+    ax.set_ylabel(<span class="hljs-string">&#x27;y (normalized)&#x27;</span>)
+    ax.legend(loc=<span class="hljs-string">&#x27;upper right&#x27;</span>, fontsize=<span class="hljs-number">8</span>)
+    ax.set_aspect(<span class="hljs-string">&#x27;equal&#x27;</span>)
+    ax.grid(<span class="hljs-literal">True</span>)
+    ax.set_xlim([-<span class="hljs-number">1.2</span>,<span class="hljs-number">1.2</span>])
+    ax.set_ylim([-<span class="hljs-number">1.2</span>,<span class="hljs-number">1.2</span>])
+
+plt.suptitle(<span class="hljs-string">&quot;Restricted Three Body Problem: Triangular Equilibrium Points and Local Orbits&quot;</span>, fontsize=<span class="hljs-number">16</span>)
+plt.tight_layout(rect=[<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">1</span>,<span class="hljs-number">0.95</span>])
+plt.show()
+</code></pre>
+<p><img src="../uploads/csdn/%E5%8F%97%E9%99%90%E4%B8%89%E4%BD%93%E9%97%AE%E9%A2%98%E4%B8%AD%E5%9B%B4%E7%BB%95%E4%B8%89%E8%A7%92%E5%BD%A2%E7%82%B9%E7%9A%84%E8%BF%90%E5%8A%A8%E5%85%B7%E6%9C%89%E8%BE%90%E5%B0%84%E6%80%A7%E5%BC%82%E8%B4%A8%E4%B8%BB%E5%A4%A9%E4%BD%93%E5%8F%8A%E7%8E%AF%E7%BB%95%E5%B8%A6%E7%8A%B6%E7%BB%93%E6%9E%84/img-11.png" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/基于的黏滞阻力作用下的物体运动仿真模拟黏滞阻力终极速度牛顿第二定律.html">
+      <span>上一篇</span>
+      <strong>基于的黏滞阻力作用下的物体运动仿真模拟黏滞阻力终极速度牛顿第二定律</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/卫星轨道matlab动力学仿真.html">
+      <span>下一篇</span>
+      <strong>卫星轨道MATLAB动力学仿真</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/高中物理竞赛一道三角形物体运动的最优解.html">高中物理竞赛一道三角形物体运动的最优解</a></h3>
+        <p class="post-excerpt">Python代码</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.935Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

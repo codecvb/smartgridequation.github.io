@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>C语言的基本练习003 1之多线程应用库文件不方便使用改为C · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/c-c-与-rust.html">C/C++ 与 Rust</a>
+        </nav>
+        <h1 class="post-title">C语言的基本练习003 1之多线程应用库文件不方便使用改为C</h1>
+        <p class="post-deck">c++语言的多线程应用，代码如下：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.885Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>4 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-7.html">C/C++</a>
+          
+            <a class="tag-chip" href="../tags/tag-8.html">Rust</a>
+          
+            <a class="tag-chip" href="../tags/tag-9.html">C</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>c++语言的多线程应用，代码如下：</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;thread&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;mutex&gt;</span></span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;bits/stdc++.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;unistd.h&gt;</span></span>
+
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+
+mutex TESTMUTEX;
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">myThread</span><span class="hljs-params">( unique_ptr&lt;string &gt;a)</span><span class="hljs-comment">//定义线程入口函数</span>
+</span>{
+    <span class="hljs-comment">//TESTMUTEX.lock();</span>
+    cout&lt;&lt;<span class="hljs-string">&quot;a value &quot;</span>&lt;&lt; *a&lt;&lt;endl;
+    <span class="hljs-comment">//TESTMUTEX.unlock();</span>
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">myThread_2</span><span class="hljs-params">( unique_ptr&lt;string &gt;a)</span><span class="hljs-comment">//定义线程入口函数</span>
+</span>{
+    <span class="hljs-comment">//TESTMUTEX.lock();</span>
+    cout&lt;&lt;<span class="hljs-string">&quot;b value &quot;</span>&lt;&lt; *a&lt;&lt;endl;
+    <span class="hljs-comment">//TESTMUTEX.unlock();</span>
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">run_thread</span><span class="hljs-params">()</span>
+</span>{
+    unique_ptr&lt;string &gt;<span class="hljs-built_in">a</span>(<span class="hljs-keyword">new</span> <span class="hljs-built_in">string</span>(<span class="hljs-string">&quot;I am an apple\n&quot;</span>));
+
+    unique_ptr&lt;string &gt;<span class="hljs-built_in">b</span>(<span class="hljs-keyword">new</span> <span class="hljs-built_in">string</span>(<span class="hljs-string">&quot;I am a banana\n&quot;</span>));
+
+    <span class="hljs-function">std::thread <span class="hljs-title">thread_test</span><span class="hljs-params">(myThread,std::move(a))</span></span>;<span class="hljs-comment">//定义 线程变量 定义的时候线程就会开始执行</span>
+
+    <span class="hljs-function">std::thread <span class="hljs-title">thread_test_2</span><span class="hljs-params">(myThread_2,std::move(b))</span></span>;<span class="hljs-comment">//定义 线程变量 定义的时候线程就会开始执行</span>
+
+    thread_test_<span class="hljs-number">2.</span><span class="hljs-built_in">join</span>();
+
+    thread_test.<span class="hljs-built_in">join</span>();
+
+    <span class="hljs-comment">//cout&lt;&lt;&quot;a -&gt; &quot;&lt;&lt; *a&lt;&lt;endl;</span>
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span>{
+
+    <span class="hljs-built_in">run_thread</span>();
+
+    <span class="hljs-comment">//thread(run_thread);</span>
+
+    <span class="hljs-comment">//thread thread1(myThread,ref(&quot;i am apple&quot;));</span>
+
+    <span class="hljs-comment">//thread thread2(myThread_2);</span>
+
+    <span class="hljs-comment">//thread1.join();</span>
+
+    <span class="hljs-comment">//thread2.join();</span>
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<p>请自行取消注释，观察：</p>
+<p>（1）是否可以运行，会出现什么错误。</p>
+<p>（2）取消锁和加锁是分别什么结果，结果有趣也很让人着迷。</p>
+<p>（3）如何运行基本的多线程。</p>
+<p>（4）既简单又可以复杂，值得好好研究。</p>
+<p>（5）基本结果如下：</p>
+<p><img src="../uploads/csdn/c%E8%AF%AD%E8%A8%80%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%BB%83%E4%B9%A0003-1%E4%B9%8B%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%BA%94%E7%94%A8%E5%BA%93%E6%96%87%E4%BB%B6%E4%B8%8D%E6%96%B9%E4%BE%BF%E4%BD%BF%E7%94%A8%E6%94%B9%E4%B8%BAc/img-01.png" alt="watermark,typed3F5LXplbmhlaQ,shadow50,textQ1NETiBAU21hcnRHcmlkZXF1YXRpb24=,size8,colorFFFFFF,t70,gse,x16"></p>
+<p>感谢源码提供者，以上代码为集合整理。如遇问题，请您留言。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/qt6androidc拍照程序.html">
+      <span>上一篇</span>
+      <strong>QT6AndroidC拍照程序</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/c语言的基本练习002-1之简易菜单选项与三角函数值计算.html">
+      <span>下一篇</span>
+      <strong>C语言的基本练习002 1之简易菜单选项与三角函数值计算</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/编写有内存漏洞的c代码并实现内存注入的示例一个程序注入另一个程序.html">编写有内存漏洞的C代码并实现内存注入的示例一个程序注入另一个程序</a></h3>
+        <p class="post-excerpt">实现思路</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.956Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/用c语言实现的回调函数案例涵盖基础用法及不同消息机制gui模拟网络请求模拟状态机消息队列.html">用C语言实现的回调函数案例涵盖基础用法及不同消息机制GUI模拟网络请求模拟状态机消息队列</a></h3>
+        <p class="post-excerpt">以下是用 C 语言实现的回调函数案例，涵盖基础用法及不同消息机制（GUI 模拟、网络请求模拟、状态机、消息队列），包含详细注释和解释。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.946Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/推荐比mini-stl更好的c实现项目代码.html">推荐比mini stl更好的C实现项目代码</a></h3>
+        <p class="post-excerpt">代码来源 -- STL模拟: STL模拟 的各类实现 - Gitee.com</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.937Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

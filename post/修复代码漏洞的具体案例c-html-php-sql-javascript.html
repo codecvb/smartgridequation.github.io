@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>修复代码漏洞的具体案例C HTML PHP SQL JavaScript · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/c-c-与-rust.html">C/C++ 与 Rust</a>
+        </nav>
+        <h1 class="post-title">修复代码漏洞的具体案例C HTML PHP SQL JavaScript</h1>
+        <p class="post-deck">以下是一些修复代码漏洞的具体案例：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.929Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>13 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-7.html">C/C++</a>
+          
+            <a class="tag-chip" href="../tags/tag-8.html">Rust</a>
+          
+            <a class="tag-chip" href="../tags/tag-9.html">C</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>以下是一些修复代码漏洞的具体案例：</p>
+<h2 id="案例一-sql-注入漏洞修复-web-应用程序" class="prose-heading"><strong>案例一：SQL 注入漏洞修复（Web 应用程序）</strong></h2>
+<ol>
+<li><strong>漏洞描述</strong>
+<ul>
+<li>假设一个简单的用户登录功能的 PHP 代码存在 SQL 注入漏洞。代码可能类似于以下部分：</li>
+</ul>
+</li>
+</ol>
+<p>php</p>
+<pre class="hljs"><code class="language-php">   <span class="hljs-variable">$username</span> = <span class="hljs-variable">$_POST</span>[<span class="hljs-string">&#x27;username&#x27;</span>];
+   <span class="hljs-variable">$password</span> = <span class="hljs-variable">$_POST</span>[<span class="hljs-string">&#x27;password&#x27;</span>];
+   <span class="hljs-variable">$query</span> = <span class="hljs-string">&quot;SELECT * FROM users WHERE username = &#x27;<span class="hljs-subst">$username</span>&#x27; AND password = &#x27;<span class="hljs-subst">$password</span>&#x27;&quot;</span>;
+   <span class="hljs-variable">$result</span> = <span class="hljs-title function_ invoke__">mysqli_query</span>(<span class="hljs-variable">$conn</span>, <span class="hljs-variable">$query</span>);
+</code></pre>
+<ul>
+<li>攻击者可以通过在用户名或密码输入框中输入恶意的 SQL 语句，如<code>' OR '1'='1</code>作为用户名，来绕过登录验证，因为最终生成的 SQL 查询会变成<code>SELECT * FROM users WHERE username = '' OR '1'='1' AND password = '$password'</code>，这样就可以获取未经授权的访问权限。</li>
+</ul>
+<ol>
+<li><strong>修复过程</strong>
+<ul>
+<li><strong>使用预处理语句</strong>：
+<ul>
+<li>改写后的代码如下：</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>php</p>
+<pre class="hljs"><code class="language-php">     <span class="hljs-variable">$username</span> = <span class="hljs-variable">$_POST</span>[<span class="hljs-string">&#x27;username&#x27;</span>];
+     <span class="hljs-variable">$password</span> = <span class="hljs-variable">$_POST</span>[<span class="hljs-string">&#x27;password&#x27;</span>];
+     <span class="hljs-variable">$stmt</span> = <span class="hljs-variable">$conn</span>-&gt;<span class="hljs-title function_ invoke__">prepare</span>(<span class="hljs-string">&quot;SELECT * FROM users WHERE username =? AND password =?&quot;</span>);
+     <span class="hljs-variable">$stmt</span>-&gt;<span class="hljs-title function_ invoke__">bind_param</span>(<span class="hljs-string">&quot;ss&quot;</span>, <span class="hljs-variable">$username</span>, <span class="hljs-variable">$password</span>);
+     <span class="hljs-variable">$stmt</span>-&gt;<span class="hljs-title function_ invoke__">execute</span>();
+     <span class="hljs-variable">$result</span> = <span class="hljs-variable">$stmt</span>-&gt;<span class="hljs-title function_ invoke__">get_result</span>();
+</code></pre>
+<ul>
+<li>这里使用了<code>mysqli</code>的预处理语句。<code>prepare</code>函数创建一个预处理语句对象，<code>bind_param</code>函数将用户输入的变量绑定到 SQL 语句中的参数位置，并且指定参数类型（这里的<code>ss</code>表示两个字符串参数）。这样，用户输入的数据就会被当作普通的字符串处理，而不是 SQL 代码的一部分，从而有效地防止了 SQL 注入攻击。</li>
+</ul>
+<h2 id="案例二-跨站脚本攻击-xss-漏洞修复-javascript-代码" class="prose-heading"><strong>案例二：跨站脚本攻击（XSS）漏洞修复（JavaScript 代码）</strong></h2>
+<ol>
+<li><strong>漏洞描述</strong>
+<ul>
+<li>考虑一个简单的网页，它会显示用户评论。原始的 JavaScript 代码可能如下：</li>
+</ul>
+</li>
+</ol>
+<p>html</p>
+<pre class="hljs"><code class="language-html">   <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;comments&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+   <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="language-javascript">
+     <span class="hljs-keyword">const</span> comment = <span class="hljs-title function_">getCommentFromServer</span>(); <span class="hljs-comment">// 从服务器获取评论内容</span>
+     <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;comments&#x27;</span>).<span class="hljs-property">innerHTML</span> = comment;
+   </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<ul>
+<li>如果攻击者提交包含恶意 JavaScript 代码的评论，如<code>alert('XSS');</code>，那么当这段评论被显示在页面上时，浏览器会执行这个恶意脚本，可能导致信息泄露、用户会话劫持等安全问题。</li>
+</ul>
+<ol>
+<li><strong>修复过程</strong>
+<ul>
+<li><strong>对用户输入进行编码</strong>：
+<ul>
+<li>一种修复方法是使用合适的编码函数来处理用户输入的评论内容。在 JavaScript 中，可以使用<code>textContent</code>属性来设置文本内容，而不是<code>innerHTML</code>，或者对内容进行 HTML 实体编码。例如：</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>html</p>
+<pre class="hljs"><code class="language-html">     <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;comments&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="language-javascript">
+       <span class="hljs-keyword">const</span> comment = <span class="hljs-title function_">getCommentFromServer</span>();
+       <span class="hljs-keyword">const</span> escapedComment = <span class="hljs-title function_">escapeHTML</span>(comment); <span class="hljs-comment">// 自定义的HTML实体编码函数</span>
+       <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;comments&#x27;</span>).<span class="hljs-property">textContent</span> = escapedComment;
+     </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<ul>
+<li>自定义的<code>escapeHTML</code>函数可以将特殊字符（如<code>&lt;</code>、<code>&gt;</code>、<code>&amp;</code>等）转换为对应的 HTML 实体，例如将<code>&lt;</code>转换为<code>&lt;</code>，这样浏览器就会将其当作普通文本显示，而不会执行其中的脚本。</li>
+</ul>
+<h2 id="案例三-缓冲区溢出漏洞修复-c-c-代码" class="prose-heading"><strong>案例三：缓冲区溢出漏洞修复（C/C++ 代码）</strong></h2>
+<ol>
+<li><strong>漏洞描述</strong>
+<ul>
+<li>以下是一个简单的 C 语言代码示例，存在缓冲区溢出漏洞：</li>
+</ul>
+</li>
+</ol>
+<p>c</p>
+<pre class="hljs"><code class="language-cpp">   <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span>
+   <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string.h&gt;</span></span>
+   <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+       <span class="hljs-type">char</span> buffer[<span class="hljs-number">10</span>];
+       <span class="hljs-type">char</span> input[<span class="hljs-number">100</span>];
+       <span class="hljs-built_in">scanf</span>(<span class="hljs-string">&quot;%s&quot;</span>, input);
+       <span class="hljs-built_in">strcpy</span>(buffer, input);
+       <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s&quot;</span>, buffer);
+       <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+   }
+</code></pre>
+<ul>
+<li>如果用户输入的字符串长度超过<code>buffer</code>的大小（10 个字节），就会发生缓冲区溢出。这可能导致程序崩溃，或者更严重的是，攻击者可以利用这个漏洞来修改程序的其他内存区域，执行恶意代码。</li>
+</ul>
+<ol>
+<li><strong>修复过程</strong>
+<ul>
+<li><strong>使用安全的字符串处理函数</strong>：
+<ul>
+<li>可以将<code>strcpy</code>函数替换为<code>strncpy</code>函数，修改后的代码如下：</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>展开过程</p>
+<ul>
+<li><code>strncpy</code>函数会限制复制的字符数量，最多复制<code>sizeof(buffer)-1</code>个字符，以确保不会超出<code>buffer</code>的范围。并且在最后手动添加字符串结束符<code>\0</code>，以保证<code>buffer</code>始终是一个有效的字符串。这样就可以避免缓冲区溢出漏洞。</li>
+</ul>
+<h2 id="修复c-代码漏洞并执行恶意代码的具体案例" class="prose-heading">修复C++代码漏洞并执行恶意代码的具体案例</h2>
+<p>以下是一个关于修复 C++ 代码漏洞以及该漏洞可能被利用执行恶意代码的具体案例示例，请注意，此仅用于演示安全问题及修复，绝不可用于非法用途：</p>
+<h4 id="案例背景" class="prose-heading">案例背景</h4>
+<p>假设有如下一个简单的 C++ 程序，用于处理用户输入的用户名，并根据用户名来进行一些后续操作（比如验证登录等，这里简化示意），代码原本如下：</p>
+<p>cpp</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;cstring&gt;</span></span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">User</span> {
+<span class="hljs-keyword">private</span>:
+    <span class="hljs-type">char</span> username[<span class="hljs-number">10</span>];
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">setUsername</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span>* input)</span> </span>{
+        <span class="hljs-comment">// 直接将输入复制到 username 数组，这里存在漏洞</span>
+        <span class="hljs-built_in">strcpy</span>(username, input);
+    }
+
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">printUsername</span><span class="hljs-params">()</span> </span>{
+        std::cout &lt;&lt; <span class="hljs-string">&quot;Username: &quot;</span> &lt;&lt; username &lt;&lt; std::endl;
+    }
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    User user;
+    <span class="hljs-type">char</span> userInput[<span class="hljs-number">100</span>];
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Please enter your username: &quot;</span>;
+    std::cin &gt;&gt; userInput;
+    user.<span class="hljs-built_in">setUsername</span>(userInput);
+    user.<span class="hljs-built_in">printUsername</span>();
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<h4 id="漏洞描述" class="prose-heading">漏洞描述</h4>
+<p>上述代码中，在 <code>User</code> 类的 <code>setUsername</code> 方法里使用了 <code>strcpy</code> 函数将外部输入的字符串直接复制到固定长度为 <code>10</code> 字节的 <code>username</code> 数组中。如果用户输入的字符串长度超过了 <code>10</code> 个字符，就会发生缓冲区溢出。</p>
+<p>例如，攻击者可以精心构造一个超长的输入字符串，这个字符串除了填满 <code>username</code> 数组的空间外，还能覆盖内存中相邻的数据，比如函数的返回地址等关键信息。假如攻击者知道程序的内存布局，就可以通过覆盖返回地址，让程序在函数返回时跳转到攻击者指定的恶意代码所在的内存位置，从而执行恶意代码。</p>
+<p>比如，攻击者构造的输入类似如下（这里只是简单示意，实际利用会更复杂且依赖具体环境）：</p>
+<p><code>&quot;AAAAAAAABBBBBBBBCCCCCCCCDDDDDDDD&quot; + 恶意代码的内存地址（假设为十六进制表示的地址，比如 0x401000 等）</code></p>
+<h4 id="修复过程" class="prose-heading">修复过程</h4>
+<p>为了修复这个缓冲区溢出漏洞，我们可以使用更安全的字符串处理函数，比如 <code>strncpy</code> ，并且要确保正确处理字符串结尾的 <code>'\0'</code> 字符，修改后的代码如下：</p>
+<p>cpp</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;cstring&gt;</span></span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">User</span> {
+<span class="hljs-keyword">private</span>:
+    <span class="hljs-type">char</span> username[<span class="hljs-number">10</span>];
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">setUsername</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span>* input)</span> </span>{
+        <span class="hljs-comment">// 使用 strncpy 限制复制的字符数量，并确保结尾添加 &#x27;\0&#x27;</span>
+        <span class="hljs-built_in">strncpy</span>(username, input, <span class="hljs-built_in">sizeof</span>(username) - <span class="hljs-number">1</span>);
+        username[<span class="hljs-built_in">sizeof</span>(username) - <span class="hljs-number">1</span>] = <span class="hljs-string">&#x27;\0&#x27;</span>;
+    }
+
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">printUsername</span><span class="hljs-params">()</span> </span>{
+        std::cout &lt;&lt; <span class="hljs-string">&quot;Username: &quot;</span> &lt;&lt; username &lt;&lt; std::endl;
+    }
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    User user;
+    <span class="hljs-type">char</span> userInput[<span class="hljs-number">100</span>];
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Please enter your username: &quot;</span>;
+    std::cin &gt;&gt; userInput;
+    user.<span class="hljs-built_in">setUsername</span>(userInput);
+    user.<span class="hljs-built_in">printUsername</span>();
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<p>在修改后的 <code>setUsername</code> 方法中，<code>strncpy</code> 函数只会复制最多 <code>sizeof(username) - 1</code> 个字符（也就是 <code>9</code> 个字符），这样就可以避免写入超出 <code>username</code> 数组范围的数据，然后手动将最后一个字节设置为 <code>'\0'</code> ，保证 <code>username</code> 始终是一个合法的、以 <code>'\0'</code> 结尾的字符串，从而消除了缓冲区溢出的漏洞，也就阻断了攻击者利用该漏洞执行恶意代码的途径。</p>
+<p>再次强调，以上只是从安全角度进行的原理性示例讲解，在实际中，软件的安全保障需要综合考虑众多因素，并且利用代码漏洞执行恶意代码是非法和违背道德伦理的行为，安全工作者们致力于不断发现并修复这些漏洞来保障系统的安全稳定运行。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-2" href="#案例一-sql-注入漏洞修复-web-应用程序">**案例一：SQL 注入漏洞修复（Web 应用程序）**</a>
+          
+            <a class="toc-level-2" href="#案例二-跨站脚本攻击-xss-漏洞修复-javascript-代码">**案例二：跨站脚本攻击（XSS）漏洞修复（JavaScript 代码）**</a>
+          
+            <a class="toc-level-2" href="#案例三-缓冲区溢出漏洞修复-c-c-代码">**案例三：缓冲区溢出漏洞修复（C/C++ 代码）**</a>
+          
+            <a class="toc-level-2" href="#修复c-代码漏洞并执行恶意代码的具体案例">修复C++代码漏洞并执行恶意代码的具体案例</a>
+          
+            <a class="toc-level-4" href="#案例背景">案例背景</a>
+          
+            <a class="toc-level-4" href="#漏洞描述">漏洞描述</a>
+          
+            <a class="toc-level-4" href="#修复过程">修复过程</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/推荐比mini-stl更好的c实现项目代码.html">
+      <span>上一篇</span>
+      <strong>推荐比mini stl更好的C实现项目代码</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/rust语言俄罗斯方块漂亮的界面案例详细的代码解说完美运行.html">
+      <span>下一篇</span>
+      <strong>Rust语言俄罗斯方块漂亮的界面案例详细的代码解说完美运行</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/编写有内存漏洞的c代码并实现内存注入的示例一个程序注入另一个程序.html">编写有内存漏洞的C代码并实现内存注入的示例一个程序注入另一个程序</a></h3>
+        <p class="post-excerpt">实现思路</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.956Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/用c语言实现的回调函数案例涵盖基础用法及不同消息机制gui模拟网络请求模拟状态机消息队列.html">用C语言实现的回调函数案例涵盖基础用法及不同消息机制GUI模拟网络请求模拟状态机消息队列</a></h3>
+        <p class="post-excerpt">以下是用 C 语言实现的回调函数案例，涵盖基础用法及不同消息机制（GUI 模拟、网络请求模拟、状态机、消息队列），包含详细注释和解释。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.946Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/推荐比mini-stl更好的c实现项目代码.html">推荐比mini stl更好的C实现项目代码</a></h3>
+        <p class="post-excerpt">代码来源 -- STL模拟: STL模拟 的各类实现 - Gitee.com</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.937Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

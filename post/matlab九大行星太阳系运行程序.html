@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>MATLAB九大行星太阳系运行程序 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">MATLAB九大行星太阳系运行程序</h1>
+        <p class="post-deck">Matlab</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.085Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>10 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p><img src="../uploads/csdn/matlab%E4%B9%9D%E5%A4%A7%E8%A1%8C%E6%98%9F%E5%A4%AA%E9%98%B3%E7%B3%BB%E8%BF%90%E8%A1%8C%E7%A8%8B%E5%BA%8F/img-01.gif" alt=""></p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">solar_system_simulation</span></span>
+    <span class="hljs-comment">% 初始化参数</span>
+    G = <span class="hljs-number">6.67430e-11</span>; <span class="hljs-comment">% 万有引力常数(N·m²/kg²)</span>
+    AU = <span class="hljs-number">1.496e11</span>;   <span class="hljs-comment">% 天文单位(m)</span>
+    day = <span class="hljs-number">86400</span>;     <span class="hljs-comment">% 每日秒数</span>
+
+    <span class="hljs-comment">% 太阳质量(kg)</span>
+    sun_mass = <span class="hljs-number">1.989e30</span>;
+
+    <span class="hljs-comment">% 行星数据 [质量(kg) 轨道半长轴(AU) 离心率 轨道倾角(deg) 颜色RGB]</span>
+    planets = {
+        <span class="hljs-string">&#x27;水星&#x27;</span>, <span class="hljs-number">3.3011e23</span>, <span class="hljs-number">0.387</span>, <span class="hljs-number">0.206</span>, <span class="hljs-number">7.0</span>, [<span class="hljs-number">0.7</span> <span class="hljs-number">0.7</span> <span class="hljs-number">0.7</span>];
+        <span class="hljs-string">&#x27;金星&#x27;</span>, <span class="hljs-number">4.8675e24</span>, <span class="hljs-number">0.723</span>, <span class="hljs-number">0.007</span>, <span class="hljs-number">3.4</span>, [<span class="hljs-number">0.9</span> <span class="hljs-number">0.6</span> <span class="hljs-number">0.1</span>];
+        <span class="hljs-string">&#x27;地球&#x27;</span>, <span class="hljs-number">5.9724e24</span>, <span class="hljs-number">1.000</span>, <span class="hljs-number">0.017</span>, <span class="hljs-number">0.0</span>, [<span class="hljs-number">0.1</span> <span class="hljs-number">0.5</span> <span class="hljs-number">0.8</span>];
+        <span class="hljs-string">&#x27;火星&#x27;</span>, <span class="hljs-number">6.4171e23</span>, <span class="hljs-number">1.524</span>, <span class="hljs-number">0.093</span>, <span class="hljs-number">1.9</span>, [<span class="hljs-number">0.8</span> <span class="hljs-number">0.3</span> <span class="hljs-number">0.1</span>];
+        <span class="hljs-string">&#x27;木星&#x27;</span>, <span class="hljs-number">1.8982e27</span>, <span class="hljs-number">5.203</span>, <span class="hljs-number">0.048</span>, <span class="hljs-number">1.3</span>, [<span class="hljs-number">0.8</span> <span class="hljs-number">0.7</span> <span class="hljs-number">0.5</span>];
+        <span class="hljs-string">&#x27;土星&#x27;</span>, <span class="hljs-number">5.6834e26</span>, <span class="hljs-number">9.537</span>, <span class="hljs-number">0.056</span>, <span class="hljs-number">2.5</span>, [<span class="hljs-number">0.9</span> <span class="hljs-number">0.8</span> <span class="hljs-number">0.6</span>];
+        <span class="hljs-string">&#x27;天王星&#x27;</span>, <span class="hljs-number">8.6810e25</span>, <span class="hljs-number">19.191</span>, <span class="hljs-number">0.046</span>, <span class="hljs-number">0.8</span>, [<span class="hljs-number">0.6</span> <span class="hljs-number">0.8</span> <span class="hljs-number">0.9</span>];
+        <span class="hljs-string">&#x27;海王星&#x27;</span>, <span class="hljs-number">1.0243e26</span>, <span class="hljs-number">30.069</span>, <span class="hljs-number">0.010</span>, <span class="hljs-number">1.8</span>, [<span class="hljs-number">0.3</span> <span class="hljs-number">0.5</span> <span class="hljs-number">0.9</span>];
+        <span class="hljs-string">&#x27;冥王星&#x27;</span>, <span class="hljs-number">1.303e22</span>, <span class="hljs-number">39.482</span>, <span class="hljs-number">0.248</span>, <span class="hljs-number">17.2</span>, [<span class="hljs-number">0.7</span> <span class="hljs-number">0.5</span> <span class="hljs-number">0.5</span>]
+    };
+
+    <span class="hljs-comment">% 创建3D图形窗口</span>
+    <span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;k&#x27;</span>,<span class="hljs-string">&#x27;Position&#x27;</span>,[<span class="hljs-number">100</span> <span class="hljs-number">100</span> <span class="hljs-number">1200</span> <span class="hljs-number">800</span>])
+    <span class="hljs-built_in">hold</span> on
+    axis equal
+    grid on
+    view(<span class="hljs-number">3</span>)
+    xlabel(<span class="hljs-string">&#x27;X (AU)&#x27;</span>), ylabel(<span class="hljs-string">&#x27;Y (AU)&#x27;</span>), zlabel(<span class="hljs-string">&#x27;Z (AU)&#x27;</span>)
+    title(<span class="hljs-string">&#x27;太阳系行星轨道模拟&#x27;</span>,<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;w&#x27;</span>)
+    set(gca,<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;k&#x27;</span>,<span class="hljs-string">&#x27;XColor&#x27;</span>,<span class="hljs-string">&#x27;w&#x27;</span>,<span class="hljs-string">&#x27;YColor&#x27;</span>,<span class="hljs-string">&#x27;w&#x27;</span>,<span class="hljs-string">&#x27;ZColor&#x27;</span>,<span class="hljs-string">&#x27;w&#x27;</span>)
+
+    <span class="hljs-comment">% 绘制太阳</span>
+    [X,Y,Z] = sphere(<span class="hljs-number">10</span>);
+    surf(X*<span class="hljs-number">0.2</span>,Y*<span class="hljs-number">0.2</span>,Z*<span class="hljs-number">0.2</span>,<span class="hljs-string">&#x27;FaceColor&#x27;</span>,<span class="hljs-string">&#x27;y&#x27;</span>,<span class="hljs-string">&#x27;EdgeColor&#x27;</span>,<span class="hljs-string">&#x27;none&#x27;</span>)
+    light(<span class="hljs-string">&#x27;Position&#x27;</span>,[<span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>],<span class="hljs-string">&#x27;Style&#x27;</span>,<span class="hljs-string">&#x27;local&#x27;</span>,<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;y&#x27;</span>)
+
+    <span class="hljs-comment">% 计算并绘制各行星轨道</span>
+    theta = <span class="hljs-built_in">linspace</span>(<span class="hljs-number">0</span>,<span class="hljs-number">2</span>*<span class="hljs-built_in">pi</span>,<span class="hljs-number">500</span>);
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(planets,<span class="hljs-number">1</span>)
+        a = planets{<span class="hljs-built_in">i</span>,<span class="hljs-number">3</span>}*AU;       <span class="hljs-comment">% 半长轴(m)</span>
+        e = planets{<span class="hljs-built_in">i</span>,<span class="hljs-number">4</span>};          <span class="hljs-comment">% 离心率</span>
+        r = a*(<span class="hljs-number">1</span>-e)./(<span class="hljs-number">1</span>+e*<span class="hljs-built_in">cos</span>(theta)); <span class="hljs-comment">% 极坐标轨道方程</span>
+
+        <span class="hljs-comment">% 转换为笛卡尔坐标并考虑轨道倾角</span>
+        inclination = deg2rad(planets{<span class="hljs-built_in">i</span>,<span class="hljs-number">5</span>});
+        x = r.*<span class="hljs-built_in">cos</span>(theta);
+        y = r.*<span class="hljs-built_in">sin</span>(theta)*<span class="hljs-built_in">cos</span>(inclination);
+        z = r.*<span class="hljs-built_in">sin</span>(theta)*<span class="hljs-built_in">sin</span>(inclination);
+
+        <span class="hljs-comment">% 绘制轨道线</span>
+        <span class="hljs-built_in">plot3</span>(x/AU,y/AU,z/AU,<span class="hljs-string">&#x27;Color&#x27;</span>,planets{<span class="hljs-built_in">i</span>,<span class="hljs-number">6</span>},<span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">1</span>);
+
+        <span class="hljs-comment">% 计算轨道周期(秒) - 开普勒第三定律</span>
+        T = <span class="hljs-built_in">sqrt</span>(<span class="hljs-number">4</span>*<span class="hljs-built_in">pi</span>*a/(G*(sun_mass+planets{<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>})));
+
+        <span class="hljs-comment">% 创建行星动画对象</span>
+        planet_plot(<span class="hljs-built_in">i</span>) = <span class="hljs-built_in">plot3</span>(NaN,NaN,NaN,<span class="hljs-string">&#x27;o&#x27;</span>,<span class="hljs-string">&#x27;Color&#x27;</span>,planets{<span class="hljs-built_in">i</span>,<span class="hljs-number">6</span>},...
+            <span class="hljs-string">&#x27;MarkerSize&#x27;</span>,<span class="hljs-number">8</span>,<span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>,planets{<span class="hljs-built_in">i</span>,<span class="hljs-number">6</span>});
+        text(a/AU,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,planets{<span class="hljs-built_in">i</span>,<span class="hljs-number">1</span>},<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;w&#x27;</span>)
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 动画参数设置</span>
+    days_per_frame = <span class="hljs-number">5</span>;    <span class="hljs-comment">% 每帧天数</span>
+    total_days = <span class="hljs-number">100</span>;     <span class="hljs-comment">% 总模拟天数</span>
+    frames = total_days/days_per_frame;
+
+    <span class="hljs-comment">% --- 新增部分：GIF保存准备 ---</span>
+    <span class="hljs-comment">% 定义GIF文件名</span>
+    gif_filename = <span class="hljs-string">&#x27;solar_system_simulation.gif&#x27;</span>;
+    <span class="hljs-comment">% --- 新增结束 ---</span>
+
+    <span class="hljs-comment">% 动画循环</span>
+    <span class="hljs-keyword">for</span> f = <span class="hljs-number">1</span>:frames
+        time = f*days_per_frame*day;
+
+        <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(planets,<span class="hljs-number">1</span>)
+            a = planets{<span class="hljs-built_in">i</span>,<span class="hljs-number">3</span>}*AU;
+            e = planets{<span class="hljs-built_in">i</span>,<span class="hljs-number">4</span>};
+
+            <span class="hljs-comment">% 计算当前角度(简化模型)</span>
+            T = <span class="hljs-built_in">sqrt</span>(<span class="hljs-number">4</span>*<span class="hljs-built_in">pi</span>*a/(G*(sun_mass+planets{<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>})));
+            <span class="hljs-built_in">angle</span> = <span class="hljs-number">2</span>*<span class="hljs-built_in">pi</span>*<span class="hljs-built_in">mod</span>(time/T,<span class="hljs-number">1</span>);
+
+            <span class="hljs-comment">% 计算当前位置</span>
+            r = a*(<span class="hljs-number">1</span>-e)/(<span class="hljs-number">1</span>+e*<span class="hljs-built_in">cos</span>(<span class="hljs-built_in">angle</span>));
+            inclination = deg2rad(planets{<span class="hljs-built_in">i</span>,<span class="hljs-number">5</span>});
+            x = r*<span class="hljs-built_in">cos</span>(<span class="hljs-built_in">angle</span>);
+            y = r*<span class="hljs-built_in">sin</span>(<span class="hljs-built_in">angle</span>)*<span class="hljs-built_in">cos</span>(inclination);
+            z = r*<span class="hljs-built_in">sin</span>(<span class="hljs-built_in">angle</span>)*<span class="hljs-built_in">sin</span>(inclination);
+
+            <span class="hljs-comment">% 更新行星位置</span>
+            set(planet_plot(<span class="hljs-built_in">i</span>),<span class="hljs-string">&#x27;XData&#x27;</span>,x/AU,<span class="hljs-string">&#x27;YData&#x27;</span>,y/AU,<span class="hljs-string">&#x27;ZData&#x27;</span>,z/AU)
+        <span class="hljs-keyword">end</span>
+
+        drawnow
+
+        <span class="hljs-comment">% --- 新增部分：保存当前帧到GIF ---</span>
+        <span class="hljs-comment">% 1. 获取当前坐标轴的图像数据</span>
+        frame = getframe(gca);
+        <span class="hljs-comment">% 2. 将图像数据转换为索引图像，这是GIF格式所要求的</span>
+        <span class="hljs-comment">%    &#x27;colormap&#x27;参数确保颜色准确</span>
+        im = frame2im(frame);
+        [imind, cm] = rgb2ind(im, <span class="hljs-number">256</span>);
+
+        <span class="hljs-comment">% 3. 写入GIF文件</span>
+        <span class="hljs-comment">%    对于第一帧，使用&#x27;w&#x27;模式创建文件</span>
+        <span class="hljs-comment">%    对于后续帧，使用&#x27;a&#x27;模式追加到文件末尾</span>
+        <span class="hljs-comment">%    &#x27;DelayTime&#x27;设置每帧的显示时间(秒)</span>
+        <span class="hljs-comment">%    &#x27;LoopCount&#x27;,inf 使GIF无限循环播放</span>
+        <span class="hljs-keyword">if</span> f == <span class="hljs-number">1</span>
+            imwrite(imind, cm, gif_filename, <span class="hljs-string">&#x27;GIF&#x27;</span>, <span class="hljs-string">&#x27;LoopCount&#x27;</span>, <span class="hljs-built_in">inf</span>, <span class="hljs-string">&#x27;DelayTime&#x27;</span>, <span class="hljs-number">0.05</span>);
+        <span class="hljs-keyword">else</span>
+            imwrite(imind, cm, gif_filename, <span class="hljs-string">&#x27;GIF&#x27;</span>, <span class="hljs-string">&#x27;WriteMode&#x27;</span>, <span class="hljs-string">&#x27;append&#x27;</span>, <span class="hljs-string">&#x27;DelayTime&#x27;</span>, <span class="hljs-number">0.05</span>);
+        <span class="hljs-keyword">end</span>
+        <span class="hljs-comment">% --- 新增结束 ---</span>
+
+        pause(<span class="hljs-number">0.05</span>)
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% --- 新增部分：提示信息 ---</span>
+    <span class="hljs-built_in">disp</span>([<span class="hljs-string">&#x27;动画已成功保存为 GIF 文件: &#x27;</span>, fullfile(pwd, gif_filename)]);
+    <span class="hljs-comment">% --- 新增结束 ---</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/matlab凸透镜成像原理仿真凹透镜大致图.html">
+      <span>上一篇</span>
+      <strong>MATLAB凸透镜成像原理仿真凹透镜大致图</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/证明整数i的三次方的数列求和等于整数i的平方的数列求和的平方.html">
+      <span>下一篇</span>
+      <strong>证明整数i的三次方的数列求和等于整数i的平方的数列求和的平方</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/计算卫星与地面时差用广义相对论给出计算公式与matlab代码.html">计算卫星与地面时差用广义相对论给出计算公式与MATLAB代码</a></h3>
+        <p class="post-excerpt">一、相对论时差的主要来源</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.817Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

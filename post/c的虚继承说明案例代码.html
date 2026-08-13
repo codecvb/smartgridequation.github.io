@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>c的虚继承说明案例代码 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/c-c-与-rust.html">C/C++ 与 Rust</a>
+        </nav>
+        <h1 class="post-title">c的虚继承说明案例代码</h1>
+        <p class="post-deck">1.  ## 虚继承的基本概念</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.862Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>10 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-7.html">C/C++</a>
+          
+            <a class="tag-chip" href="../tags/tag-8.html">Rust</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <ol>
+<li>
+<h2 id="虚继承的基本概念" class="prose-heading"><strong>虚继承的基本概念</strong></h2>
+<ul>
+<li>在 C++ 中，虚继承主要用于解决多继承时可能出现的菱形继承问题。菱形继承是指一个类有两个（或更多）子类，而这两个子类又同时继承自一个共同的基类，当这些子类又被另一个类继承时，就形成了菱形结构。在这种情况下，如果没有虚继承，会导致基类数据成员在派生类中有多份副本，可能引起二义性等问题。虚继承可以保证在这种复杂的继承关系中，公共基类只有一份副本。</li>
+</ul>
+</li>
+<li>
+<h2 id="简单的虚继承示例" class="prose-heading"><strong>简单的虚继承示例</strong></h2>
+<ul>
+<li>首先看一个没有虚继承导致数据成员重复的例子：</li>
+<li>cpp</li>
+</ul>
+</li>
+</ol>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Base</span> {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-type">int</span> baseData;
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Derived1</span> : <span class="hljs-keyword">public</span> Base {
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Derived2</span> : <span class="hljs-keyword">public</span> Base {
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">GrandDerived</span> : <span class="hljs-keyword">public</span> Derived1, <span class="hljs-keyword">public</span> Derived2 {
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    GrandDerived gd;
+    <span class="hljs-comment">// 下面这行代码会产生二义性错误，因为baseData在Derived1和Derived2中都存在</span>
+    <span class="hljs-comment">// gd.baseData = 10;</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<ul>
+<li>在这个例子中，<code>GrandDerived</code>类通过<code>Derived1</code>和<code>Derived2</code>间接继承了<code>Base</code>类，这就导致<code>GrandDerived</code>对象中有两份<code>Base</code>类的数据成员<code>baseData</code>。当试图访问<code>baseData</code>时会产生二义性错误。</li>
+</ul>
+<ol>
+<li>
+<h2 id="使用虚继承解决菱形继承问题" class="prose-heading"><strong>使用虚继承解决菱形继承问题</strong></h2>
+<ul>
+<li>下面是使用虚继承来解决上述问题的代码</li>
+<li>cpp</li>
+</ul>
+</li>
+</ol>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Base</span> {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-type">int</span> baseData;
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Derived1</span> : <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">public</span> Base {
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Derived2</span> : <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">public</span> Base {
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">GrandDerived</span> : <span class="hljs-keyword">public</span> Derived1, <span class="hljs-keyword">public</span> Derived2 {
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    GrandDerived gd;
+    gd.baseData = <span class="hljs-number">10</span>;  <span class="hljs-comment">// 正确，此时只有一份baseData</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<ul>
+<li>在这个修改后的代码中，<code>Derived1</code>和<code>Derived2</code>虚继承自<code>Base</code>类。这使得在<code>GrandDerived</code>类中，<code>Base</code>类只会有一份副本，所以可以正确地访问<code>baseData</code>成员。</li>
+</ul>
+<ol>
+<li>
+<h2 id="虚继承的构造函数顺序案例" class="prose-heading"><strong>虚继承的构造函数顺序案例</strong></h2>
+<ul>
+<li>当涉及虚继承时，构造函数的调用顺序也有特殊的规则。构造函数的调用顺序是先调用虚基类的构造函数，然后再按照继承顺序调用非虚基类的构造函数。</li>
+<li>cpp</li>
+</ul>
+</li>
+</ol>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Base</span> {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-built_in">Base</span>() {
+        std::cout &lt;&lt; <span class="hljs-string">&quot;Base constructor&quot;</span> &lt;&lt; std::endl;
+    }
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Derived1</span> : <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">public</span> Base {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-built_in">Derived1</span>() {
+        std::cout &lt;&lt; <span class="hljs-string">&quot;Derived1 constructor&quot;</span> &lt;&lt; std::endl;
+    }
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Derived2</span> : <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">public</span> Base {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-built_in">Derived2</span>() {
+        std::cout &lt;&lt; <span class="hljs-string">&quot;Derived2 constructor&quot;</span> &lt;&lt; std::endl;
+    }
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">GrandDerived</span> : <span class="hljs-keyword">public</span> Derived1, <span class="hljs-keyword">public</span> Derived2 {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-built_in">GrandDerived</span>() {
+        std::cout &lt;&lt; <span class="hljs-string">&quot;GrandDerived constructor&quot;</span> &lt;&lt; std::endl;
+    }
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    GrandDerived gd;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<ul>
+<li>在这个例子中，输出结果是：</li>
+</ul>
+<pre class="hljs"><code>Base constructor
+Derived1 constructor
+Derived2 constructor
+GrandDerived constructor
+</code></pre>
+<ul>
+<li>可以看到，首先调用了虚基类<code>Base</code>的构造函数，然后按照继承顺序调用了<code>Derived1</code>和<code>Derived2</code>的构造函数，最后调用了<code>GrandDerived</code>的构造函数。</li>
+</ul>
+<ol>
+<li>
+<h2 id="虚继承中的指针和引用案例" class="prose-heading"><strong>虚继承中的指针和引用案例</strong></h2>
+<ul>
+<li>考虑以下代码来展示虚继承中指针和引用的行为：</li>
+<li>cpp</li>
+</ul>
+</li>
+</ol>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Base</span> {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-type">int</span> baseData;
+    <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">print</span><span class="hljs-params">()</span> </span>{
+        std::cout &lt;&lt; <span class="hljs-string">&quot;Base print&quot;</span> &lt;&lt; std::endl;
+    }
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Derived1</span> : <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">public</span> Base {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">print</span><span class="hljs-params">()</span> <span class="hljs-keyword">override</span> </span>{
+        std::cout &lt;&lt; <span class="hljs-string">&quot;Derived1 print&quot;</span> &lt;&lt; std::endl;
+    }
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Derived2</span> : <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">public</span> Base {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">print</span><span class="hljs-params">()</span> <span class="hljs-keyword">override</span> </span>{
+        std::cout &lt;&lt; <span class="hljs-string">&quot;Derived2 print&quot;</span> &lt;&lt; std::endl;
+    }
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">GrandDerived</span> : <span class="hljs-keyword">public</span> Derived1, <span class="hljs-keyword">public</span> Derived2 {
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    GrandDerived gd;
+    Base* ptr = &amp;gd;
+    ptr-&gt;<span class="hljs-built_in">print</span>();  <span class="hljs-comment">// 调用Derived1的print函数，这取决于继承顺序和虚函数机制</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<ul>
+<li>在这个例子中，通过<code>Base*</code>指针指向<code>GrandDerived</code>对象，当调用<code>print</code>函数时，由于虚函数的动态绑定特性和继承顺序，实际上调用的是<code>Derived1</code>类中的<code>print</code>函数。这展示了在虚继承场景下，通过基类指针或引用访问虚函数时的多态行为。</li>
+</ul>
+<h2 id="以下是用流程图来说明虚继承用于解决多继承时菱形继承问题的过程" class="prose-heading">以下是用流程图来说明虚继承用于解决多继承时菱形继承问题的过程：</h2>
+<pre class="hljs"><code class="language-cpp">graph TD;
+    A[定义基类Base] --&gt; B[定义子类Derived1和Derived2直接继承Base];
+    B --&gt; C[定义GrandDerived类继承Derived1和Derived2形成菱形继承结构];
+    C --&gt; D[不使用虚继承时，GrandDerived对象中有两份Base类的数据成员，访问可能出现二义性];
+    A --&gt; E[定义子类Derived1和Derived2虚继承Base];
+    E --&gt; F[定义GrandDerived类继承Derived1和Derived2];
+    F --&gt; G[使用虚继承后，Base类在GrandDerived对象中只有一份副本，可正常访问数据成员];
+</code></pre>
+<p>在上述流程图中：</p>
+<ul>
+<li>首先是定义一个基类<code>Base</code>。</li>
+<li>然后有两种情况分支：
+<ul>
+<li>一种是常规的非虚继承方式，<code>Derived1</code>和<code>Derived2</code>直接继承<code>Base</code>，之后<code>GrandDerived</code>再继承<code>Derived1</code>和<code>Derived2</code>，这样会形成菱形继承结构，并且在不使用虚继承时，<code>GrandDerived</code>对象中会存在两份<code>Base</code>类的数据成员，导致在访问这些数据成员时可能出现二义性问题。</li>
+<li>另一种是采用虚继承的方式，<code>Derived1</code>和<code>Derived2</code>虚继承<code>Base</code>，接着<code>GrandDerived</code>继承<code>Derived1</code>和<code>Derived2</code>，此时由于虚继承的作用，<code>Base</code>类在<code>GrandDerived</code>对象中只会有一份副本，从而可以正常地访问数据成员，避免了二义性等问题。</li>
+</ul>
+</li>
+</ul>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-2" href="#虚继承的基本概念">**虚继承的基本概念**</a>
+          
+            <a class="toc-level-2" href="#简单的虚继承示例">**简单的虚继承示例**</a>
+          
+            <a class="toc-level-2" href="#使用虚继承解决菱形继承问题">**使用虚继承解决菱形继承问题**</a>
+          
+            <a class="toc-level-2" href="#虚继承的构造函数顺序案例">**虚继承的构造函数顺序案例**</a>
+          
+            <a class="toc-level-2" href="#虚继承中的指针和引用案例">**虚继承中的指针和引用案例**</a>
+          
+            <a class="toc-level-2" href="#以下是用流程图来说明虚继承用于解决多继承时菱形继承问题的过程">以下是用流程图来说明虚继承用于解决多继承时菱形继承问题的过程：</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/c语言的基本练习001-1之普通输出消息.html">
+      <span>上一篇</span>
+      <strong>C语言的基本练习001 1之普通输出消息</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/c多继承一个子类继承多个父类的情况.html">
+      <span>下一篇</span>
+      <strong>C多继承一个子类继承多个父类的情况</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/编写有内存漏洞的c代码并实现内存注入的示例一个程序注入另一个程序.html">编写有内存漏洞的C代码并实现内存注入的示例一个程序注入另一个程序</a></h3>
+        <p class="post-excerpt">实现思路</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.956Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/用c语言实现的回调函数案例涵盖基础用法及不同消息机制gui模拟网络请求模拟状态机消息队列.html">用C语言实现的回调函数案例涵盖基础用法及不同消息机制GUI模拟网络请求模拟状态机消息队列</a></h3>
+        <p class="post-excerpt">以下是用 C 语言实现的回调函数案例，涵盖基础用法及不同消息机制（GUI 模拟、网络请求模拟、状态机、消息队列），包含详细注释和解释。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.946Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/推荐比mini-stl更好的c实现项目代码.html">推荐比mini stl更好的C实现项目代码</a></h3>
+        <p class="post-excerpt">代码来源 -- STL模拟: STL模拟 的各类实现 - Gitee.com</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.937Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

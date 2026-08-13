@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>QT6AndroidC拍照程序 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/c-c-与-rust.html">C/C++ 与 Rust</a>
+        </nav>
+        <h1 class="post-title">QT6AndroidC拍照程序</h1>
+        <p class="post-deck">该代码实现了一个基于Qt框架的摄像头拍照应用程序。主要功能包括：1) 检查并请求相机权限；2) 初始化摄像头设备，优先选择后置摄像头；3) 提供实时摄像头预览；4) 点击按钮拍照并保存图片。图片会尝试保存到多个可能的位置（如DCIM/Camera、Pictures目录等）。程序还包含状态提示功能，会显示权限请求、摄像头状态、拍照结果等信息。当摄像头错误或保存失败时，会输出相应的错误信息。整个程序通…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.893Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>17 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-7.html">C/C++</a>
+          
+            <a class="tag-chip" href="../tags/tag-8.html">Rust</a>
+          
+            <a class="tag-chip" href="../tags/tag-17.html">QT6</a>
+          
+            <a class="tag-chip" href="../tags/tag-22.html">Android</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>该代码实现了一个基于Qt框架的摄像头拍照应用程序。主要功能包括：1) 检查并请求相机权限；2) 初始化摄像头设备，优先选择后置摄像头；3) 提供实时摄像头预览；4) 点击按钮拍照并保存图片。图片会尝试保存到多个可能的位置（如DCIM/Camera、Pictures目录等）。程序还包含状态提示功能，会显示权限请求、摄像头状态、拍照结果等信息。当摄像头错误或保存失败时，会输出相应的错误信息。整个程序通过信号槽机制实现各功能的异步响应。</p>
+<p><img src="../uploads/csdn/qt6androidc%E6%8B%8D%E7%85%A7%E7%A8%8B%E5%BA%8F/img-01.jpeg" alt=""></p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;mainwindow.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;ui_mainwindow.h&quot;</span></span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QCamera&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QMediaCaptureSession&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QMediaDevices&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QDateTime&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QDir&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QStandardPaths&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QPermission&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QDebug&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;QFile&gt;</span></span>
+
+MainWindow::<span class="hljs-built_in">MainWindow</span>(QWidget *parent)
+    : <span class="hljs-built_in">QMainWindow</span>(parent)
+    , <span class="hljs-built_in">ui</span>(<span class="hljs-keyword">new</span> Ui::MainWindow)
+    , <span class="hljs-built_in">m_camera</span>(<span class="hljs-literal">nullptr</span>)
+    , <span class="hljs-built_in">m_imageCapture</span>(<span class="hljs-literal">nullptr</span>)
+    , <span class="hljs-built_in">m_captureSession</span>(<span class="hljs-literal">nullptr</span>)
+    , <span class="hljs-built_in">m_cameraPermissionGranted</span>(<span class="hljs-literal">false</span>)
+    , <span class="hljs-built_in">m_storagePermissionGranted</span>(<span class="hljs-literal">false</span>)
+{
+    ui-&gt;<span class="hljs-built_in">setupUi</span>(<span class="hljs-keyword">this</span>);
+
+    <span class="hljs-built_in">setWindowTitle</span>(QString::<span class="hljs-built_in">fromUtf8</span>(<span class="hljs-string">&quot;摄像头拍照&quot;</span>));
+
+    ui-&gt;videoWidget-&gt;<span class="hljs-built_in">setAspectRatioMode</span>(Qt::KeepAspectRatioByExpanding);
+
+    m_captureSession = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QMediaCaptureSession</span>(<span class="hljs-keyword">this</span>);
+    m_captureSession-&gt;<span class="hljs-built_in">setVideoOutput</span>(ui-&gt;videoWidget);
+
+    m_imageCapture = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QImageCapture</span>(<span class="hljs-keyword">this</span>);
+    m_captureSession-&gt;<span class="hljs-built_in">setImageCapture</span>(m_imageCapture);
+
+    <span class="hljs-built_in">connect</span>(ui-&gt;captureButton, &amp;QPushButton::clicked, <span class="hljs-keyword">this</span>, &amp;MainWindow::onCaptureButtonClicked);
+    <span class="hljs-built_in">connect</span>(m_imageCapture, &amp;QImageCapture::imageCaptured, <span class="hljs-keyword">this</span>, &amp;MainWindow::onImageCaptured);
+
+    ui-&gt;statusLabel-&gt;<span class="hljs-built_in">setText</span>(QString::<span class="hljs-built_in">fromUtf8</span>(<span class="hljs-string">&quot;正在请求相机权限...&quot;</span>));
+    ui-&gt;captureButton-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">false</span>);
+
+    QCameraPermission cameraPerm;
+    <span class="hljs-keyword">auto</span> camStatus = qApp-&gt;<span class="hljs-built_in">checkPermission</span>(cameraPerm);
+
+    <span class="hljs-keyword">if</span> (camStatus == Qt::PermissionStatus::Undetermined) {
+        qApp-&gt;<span class="hljs-built_in">requestPermission</span>(cameraPerm, <span class="hljs-keyword">this</span>, [<span class="hljs-keyword">this</span>](<span class="hljs-type">const</span> QPermission &amp;perm) {
+            <span class="hljs-keyword">if</span> (perm.<span class="hljs-built_in">status</span>() == Qt::PermissionStatus::Granted) {
+                m_cameraPermissionGranted = <span class="hljs-literal">true</span>;
+                m_storagePermissionGranted = <span class="hljs-literal">true</span>;
+                ui-&gt;statusLabel-&gt;<span class="hljs-built_in">setText</span>(QString::<span class="hljs-built_in">fromUtf8</span>(<span class="hljs-string">&quot;正在打开摄像头...&quot;</span>));
+                <span class="hljs-built_in">initCamera</span>();
+            } <span class="hljs-keyword">else</span> {
+                ui-&gt;statusLabel-&gt;<span class="hljs-built_in">setText</span>(QString::<span class="hljs-built_in">fromUtf8</span>(<span class="hljs-string">&quot;相机权限被拒绝，请在设置中授权&quot;</span>));
+            }
+        });
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (camStatus == Qt::PermissionStatus::Granted) {
+        m_cameraPermissionGranted = <span class="hljs-literal">true</span>;
+        m_storagePermissionGranted = <span class="hljs-literal">true</span>;
+        ui-&gt;statusLabel-&gt;<span class="hljs-built_in">setText</span>(QString::<span class="hljs-built_in">fromUtf8</span>(<span class="hljs-string">&quot;正在打开摄像头...&quot;</span>));
+        <span class="hljs-built_in">initCamera</span>();
+    } <span class="hljs-keyword">else</span> {
+        ui-&gt;statusLabel-&gt;<span class="hljs-built_in">setText</span>(QString::<span class="hljs-built_in">fromUtf8</span>(<span class="hljs-string">&quot;相机权限已被拒绝，请在设置中授权&quot;</span>));
+    }
+}
+
+MainWindow::~<span class="hljs-built_in">MainWindow</span>()
+{
+    <span class="hljs-keyword">if</span> (m_camera) {
+        m_camera-&gt;<span class="hljs-built_in">stop</span>();
+    }
+    <span class="hljs-keyword">delete</span> ui;
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::initCamera</span><span class="hljs-params">()</span>
+</span>{
+    QList&lt;QCameraDevice&gt; cameras = QMediaDevices::<span class="hljs-built_in">videoInputs</span>();
+
+    <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;找到&quot;</span> &lt;&lt; cameras.<span class="hljs-built_in">size</span>() &lt;&lt; <span class="hljs-string">&quot;个摄像头&quot;</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> QCameraDevice &amp;cam : cameras) {
+        <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;  -&quot;</span> &lt;&lt; cam.<span class="hljs-built_in">description</span>() &lt;&lt; <span class="hljs-string">&quot;位置:&quot;</span> &lt;&lt; cam.<span class="hljs-built_in">position</span>();
+    }
+
+    <span class="hljs-keyword">if</span> (cameras.<span class="hljs-built_in">isEmpty</span>()) {
+        ui-&gt;statusLabel-&gt;<span class="hljs-built_in">setText</span>(QString::<span class="hljs-built_in">fromUtf8</span>(<span class="hljs-string">&quot;未找到摄像头设备&quot;</span>));
+        <span class="hljs-keyword">return</span>;
+    }
+
+    QCameraDevice selectedDevice;
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> QCameraDevice &amp;device : cameras) {
+        <span class="hljs-keyword">if</span> (device.<span class="hljs-built_in">position</span>() == QCameraDevice::BackFace) {
+            selectedDevice = device;
+            <span class="hljs-keyword">break</span>;
+        }
+    }
+
+    <span class="hljs-keyword">if</span> (selectedDevice.<span class="hljs-built_in">isNull</span>()) {
+        selectedDevice = cameras.<span class="hljs-built_in">first</span>();
+    }
+
+    <span class="hljs-keyword">if</span> (m_camera) {
+        m_camera-&gt;<span class="hljs-built_in">stop</span>();
+        m_camera-&gt;<span class="hljs-built_in">deleteLater</span>();
+    }
+
+    m_camera = <span class="hljs-keyword">new</span> <span class="hljs-built_in">QCamera</span>(selectedDevice, <span class="hljs-keyword">this</span>);
+
+    <span class="hljs-built_in">connect</span>(m_camera, &amp;QCamera::errorOccurred, <span class="hljs-keyword">this</span>, &amp;MainWindow::onCameraErrorOccurred);
+    <span class="hljs-built_in">connect</span>(m_camera, &amp;QCamera::activeChanged, <span class="hljs-keyword">this</span>, [<span class="hljs-keyword">this</span>](<span class="hljs-type">bool</span> active) {
+        <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;摄像头状态变化:&quot;</span> &lt;&lt; active;
+        <span class="hljs-keyword">if</span> (active) {
+            ui-&gt;statusLabel-&gt;<span class="hljs-built_in">setText</span>(QString::<span class="hljs-built_in">fromUtf8</span>(<span class="hljs-string">&quot;准备就绪&quot;</span>));
+            ui-&gt;captureButton-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">true</span>);
+        }
+    });
+
+    m_captureSession-&gt;<span class="hljs-built_in">setCamera</span>(m_camera);
+    m_camera-&gt;<span class="hljs-built_in">start</span>();
+
+    <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;正在启动摄像头:&quot;</span> &lt;&lt; selectedDevice.<span class="hljs-built_in">description</span>();
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::onCaptureButtonClicked</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-keyword">if</span> (m_camera &amp;&amp; m_camera-&gt;<span class="hljs-built_in">isActive</span>()) {
+        ui-&gt;captureButton-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">false</span>);
+        ui-&gt;statusLabel-&gt;<span class="hljs-built_in">setText</span>(QString::<span class="hljs-built_in">fromUtf8</span>(<span class="hljs-string">&quot;正在拍照...&quot;</span>));
+        m_imageCapture-&gt;<span class="hljs-built_in">capture</span>();
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::onImageCaptured</span><span class="hljs-params">(<span class="hljs-type">int</span> id, <span class="hljs-type">const</span> QImage &amp;image)</span>
+</span>{
+    <span class="hljs-built_in">Q_UNUSED</span>(id);
+    <span class="hljs-built_in">saveImageToDCIM</span>(image);
+    ui-&gt;captureButton-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">true</span>);
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::saveImageToDCIM</span><span class="hljs-params">(<span class="hljs-type">const</span> QImage &amp;image)</span>
+</span>{
+    QString fileName = <span class="hljs-built_in">QString</span>(<span class="hljs-string">&quot;IMG_%1.jpg&quot;</span>).<span class="hljs-built_in">arg</span>(
+        QDateTime::<span class="hljs-built_in">currentDateTime</span>().<span class="hljs-built_in">toString</span>(<span class="hljs-string">&quot;yyyyMMdd_hhmmss&quot;</span>));
+
+    QStringList savePaths;
+
+    QString picturesPath = QStandardPaths::<span class="hljs-built_in">writableLocation</span>(QStandardPaths::PicturesLocation);
+    <span class="hljs-keyword">if</span> (!picturesPath.<span class="hljs-built_in">isEmpty</span>()) {
+        <span class="hljs-function">QDir <span class="hljs-title">picsDir</span><span class="hljs-params">(picturesPath)</span></span>;
+        QString dcimCamera = picsDir.<span class="hljs-built_in">absolutePath</span>().<span class="hljs-built_in">replace</span>(<span class="hljs-string">&quot;/Pictures&quot;</span>, <span class="hljs-string">&quot;/DCIM/Camera&quot;</span>);
+        savePaths &lt;&lt; dcimCamera;
+        savePaths &lt;&lt; picturesPath;
+    }
+
+    QString dcimRoot = QDir::<span class="hljs-built_in">homePath</span>() + <span class="hljs-string">&quot;/DCIM/Camera&quot;</span>;
+    savePaths &lt;&lt; dcimRoot;
+    savePaths &lt;&lt; <span class="hljs-string">&quot;/sdcard/DCIM/Camera&quot;</span>;
+    savePaths &lt;&lt; <span class="hljs-string">&quot;/storage/emulated/0/DCIM/Camera&quot;</span>;
+
+    QString appDataPath = QStandardPaths::<span class="hljs-built_in">writableLocation</span>(QStandardPaths::AppDataLocation);
+    <span class="hljs-keyword">if</span> (!appDataPath.<span class="hljs-built_in">isEmpty</span>()) {
+        savePaths &lt;&lt; appDataPath + <span class="hljs-string">&quot;/Photos&quot;</span>;
+    }
+
+    savePaths &lt;&lt; QDir::<span class="hljs-built_in">currentPath</span>();
+
+    <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;尝试保存到以下位置:&quot;</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> QString &amp;p : savePaths) {
+        <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;  &quot;</span> &lt;&lt; p;
+    }
+
+    <span class="hljs-type">bool</span> saved = <span class="hljs-literal">false</span>;
+    QString savedPath;
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> QString &amp;dirPath : savePaths) {
+        <span class="hljs-function">QDir <span class="hljs-title">dir</span><span class="hljs-params">(dirPath)</span></span>;
+        <span class="hljs-keyword">if</span> (!dir.<span class="hljs-built_in">exists</span>()) {
+            <span class="hljs-keyword">if</span> (!dir.<span class="hljs-built_in">mkpath</span>(<span class="hljs-string">&quot;.&quot;</span>)) {
+                <span class="hljs-built_in">qWarning</span>() &lt;&lt; <span class="hljs-string">&quot;无法创建目录:&quot;</span> &lt;&lt; dirPath;
+                <span class="hljs-keyword">continue</span>;
+            }
+        }
+        QString filePath = dirPath + <span class="hljs-string">&quot;/&quot;</span> + fileName;
+        <span class="hljs-keyword">if</span> (image.<span class="hljs-built_in">save</span>(filePath, <span class="hljs-string">&quot;JPG&quot;</span>, <span class="hljs-number">100</span>)) {
+            saved = <span class="hljs-literal">true</span>;
+            savedPath = filePath;
+            <span class="hljs-built_in">qDebug</span>() &lt;&lt; <span class="hljs-string">&quot;图片已保存到:&quot;</span> &lt;&lt; filePath;
+            <span class="hljs-keyword">break</span>;
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-built_in">qWarning</span>() &lt;&lt; <span class="hljs-string">&quot;保存到&quot;</span> &lt;&lt; dirPath &lt;&lt; <span class="hljs-string">&quot;失败&quot;</span>;
+        }
+    }
+
+    <span class="hljs-keyword">if</span> (saved) {
+        ui-&gt;statusLabel-&gt;<span class="hljs-built_in">setText</span>(QString::<span class="hljs-built_in">fromUtf8</span>(<span class="hljs-string">&quot;拍照成功: %1&quot;</span>).<span class="hljs-built_in">arg</span>(savedPath));
+    } <span class="hljs-keyword">else</span> {
+        ui-&gt;statusLabel-&gt;<span class="hljs-built_in">setText</span>(QString::<span class="hljs-built_in">fromUtf8</span>(<span class="hljs-string">&quot;拍照失败: 所有保存位置都不可用&quot;</span>));
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainWindow::onCameraErrorOccurred</span><span class="hljs-params">(QCamera::Error error, <span class="hljs-type">const</span> QString &amp;errorString)</span>
+</span>{
+    <span class="hljs-built_in">Q_UNUSED</span>(error);
+    <span class="hljs-built_in">qCritical</span>() &lt;&lt; <span class="hljs-string">&quot;摄像头错误:&quot;</span> &lt;&lt; errorString;
+    ui-&gt;statusLabel-&gt;<span class="hljs-built_in">setText</span>(QString::<span class="hljs-built_in">fromUtf8</span>(<span class="hljs-string">&quot;摄像头错误: %1&quot;</span>).<span class="hljs-built_in">arg</span>(errorString));
+    ui-&gt;captureButton-&gt;<span class="hljs-built_in">setEnabled</span>(<span class="hljs-literal">false</span>);
+}
+</code></pre>
+<p>需要整个代码请私信。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/qt6androidc自制美观闹钟.html">
+      <span>上一篇</span>
+      <strong>QT6AndroidC自制美观闹钟</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/c语言的基本练习003-1之多线程应用库文件不方便使用改为c.html">
+      <span>下一篇</span>
+      <strong>C语言的基本练习003 1之多线程应用库文件不方便使用改为C</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/qt6androidc自制美观闹钟.html">QT6AndroidC自制美观闹钟</a></h3>
+        <p class="post-excerpt">该代码实现了一个基于Qt的闹钟应用，主要功能包括：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.902Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/qt6androidctensorflowlite人脸识别程序.html">QT6AndroidCTensorFlowlite人脸识别程序</a></h3>
+        <p class="post-excerpt">本文聚焦于在QT6框架下，面向Android平台，利用C++与TensorFlow Lite（TFLite）实现的人脸识别程序开发。研究目的在于探索一种跨平台、高性能的移动端人脸识别解决方案，突破传统Java或Python方案在实时性与资源管控上的局限。方法上，程序以QT6的Android JNI接口为桥梁，实现C++业务逻辑与Android系统服务的交互；核心推理引擎采用TFLite的C++ A…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.807Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/编写有内存漏洞的c代码并实现内存注入的示例一个程序注入另一个程序.html">编写有内存漏洞的C代码并实现内存注入的示例一个程序注入另一个程序</a></h3>
+        <p class="post-excerpt">实现思路</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.956Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

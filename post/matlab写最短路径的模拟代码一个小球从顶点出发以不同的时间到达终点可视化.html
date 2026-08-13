@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>MATLAB写最短路径的模拟代码一个小球从顶点出发以不同的时间到达终点可视化 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/matlab-仿真.html">MATLAB 仿真</a>
+        </nav>
+        <h1 class="post-title">MATLAB写最短路径的模拟代码一个小球从顶点出发以不同的时间到达终点可视化</h1>
+        <p class="post-deck">代码说明：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.984Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>10 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p><img src="../uploads/csdn/matlab%E5%86%99%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84%E7%9A%84%E6%A8%A1%E6%8B%9F%E4%BB%A3%E7%A0%81%E4%B8%80%E4%B8%AA%E5%B0%8F%E7%90%83%E4%BB%8E%E9%A1%B6%E7%82%B9%E5%87%BA%E5%8F%91%E4%BB%A5%E4%B8%8D%E5%90%8C%E7%9A%84%E6%97%B6%E9%97%B4%E5%88%B0%E8%BE%BE%E7%BB%88%E7%82%B9%E5%8F%AF%E8%A7%86%E5%8C%96/img-01.jpeg" alt=""></p>
+<h4 id="代码说明" class="prose-heading">代码说明：</h4>
+<ol>
+<li><strong>节点生成</strong>：使用 <code>randi</code> 函数随机生成 120 个节点的坐标，范围在 <code>[0, 100]</code> 之间。</li>
+<li><strong>邻接矩阵</strong>：通过 <code>connectionProb</code> 控制节点之间的连接概率，随机连接节点并为每条边分配 1 到 10 之间的随机权重。</li>
+<li><strong>可视化</strong>：将节点和边绘制在图中，并标记起点和终点。</li>
+<li><strong>最短路径计算</strong>：使用 Dijkstra 算法计算从起点到终点的最短路径。</li>
+<li><strong>动态可视化</strong>：模拟小球沿着最短路径移动，并实时更新总耗时。</li>
+</ol>
+<p>运行此代码，你将看到一个包含超过 100 个节点的复杂路径网图，以及小球沿着最短路径的动态移动过程。</p>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">%% 初始化参数</span>
+clf;
+<span class="hljs-built_in">hold</span> on;
+axis equal;
+axis([<span class="hljs-number">0</span> <span class="hljs-number">100</span> <span class="hljs-number">0</span> <span class="hljs-number">100</span>]);
+grid on;
+title(<span class="hljs-string">&#x27;最短路径运动模拟 - 总耗时: 0&#x27;</span>);
+
+<span class="hljs-comment">% 定义节点数量</span>
+numNodes = <span class="hljs-number">120</span>;
+
+<span class="hljs-comment">% 随机生成节点坐标</span>
+nodes = randi([<span class="hljs-number">0</span>, <span class="hljs-number">100</span>], numNodes, <span class="hljs-number">2</span>);
+
+<span class="hljs-comment">% 初始化邻接矩阵</span>
+adjMatrix = <span class="hljs-built_in">zeros</span>(numNodes, numNodes);
+
+<span class="hljs-comment">% 随机连接节点并分配权重</span>
+connectionProb = <span class="hljs-number">0.1</span>; <span class="hljs-comment">% 连接概率</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:numNodes
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">j</span> = <span class="hljs-built_in">i</span> + <span class="hljs-number">1</span>:numNodes
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">rand</span>() &lt; connectionProb
+            <span class="hljs-comment">% 权重可以根据节点间距离或随机值分配</span>
+            <span class="hljs-comment">% 这里简单使用随机值</span>
+            adjMatrix(<span class="hljs-built_in">i</span>, <span class="hljs-built_in">j</span>) = randi([<span class="hljs-number">1</span>, <span class="hljs-number">10</span>]);
+            adjMatrix(<span class="hljs-built_in">j</span>, <span class="hljs-built_in">i</span>) = adjMatrix(<span class="hljs-built_in">i</span>, <span class="hljs-built_in">j</span>); <span class="hljs-comment">% 保证对称</span>
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 可视化静态地图</span>
+<span class="hljs-built_in">scatter</span>(nodes(:,<span class="hljs-number">1</span>), nodes(:,<span class="hljs-number">2</span>), <span class="hljs-number">200</span>, <span class="hljs-string">&#x27;filled&#x27;</span>);
+text(nodes(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)+<span class="hljs-number">2</span>, nodes(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>), <span class="hljs-string">&#x27;起点&#x27;</span>,<span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">12</span>);
+text(nodes(<span class="hljs-keyword">end</span>,<span class="hljs-number">1</span>)+<span class="hljs-number">2</span>, nodes(<span class="hljs-keyword">end</span>,<span class="hljs-number">2</span>), <span class="hljs-string">&#x27;终点&#x27;</span>,<span class="hljs-string">&#x27;FontSize&#x27;</span>,<span class="hljs-number">12</span>);
+
+<span class="hljs-comment">% 绘制所有边</span>
+<span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(adjMatrix,<span class="hljs-number">1</span>)
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">j</span> = <span class="hljs-built_in">i</span>+<span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(adjMatrix,<span class="hljs-number">2</span>)
+        <span class="hljs-keyword">if</span> adjMatrix(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>) &gt; <span class="hljs-number">0</span>
+            <span class="hljs-built_in">plot</span>([nodes(<span class="hljs-built_in">i</span>,<span class="hljs-number">1</span>), nodes(<span class="hljs-built_in">j</span>,<span class="hljs-number">1</span>)], [nodes(<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>), nodes(<span class="hljs-built_in">j</span>,<span class="hljs-number">2</span>)],...
+                 <span class="hljs-string">&#x27;--&#x27;</span>, <span class="hljs-string">&#x27;Color&#x27;</span>, [<span class="hljs-number">0.7</span> <span class="hljs-number">0.7</span> <span class="hljs-number">0.7</span>]);
+            text(<span class="hljs-built_in">mean</span>([nodes(<span class="hljs-built_in">i</span>,<span class="hljs-number">1</span>), nodes(<span class="hljs-built_in">j</span>,<span class="hljs-number">1</span>)]),...
+                 <span class="hljs-built_in">mean</span>([nodes(<span class="hljs-built_in">i</span>,<span class="hljs-number">2</span>), nodes(<span class="hljs-built_in">j</span>,<span class="hljs-number">2</span>)]),...
+                 num2str(adjMatrix(<span class="hljs-built_in">i</span>,<span class="hljs-built_in">j</span>)), <span class="hljs-string">&#x27;Color&#x27;</span>, <span class="hljs-string">&#x27;red&#x27;</span>);
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% Dijkstra 算法求最短路径</span>
+[dist, path] = dijkstra(adjMatrix, <span class="hljs-number">1</span>, numNodes);
+
+<span class="hljs-comment">%% 运动轨迹生成</span>
+trajectory = [];
+<span class="hljs-keyword">for</span> k = <span class="hljs-number">1</span>:<span class="hljs-built_in">length</span>(path)<span class="hljs-number">-1</span>
+    startNode = path(k);
+    endNode = path(k+<span class="hljs-number">1</span>);
+    steps = <span class="hljs-built_in">max</span>(<span class="hljs-number">2</span>, <span class="hljs-built_in">ceil</span>(adjMatrix(startNode, endNode)*<span class="hljs-number">10</span>)); <span class="hljs-comment">% 根据耗时生成步数</span>
+    x = <span class="hljs-built_in">linspace</span>(nodes(startNode,<span class="hljs-number">1</span>), nodes(endNode,<span class="hljs-number">1</span>), steps);
+    y = <span class="hljs-built_in">linspace</span>(nodes(startNode,<span class="hljs-number">2</span>), nodes(endNode,<span class="hljs-number">2</span>), steps);
+    trajectory = [trajectory; [x(<span class="hljs-number">1</span>:<span class="hljs-keyword">end</span><span class="hljs-number">-1</span>)&#x27; y(<span class="hljs-number">1</span>:<span class="hljs-keyword">end</span><span class="hljs-number">-1</span>)&#x27;]];
+<span class="hljs-keyword">end</span>
+trajectory = [trajectory; nodes(<span class="hljs-keyword">end</span>,:)]; <span class="hljs-comment">% 添加终点</span>
+
+<span class="hljs-comment">%% 动态可视化</span>
+hBall = <span class="hljs-built_in">plot</span>(nodes(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>), nodes(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>), <span class="hljs-string">&#x27;o&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>, <span class="hljs-number">15</span>,...
+            <span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>, <span class="hljs-string">&#x27;r&#x27;</span>, <span class="hljs-string">&#x27;MarkerEdgeColor&#x27;</span>, <span class="hljs-string">&#x27;k&#x27;</span>);
+
+totalTime = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">for</span> pos = <span class="hljs-number">1</span>:<span class="hljs-built_in">size</span>(trajectory,<span class="hljs-number">1</span>)
+    <span class="hljs-comment">% 更新小球位置</span>
+    set(hBall, <span class="hljs-string">&#x27;XData&#x27;</span>, trajectory(pos,<span class="hljs-number">1</span>), <span class="hljs-string">&#x27;YData&#x27;</span>, trajectory(pos,<span class="hljs-number">2</span>));
+
+    <span class="hljs-comment">% 更新标题时间</span>
+    <span class="hljs-keyword">if</span> pos &gt; <span class="hljs-number">1</span>
+        <span class="hljs-comment">% 找到当前位置在 path 中的索引</span>
+        currentNodeIndex = <span class="hljs-built_in">find</span>(all(<span class="hljs-built_in">bsxfun</span>(@eq, nodes(path,:), trajectory(pos,:)), <span class="hljs-number">2</span>));
+        <span class="hljs-keyword">if</span> ~<span class="hljs-built_in">isempty</span>(currentNodeIndex) &amp;&amp; currentNodeIndex &lt; <span class="hljs-built_in">length</span>(path)
+            segmentTime = adjMatrix(path(currentNodeIndex), path(currentNodeIndex + <span class="hljs-number">1</span>));
+            totalTime = totalTime + segmentTime/steps;
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+    title([<span class="hljs-string">&#x27;最短路径运动模拟 - 总耗时: &#x27;</span> num2str(totalTime, <span class="hljs-string">&#x27;%.1f&#x27;</span>)]);
+
+    <span class="hljs-comment">% 动态绘制路径</span>
+    <span class="hljs-keyword">if</span> pos &gt; <span class="hljs-number">1</span>
+        <span class="hljs-built_in">plot</span>([trajectory(pos<span class="hljs-number">-1</span>,<span class="hljs-number">1</span>), trajectory(pos,<span class="hljs-number">1</span>)],...
+             [trajectory(pos<span class="hljs-number">-1</span>,<span class="hljs-number">2</span>), trajectory(pos,<span class="hljs-number">2</span>)],...
+             <span class="hljs-string">&#x27;b&#x27;</span>, <span class="hljs-string">&#x27;LineWidth&#x27;</span>, <span class="hljs-number">2</span>);
+    <span class="hljs-keyword">end</span>
+
+    pause(<span class="hljs-number">0.05</span>); <span class="hljs-comment">% 控制动画速度</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% Dijkstra 算法函数</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">[dist, path]</span> = <span class="hljs-title">dijkstra</span><span class="hljs-params">(adjMatrix, start, target)</span></span>
+    n = <span class="hljs-built_in">size</span>(adjMatrix,<span class="hljs-number">1</span>);
+    dist = <span class="hljs-built_in">inf</span>(<span class="hljs-number">1</span>,n);
+    dist(start) = <span class="hljs-number">0</span>;
+    prev = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">1</span>,n);
+    visited = <span class="hljs-built_in">false</span>(<span class="hljs-number">1</span>,n);
+
+    <span class="hljs-keyword">for</span> <span class="hljs-built_in">i</span> = <span class="hljs-number">1</span>:n
+        [~, minIndex] = <span class="hljs-built_in">min</span>(dist(~visited));
+        nodesIndices = <span class="hljs-built_in">find</span>(~visited);
+        u = nodesIndices(minIndex);
+        visited(u) = <span class="hljs-built_in">true</span>;
+
+        <span class="hljs-keyword">for</span> v = <span class="hljs-number">1</span>:n
+            <span class="hljs-keyword">if</span> adjMatrix(u,v) &gt; <span class="hljs-number">0</span> &amp;&amp; ~visited(v)
+                alt = dist(u) + adjMatrix(u,v);
+                <span class="hljs-keyword">if</span> alt &lt; dist(v)
+                    dist(v) = alt;
+                    prev(v) = u;
+                <span class="hljs-keyword">end</span>
+            <span class="hljs-keyword">end</span>
+        <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment">% 路径回溯</span>
+    path = [];
+    <span class="hljs-keyword">if</span> dist(target) == <span class="hljs-built_in">inf</span>
+        <span class="hljs-keyword">return</span>;
+    <span class="hljs-keyword">end</span>
+    u = target;
+    <span class="hljs-keyword">while</span> u ~= <span class="hljs-number">0</span>
+        path = [u path];
+        u = prev(u);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#代码说明">代码说明：</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/matlab基础编程003-1之画双曲面的组合.html">
+      <span>上一篇</span>
+      <strong>MATLAB基础编程003 1之画双曲面的组合</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/matlab3d画图画一把雨伞之雨伞的顶部一.html">
+      <span>下一篇</span>
+      <strong>MATLAB3D画图画一把雨伞之雨伞的顶部一</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/凸包问题graham扫描算法matlab.html">凸包问题Graham扫描算法MATLAB</a></h3>
+        <p class="post-excerpt">算法要解决的问题</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.498Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

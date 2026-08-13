@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>MATLAB山地地形仿真与最高点到最低点最短路径 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/matlab-仿真.html">MATLAB 仿真</a>
+        </nav>
+        <h1 class="post-title">MATLAB山地地形仿真与最高点到最低点最短路径</h1>
+        <p class="post-deck">MATLAB山地地形仿真与最高点到最低点最短路径（考虑地形高程）</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.003Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>85 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <h2 id="matlab山地地形仿真与最高点到最低点最短路径-考虑地形高程" class="prose-heading">MATLAB山地地形仿真与最高点到最低点最短路径（考虑地形高程）</h2>
+<blockquote>
+<p>注意：这里不是平面欧氏最短距离，是<strong>三维地形表面的最短路径（测地线）</strong>，山地有高低起伏，路径要沿着山体表面走，不能直接穿山洞。</p>
+</blockquote>
+<p><img src="../uploads/csdn/matlab%E5%B1%B1%E5%9C%B0%E5%9C%B0%E5%BD%A2%E4%BB%BF%E7%9C%9F%E4%B8%8E%E6%9C%80%E9%AB%98%E7%82%B9%E5%88%B0%E6%9C%80%E4%BD%8E%E7%82%B9%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/img-01.png" alt="在这里插入图片描述"></p>
+<ul>
+<li></li>
+</ul>
+<pre><code>地形：用随机分形 / 高斯叠加模拟起伏不平山地曲面 $z=f(x,y)z = f(x,y)$
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>算法选用：**Dijkstra 算法**，把地形离散成网格图，每个网格点为图节点，相邻节点代价为地表实际行走距离，求解从最高海拔点到最低海拔点的最小代价路径。
+</code></pre>
+<h3 id="完整-matlab-可直接运行代码" class="prose-heading">完整 MATLAB 可直接运行代码</h3>
+<pre class="hljs"><code class="language-matlab">&lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">%% 1.生成起伏山地地形&lt;/span&gt;</span>
+clear&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt; clc&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt; close all&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+n &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">50</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;   &lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">% 网格分辨率 n*n地形网格&lt;/span&gt;</span>
+&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;[&lt;/span&gt;x&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;y&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;]&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">meshgrid</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">linspace</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">0</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">20</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;n&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">linspace</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">0</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">20</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;n&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+
+&lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">% 多个高斯山峰叠加模拟山地，制造高低起伏&lt;/span&gt;</span>
+z &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">zeros</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">size</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;x&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+peak_num &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">8</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;rng&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">%固定随机种子，复现地形&lt;/span&gt;</span>
+&lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">for</span>&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-built_in">i</span>&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;:&lt;/span&gt;peak_num
+    x0 &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">20</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;*&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">rand</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+    y0 &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">20</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;*&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">rand</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+    sigma &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1.5</span>&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">3</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;*&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">rand</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+    amp &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">2</span>&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">6</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;*&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">rand</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+    z &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; z &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt; amp&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;*&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">exp</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;-&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;x&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;-&lt;/span&gt;x0&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;.^&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">2</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;y&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;-&lt;/span&gt;y0&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;.^&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">2</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;/&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">2</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;*&lt;/span&gt;sigma&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;^&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">2</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">end</span>&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">% 叠加小噪声模拟粗糙山地&lt;/span&gt;</span>
+z &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; z &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">0.4</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;*&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">randn</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">size</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;z&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+
+&lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">%% 找最高点、最低点的网格下标&lt;/span&gt;</span>
+&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;[&lt;/span&gt;z_max&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;idx_max&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;]&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">max</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;z&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;:&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;[&lt;/span&gt;ix_start&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;iy_start&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;]&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">ind2sub</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">size</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;z&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;idx_max&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+
+&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;[&lt;/span&gt;z_min&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;idx_min&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;]&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">min</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;z&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;:&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;[&lt;/span&gt;ix_end&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;iy_end&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;]&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">ind2sub</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">size</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;z&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;idx_min&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+
+&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;fprintf&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;<span class="hljs-string">&quot;最高点&lt;span class=&quot;</span>token punctuation<span class="hljs-string">&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;</span>token comment<span class="hljs-string">&quot;&gt;%d,%d),高程=%.2f \n&quot;</span>,ix_start,iy_start,z_max);&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;fprintf&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;<span class="hljs-string">&quot;最低点&lt;span class=&quot;</span>token punctuation<span class="hljs-string">&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;</span>token comment<span class="hljs-string">&quot;&gt;%d,%d),高程=%.2f \n&quot;</span>,ix_end,iy_end,z_min);&lt;/span&gt;
+
+&lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">%% 2.Dijkstra求解地形表面最短路径&lt;/span&gt;</span>
+&lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">% 将二维网格(i,j)映射成一维节点编号 node = (j-1)*n + i&lt;/span&gt;</span>
+idx2node &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;@&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-built_in">i</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-built_in">j</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-built_in">j</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;-&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;*&lt;/span&gt;n &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-built_in">i</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+node2idx &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;@&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;node&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">ind2sub</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;[&lt;/span&gt;n&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;n&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;]&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;node&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+
+N &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; n&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;*&lt;/span&gt;n&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;   &lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">%总节点数目&lt;/span&gt;</span>
+INF &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1e10</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+dist &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">ones</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;N&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;*&lt;/span&gt;INF&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+start_node &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;idx2node&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;ix_start&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt; iy_start&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+end_node   &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;idx2node&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;ix_end&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt; iy_end&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;dist&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;start_node&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">0</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+visited &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">false</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;N&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+prev &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">zeros</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;N&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">%记录路径前驱，用于回溯路径&lt;/span&gt;</span>
+
+&lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">% 四邻域：上下左右；也可以改成8邻域允许斜向行走&lt;/span&gt;</span>
+neigh_d &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;[&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;-&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">0</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">0</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">0</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;-&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">0</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;]&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">% neigh_d = [ -1,-1;-1,0;-1,1;0,-1;0,1;1,-1;1,0;1,1 ]; %8邻域&lt;/span&gt;</span>
+
+&lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">for</span>&lt;/span&gt; iter &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;:&lt;/span&gt;N
+    &lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">% 选取未访问距离最小的节点u(Dijkstra核心)&lt;/span&gt;</span>
+    minD &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; INF&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+    u &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;-&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+    &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">for</span>&lt;/span&gt; v &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;:&lt;/span&gt;N
+        &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">if</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;~&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;visited&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;v&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;&amp;&amp;&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;dist&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;v&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;&lt;&lt;/span&gt; minD&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;
+            minD &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;dist&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;v&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+            u &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; v&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+        &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">end</span>&lt;/span&gt;
+    &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">end</span>&lt;/span&gt;
+    &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">if</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;u &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;==&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;-&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">break</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+    &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">if</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;u &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;==&lt;/span&gt; end_node&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">break</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">%到达终点，提前退出&lt;/span&gt;</span>
+    &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;visited&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;u&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; <span class="hljs-built_in">true</span>&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+
+    &lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;[&lt;/span&gt;iu&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;ju&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;]&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;node2idx&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;u&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+    &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">for</span>&lt;/span&gt; k &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;:&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">size</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;neigh_d&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;
+        di &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;neigh_d&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;k&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+        dj &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;neigh_d&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;k&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">2</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+        iv &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; iu &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt; di&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+        jv &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; ju &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt; dj&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+        &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">if</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;iv&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;&lt;&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;||&lt;/span&gt;iv&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;&gt;&lt;/span&gt;n&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;||&lt;/span&gt;jv&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;&lt;&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;||&lt;/span&gt;jv&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;&gt;&lt;/span&gt;n&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">continue</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">%越界跳过&lt;/span&gt;</span>
+        v &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;idx2node&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;iv&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;jv&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+        &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">if</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;visited&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;v&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">continue</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">end</span>&lt;/span&gt;
+
+        &lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">% =========关键：计算山地地表实际行走距离=========&lt;/span&gt;</span>
+        &lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">% 两点三维距离：dx,dy平面步长；dz高程差&lt;/span&gt;</span>
+        dx &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;x&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;iu&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;ju&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;-&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;x&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;iv&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;jv&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+        dy &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;y&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;iu&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;ju&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;-&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;y&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;iv&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;jv&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+        dz &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;z&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;iu&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;ju&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;-&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;z&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;iv&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;jv&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+        cost_uv &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">sqrt</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;dx&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;^&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">2</span>&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt; dy&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;^&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">2</span>&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt; dz&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;^&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">2</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">%地表欧式距离&lt;/span&gt;</span>
+
+        &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">if</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;dist&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;v&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;&gt;&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;dist&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;u&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt;cost_uv &lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;
+            &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;dist&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;v&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;dist&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;u&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt;cost_uv&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+            &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;prev&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;v&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; u&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+        &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">end</span>&lt;/span&gt;
+    &lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">end</span>&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">end</span>&lt;/span&gt;
+
+&lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">%% 回溯得到路径坐标&lt;/span&gt;</span>
+path_nodes &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;[&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;]&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+cur &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; end_node&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">while</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;cur &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;~=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">0</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;
+    path_nodes &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;[&lt;/span&gt;cur&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt; path_nodes&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;]&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+    cur &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;prev&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;cur&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">end</span>&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">%转成x,y,z坐标&lt;/span&gt;</span>
+px &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;[&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;]&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt; py &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;[&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;]&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt; pz &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;[&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;]&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">for</span>&lt;/span&gt; nd &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; path_nodes&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;.<span class="hljs-string">&#x27;&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;ii&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;jj&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;node2idx&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;nd&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+    px &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;px&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;ii&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;jj&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+    py &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;py&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;ii&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;jj&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+    pz &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;pz&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;ii&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;jj&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;token keyword&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;token function&quot;&gt;fprintf&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&quot;地形表面最短路径总长度：&lt;span class=&quot;token comment&quot;&gt;%.3f \n&quot;, dist(end_node));&lt;/span&gt;
+
+&lt;span class=&quot;token comment&quot;&gt;%% 绘图可视化&lt;/span&gt;
+&lt;span class=&quot;token function&quot;&gt;figure&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&#x27;</span>Color&#x27;&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;w&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;surf&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;x&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;y&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;z&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;EdgeAlpha&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">0.1</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt; <span class="hljs-built_in">hold</span> on&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+shading interp&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+colormap jet&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">%绘制路径&lt;/span&gt;</span>
+&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">plot3</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;px&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;py&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;pz&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">0.15</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;r-&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;LineWidth&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">2.5</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">%标记起点最高点、终点最低点&lt;/span&gt;</span>
+&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">plot3</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;x&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;ix_start&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;iy_start&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;y&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;ix_start&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;iy_start&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;z_max&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">0.2</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;go&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;MarkerSize&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">8</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;g&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">plot3</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;x&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;ix_end&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;iy_end&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;y&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;ix_end&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;iy_end&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;z_min&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">0.2</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;mo&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;MarkerSize&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">8</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;m&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;xlabel&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;X&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;ylabel&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;Y&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;zlabel&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;Z 高程&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;title&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token string&quot;</span>&gt;<span class="hljs-string">&#x27;山地地形 + 最高点→最低点地表最短路径(Dijkstra)&#x27;</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;view&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">3</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+grid on&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+</code></pre>
+<h3 id="运行说明" class="prose-heading">运行说明</h3>
+<ol>
+<li></li>
+</ol>
+<pre><code>rng (1) 固定随机种子，每次生成同一片山地；注释掉可以生成不同起伏山地。
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>邻域：代码默认**4 邻域（只能上下左右走）**；注释切换为 8 邻域可以斜向穿越。
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>cost\_uv = $Δx2+Δy2+Δz2\\sqrt{\\Delta x^2+\\Delta y^2+\\Delta z^2}$ ，这是**沿着山地表面行走的实际距离**，不是平面距离，上坡下坡都会增加路径代价。
+</code></pre>
+<ol start="4">
+<li></li>
+</ol>
+<pre><code>绿色圆点 = 地形最高点；品红色圆点 = 地形最低点；红色线条为算法算出来的地表最短路径。
+</code></pre>
+<hr>
+<h2 id="算法原理详细说明" class="prose-heading">算法原理详细说明</h2>
+<h3 id="问题建模-山地-加权图" class="prose-heading">问题建模：山地→加权图</h3>
+<p>山地是连续曲面 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi><mo>=</mo><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mi>z</mi><mo>=</mo><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">z=f(x,y)z=f(x,y)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.044em;">z</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mclose">)</span><span class="mord mathnormal" style="margin-right:0.044em;">z</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mclose">)</span></span></span></span> ，计算机不能直接处理连续曲面，做<strong>离散网格化</strong>：</p>
+<ol>
+<li></li>
+</ol>
+<pre><code>将 XY 平面切分成 $n×nn\\times n$ 网格，每个网格交点 $(i,j)(i,j)$ 对应三维坐标 $(xi,j,yi,j,zi,j)(x\_{i,j},y\_{i,j},z\_{i,j})$ ，作为图的**节点**。
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>每个节点只和周围相邻节点连通（4 邻域 / 8 邻域）。
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>**边的权重 cost**：两个相邻节点之间沿着山体表面的三维欧氏距离：
+</code></pre>
+<blockquote>
+<p>关键点：高程差 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Δ</mi><mi>z</mi><mspace linebreak="newline"></mspace><mi>D</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>z</mi></mrow><annotation encoding="application/x-tex">Δz\\Delta z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord">Δ</span><span class="mord mathnormal" style="margin-right:0.044em;">z</span></span><span class="mspace katex-newline"></span><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mord mathnormal">e</span><span class="mord mathnormal" style="margin-right:0.0197em;">l</span><span class="mord mathnormal">t</span><span class="mord mathnormal">a</span><span class="mord mathnormal" style="margin-right:0.044em;">z</span></span></span></span> 会增加行走代价。爬上陡坡，两点平面很近，但地表路径代价会很大；下坡同样也要计入行走距离。</p>
+</blockquote>
+<ol start="4">
+<li>起点 S：网格上高程最大的点；终点 T：网格高程最小的点。</li>
+</ol>
+<blockquote>
+<p>目标：求从 S 到 T，总边权之和最小的路径，也就是<strong>山地表面最短路径</strong>。</p>
+</blockquote>
+<h3 id="dijkstra-算法原理-求解单源最短路径" class="prose-heading">Dijkstra 算法原理（求解单源最短路径）</h3>
+<p>Dijkstra 适用于<strong>所有边权 ≥0</strong> 的图，本问题行走距离全部大于 0，满足条件。</p>
+<h4 id="核心变量" class="prose-heading">核心变量</h4>
+<ul>
+<li></li>
+</ul>
+<pre><code>`dist[]`：`dist(v)`表示起点 S 到达节点 v 的当前已知最短距离；初始全部无穷大，仅起点 dist (S)=0。
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>`visited[]`：标记节点是否已经确定最短距离。
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>`prev[]`：记录路径前驱节点，算法结束后回溯，还原完整路径。
+</code></pre>
+<h4 id="算法迭代步骤" class="prose-heading">算法迭代步骤</h4>
+<ol>
+<li></li>
+</ol>
+<pre><code>在所有**未被访问**的节点中，选出`dist`值最小的节点 u。这个节点 u 的最短路径已经确定。
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>将 u 标记为已访问。
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>遍历 u 全部相邻节点 v：
+
+尝试松弛：`if dist[v] &gt; dist[u] + w(u→v)`
+
+
+-   如果成立：说明经过 u 走到 v，距离更近。更新`dist[v]=dist[u]+w(u→v]`，记录`prev[v]=u`。
+</code></pre>
+<ol start="4">
+<li></li>
+</ol>
+<pre><code>重复 1‑3，直到终点 T 被选为最小节点，提前终止；或者全部节点遍历完毕。
+</code></pre>
+<ol start="5">
+<li></li>
+</ol>
+<pre><code>**路径回溯**：从终点 T 不断向前读取`prev[]`，反向得到完整路径点。
+</code></pre>
+<h4 id="dijkstra-数学保证" class="prose-heading">Dijkstra 数学保证</h4>
+<blockquote>
+<p>因为所有边权重非负，一旦节点 u 被选出（visited 标记），不可能后续再找到一条距离更小的路径到达 u，所以可以直接确定 u 的最短距离。</p>
+</blockquote>
+<h4 id="本模型局限" class="prose-heading">本模型局限</h4>
+<ol>
+<li></li>
+</ol>
+<pre><code>是网格离散近似，网格 n 越大结果越准，但计算速度变慢；n=50 兼顾效果与速度。
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>路径只能沿着网格点走，不是理论上连续曲面的精确测地线，属于工程数值近似。
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>本版本代价只考虑几何行走距离；如果你想模拟爬山体力消耗，可以修改 cost，上坡额外乘惩罚系数，模拟 “爬山比平路费力”。
+</code></pre>
+<h3 id="拓展-a-算法-加速版本" class="prose-heading">拓展：A * 算法（加速版本）</h3>
+<p>Dijkstra 会盲目搜索整张图；A*加入启发函数加速，适合网格很大的场景。</p>
+<p>A*估价函数：</p>
+<ul>
+<li></li>
+</ul>
+<pre><code>$g(n)g(n)$ ：起点到 n 的实际行走距离（等价 Dijkstra 的 dist）
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>$h(n)h(n)$ ：启发估计，n 到终点的三维直线距离（不能大于真实最短距离，保证结果正确）
+</code></pre>
+<h3 id="补充-如果想要真实连续曲面测地线" class="prose-heading">补充：如果想要真实连续曲面测地线</h3>
+<p>Dijkstra 网格是离散近似；MATLAB 自带 <code>geodesic</code> 可以计算三角网格曲面的严格测地线，需要把山地转成三角面片<code>triangulation</code>对象，计算量更大。Dijkstra 网格方法更容易理解，教学演示首选。</p>
+<h3 id="拓展修改示例-增加爬山体力惩罚" class="prose-heading">拓展修改示例：增加爬山体力惩罚</h3>
+<p>比如上坡增加代价：</p>
+<pre class="hljs"><code class="language-matlab">dz &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;z&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;iu&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;ju&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;-&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;z&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;iv&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;,&lt;/span&gt;jv&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+geo_dist &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token function&quot;</span>&gt;<span class="hljs-built_in">sqrt</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;dx&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;^&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">2</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt;dy&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;^&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">2</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;+&lt;/span&gt;dz&lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;^&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">2</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">if</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;(&lt;/span&gt;dz &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;&lt;&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">0</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;)&lt;/span&gt;
+    &lt;span class=<span class="hljs-string">&quot;token comment&quot;</span>&gt;<span class="hljs-comment">% dz&lt;0：从u走到v高度上升（上坡）增加惩罚系数&lt;/span&gt;</span>
+    cost_uv &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; geo_dist &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;*&lt;/span&gt; &lt;span class=<span class="hljs-string">&quot;token number&quot;</span>&gt;<span class="hljs-number">1.8</span>&lt;/span&gt;&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">else</span>&lt;/span&gt;
+    cost_uv &lt;span class=<span class="hljs-string">&quot;token operator&quot;</span>&gt;=&lt;/span&gt; geo_dist&lt;span class=<span class="hljs-string">&quot;token punctuation&quot;</span>&gt;;&lt;/span&gt;
+&lt;span class=<span class="hljs-string">&quot;token keyword&quot;</span>&gt;<span class="hljs-keyword">end</span>&lt;/span&gt;
+</code></pre>
+<p>此时不再求几何最短，而是求<strong>体力消耗最小路径</strong>，路径会主动绕开陡峭山坡。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-2" href="#matlab山地地形仿真与最高点到最低点最短路径-考虑地形高程">MATLAB山地地形仿真与最高点到最低点最短路径（考虑地形高程）</a>
+          
+            <a class="toc-level-3" href="#完整-matlab-可直接运行代码">完整 MATLAB 可直接运行代码</a>
+          
+            <a class="toc-level-3" href="#运行说明">运行说明</a>
+          
+            <a class="toc-level-2" href="#算法原理详细说明">算法原理详细说明</a>
+          
+            <a class="toc-level-3" href="#问题建模-山地-加权图">问题建模：山地→加权图</a>
+          
+            <a class="toc-level-3" href="#dijkstra-算法原理-求解单源最短路径">Dijkstra 算法原理（求解单源最短路径）</a>
+          
+            <a class="toc-level-4" href="#核心变量">核心变量</a>
+          
+            <a class="toc-level-4" href="#算法迭代步骤">算法迭代步骤</a>
+          
+            <a class="toc-level-4" href="#dijkstra-数学保证">Dijkstra 数学保证</a>
+          
+            <a class="toc-level-4" href="#本模型局限">本模型局限</a>
+          
+            <a class="toc-level-3" href="#拓展-a-算法-加速版本">拓展：A \* 算法（加速版本）</a>
+          
+            <a class="toc-level-3" href="#补充-如果想要真实连续曲面测地线">补充：如果想要真实连续曲面测地线</a>
+          
+            <a class="toc-level-3" href="#拓展修改示例-增加爬山体力惩罚">拓展修改示例：增加爬山体力惩罚</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/matlab水滴下落湖水面泛起涟漪仿真.html">
+      <span>上一篇</span>
+      <strong>MATLAB水滴下落湖水面泛起涟漪仿真</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/matlab基础编程003-1之画双曲面的组合.html">
+      <span>下一篇</span>
+      <strong>MATLAB基础编程003 1之画双曲面的组合</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/凸包问题graham扫描算法matlab.html">凸包问题Graham扫描算法MATLAB</a></h3>
+        <p class="post-excerpt">算法要解决的问题</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.498Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式matlab代码.html">钱学森经典结业考题火箭绕太阳返回地球轨道求解含公式MATLAB代码</a></h3>
+        <p class="post-excerpt">本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程$\\ddot{\\boldsymbol{r}}=-\\mu\\frac{\\boldsymbol{r}}{r^3}$，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.877Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

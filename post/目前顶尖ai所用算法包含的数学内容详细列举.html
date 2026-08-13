@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>目前顶尖AI所用算法包含的数学内容详细列举 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">目前顶尖AI所用算法包含的数学内容详细列举</h1>
+        <p class="post-deck">这是一个非常深刻且核心的问题。目前顶尖的 AI，尤其是像 GPT、Claude、Gemini 这样的大型语言模型（LLM），其底层算法是Transformer。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.236Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>10 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-6.html">数学</a>
+          
+            <a class="tag-chip" href="../tags/tag-16.html">AI</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>这是一个非常深刻且核心的问题。目前顶尖的 AI，尤其是像 GPT、Claude、Gemini 这样的大型语言模型（LLM），其底层算法是<strong>Transformer</strong>。</p>
+<p>要理解 Transformer，我们需要理解它构建其上的一系列数学积木。这些数学知识并非凭空出现，而是计算机科学、统计学和应用数学多年发展的结晶。</p>
+<p>下面，我将从底层到高层，详细列举顶尖 AI 算法所包含的数学内容，并解释它们各自扮演的角色。</p>
+<hr>
+<h4 id="数学基础层-mathematical-foundations" class="prose-heading">数学基础层 (Mathematical Foundations)</h4>
+<p>这部分是所有 AI 算法的基石，没有它们，一切都无从谈起。</p>
+<ol>
+<li></li>
+</ol>
+<pre><code>**线性代数 (Linear Algebra)**
+
+
+-   **核心内容**: 向量、矩阵、张量、矩阵运算（加法、乘法）、向量空间、内积、范数、特征值和特征向量。
+-   **在 AI 中的作用**:
+
+    -   **数据表示**: 文本、图像、声音等所有数据在计算机中都被表示为**张量 (Tensor)**（可以理解为多维数组或高维矩阵）。例如，一个词被表示为一个向量（词嵌入），一张图片是一个三维张量（宽度 x 高度 x 颜色通道）。
+    -   **核心运算**: 神经网络中的所有基本操作，如**矩阵乘法**和**向量加法**，都是线性代数运算。模型的每一层都可以看作是对输入张量进行一次或多次线性变换。
+    -   **模型参数**: 模型中的所有 “知识” 都存储在巨大的权重矩阵中，训练模型的过程本质上就是不断更新这些矩阵的值。
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>**微积分 (Calculus)**
+
+
+-   **核心内容**: 导数、偏导数、梯度、链式法则、泰勒展开、多元微积分。
+-   **在 AI 中的作用**:
+
+    -   **梯度下降 (Gradient Descent)**: 这是训练所有深度学习模型的核心优化算法。它的数学基础就是**梯度**。梯度是一个向量，指向函数值增长最快的方向。通过计算损失函数（衡量模型预测好坏的函数）对所有模型参数的偏导数（即梯度），我们就知道了应该如何调整参数才能让损失值下降，从而让模型变得更好。
+    -   **链式法则 (Chain Rule)**: 深度学习模型通常有很多层，计算梯度时必须使用链式法则，这一过程被称为**反向传播 (Backpropagation)**。它能高效地计算出每一个参数对最终损失的贡献。
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>**概率论与统计学 (Probability and Statistics)**
+
+
+-   **核心内容**: 概率分布（如正态分布）、贝叶斯定理、最大似然估计、期望、方差、信息论（熵、交叉熵）。
+-   **在 AI 中的作用**:
+
+    -   **概率建模**: AI 模型，特别是语言模型，本质上是在进行概率预测。例如，给定前文 &quot;今天天气很好，我们去&quot;，模型会预测下一个词是 &quot;公园&quot; 的概率、是 &quot;散步&quot; 的概率等等，然后根据这些概率进行采样或选择。
+    -   **损失函数**: 最常用的损失函数之一是**交叉熵 (Cross-Entropy)**，它源于信息论，用于衡量模型预测的概率分布与真实的概率分布（通常是一个 one-hot 向量，代表正确答案）之间的差异。
+    -   **不确定性**: 概率论为模型处理不确定性提供了框架。
+</code></pre>
+<hr>
+<h4 id="核心算法构建层-core-algorithm-building-blocks" class="prose-heading">核心算法构建层 (Core Algorithm Building Blocks)</h4>
+<p>这部分是 Transformer 架构的直接组成部分，是实现其强大能力的关键。</p>
+<ol>
+<li></li>
+</ol>
+<pre><code>**优化理论 (Optimization Theory)**
+
+
+-   **核心内容**: 凸优化、非凸优化、梯度下降法及其变体（如 Adam、RMSprop）。
+-   **在 AI 中的作用**:
+
+    -   **训练过程**: 训练一个大型语言模型就是在一个极其复杂的、高维度的、非凸的参数空间中寻找最优解（即最小化损失函数）。这是一个典型的**非凸优化**问题。
+    -   **优化器 (Optimizers)**: 实际中不会使用最基础的梯度下降，而是使用更高效的变体，如 **Adam**。Adam 算法结合了动量（Momentum）和自适应学习率（Adaptive Learning Rate）的思想，能让模型更快、更稳定地收敛。
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>**信息论 (Information Theory)**
+
+
+-   **核心内容**: 熵 (Entropy)、交叉熵 (Cross-Entropy)、相对熵 / KL 散度 (Kullback-Leibler Divergence)、自注意力机制中的 “注意力分数” 计算。
+-   **在 AI 中的作用**:
+
+    -   **损失函数**: 如前所述，交叉熵是分类任务（包括语言模型的词预测）的标准损失函数。
+    -   **注意力机制**: Transformer 的核心 ——**自注意力 (Self-Attention)** 机制，其计算过程与信息论紧密相关。它通过计算词与词之间的 “关联度”（注意力分数）来决定在生成当前词时，应该 “关注” 输入序列中的哪些部分。这个分数的计算就类似于衡量两个向量之间的 “信息相似度”。
+</code></pre>
+<hr>
+<h4 id="transformer-架构中的关键数学组件" class="prose-heading">Transformer 架构中的关键数学组件</h4>
+<p>现在，我们将上述数学知识聚焦到 Transformer 的具体模块中。</p>
+<p>Transformer 组件</p>
+<p>核心数学原理</p>
+<p>作用</p>
+<p><strong>词嵌入 (Word Embedding)</strong></p>
+<p><strong>线性代数</strong> (向量空间模型)</p>
+<p>将离散的词（如 “cat”）映射到一个连续的、高维的向量空间中。这样，语义上相似的词，其向量在空间中的距离也更近。这使得模型能够理解词与词之间的关系。</p>
+<p><strong>位置编码 (Positional Encoding)</strong></p>
+<p><strong>三角函数</strong> (正弦和余弦函数)</p>
+<p>由于 Transformer 本身不包含序列的顺序信息，需要通过位置编码将每个词的位置信息注入到其词嵌入中。通常使用不同频率的正弦和余弦函数来生成位置向量，这样模型可以通过线性变换学习到词之间的相对位置。</p>
+<p><strong>自注意力机制 (Self-Attention)</strong></p>
+<p><strong>线性代数</strong> (矩阵乘法，点积)<strong>信息论</strong> (Softmax 归一化)</p>
+<p><strong>这是 Transformer 的 “大脑”</strong>。1. <strong>计算相似度</strong>: 通过<strong>点积 (Dot Product)</strong> 计算查询向量 (Query) 和键向量 (Key) 的相似度，得到原始注意力分数。2. <strong>Softmax 归一化</strong>: 对原始分数应用 <strong>Softmax 函数</strong>，将其转换为一个总和为 1 的概率分布，即注意力权重。这一步确保了权重为正，且能分配 “注意力资源”。3. <strong>加权求和</strong>: 将值向量 (Value) 按注意力权重进行<strong>加权求和</strong>，得到每个词的上下文表示。</p>
+<p><strong>前馈网络 (Feed-Forward Network)</strong></p>
+<p><strong>线性代数</strong> (矩阵乘法)<strong>非线性函数</strong> (ReLU)</p>
+<p>对自注意力输出的每个词向量进行独立的、相同的线性变换。它包含两个线性层和一个<strong>非线性激活函数</strong>（如 ReLU）。这部分负责对每个位置的信息进行更复杂的处理和特征提取。<strong>非线性</strong>是神经网络能够学习复杂模式的关键。</p>
+<p><strong>Layer Normalization</strong></p>
+<p><strong>统计学</strong> (均值，方差)</p>
+<p>在每一层的输入上进行归一化操作，使其均值为 0，方差为 1。这可以加速模型收敛，防止梯度消失或爆炸问题。</p>
+<h4 id="总结" class="prose-heading">总结</h4>
+<p>因此，当我们谈论目前顶尖的 AI 算法时，我们实际上是在谈论一个<strong>由多种高级数学理论精巧构建的复杂系统</strong>。</p>
+<p>你可以将其想象成一个大型工厂：</p>
+<ul>
+<li><strong>线性代数</strong> 提供了工厂里所有的原材料（张量）和基础工具（矩阵运算）。</li>
+<li><strong>微积分</strong> 和 <strong>优化理论</strong> 提供了工厂的核心动力系统（梯度下降优化器），驱动整个生产过程。</li>
+<li><strong>概率论</strong> 和 <strong>信息论</strong> 则定义了生产的目标和质量标准（损失函数），并指导核心部件（注意力机制）的工作方式。</li>
+</ul>
+<p>正是这些数学理论的深度融合，才催生了今天如此强大的人工智能。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#数学基础层-mathematical-foundations">数学基础层 (Mathematical Foundations)</a>
+          
+            <a class="toc-level-4" href="#核心算法构建层-core-algorithm-building-blocks">核心算法构建层 (Core Algorithm Building Blocks)</a>
+          
+            <a class="toc-level-4" href="#transformer-架构中的关键数学组件">Transformer 架构中的关键数学组件</a>
+          
+            <a class="toc-level-4" href="#总结">总结</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/神经网络的科普功能用途包含的数学知识.html">
+      <span>上一篇</span>
+      <strong>神经网络的科普功能用途包含的数学知识</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/目前机器人主要用到的编程技术和大模型是什么关系大模型的具体落地到机器人已经成为现实但是机器人的运动系.html">
+      <span>下一篇</span>
+      <strong>目前机器人主要用到的编程技术和大模型是什么关系大模型的具体落地到机器人已经成为现实但是机器人的运动系</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/由小到大的数列寻找是否存在一个数的耗时最小的算法.html">由小到大的数列寻找是否存在一个数的耗时最小的算法</a></h3>
+        <p class="post-excerpt">对于一个由小到大排列的数列，寻找其中是否存在一个特定数，耗时最小的算法是二分查找算法（Binary Search）。下面为你详细介绍该算法：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.599Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/凸包问题graham扫描算法matlab.html">凸包问题Graham扫描算法MATLAB</a></h3>
+        <p class="post-excerpt">算法要解决的问题</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.498Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/c动态规划的解释案例和完整代码斐波那契数列和背包问题需要用到动态规划算法的常见案例.html">C动态规划的解释案例和完整代码斐波那契数列和背包问题需要用到动态规划算法的常见案例</a></h3>
+        <p class="post-excerpt">动态规划的解释</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.302Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

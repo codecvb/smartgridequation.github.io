@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Python使用OpenCV将MP4转换为GIF图 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">Python使用OpenCV将MP4转换为GIF图</h1>
+        <p class="post-deck">以下是使用 Python 和 OpenCV 将 MP4 转换为 GIF 的示例代码：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.198Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>7 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+            <a class="tag-chip" href="../tags/tag-28.html">OpenCV</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>以下是使用 Python 和 OpenCV 将 MP4 转换为 GIF 的示例代码：</p>
+<p>python</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> cv2
+<span class="hljs-keyword">import</span> imageio
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">mp4_to_gif</span>(<span class="hljs-params">mp4_path, gif_path, fps=<span class="hljs-number">10</span>, start_time=<span class="hljs-literal">None</span>, end_time=<span class="hljs-literal">None</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    将MP4视频转换为GIF动图。
+
+    :param mp4_path: 输入MP4视频的路径。
+    :param gif_path: 输出GIF文件的路径。
+    :param fps: GIF的帧率，默认值为10。
+    :param start_time: 开始时间（秒），默认值为None，表示从视频开头开始转换。
+    :param end_time: 结束时间（秒），默认值为None，表示转换到视频结尾。
+    &quot;&quot;&quot;</span>
+    cap = cv2.VideoCapture(mp4_path)
+    all_images = []
+    frame_count = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+        ret, img = cap.read()
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> ret:
+            <span class="hljs-keyword">break</span>
+        <span class="hljs-comment"># 根据开始时间和结束时间截取帧</span>
+        <span class="hljs-keyword">if</span> start_time <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> frame_count &lt; start_time * fps:
+            frame_count += <span class="hljs-number">1</span>
+            <span class="hljs-keyword">continue</span>
+        <span class="hljs-keyword">if</span> end_time <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> frame_count &gt;= end_time * fps:
+            <span class="hljs-keyword">break</span>
+        <span class="hljs-comment"># 将BGR图像转换为RGB格式，以适应imageio保存GIF的要求</span>
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        all_images.append(img)
+        frame_count += <span class="hljs-number">1</span>
+
+    <span class="hljs-comment"># 将帧率转换为每帧之间的延迟时间（毫秒）</span>
+    duration = <span class="hljs-built_in">int</span>(<span class="hljs-number">1000</span> / fps)
+    imageio.mimsave(gif_path, all_images, duration=duration)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;转换完成！&quot;</span>)
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    input_mp4_path = <span class="hljs-string">&quot;your_input_mp4.mp4&quot;</span>  <span class="hljs-comment"># 替换为实际的输入MP4视频路径</span>
+    output_gif_path = <span class="hljs-string">&quot;output.gif&quot;</span>  <span class="hljs-comment"># 替换为输出GIF文件的路径</span>
+    start_time = <span class="hljs-number">0</span>  <span class="hljs-comment"># 开始时间，单位：秒，可根据需要修改</span>
+    end_time = <span class="hljs-number">5</span>  <span class="hljs-comment"># 结束时间，单位：秒，可根据需要修改</span>
+    fps = <span class="hljs-number">15</span>  <span class="hljs-comment"># GIF的帧率，可根据需要修改</span>
+
+    mp4_to_gif(input_mp4_path, output_gif_path, fps=fps, start_time=start_time, end_time=end_time)
+</code></pre>
+<p>在上述代码中：</p>
+<h4 id="读取视频帧" class="prose-heading">读取视频帧</h4>
+<ul>
+<li>首先使用<code>cv2.VideoCapture</code>函数打开指定的 MP4 视频文件，并创建一个视频捕获对象<code>cap</code>2.</li>
+<li>通过一个循环不断读取视频的帧，使用<code>cap.read()</code>函数读取视频的下一帧图像。如果读取失败（视频结束），则跳出循环2.</li>
+</ul>
+<h4 id="截取特定时间段的帧" class="prose-heading">截取特定时间段的帧</h4>
+<ul>
+<li>根据提供的<code>start_time</code>和<code>end_time</code>参数来控制要转换的帧范围。如果<code>start_time</code>不为<code>None</code>，并且当前帧索引小于<code>start_time</code>乘以帧率的值，则跳过该帧。如果<code>end_time</code>不为<code>None</code>，并且当前帧索引大于等于<code>end_time</code>乘以帧率的值，则跳出循环2.</li>
+</ul>
+<h4 id="转换图像格式" class="prose-heading">转换图像格式</h4>
+<ul>
+<li>使用<code>cv2.cvtColor</code>函数将读取的图像帧从 BGR 格式转换为 RGB 格式，以便后续生成 GIF 图片时颜色显示正确2.</li>
+</ul>
+<h4 id="保存为-gif" class="prose-heading">保存为 GIF</h4>
+<ul>
+<li>将转换后的图像帧添加到<code>all_images</code>列表中。</li>
+<li>根据提供的帧率<code>fps</code>计算每帧之间的延迟时间<code>duration</code>，以便生成的 GIF 图片播放时具有指定的帧率2.</li>
+<li>使用<code>imageio.mimsave</code>函数将<code>all_images</code>列表中的帧保存为 GIF 图片。指定参数<code>duration</code>为帧间延迟时间。保存的 GIF 图片文件名由提供的<code>gif_path</code>参数决定2.</li>
+</ul>
+<p>在运行代码之前，需要先安装<code>opencv-python</code>和<code>imageio</code>库，可以通过<code>pip install opencv-python imageio</code>命令进行安装1. 同时，要将代码中的输入 MP4 视频路径、输出 GIF 文件路径、开始时间、结束时间和帧率等参数按照实际需求进行替换 。</p>
+<p>效果如下</p>
+<p><img src="../uploads/csdn/python%E4%BD%BF%E7%94%A8opencv%E5%B0%86mp4%E8%BD%AC%E6%8D%A2%E4%B8%BAgif%E5%9B%BE/img-01.gif" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#读取视频帧">读取视频帧</a>
+          
+            <a class="toc-level-4" href="#截取特定时间段的帧">截取特定时间段的帧</a>
+          
+            <a class="toc-level-4" href="#转换图像格式">转换图像格式</a>
+          
+            <a class="toc-level-4" href="#保存为-gif">保存为 GIF</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/python使用shapelygeopandasmatplotlib绘制全国各个省份2023年gdp.html">
+      <span>上一篇</span>
+      <strong>Python使用shapelygeopandasmatplotlib绘制全国各个省份2023年GDP</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/pythonmp4截取特定时间段截取gif图特定时间段.html">
+      <span>下一篇</span>
+      <strong>Pythonmp4截取特定时间段截取GIF图特定时间段</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/python基于dlib和opencv实现人脸融合算法代码.html">Python基于Dlib和OpenCV实现人脸融合算法代码</a></h3>
+        <p class="post-excerpt">该代码实现了一个基于Dlib和OpenCV的人脸融合工具FaceMerger。主要功能包括：1) 使用Dlib检测68个人脸特征点；2) 通过三角剖分和仿射变换将源人脸特征点映射到目标人脸；3) 采用泊松融合(seamlessClone)实现自然过渡。核心步骤为：提取特征点→计算凸包→三角剖分→逐三角形变形→泊松融合。最终输出将源人脸特征区域无缝融合到目标人脸上的结果。该算法适用于需要保持目标人脸…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.769Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

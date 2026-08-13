@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>小球在摆线上下落的物理过程MATLAB代码 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/物理与天文.html">物理与天文</a>
+        </nav>
+        <h1 class="post-title">小球在摆线上下落的物理过程MATLAB代码</h1>
+        <p class="post-deck">1.  ‌物理建模‌：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.543Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>9 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+          
+            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+          
+            <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
+          
+            <a class="tag-chip" href="../tags/tag-20.html">物理仿真</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <ol>
+<li>
+<p>‌<strong>物理建模</strong>‌：</p>
+<ul>
+<li>使用摆线参数方程定义轨迹：x = r(θ - sinθ), y = r(1 - cosθ)</li>
+<li>通过微分方程求解角度θ随时间变化关系，考虑能量守恒定律</li>
+<li>计算实时速度分量和切向加速度</li>
+</ul>
+</li>
+<li>
+<p>‌<strong>可视化特性</strong>‌：</p>
+<ul>
+<li>灰色虚线显示完整摆线轨迹</li>
+<li>红色小球实时显示当前位置</li>
+<li>绿色箭头指示瞬时速度矢量</li>
+<li>粉色点迹显示运动轨迹历史</li>
+<li>实时数据显示时间、速度和加速度</li>
+</ul>
+</li>
+<li>
+<p>‌<strong>交互特性</strong>‌：</p>
+<ul>
+<li>自动调整坐标系比例保持物理尺度一致</li>
+<li>每0.09秒记录一次轨迹点</li>
+<li>速度矢量动态缩放确保可视化效果</li>
+</ul>
+</li>
+<li>
+<p><img src="../uploads/csdn/%E5%B0%8F%E7%90%83%E5%9C%A8%E6%91%86%E7%BA%BF%E4%B8%8A%E4%B8%8B%E8%90%BD%E7%9A%84%E7%89%A9%E7%90%86%E8%BF%87%E7%A8%8Bmatlab%E4%BB%A3%E7%A0%81/img-01.gif" alt=""></p>
+</li>
+</ol>
+<pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">%% 单侧摆线下落物理模拟</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">single_side_cycloid</span><span class="hljs-params">()</span></span>
+    clf; close all; clear;
+
+    <span class="hljs-comment">%% 物理参数调整</span>
+    r = <span class="hljs-number">1.0</span>;                <span class="hljs-comment">% 摆线半径 (m)</span>
+    g = <span class="hljs-number">9.81</span>;               <span class="hljs-comment">% 重力加速度 (m/s²)</span>
+    theta_max = <span class="hljs-built_in">pi</span>;         <span class="hljs-comment">% 最大角度限制为π（半摆线）</span>
+    t_total = <span class="hljs-number">2.5</span>;          <span class="hljs-comment">% 总模拟时间 (s)</span>
+    dt = <span class="hljs-number">0.03</span>;              <span class="hljs-comment">% 时间步长 (s)</span>
+
+    <span class="hljs-comment">%% 单侧摆线方程（右半侧）</span>
+    cycloid_x = @(th) r*(th - <span class="hljs-built_in">sin</span>(th));  <span class="hljs-comment">% x坐标方程保持不变</span>
+    cycloid_y = @(th) -r*(<span class="hljs-number">1</span> - <span class="hljs-built_in">cos</span>(th));  <span class="hljs-comment">% 下凹摆线y坐标（取反）</span>
+
+    <span class="hljs-comment">%% 约束运动微分方程</span>
+    ode_fun = @(t,y) [y(<span class="hljs-number">2</span>);
+                     (g/r)*<span class="hljs-built_in">sin</span>(y(<span class="hljs-number">1</span>))/(<span class="hljs-number">1</span> - <span class="hljs-built_in">cos</span>(y(<span class="hljs-number">1</span>))) * (y(<span class="hljs-number">1</span>)&lt;theta_max*<span class="hljs-number">0.98</span>)]; <span class="hljs-comment">% 角度接近π时抑制加速度</span>
+
+    opts = odeset(<span class="hljs-string">&#x27;RelTol&#x27;</span>,<span class="hljs-number">1e-6</span>,<span class="hljs-string">&#x27;AbsTol&#x27;</span>,<span class="hljs-number">1e-9</span>, <span class="hljs-string">&#x27;Events&#x27;</span>, @(t,y)angleEvents(y,theta_max));
+    [t_ode, theta] = ode45(ode_fun, [<span class="hljs-number">0</span> t_total], [<span class="hljs-number">0.1</span>; <span class="hljs-number">0</span>], opts); <span class="hljs-comment">% 初始角度0.1rad启动</span>
+
+    <span class="hljs-comment">%% 时间插值处理</span>
+    t_sim = <span class="hljs-number">0</span>:dt:<span class="hljs-built_in">min</span>(t_ode(<span class="hljs-keyword">end</span>), t_total);
+    theta_sim = interp1(t_ode, theta(:,<span class="hljs-number">1</span>), t_sim, <span class="hljs-string">&#x27;pchip&#x27;</span>);
+
+    <span class="hljs-comment">%% 图形初始化</span>
+    <span class="hljs-built_in">figure</span>(<span class="hljs-string">&#x27;Color&#x27;</span>,<span class="hljs-string">&#x27;w&#x27;</span>,<span class="hljs-string">&#x27;Position&#x27;</span>,[<span class="hljs-number">200</span> <span class="hljs-number">200</span> <span class="hljs-number">800</span> <span class="hljs-number">500</span>])
+    ax = axes(<span class="hljs-string">&#x27;XLim&#x27;</span>,[<span class="hljs-number">0</span> r*<span class="hljs-built_in">pi</span>+<span class="hljs-number">0.5</span>], <span class="hljs-string">&#x27;YLim&#x27;</span>,[<span class="hljs-number">-2.2</span> <span class="hljs-number">0.5</span>],... <span class="hljs-comment">% X轴范围限定在右半侧</span>
+             <span class="hljs-string">&#x27;DataAspectRatio&#x27;</span>,[<span class="hljs-number">1</span> <span class="hljs-number">1</span> <span class="hljs-number">1</span>],<span class="hljs-string">&#x27;Box&#x27;</span>,<span class="hljs-string">&#x27;on&#x27;</span>);
+    title(<span class="hljs-string">&#x27;单侧下凹摆线物理模拟&#x27;</span>)
+    <span class="hljs-built_in">hold</span> on;
+
+    <span class="hljs-comment">% 绘制右半摆线（θ从0到π）</span>
+    th_plot = <span class="hljs-built_in">linspace</span>(<span class="hljs-number">0</span>, theta_max, <span class="hljs-number">150</span>);
+    <span class="hljs-built_in">plot</span>(cycloid_x(th_plot), cycloid_y(th_plot),...
+        <span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">2</span>,<span class="hljs-string">&#x27;Color&#x27;</span>,[<span class="hljs-number">0.4</span> <span class="hljs-number">0.4</span> <span class="hljs-number">0.8</span>])
+
+    <span class="hljs-comment">% 初始化小球图形（右侧起点）</span>
+    ball = <span class="hljs-built_in">scatter</span>(cycloid_x(<span class="hljs-number">0.1</span>), cycloid_y(<span class="hljs-number">0.1</span>), <span class="hljs-number">120</span>, <span class="hljs-string">&#x27;filled&#x27;</span>,...
+                  <span class="hljs-string">&#x27;MarkerFaceColor&#x27;</span>,[<span class="hljs-number">0.9</span> <span class="hljs-number">0.2</span> <span class="hljs-number">0.2</span>],...
+                  <span class="hljs-string">&#x27;MarkerEdgeColor&#x27;</span>,<span class="hljs-string">&#x27;k&#x27;</span>);
+
+    <span class="hljs-comment">% 速度矢量初始化</span>
+    v_quiver = quiver(cycloid_x(<span class="hljs-number">0.1</span>), cycloid_y(<span class="hljs-number">0.1</span>), <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,...
+                     <span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">1.8</span>,<span class="hljs-string">&#x27;Color&#x27;</span>,[<span class="hljs-number">0</span> <span class="hljs-number">0.6</span> <span class="hljs-number">0</span>],...
+                     <span class="hljs-string">&#x27;MaxHeadSize&#x27;</span>,<span class="hljs-number">0.8</span>,<span class="hljs-string">&#x27;AutoScale&#x27;</span>,<span class="hljs-string">&#x27;off&#x27;</span>);
+
+    <span class="hljs-comment">% 创建终点标记</span>
+    end_marker = <span class="hljs-built_in">plot</span>(<span class="hljs-built_in">nan</span>, <span class="hljs-built_in">nan</span>, <span class="hljs-string">&#x27;rx&#x27;</span>, <span class="hljs-string">&#x27;MarkerSize&#x27;</span>,<span class="hljs-number">15</span>,<span class="hljs-string">&#x27;LineWidth&#x27;</span>,<span class="hljs-number">2</span>);
+
+    <span class="hljs-comment">%% 动态模拟主循环</span>
+    <span class="hljs-keyword">for</span> k = <span class="hljs-number">1</span>:<span class="hljs-built_in">length</span>(t_sim)
+        th = theta_sim(k);
+
+        <span class="hljs-comment">% 计算当前位置</span>
+        x = cycloid_x(th);
+        y = cycloid_y(th);
+
+        <span class="hljs-comment">% 计算瞬时速度</span>
+        dx_dth = r*(<span class="hljs-number">1</span> - <span class="hljs-built_in">cos</span>(th));
+        dy_dth = r*<span class="hljs-built_in">sin</span>(th);
+        dth_dt = interp1(t_ode, theta(:,<span class="hljs-number">2</span>), t_sim(k));
+        vx = dx_dth * dth_dt;
+        vy = dy_dth * dth_dt;
+
+        <span class="hljs-comment">% 更新图形对象</span>
+        set(ball, <span class="hljs-string">&#x27;XData&#x27;</span>,x, <span class="hljs-string">&#x27;YData&#x27;</span>,y)
+        set(v_quiver, <span class="hljs-string">&#x27;XData&#x27;</span>,x, <span class="hljs-string">&#x27;YData&#x27;</span>,y,...
+                     <span class="hljs-string">&#x27;UData&#x27;</span>,vx*<span class="hljs-number">0.08</span>, <span class="hljs-string">&#x27;VData&#x27;</span>,vy*<span class="hljs-number">0.08</span>)
+
+        <span class="hljs-comment">% 到达终点时标记</span>
+        <span class="hljs-keyword">if</span> th &gt;= theta_max*<span class="hljs-number">0.98</span>
+            set(end_marker, <span class="hljs-string">&#x27;XData&#x27;</span>,x, <span class="hljs-string">&#x27;YData&#x27;</span>,y)
+            <span class="hljs-keyword">break</span>; <span class="hljs-comment">% 提前终止循环</span>
+        <span class="hljs-keyword">end</span>
+
+        <span class="hljs-comment">% 绘制轨迹（每4帧记录一次）</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">mod</span>(k,<span class="hljs-number">4</span>)==<span class="hljs-number">0</span>
+            <span class="hljs-built_in">plot</span>(x, y, <span class="hljs-string">&#x27;.&#x27;</span>,<span class="hljs-string">&#x27;Color&#x27;</span>,[<span class="hljs-number">1</span> <span class="hljs-number">0.4</span> <span class="hljs-number">0.4</span>],<span class="hljs-string">&#x27;MarkerSize&#x27;</span>,<span class="hljs-number">12</span>)
+        <span class="hljs-keyword">end</span>
+
+        drawnow limitrate
+
+        pause(<span class="hljs-number">0.8</span>);
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">%% 事件函数（角度达到π时停止）</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">[value,isterminal,direction]</span> = <span class="hljs-title">angleEvents</span><span class="hljs-params">(y,theta_max)</span></span>
+    value = y(<span class="hljs-number">1</span>) - theta_max*<span class="hljs-number">0.99</span>; <span class="hljs-comment">% 触发阈值设为99%最大角度</span>
+    isterminal = <span class="hljs-number">1</span>; <span class="hljs-comment">% 终止积分</span>
+    direction = <span class="hljs-number">1</span>;  <span class="hljs-comment">% 单方向触发</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/广义相对论水星近日点进动完整详细数学推导.html">
+      <span>上一篇</span>
+      <strong>广义相对论水星近日点进动完整详细数学推导</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/嫦娥号地月轨道环月一个月matlab仿真.html">
+      <span>下一篇</span>
+      <strong>嫦娥号地月轨道环月一个月MATLAB仿真</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用matlab写出计算过程.html">试用数学和物理分析一架歼35需要怎么样推力和电磁弹射才可以顺利起飞用MATLAB写出计算过程</a></h3>
+        <p class="post-excerpt">要分析歼 - 35 使用电磁弹射起飞所需的推力和弹射参数，我们需要考虑多个物理因素，包括起飞重量、起飞速度、弹射距离、加速度以及空气阻力等。下面我将进行数学和物理分析，并提供 MATLAB 计算代码。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.846Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/物理竞赛书籍按层级堆叠求质心的问题附带matlab仿真代码和数学求导过程.html">物理竞赛书籍按层级堆叠求质心的问题附带MATLAB仿真代码和数学求导过程</a></h3>
+        <p class="post-excerpt">三、MATLAB 仿真：可视化堆叠与质心计算</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.661Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/卫星轨道matlab动力学仿真.html">卫星轨道MATLAB动力学仿真</a></h3>
+        <p class="post-excerpt">本文介绍了一个基于MATLAB的卫星轨道动力学仿真程序。该程序采用国际空间站(ISS)近似轨道参数(400km高度、51.6°倾角)，通过数值积分方法求解包含地球引力和J2摄动项的轨道运动方程。仿真结果包括3D轨道可视化、位置/速度分量变化、轨道高度和速度大小变化等图表，并进行了能量守恒验证和轨道参数分析。程序实现了从轨道要素到ECI坐标系状态的转换，采用ode45求解器进行积分，最终分析了半长轴…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.374Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

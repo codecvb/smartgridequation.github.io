@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>什么是哈希表详解c哈希表 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/算法与数据结构.html">算法与数据结构</a>
+        </nav>
+        <h1 class="post-title">什么是哈希表详解c哈希表</h1>
+        <p class="post-deck">什么是哈希表？</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.463Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>27 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-18.html">算法</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <h4 id="什么是哈希表" class="prose-heading">什么是哈希表？</h4>
+<p>哈希表（Hash Table）是一种高效的数据结构，它通过<strong>哈希函数</strong>将键（Key）映射到存储位置（数组索引），实现快速的插入、删除和查找操作（平均时间复杂度为 O (1)）。</p>
+<p>哈希表的核心思想是：</p>
+<ol>
+<li>使用数组作为底层存储结构</li>
+<li>通过哈希函数计算键对应的数组索引</li>
+<li>当不同的键映射到相同索引时，使用<strong>哈希冲突解决策略</strong>处理</li>
+</ol>
+<h4 id="c-中的哈希表实现" class="prose-heading">C++ 中的哈希表实现</h4>
+<p>C++ 标准库提供了多种哈希表相关容器，主要包括：</p>
+<ol>
+<li><strong><code>std::unordered_map</code></strong>：键值对映射，键唯一</li>
+<li><strong><code>std::unordered_set</code></strong>：存储唯一键</li>
+<li><strong><code>std::unordered_multimap</code></strong>：允许键重复的键值对映射</li>
+<li><strong><code>std::unordered_multiset</code></strong>：允许键重复的集合</li>
+</ol>
+<p>这些容器都基于哈希表实现，属于 C++11 及以上标准。</p>
+<h5 id="1-std-unordered-map-基本用法" class="prose-heading">1. <code>std::unordered_map</code> 基本用法</h5>
+<p>C++ unordered_map 示例</p>
+<p>V1</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;unordered_map&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-comment">// 创建一个unordered_map，键为string类型，值为int类型</span>
+    std::unordered_map&lt;std::string, <span class="hljs-type">int</span>&gt; student_scores;
+
+    <span class="hljs-comment">// 插入元素</span>
+    student_scores[<span class="hljs-string">&quot;Alice&quot;</span>] = <span class="hljs-number">90</span>;
+    student_scores.<span class="hljs-built_in">insert</span>({<span class="hljs-string">&quot;Bob&quot;</span>, <span class="hljs-number">85</span>});
+    student_scores.<span class="hljs-built_in">emplace</span>(<span class="hljs-string">&quot;Charlie&quot;</span>, <span class="hljs-number">95</span>);
+
+    <span class="hljs-comment">// 查找元素</span>
+    std::string name = <span class="hljs-string">&quot;Bob&quot;</span>;
+    <span class="hljs-keyword">auto</span> it = student_scores.<span class="hljs-built_in">find</span>(name);
+    <span class="hljs-keyword">if</span> (it != student_scores.<span class="hljs-built_in">end</span>()) {
+        std::cout &lt;&lt; name &lt;&lt; <span class="hljs-string">&quot; 的分数是: &quot;</span> &lt;&lt; it-&gt;second &lt;&lt; std::endl;
+    } <span class="hljs-keyword">else</span> {
+        std::cout &lt;&lt; name &lt;&lt; <span class="hljs-string">&quot; 未找到&quot;</span> &lt;&lt; std::endl;
+    }
+
+    <span class="hljs-comment">// 遍历哈希表</span>
+    std::cout &lt;&lt; <span class="hljs-string">&quot;\n所有学生分数:&quot;</span> &lt;&lt; std::endl;
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> <span class="hljs-keyword">auto</span>&amp; pair : student_scores) {
+        std::cout &lt;&lt; pair.first &lt;&lt; <span class="hljs-string">&quot;: &quot;</span> &lt;&lt; pair.second &lt;&lt; std::endl;
+    }
+
+    <span class="hljs-comment">// 删除元素</span>
+    student_scores.<span class="hljs-built_in">erase</span>(<span class="hljs-string">&quot;Bob&quot;</span>);
+
+    <span class="hljs-comment">// 查看大小</span>
+    std::cout &lt;&lt; <span class="hljs-string">&quot;\n当前学生数量: &quot;</span> &lt;&lt; student_scores.<span class="hljs-built_in">size</span>() &lt;&lt; std::endl;
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<h5 id="2-哈希冲突解决策略" class="prose-heading">2. 哈希冲突解决策略</h5>
+<p>C++ 哈希表采用<strong>链地址法</strong>（Separate Chaining）解决哈希冲突：</p>
+<ul>
+<li>底层是一个数组，每个元素是一个链表（或平衡树）的头指针</li>
+<li>当哈希冲突发生时，将新元素添加到对应索引的链表中</li>
+<li>当链表长度超过阈值时，会自动转换为平衡树（如红黑树）以保持高效操作</li>
+</ul>
+<h5 id="3-自定义类型作为键" class="prose-heading">3. 自定义类型作为键</h5>
+<p>要将自定义类型用作哈希表的键，需要：</p>
+<ol>
+<li>提供哈希函数（特化 <code>std::hash</code>）</li>
+<li>提供相等比较运算符（<code>operator==</code>）</li>
+</ol>
+<p>C++ 自定义哈希表键类型</p>
+<p>V1</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;unordered_map&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+
+<span class="hljs-comment">// 自定义类型</span>
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Person</span> {
+    std::string name;
+    <span class="hljs-type">int</span> age;
+
+    <span class="hljs-comment">// 相等比较运算符</span>
+    <span class="hljs-type">bool</span> <span class="hljs-keyword">operator</span>==(<span class="hljs-type">const</span> Person&amp; other) <span class="hljs-type">const</span> {
+        <span class="hljs-keyword">return</span> name == other.name &amp;&amp; age == other.age;
+    }
+};
+
+<span class="hljs-comment">// 为Person类型提供哈希函数</span>
+<span class="hljs-keyword">namespace</span> std {
+    <span class="hljs-keyword">template</span>&lt;&gt; <span class="hljs-keyword">struct</span> <span class="hljs-title class_">hash</span>&lt;Person&gt; {
+        <span class="hljs-function"><span class="hljs-type">size_t</span> <span class="hljs-title">operator</span><span class="hljs-params">()</span><span class="hljs-params">(<span class="hljs-type">const</span> Person&amp; p)</span> <span class="hljs-type">const</span> </span>{
+            <span class="hljs-comment">// 组合name和age的哈希值</span>
+            <span class="hljs-type">size_t</span> h1 = <span class="hljs-built_in">hash</span>&lt;std::string&gt;()(p.name);
+            <span class="hljs-type">size_t</span> h2 = <span class="hljs-built_in">hash</span>&lt;<span class="hljs-type">int</span>&gt;()(p.age);
+            <span class="hljs-comment">// 简单的哈希组合方式</span>
+            <span class="hljs-keyword">return</span> h1 ^ (h2 &lt;&lt; <span class="hljs-number">1</span>);
+        }
+    };
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    std::unordered_map&lt;Person, std::string&gt; person_jobs;
+
+    person_jobs[{ <span class="hljs-string">&quot;Alice&quot;</span>, <span class="hljs-number">30</span> }] = <span class="hljs-string">&quot;Engineer&quot;</span>;
+    person_jobs[{ <span class="hljs-string">&quot;Bob&quot;</span>, <span class="hljs-number">25</span> }] = <span class="hljs-string">&quot;Designer&quot;</span>;
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> <span class="hljs-keyword">auto</span>&amp; pair : person_jobs) {
+        std::cout &lt;&lt; pair.first.name &lt;&lt; <span class="hljs-string">&quot; (&quot;</span> &lt;&lt; pair.first.age &lt;&lt; <span class="hljs-string">&quot;): &quot;</span>
+                  &lt;&lt; pair.second &lt;&lt; std::endl;
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<h4 id="哈希表的优缺点" class="prose-heading">哈希表的优缺点</h4>
+<p><strong>优点</strong>：</p>
+<ul>
+<li>平均时间复杂度为 O (1) 的插入、删除和查找</li>
+<li>适用于需要频繁查找的场景</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>元素无序存储</li>
+<li>哈希函数设计不当会导致大量冲突，性能下降</li>
+<li>内存占用通常比树结构更大</li>
+<li>最坏情况下（所有元素哈希冲突）时间复杂度为 O (n)</li>
+</ul>
+<h4 id="与-std-map-的对比" class="prose-heading">与 <code>std::map</code> 的对比</h4>
+<p>特性</p>
+<p><code>std::unordered_map</code></p>
+<p><code>std::map</code></p>
+<p>底层实现</p>
+<p>哈希表</p>
+<p>红黑树</p>
+<p>元素顺序</p>
+<p>无序</p>
+<p>按键排序</p>
+<p>平均查找时间</p>
+<p>O(1)</p>
+<p>O(log n)</p>
+<p>最坏查找时间</p>
+<p>O(n)</p>
+<p>O(log n)</p>
+<p>内存占用</p>
+<p>通常更大</p>
+<p>通常更小</p>
+<p>插入性能</p>
+<p>更好（平均）</p>
+<p>较稳定</p>
+<p>选择建议：</p>
+<ul>
+<li>需要快速查找且不关心顺序时，选 <code>std::unordered_map</code></li>
+<li>需要有序存储或保证最坏情况性能时，选 <code>std::map</code></li>
+</ul>
+<p>哈希表是 C++ 中处理快速查找场景的重要工具，合理使用能显著提升程序性能。</p>
+<p>分享</p>
+<h4 id="用哈希表解决几个算法问题-难度为简单或者中等" class="prose-heading">用哈希表解决几个算法问题，难度为简单或者中等</h4>
+<p>下面我将使用哈希表解决几个简单到中等难度的算法问题，展示哈希表在实际编程中的应用。</p>
+<h4 id="问题-1-两数之和-简单" class="prose-heading">问题 1：两数之和（简单）</h4>
+<p>给定一个整数数组 nums 和一个整数目标值 target，请你在该数组中找出和为目标值的那两个整数，并返回它们的数组下标。</p>
+<p>两数之和问题的哈希表解法</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;unordered_map&gt;</span></span>
+
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+
+<span class="hljs-function">vector&lt;<span class="hljs-type">int</span>&gt; <span class="hljs-title">twoSum</span><span class="hljs-params">(vector&lt;<span class="hljs-type">int</span>&gt;&amp; nums, <span class="hljs-type">int</span> target)</span> </span>{
+    <span class="hljs-comment">// 创建哈希表存储数字及其索引</span>
+    unordered_map&lt;<span class="hljs-type">int</span>, <span class="hljs-type">int</span>&gt; num_map;
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; nums.<span class="hljs-built_in">size</span>(); ++i) {
+        <span class="hljs-comment">// 计算需要寻找的补数</span>
+        <span class="hljs-type">int</span> complement = target - nums[i];
+
+        <span class="hljs-comment">// 检查补数是否已经在哈希表中</span>
+        <span class="hljs-keyword">if</span> (num_map.<span class="hljs-built_in">find</span>(complement) != num_map.<span class="hljs-built_in">end</span>()) {
+            <span class="hljs-comment">// 找到则返回两个索引</span>
+            <span class="hljs-keyword">return</span> {num_map[complement], i};
+        }
+
+        <span class="hljs-comment">// 未找到则将当前数字及其索引存入哈希表</span>
+        num_map[nums[i]] = i;
+    }
+
+    <span class="hljs-comment">// 题目保证有解，这里只是为了语法完整</span>
+    <span class="hljs-keyword">return</span> {};
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    vector&lt;<span class="hljs-type">int</span>&gt; nums = {<span class="hljs-number">2</span>, <span class="hljs-number">7</span>, <span class="hljs-number">11</span>, <span class="hljs-number">15</span>};
+    <span class="hljs-type">int</span> target = <span class="hljs-number">9</span>;
+
+    vector&lt;<span class="hljs-type">int</span>&gt; result = <span class="hljs-built_in">twoSum</span>(nums, target);
+    cout &lt;&lt; <span class="hljs-string">&quot;[&quot;</span> &lt;&lt; result[<span class="hljs-number">0</span>] &lt;&lt; <span class="hljs-string">&quot;, &quot;</span> &lt;&lt; result[<span class="hljs-number">1</span>] &lt;&lt; <span class="hljs-string">&quot;]&quot;</span> &lt;&lt; endl;  <span class="hljs-comment">// 输出 [0, 1]</span>
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+
+</code></pre>
+<p><strong>解法说明</strong>：</p>
+<ul>
+<li>时间复杂度：O (n)，只需遍历一次数组</li>
+<li>空间复杂度：O (n)，哈希表最多存储 n 个元素</li>
+<li>核心思路：通过哈希表存储已遍历的数字及其索引，对每个数字计算补数并检查是否在哈希表中</li>
+</ul>
+<p>在 C++ 中，<code>unordered_map</code> 等标准容器具有<strong>默认构造函数</strong>，这意味着当你声明 <code>unordered_map num_map;</code> 时，编译器会自动调用其默认构造函数完成初始化，不需要显式编写初始化代码。</p>
+<p>这就是为什么即使没有显式初始化（如 <code>unordered_map num_map = unordered_map();</code>），也可以直接使用 <code>num_map.find()</code> 等成员函数的原因：</p>
+<ol>
+<li></li>
+</ol>
+<pre><code>**默认构造函数的作用**：
+
+
+-   会初始化哈希表的内部结构（如桶数组、大小计数器等）
+-   会创建一个**空的哈希表**（包含 0 个元素），但容器本身是处于可用状态的
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>**对 `find()` 方法的影响**：
+
+
+-   当调用 `num_map.find(complement)` 时，即使哈希表为空，`find()` 也能正常工作
+-   对于空哈希表，`find()` 会直接返回 `num_map.end()`，表示未找到目标元素
+</code></pre>
+<p>简单来说，<code>unordered_map</code> 的默认构造函数已经确保了对象处于<strong>可用状态</strong>，因此可以直接调用其成员函数，无需额外的初始化操作。这是 C++ 标准容器的设计特性，方便开发者使用。</p>
+<h4 id="问题-2-存在重复元素-ii-中等" class="prose-heading">问题 2：存在重复元素 II（中等）</h4>
+<p>给定一个整数数组和一个整数 k，判断数组中是否存在两个不同的索引 i 和 j，使得 nums [i] = nums [j]，并且 i 和 j 的差的绝对值不超过 k。</p>
+<p>存在重复元素II的哈希表解法</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;unordered_map&gt;</span></span>
+
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+
+<span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">containsNearbyDuplicate</span><span class="hljs-params">(vector&lt;<span class="hljs-type">int</span>&gt;&amp; nums, <span class="hljs-type">int</span> k)</span> </span>{
+    unordered_map&lt;<span class="hljs-type">int</span>, <span class="hljs-type">int</span>&gt; num_index;  <span class="hljs-comment">// 存储数字及其最近出现的索引</span>
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; nums.<span class="hljs-built_in">size</span>(); ++i) {
+        <span class="hljs-comment">// 检查当前数字是否出现过，且索引差不超过k</span>
+        <span class="hljs-keyword">if</span> (num_index.<span class="hljs-built_in">find</span>(nums[i]) != num_index.<span class="hljs-built_in">end</span>() &amp;&amp;
+            i - num_index[nums[i]] &lt;= k) {
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+        }
+
+        <span class="hljs-comment">// 更新当前数字的最新索引</span>
+        num_index[nums[i]] = i;
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    vector&lt;<span class="hljs-type">int</span>&gt; nums1 = {<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>};
+    <span class="hljs-type">int</span> k1 = <span class="hljs-number">3</span>;
+    cout &lt;&lt; boolalpha &lt;&lt; <span class="hljs-built_in">containsNearbyDuplicate</span>(nums1, k1) &lt;&lt; endl;  <span class="hljs-comment">// 输出 true</span>
+
+    vector&lt;<span class="hljs-type">int</span>&gt; nums2 = {<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>};
+    <span class="hljs-type">int</span> k2 = <span class="hljs-number">1</span>;
+    cout &lt;&lt; boolalpha &lt;&lt; <span class="hljs-built_in">containsNearbyDuplicate</span>(nums2, k2) &lt;&lt; endl;  <span class="hljs-comment">// 输出 true</span>
+
+    vector&lt;<span class="hljs-type">int</span>&gt; nums3 = {<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>};
+    <span class="hljs-type">int</span> k3 = <span class="hljs-number">2</span>;
+    cout &lt;&lt; boolalpha &lt;&lt; <span class="hljs-built_in">containsNearbyDuplicate</span>(nums3, k3) &lt;&lt; endl;  <span class="hljs-comment">// 输出 false</span>
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+
+</code></pre>
+<p><strong>解法说明</strong>：</p>
+<ul>
+<li>时间复杂度：O (n)，只需一次遍历</li>
+<li>空间复杂度：O (n)，哈希表存储元素及其索引</li>
+<li>核心思路：使用哈希表记录每个数字最后出现的位置，每次遇到相同数字时检查索引差</li>
+</ul>
+<h4 id="问题-3-无重复字符的最长子串-中等" class="prose-heading">问题 3：无重复字符的最长子串（中等）</h4>
+<p>给定一个字符串，请你找出其中不含有重复字符的最长子串的长度。</p>
+<p>我来修改函数，使其输出最小子字符串，并详细展示left和right的变化过程。</p>
+<h3 id="修改后的c-代码" class="prose-heading">修改后的C++代码</h3>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;unordered_map&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;algorithm&gt;</span></span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">lengthOfLongestSubstring</span><span class="hljs-params">(string s)</span> </span>{
+    unordered_map&lt;<span class="hljs-type">char</span>, <span class="hljs-type">int</span>&gt; charIndexMap;
+    <span class="hljs-type">int</span> maxLength = <span class="hljs-number">0</span>;
+    <span class="hljs-type">int</span> left = <span class="hljs-number">0</span>;
+    <span class="hljs-type">int</span> start = <span class="hljs-number">0</span>; <span class="hljs-comment">// 记录最长子串的起始位置</span>
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> right = <span class="hljs-number">0</span>; right &lt; s.<span class="hljs-built_in">size</span>(); right++) {
+        <span class="hljs-type">char</span> currentChar = s[right];
+
+        <span class="hljs-comment">// 输出当前状态</span>
+        cout &lt;&lt; <span class="hljs-string">&quot;right=&quot;</span> &lt;&lt; right &lt;&lt; <span class="hljs-string">&quot;, char=&#x27;&quot;</span> &lt;&lt; currentChar &lt;&lt; <span class="hljs-string">&quot;&#x27;, &quot;</span>;
+        cout &lt;&lt; <span class="hljs-string">&quot;left=&quot;</span> &lt;&lt; left &lt;&lt; <span class="hljs-string">&quot;, &quot;</span>;
+        cout &lt;&lt; <span class="hljs-string">&quot;current window: [&quot;</span> &lt;&lt; left &lt;&lt; <span class="hljs-string">&quot;,&quot;</span> &lt;&lt; right &lt;&lt; <span class="hljs-string">&quot;] = \&quot;&quot;</span>;
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = left; i &lt;= right; i++) cout &lt;&lt; s[i];
+        cout &lt;&lt; <span class="hljs-string">&quot;\&quot;&quot;</span> &lt;&lt; endl;
+
+        <span class="hljs-keyword">if</span> (charIndexMap.<span class="hljs-built_in">find</span>(currentChar) != charIndexMap.<span class="hljs-built_in">end</span>() &amp;&amp; charIndexMap[currentChar] &gt;= left) {
+            cout &lt;&lt; <span class="hljs-string">&quot;  -&gt; Duplicate found! Moving left from &quot;</span> &lt;&lt; left &lt;&lt; <span class="hljs-string">&quot; to &quot;</span> &lt;&lt; charIndexMap[currentChar] + <span class="hljs-number">1</span> &lt;&lt; endl;
+            left = charIndexMap[currentChar] + <span class="hljs-number">1</span>;
+        }
+
+        charIndexMap[currentChar] = right;
+        <span class="hljs-type">int</span> currentLength = right - left + <span class="hljs-number">1</span>;
+
+        <span class="hljs-keyword">if</span> (currentLength &gt; maxLength) {
+            maxLength = currentLength;
+            start = left; <span class="hljs-comment">// 记录最长子串的起始位置</span>
+            cout &lt;&lt; <span class="hljs-string">&quot;  -&gt; New max length: &quot;</span> &lt;&lt; maxLength &lt;&lt; <span class="hljs-string">&quot;, substring: \&quot;&quot;</span>;
+            <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = start; i &lt;= right; i++) cout &lt;&lt; s[i];
+            cout &lt;&lt; <span class="hljs-string">&quot;\&quot;&quot;</span> &lt;&lt; endl;
+        }
+
+        cout &lt;&lt; <span class="hljs-string">&quot;  Updated map: &quot;</span>;
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; pair : charIndexMap) {
+            cout &lt;&lt; pair.first &lt;&lt; <span class="hljs-string">&quot;:&quot;</span> &lt;&lt; pair.second &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;
+        }
+        cout &lt;&lt; endl &lt;&lt; endl;
+    }
+
+    cout &lt;&lt; <span class="hljs-string">&quot;Longest substring: \&quot;&quot;</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = start; i &lt; start + maxLength; i++) cout &lt;&lt; s[i];
+    cout &lt;&lt; <span class="hljs-string">&quot;\&quot; with length: &quot;</span> &lt;&lt; maxLength &lt;&lt; endl &lt;&lt; endl;
+
+    <span class="hljs-keyword">return</span> maxLength;
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    string test1 = <span class="hljs-string">&quot;abcabcbb&quot;</span>;
+    string test2 = <span class="hljs-string">&quot;pwwkew&quot;</span>;
+    string test3 = <span class="hljs-string">&quot;abcdeedcbaabcdeedcba&quot;</span>;
+
+    cout &lt;&lt; <span class="hljs-string">&quot;=== Test 1: \&quot;&quot;</span> &lt;&lt; test1 &lt;&lt; <span class="hljs-string">&quot;\&quot; ===&quot;</span> &lt;&lt; endl;
+    <span class="hljs-built_in">lengthOfLongestSubstring</span>(test1);
+
+    cout &lt;&lt; <span class="hljs-string">&quot;=== Test 2: \&quot;&quot;</span> &lt;&lt; test2 &lt;&lt; <span class="hljs-string">&quot;\&quot; ===&quot;</span> &lt;&lt; endl;
+    <span class="hljs-built_in">lengthOfLongestSubstring</span>(test2);
+
+    cout &lt;&lt; <span class="hljs-string">&quot;=== Test 3: \&quot;&quot;</span> &lt;&lt; test3 &lt;&lt; <span class="hljs-string">&quot;\&quot; ===&quot;</span> &lt;&lt; endl;
+    <span class="hljs-built_in">lengthOfLongestSubstring</span>(test3);
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<h3 id="left和right变化与子字符串的关系说明" class="prose-heading">left和right变化与子字符串的关系说明</h3>
+<h4 id="基本概念" class="prose-heading">基本概念：</h4>
+<ul>
+<li></li>
+</ul>
+<pre><code>**left**: 滑动窗口的左边界，表示当前无重复子串的起始位置
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**right**: 滑动窗口的右边界，表示当前遍历到的字符位置
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<pre><code>**窗口 \[left, right\]**: 表示当
+</code></pre>
+<pre class="hljs"><code class="language-html">变化规则：
+right向右移动：每次循环right增加1，扩展窗口的右边界
+
+left的移动条件：当遇到重复字符时，left移动到该字符上次出现位置的下一个位置
+
+子串长度：right - left + 1
+
+以test2: &quot;pwwkew&quot; 为例的详细过程：
+=== Test 2: &quot;pwwkew&quot; ===
+right=0, char=&#x27;p&#x27;, left=0, current window: [0,0] = &quot;p&quot;
+  -&gt; New max length: 1, substring: &quot;p&quot;
+  Updated map: p:0
+
+right=1, char=&#x27;w&#x27;, left=0, current window: [0,1] = &quot;pw&quot;
+  -&gt; New max length: 2, substring: &quot;pw&quot;
+  Updated map: p:0 w:1
+
+right=2, char=&#x27;w&#x27;, left=0, current window: [0,2] = &quot;pww&quot;
+  -&gt; Duplicate found! Moving left from 0 to 2
+  Updated map: p:0 w:2
+
+right=3, char=&#x27;k&#x27;, left=2, current window: [2,3] = &quot;wk&quot;
+  -&gt; New max length: 2, substring: &quot;wk&quot;
+  Updated map: p:0 w:2 k:3
+
+right=4, char=&#x27;e&#x27;, left=2, current window: [2,4] = &quot;wke&quot;
+  -&gt; New max length: 3, substring: &quot;wke&quot;
+  Updated map: p:0 w:2 k:3 e:4
+
+right=5, char=&#x27;w&#x27;, left=2, current window: [2,5] = &quot;wkew&quot;
+  -&gt; Duplicate found! Moving left from 2 to 3
+  Updated map: p:0 w:5 k:3 e:4
+
+Longest substring: &quot;wke&quot; with length: 3
+</code></pre>
+<h4 id="关键点说明" class="prose-heading">关键点说明：</h4>
+<ol>
+<li></li>
+</ol>
+<pre><code>**初始状态**：left=0, right=0，窗口为&quot;p&quot;
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>**扩展窗口**：right移动到1，窗口扩展为&quot;pw&quot;（无重复）
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>**遇到重复**：right=2时遇到第二个'w'，发现重复，left从0移动到2
+</code></pre>
+<ol start="4">
+<li></li>
+</ol>
+<pre><code>**重新构建**：窗口变为&quot;w&quot;（从索引2开始）
+</code></pre>
+<ol start="5">
+<li></li>
+</ol>
+<pre><code>**继续扩展**：添加'k'和'e'，形成&quot;wke&quot;（长度为3）
+</code></pre>
+<ol start="6">
+<li></li>
+</ol>
+<pre><code>**再次遇到重复**：right=5时遇到第三个'w'，但此时left=2，窗口为&quot;wkew&quot;包含重复
+</code></pre>
+<ol start="7">
+<li></li>
+</ol>
+<pre><code>**调整窗口**：left移动到3，窗口变为&quot;kew&quot;（仍然长度为3）
+</code></pre>
+<h4 id="输出结果" class="prose-heading">输出结果：</h4>
+<p>程序会详细显示每一步的left、right变化，当前窗口内容，哈希表状态，以及何时发现重复字符和如何调整窗口边界。</p>
+<p>这样的输出可以帮助你清晰理解滑动窗口算法的工作原理和left/right指针的动态变化过程。</p>
+<p><strong>解法说明</strong>：</p>
+<ul>
+<li>时间复杂度：O (n)，每个字符只处理一次</li>
+<li>空间复杂度：O (min (m, n))，m 是字符集大小</li>
+<li>核心思路：使用滑动窗口 + 哈希表，哈希表记录字符最后出现的位置，当遇到重复字符时调整窗口起始位置</li>
+</ul>
+<p>这些问题展示了哈希表在快速查找、去重和记录位置等场景的高效应用，通过哈希表可以将许多原本需要 O (n²) 时间复杂度的问题优化到 O (n)。</p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          
+            <a class="toc-level-4" href="#什么是哈希表">什么是哈希表？</a>
+          
+            <a class="toc-level-4" href="#c-中的哈希表实现">C++ 中的哈希表实现</a>
+          
+            <a class="toc-level-5" href="#1-std-unordered-map-基本用法">1. `std::unordered_map` 基本用法</a>
+          
+            <a class="toc-level-5" href="#2-哈希冲突解决策略">2\. 哈希冲突解决策略</a>
+          
+            <a class="toc-level-5" href="#3-自定义类型作为键">3\. 自定义类型作为键</a>
+          
+            <a class="toc-level-4" href="#哈希表的优缺点">哈希表的优缺点</a>
+          
+            <a class="toc-level-4" href="#与-std-map-的对比">与 `std::map` 的对比</a>
+          
+            <a class="toc-level-4" href="#用哈希表解决几个算法问题-难度为简单或者中等">用哈希表解决几个算法问题，难度为简单或者中等</a>
+          
+            <a class="toc-level-4" href="#问题-1-两数之和-简单">问题 1：两数之和（简单）</a>
+          
+            <a class="toc-level-4" href="#问题-2-存在重复元素-ii-中等">问题 2：存在重复元素 II（中等）</a>
+          
+            <a class="toc-level-4" href="#问题-3-无重复字符的最长子串-中等">问题 3：无重复字符的最长子串（中等）</a>
+          
+            <a class="toc-level-3" href="#修改后的c-代码">修改后的C++代码</a>
+          
+            <a class="toc-level-3" href="#left和right变化与子字符串的关系说明">left和right变化与子字符串的关系说明</a>
+          
+            <a class="toc-level-4" href="#基本概念">基本概念：</a>
+          
+            <a class="toc-level-4" href="#关键点说明">关键点说明：</a>
+          
+            <a class="toc-level-4" href="#输出结果">输出结果：</a>
+          
+        </nav>
+      </aside>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/凸包问题graham扫描算法matlab.html">
+      <span>上一篇</span>
+      <strong>凸包问题Graham扫描算法MATLAB</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/为什么new分配在堆上函数变量在栈上递归调用时栈内存的变化过程.html">
+      <span>下一篇</span>
+      <strong>为什么new分配在堆上函数变量在栈上递归调用时栈内存的变化过程</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/蚁群算法是一种模拟蚂蚁觅食行为的优化算法适合用于解决旅行商问题tsp.html">蚁群算法是一种模拟蚂蚁觅食行为的优化算法适合用于解决旅行商问题TSP</a></h3>
+        <p class="post-excerpt">蚁群算法是一种模拟蚂蚁觅食行为的优化算法，适合用于解决旅行商问题（TSP）。以下是使用 MATLAB 实现蚁群算法解决 50 个城市 TSP 问题的代码：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.633Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/基于levy飞行粒子群优化算法的微电网优化调度.html">基于Levy飞行粒子群优化算法的微电网优化调度</a></h3>
+        <p class="post-excerpt">本文提出了一种基于Levy飞行粒子群优化（LFPSO）的微电网优化调度模型。该模型综合考虑经济成本和环境成本，通过优化光伏、风电、燃料电池、微型燃气轮机、柴油发电机和蓄电池等设备的出力，实现微电网24小时最优运行。研究对比了削峰填谷和模糊逻辑两种蓄电池控制策略，结果表明模糊逻辑策略能进一步降低总成本。系统包含负荷预测、可再生能源发电预测、设备参数设置和约束条件处理等功能模块，采用加权目标函数平衡经…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.532Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/为什么new分配在堆上函数变量在栈上递归调用时栈内存的变化过程.html">为什么new分配在堆上函数变量在栈上递归调用时栈内存的变化过程</a></h3>
+        <p class="post-excerpt">在 C++ 里，new 运算符分配的内存位于堆上，而函数的局部变量存于栈上，这是由它们各自的特性和设计目的决定的，下面为你详细解释：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.430Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

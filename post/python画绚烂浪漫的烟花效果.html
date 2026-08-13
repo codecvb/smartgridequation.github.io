@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>Python画绚烂浪漫的烟花效果 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">Python画绚烂浪漫的烟花效果</h1>
+        <p class="post-deck">这篇文章介绍了一个使用Pygame库实现的多种类型烟花模拟程序。程序实现了四种不同形状的烟花效果：圆形爆炸、星形爆炸、螺旋爆炸和心形爆炸。每个烟花由多个粒子组成，通过不同的参数方程控制粒子运动轨迹形成特定图案。程序提供了实时交互功能，用户可以通过空格键添加新烟花组，系统也会随机生成烟花。视觉效果方面，实现了粒子淡出和尾迹效果，增强了真实感。这个模拟展示了如何使用数学函数控制粒子行为来创造多样的视觉…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.402Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>19 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>这篇文章介绍了一个使用Pygame库实现的多种类型烟花模拟程序。程序实现了四种不同形状的烟花效果：圆形爆炸、星形爆炸、螺旋爆炸和心形爆炸。每个烟花由多个粒子组成，通过不同的参数方程控制粒子运动轨迹形成特定图案。程序提供了实时交互功能，用户可以通过空格键添加新烟花组，系统也会随机生成烟花。视觉效果方面，实现了粒子淡出和尾迹效果，增强了真实感。这个模拟展示了如何使用数学函数控制粒子行为来创造多样的视觉效果。</p>
+<p><img src="../uploads/csdn/python%E7%94%BB%E7%BB%9A%E7%83%82%E6%B5%AA%E6%BC%AB%E7%9A%84%E7%83%9F%E8%8A%B1%E6%95%88%E6%9E%9C/img-01.gif" alt=""></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> pygame
+<span class="hljs-keyword">import</span> random
+<span class="hljs-keyword">import</span> math
+<span class="hljs-keyword">import</span> sys
+
+<span class="hljs-comment"># 初始化pygame</span>
+pygame.init()
+
+<span class="hljs-comment"># 设置窗口尺寸</span>
+WIDTH, HEIGHT = <span class="hljs-number">1000</span>, <span class="hljs-number">700</span>
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(<span class="hljs-string">&quot;绚烂烟花模拟 - 多种类型烟花展示&quot;</span>)
+
+<span class="hljs-comment"># 颜色定义</span>
+BLACK = (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+WHITE = (<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>)
+COLORS = [
+    (<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>),
+    (<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>), (<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>),
+    (<span class="hljs-number">255</span>, <span class="hljs-number">165</span>, <span class="hljs-number">0</span>), (<span class="hljs-number">255</span>, <span class="hljs-number">192</span>, <span class="hljs-number">203</span>), (<span class="hljs-number">138</span>, <span class="hljs-number">43</span>, <span class="hljs-number">226</span>)
+]
+
+<span class="hljs-comment"># 烟花粒子类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Particle</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x, y, color, velocity_x, velocity_y, size=<span class="hljs-number">2</span>, decay=<span class="hljs-number">0.97</span>, gravity=<span class="hljs-number">0.15</span></span>):
+        <span class="hljs-variable language_">self</span>.x = x
+        <span class="hljs-variable language_">self</span>.y = y
+        <span class="hljs-variable language_">self</span>.color = color
+        <span class="hljs-variable language_">self</span>.velocity_x = velocity_x
+        <span class="hljs-variable language_">self</span>.velocity_y = velocity_y
+        <span class="hljs-variable language_">self</span>.size = size
+        <span class="hljs-variable language_">self</span>.decay = decay
+        <span class="hljs-variable language_">self</span>.gravity = gravity
+        <span class="hljs-variable language_">self</span>.lifetime = <span class="hljs-number">255</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.velocity_x *= <span class="hljs-variable language_">self</span>.decay
+        <span class="hljs-variable language_">self</span>.velocity_y *= <span class="hljs-variable language_">self</span>.decay
+        <span class="hljs-variable language_">self</span>.velocity_y += <span class="hljs-variable language_">self</span>.gravity
+        <span class="hljs-variable language_">self</span>.x += <span class="hljs-variable language_">self</span>.velocity_x
+        <span class="hljs-variable language_">self</span>.y += <span class="hljs-variable language_">self</span>.velocity_y
+        <span class="hljs-variable language_">self</span>.lifetime -= <span class="hljs-number">4</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">draw</span>(<span class="hljs-params">self, surface</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.lifetime &gt; <span class="hljs-number">0</span>:
+            alpha = <span class="hljs-built_in">min</span>(<span class="hljs-variable language_">self</span>.lifetime, <span class="hljs-number">255</span>)
+            color_with_alpha = (<span class="hljs-variable language_">self</span>.color[<span class="hljs-number">0</span>], <span class="hljs-variable language_">self</span>.color[<span class="hljs-number">1</span>], <span class="hljs-variable language_">self</span>.color[<span class="hljs-number">2</span>], alpha)
+            surf = pygame.Surface((<span class="hljs-variable language_">self</span>.size * <span class="hljs-number">2</span>, <span class="hljs-variable language_">self</span>.size * <span class="hljs-number">2</span>), pygame.SRCALPHA)
+            pygame.draw.circle(surf, color_with_alpha, (<span class="hljs-variable language_">self</span>.size, <span class="hljs-variable language_">self</span>.size), <span class="hljs-variable language_">self</span>.size)
+            surface.blit(surf, (<span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.x - <span class="hljs-variable language_">self</span>.size), <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.y - <span class="hljs-variable language_">self</span>.size)))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">is_dead</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.lifetime &lt;= <span class="hljs-number">0</span>
+
+<span class="hljs-comment"># 烟花类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Firework</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x, y, type_index</span>):
+        <span class="hljs-variable language_">self</span>.x = x
+        <span class="hljs-variable language_">self</span>.y = y
+        <span class="hljs-variable language_">self</span>.type_index = type_index
+        <span class="hljs-variable language_">self</span>.color = random.choice(COLORS)
+        <span class="hljs-variable language_">self</span>.particles = []
+        <span class="hljs-variable language_">self</span>.exploded = <span class="hljs-literal">False</span>
+        <span class="hljs-variable language_">self</span>.velocity_y = -random.uniform(<span class="hljs-number">8</span>, <span class="hljs-number">12</span>)
+        <span class="hljs-variable language_">self</span>.gravity = <span class="hljs-number">0.2</span>
+
+        <span class="hljs-comment"># 根据类型索引决定烟花类型</span>
+        <span class="hljs-variable language_">self</span>.<span class="hljs-built_in">type</span> = type_index % <span class="hljs-number">4</span>  <span class="hljs-comment"># 0:圆形, 1:星形, 2:螺旋, 3:心形</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.exploded:
+            <span class="hljs-variable language_">self</span>.velocity_y += <span class="hljs-variable language_">self</span>.gravity
+            <span class="hljs-variable language_">self</span>.y += <span class="hljs-variable language_">self</span>.velocity_y
+
+            <span class="hljs-comment"># 当速度变为正数（开始下落）时爆炸</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.velocity_y &gt;= <span class="hljs-number">0</span>:
+                <span class="hljs-variable language_">self</span>.explode()
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 更新所有粒子</span>
+            <span class="hljs-keyword">for</span> particle <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.particles[:]:
+                particle.update()
+                <span class="hljs-keyword">if</span> particle.is_dead():
+                    <span class="hljs-variable language_">self</span>.particles.remove(particle)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">draw</span>(<span class="hljs-params">self, surface</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>.exploded:
+            <span class="hljs-comment"># 绘制上升的烟花</span>
+            pygame.draw.circle(surface, <span class="hljs-variable language_">self</span>.color, (<span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.x), <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.y)), <span class="hljs-number">3</span>)
+            <span class="hljs-comment"># 绘制尾迹</span>
+            <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">5</span>):
+                pos_y = <span class="hljs-variable language_">self</span>.y + i * <span class="hljs-number">3</span>
+                alpha = <span class="hljs-number">255</span> - i * <span class="hljs-number">50</span>
+                <span class="hljs-keyword">if</span> alpha &gt; <span class="hljs-number">0</span>:
+                    trail_color = (<span class="hljs-variable language_">self</span>.color[<span class="hljs-number">0</span>], <span class="hljs-variable language_">self</span>.color[<span class="hljs-number">1</span>], <span class="hljs-variable language_">self</span>.color[<span class="hljs-number">2</span>], alpha)
+                    surf = pygame.Surface((<span class="hljs-number">6</span>, <span class="hljs-number">6</span>), pygame.SRCALPHA)
+                    pygame.draw.circle(surf, trail_color, (<span class="hljs-number">3</span>, <span class="hljs-number">3</span>), <span class="hljs-number">2</span>)
+                    surface.blit(surf, (<span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.x - <span class="hljs-number">3</span>), <span class="hljs-built_in">int</span>(pos_y - <span class="hljs-number">3</span>)))
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 绘制所有粒子</span>
+            <span class="hljs-keyword">for</span> particle <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.particles:
+                particle.draw(surface)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">explode</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.exploded = <span class="hljs-literal">True</span>
+        num_particles = <span class="hljs-number">0</span>
+
+        <span class="hljs-comment"># 根据烟花类型生成不同的粒子模式</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.<span class="hljs-built_in">type</span> == <span class="hljs-number">0</span>:  <span class="hljs-comment"># 圆形爆炸</span>
+            num_particles = <span class="hljs-number">150</span>
+            <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_particles):
+                angle = random.uniform(<span class="hljs-number">0</span>, math.pi * <span class="hljs-number">2</span>)
+                speed = random.uniform(<span class="hljs-number">2</span>, <span class="hljs-number">6</span>)
+                velocity_x = math.cos(angle) * speed
+                velocity_y = math.sin(angle) * speed
+                <span class="hljs-variable language_">self</span>.particles.append(Particle(<span class="hljs-variable language_">self</span>.x, <span class="hljs-variable language_">self</span>.y, <span class="hljs-variable language_">self</span>.color, velocity_x, velocity_y))
+
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.<span class="hljs-built_in">type</span> == <span class="hljs-number">1</span>:  <span class="hljs-comment"># 星形爆炸</span>
+            num_particles = <span class="hljs-number">200</span>
+            points = <span class="hljs-number">5</span>  <span class="hljs-comment"># 五角星</span>
+            <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_particles):
+                angle = (i % points) * (<span class="hljs-number">2</span> * math.pi / points) + random.uniform(-<span class="hljs-number">0.2</span>, <span class="hljs-number">0.2</span>)
+                speed = random.uniform(<span class="hljs-number">3</span>, <span class="hljs-number">7</span>)
+                velocity_x = math.cos(angle) * speed
+                velocity_y = math.sin(angle) * speed
+                <span class="hljs-variable language_">self</span>.particles.append(Particle(<span class="hljs-variable language_">self</span>.x, <span class="hljs-variable language_">self</span>.y, <span class="hljs-variable language_">self</span>.color, velocity_x, velocity_y))
+
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.<span class="hljs-built_in">type</span> == <span class="hljs-number">2</span>:  <span class="hljs-comment"># 螺旋形爆炸</span>
+            num_particles = <span class="hljs-number">250</span>
+            <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_particles):
+                angle = i * <span class="hljs-number">0.1</span>
+                radius = i * <span class="hljs-number">0.05</span>
+                speed = random.uniform(<span class="hljs-number">2</span>, <span class="hljs-number">5</span>)
+                velocity_x = math.cos(angle) * radius * speed
+                velocity_y = math.sin(angle) * radius * speed
+                <span class="hljs-variable language_">self</span>.particles.append(Particle(<span class="hljs-variable language_">self</span>.x, <span class="hljs-variable language_">self</span>.y, <span class="hljs-variable language_">self</span>.color, velocity_x, velocity_y))
+
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.<span class="hljs-built_in">type</span> == <span class="hljs-number">3</span>:  <span class="hljs-comment"># 心形爆炸</span>
+            num_particles = <span class="hljs-number">180</span>
+            <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_particles):
+                t = i / num_particles * <span class="hljs-number">2</span> * math.pi
+                <span class="hljs-comment"># 心形参数方程</span>
+                x = <span class="hljs-number">16</span> * (math.sin(t) ** <span class="hljs-number">3</span>)
+                y = <span class="hljs-number">13</span> * math.cos(t) - <span class="hljs-number">5</span> * math.cos(<span class="hljs-number">2</span>*t) - <span class="hljs-number">2</span> * math.cos(<span class="hljs-number">3</span>*t) - math.cos(<span class="hljs-number">4</span>*t)
+                <span class="hljs-comment"># 缩放和随机化</span>
+                scale = random.uniform(<span class="hljs-number">0.2</span>, <span class="hljs-number">0.4</span>)
+                velocity_x = x * scale
+                velocity_y = -y * scale  <span class="hljs-comment"># 反转y轴使心形正立</span>
+                <span class="hljs-variable language_">self</span>.particles.append(Particle(<span class="hljs-variable language_">self</span>.x, <span class="hljs-variable language_">self</span>.y, <span class="hljs-variable language_">self</span>.color, velocity_x, velocity_y))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">is_dead</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.exploded <span class="hljs-keyword">and</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.particles) == <span class="hljs-number">0</span>
+
+<span class="hljs-comment"># 主循环</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    clock = pygame.time.Clock()
+    fireworks = []
+    running = <span class="hljs-literal">True</span>
+
+    <span class="hljs-comment"># 创建半透明的surface用于实现淡出效果</span>
+    fade_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    fade_surface.fill((<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">25</span>))  <span class="hljs-comment"># 黑色带透明度</span>
+
+    <span class="hljs-comment"># 初始化一些烟花</span>
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">4</span>):
+        fireworks.append(Firework(random.randint(<span class="hljs-number">100</span>, WIDTH-<span class="hljs-number">100</span>), HEIGHT, i))
+
+    <span class="hljs-comment"># 显示说明文字</span>
+    font = pygame.font.SysFont(<span class="hljs-string">&#x27;simhei&#x27;</span>, <span class="hljs-number">24</span>)
+    text1 = font.render(<span class="hljs-string">&quot;圆形爆炸    星形爆炸    螺旋爆炸    心形爆炸&quot;</span>, <span class="hljs-literal">True</span>, WHITE)
+
+    <span class="hljs-keyword">while</span> running:
+        <span class="hljs-keyword">for</span> event <span class="hljs-keyword">in</span> pygame.event.get():
+            <span class="hljs-keyword">if</span> event.<span class="hljs-built_in">type</span> == pygame.QUIT:
+                running = <span class="hljs-literal">False</span>
+            <span class="hljs-keyword">elif</span> event.<span class="hljs-built_in">type</span> == pygame.KEYDOWN:
+                <span class="hljs-keyword">if</span> event.key == pygame.K_ESCAPE:
+                    running = <span class="hljs-literal">False</span>
+                <span class="hljs-keyword">elif</span> event.key == pygame.K_SPACE:
+                    <span class="hljs-comment"># 空格键添加一组新烟花</span>
+                    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">4</span>):
+                        fireworks.append(Firework(random.randint(<span class="hljs-number">100</span>, WIDTH-<span class="hljs-number">100</span>), HEIGHT, i))
+
+        <span class="hljs-comment"># 应用淡出效果</span>
+        screen.blit(fade_surface, (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>))
+
+        <span class="hljs-comment"># 随机添加新烟花</span>
+        <span class="hljs-keyword">if</span> random.random() &lt; <span class="hljs-number">0.05</span> <span class="hljs-keyword">and</span> <span class="hljs-built_in">len</span>(fireworks) &lt; <span class="hljs-number">20</span>:
+            fireworks.append(Firework(random.randint(<span class="hljs-number">100</span>, WIDTH-<span class="hljs-number">100</span>), HEIGHT, random.randint(<span class="hljs-number">0</span>, <span class="hljs-number">3</span>)))
+
+        <span class="hljs-comment"># 更新和绘制所有烟花</span>
+        <span class="hljs-keyword">for</span> firework <span class="hljs-keyword">in</span> fireworks[:]:
+            firework.update()
+            firework.draw(screen)
+            <span class="hljs-keyword">if</span> firework.is_dead():
+                fireworks.remove(firework)
+
+        <span class="hljs-comment"># 显示说明文字</span>
+        screen.blit(text1, (WIDTH//<span class="hljs-number">2</span> - text1.get_width()//<span class="hljs-number">2</span>, <span class="hljs-number">20</span>))
+
+        pygame.display.flip()
+        clock.tick(<span class="hljs-number">60</span>)
+
+    pygame.quit()
+    sys.exit()
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    main()
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/python离线语音歌词识别播放器歌词导入导出txt文本.html">
+      <span>上一篇</span>
+      <strong>Python离线语音歌词识别播放器歌词导入导出txt文本</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/python用手势控制程序窗口文字大小.html">
+      <span>下一篇</span>
+      <strong>python用手势控制程序窗口文字大小</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

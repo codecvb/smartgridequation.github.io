@@ -96,7 +96,7 @@ app.locals.renderMarkdown = renderMarkdown;
 // Public site ---------------------------------------------------------------
 
 app.get('/', (req, res) => {
-  const posts = store.listPosts({ status: 'published', limit: 8 });
+  const posts = store.listPosts({ status: 'published', limit: 9 });
   const featured = posts[0] || null;
   res.render('site/layout', {
     view: 'site/home',
@@ -104,19 +104,50 @@ app.get('/', (req, res) => {
     featured,
     posts: posts.slice(1),
     stats: store.getStats(),
-    tags: store.getTags().slice(0, 8)
+    tags: store.getTags().slice(0, 8),
+    categories: store.getCategories()
   });
 });
 
 app.get('/archive', (req, res) => {
   const posts = store.listPosts({ status: 'published' });
+  const categories = store.getCategories();
+  const groups = categories
+    .map((category) => ({
+      ...category,
+      posts: store.listPosts({ status: 'published', category: category.name })
+    }))
+    .filter((group) => group.posts.length);
   res.render('site/layout', {
     view: 'site/archive',
     pageTitle: '归档',
     heading: '全部文章',
-    description: '按时间倒序排列，一共 ' + posts.length + ' 篇。',
+    description: '按分类整理，一共 ' + posts.length + ' 篇。',
     posts,
+    categories,
+    groups,
     tags: []
+  });
+});
+
+app.get('/categories', (req, res) => {
+  res.render('site/layout', {
+    view: 'site/categories',
+    pageTitle: '分类',
+    categories: store.getCategories()
+  });
+});
+
+app.get('/category/:slug', (req, res, next) => {
+  const category = store.getCategories().find((c) => c.slug === req.params.slug);
+  if (!category) return next();
+  const posts = store.listPosts({ status: 'published', category: category.name });
+  res.render('site/layout', {
+    view: 'site/category',
+    pageTitle: category.name,
+    selected: category,
+    posts,
+    categories: store.getCategories()
   });
 });
 
@@ -142,7 +173,9 @@ app.get('/search', (req, res) => {
     description: q ? `找到 ${posts.length} 篇相关文章。` : '输入关键词，搜索标题、摘要与正文。',
     posts,
     q,
-    tags: []
+    tags: [],
+    categories: [],
+    groups: []
   });
 });
 
@@ -164,6 +197,7 @@ app.get('/post/:slug', (req, res, next) => {
     pageTitle: fresh.title,
     post: {
       ...fresh,
+      categorySlug: store.slugify(fresh.category || '随笔'),
       contentHtml: renderMarkdown(fresh.content),
       toc: getToc(fresh.content),
       readMinutes: readTime(fresh.content)
@@ -278,6 +312,7 @@ function emptyPost() {
     summary: '',
     content: '',
     tags: [],
+    category: '',
     status: 'draft',
     viewCount: 0
   };
@@ -315,6 +350,7 @@ admin.post('/posts', (req, res) => {
     summary: req.body.summary,
     content: req.body.content,
     tags: req.body.tags,
+    category: req.body.category,
     status: action
   });
   res.redirect('/admin/posts/' + post.id + '/edit?ok=1');
@@ -330,7 +366,8 @@ admin.post('/posts/:id', (req, res) => {
       slug: req.body.slug,
       summary: req.body.summary,
       content: req.body.content,
-      tags: req.body.tags
+      tags: req.body.tags,
+      category: req.body.category
     },
     req.body.action === 'publish' ? 'publish' : 'save'
   );
@@ -494,6 +531,7 @@ Oracle Cloud 的 Always Free 永久免费额度包含虚拟机（AMD 与 Arm）�
     summary: '整理 2026 年仍可用的免费与低价部署方案，从开箱即用的 Render 到长期免费的 Oracle Cloud。',
     content: deploy,
     tags: '部署, 指南',
+    category: '科技与社会',
     status: 'published'
   });
   store.createPost({
@@ -502,6 +540,7 @@ Oracle Cloud 的 Always Free 永久免费额度包含虚拟机（AMD 与 Arm）�
     summary: '这套博客的第一篇文章：介绍 Markdown 写作、目录、标签、搜索与图片上传等能力。',
     content: hello,
     tags: '随笔, Markdown',
+    category: '科技与社会',
     status: 'published'
   });
   const posts = store.listPosts({});

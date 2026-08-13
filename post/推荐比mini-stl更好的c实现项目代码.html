@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>推荐比mini stl更好的C实现项目代码 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/c-c-与-rust.html">C/C++ 与 Rust</a>
+        </nav>
+        <h1 class="post-title">推荐比mini stl更好的C实现项目代码</h1>
+        <p class="post-deck">代码来源 -- STL模拟: STL模拟 的各类实现 - Gitee.com</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.937Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>25 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-7.html">C/C++</a>
+          
+            <a class="tag-chip" href="../tags/tag-8.html">Rust</a>
+          
+            <a class="tag-chip" href="../tags/tag-9.html">C</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>代码来源 – <a href="https://gitee.com/liu-zhijiang_sc/stl-simulation/tree/master" title="STL模拟: STL模拟 的各类实现 - Gitee.com">STL模拟: STL模拟 的各类实现 - Gitee.com</a></p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-comment">// 防止头文件被重复包含</span>
+<span class="hljs-meta">#<span class="hljs-keyword">pragma</span> once</span>
+<span class="hljs-comment">// 包含输入输出流库，用于基本的输入输出操作</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-comment">// 包含向量容器库，向量是一种动态数组</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
+<span class="hljs-comment">// 包含列表容器库，列表是一种双向链表</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;list&gt;</span></span>
+
+<span class="hljs-comment">// 使用标准命名空间，这样就可以直接使用标准库中的类和函数，而无需加上std::前缀</span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+
+<span class="hljs-comment">// 正向迭代器类模板，用于以正向顺序遍历容器</span>
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">Iterator</span>&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ForwardIterator</span> {
+<span class="hljs-keyword">private</span>:
+    <span class="hljs-comment">// 当前迭代器指向的位置</span>
+    Iterator current;
+
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-comment">// 定义迭代器所指向元素的类型</span>
+    <span class="hljs-keyword">using</span> value_type = <span class="hljs-keyword">typename</span> iterator_traits&lt;Iterator&gt;::value_type;
+    <span class="hljs-comment">// 定义迭代器所指向元素的引用类型</span>
+    <span class="hljs-keyword">using</span> reference = <span class="hljs-keyword">typename</span> iterator_traits&lt;Iterator&gt;::reference;
+    <span class="hljs-comment">// 定义迭代器所指向元素的指针类型</span>
+    <span class="hljs-keyword">using</span> pointer = <span class="hljs-keyword">typename</span> iterator_traits&lt;Iterator&gt;::pointer;
+
+    <span class="hljs-comment">// 构造函数，使用一个迭代器初始化当前迭代器</span>
+    <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">ForwardIterator</span><span class="hljs-params">(Iterator it)</span> : current(it) {</span>}
+
+    <span class="hljs-comment">// 解引用操作符，返回当前迭代器指向的元素的引用</span>
+    reference <span class="hljs-keyword">operator</span>*() {
+        <span class="hljs-keyword">return</span> *current;
+    }
+
+    <span class="hljs-comment">// 前置递增操作符，将迭代器移动到下一个位置，并返回自身引用</span>
+    ForwardIterator&amp; <span class="hljs-keyword">operator</span>++() {
+        ++current;
+        <span class="hljs-keyword">return</span> *<span class="hljs-keyword">this</span>;
+    }
+
+    <span class="hljs-comment">// 后置递增操作符，先保存当前迭代器状态，再将迭代器移动到下一个位置，最后返回保存的状态</span>
+    ForwardIterator <span class="hljs-keyword">operator</span>++(<span class="hljs-type">int</span>) {
+        ForwardIterator tmp = *<span class="hljs-keyword">this</span>;
+        ++(*<span class="hljs-keyword">this</span>);
+        <span class="hljs-keyword">return</span> tmp;
+    }
+
+    <span class="hljs-comment">// 不等于比较操作符，用于判断两个迭代器是否指向不同的位置</span>
+    <span class="hljs-type">bool</span> <span class="hljs-keyword">operator</span>!=(<span class="hljs-type">const</span> ForwardIterator&amp; other) <span class="hljs-type">const</span> {
+        <span class="hljs-keyword">return</span> current != other.current;
+    }
+};
+
+<span class="hljs-comment">// 常量正向迭代器类模板，用于以正向顺序遍历容器，且不允许修改元素</span>
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">Iterator</span>&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ConstForwardIterator</span> {
+<span class="hljs-keyword">private</span>:
+    <span class="hljs-comment">// 当前迭代器指向的位置</span>
+    Iterator current;
+
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-comment">// 定义迭代器所指向元素的类型</span>
+    <span class="hljs-keyword">using</span> value_type = <span class="hljs-keyword">typename</span> iterator_traits&lt;Iterator&gt;::value_type;
+    <span class="hljs-comment">// 定义迭代器所指向元素的常量引用类型</span>
+    <span class="hljs-keyword">using</span> reference = <span class="hljs-type">const</span> <span class="hljs-keyword">typename</span> iterator_traits&lt;Iterator&gt;::value_type&amp;;
+    <span class="hljs-comment">// 定义迭代器所指向元素的常量指针类型</span>
+    <span class="hljs-keyword">using</span> pointer = <span class="hljs-type">const</span> <span class="hljs-keyword">typename</span> iterator_traits&lt;Iterator&gt;::value_type*;
+
+    <span class="hljs-comment">// 构造函数，使用一个迭代器初始化当前迭代器</span>
+    <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">ConstForwardIterator</span><span class="hljs-params">(Iterator it)</span> : current(it) {</span>}
+
+    <span class="hljs-comment">// 解引用操作符，返回当前迭代器指向的元素的常量引用</span>
+    reference <span class="hljs-keyword">operator</span>*() <span class="hljs-type">const</span> {
+        <span class="hljs-keyword">return</span> *current;
+    }
+
+    <span class="hljs-comment">// 前置递增操作符，将迭代器移动到下一个位置，并返回自身引用</span>
+    ConstForwardIterator&amp; <span class="hljs-keyword">operator</span>++() {
+        ++current;
+        <span class="hljs-keyword">return</span> *<span class="hljs-keyword">this</span>;
+    }
+
+    <span class="hljs-comment">// 后置递增操作符，先保存当前迭代器状态，再将迭代器移动到下一个位置，最后返回保存的状态</span>
+    ConstForwardIterator <span class="hljs-keyword">operator</span>++(<span class="hljs-type">int</span>) {
+        ConstForwardIterator tmp = *<span class="hljs-keyword">this</span>;
+        ++(*<span class="hljs-keyword">this</span>);
+        <span class="hljs-keyword">return</span> tmp;
+    }
+
+    <span class="hljs-comment">// 不等于比较操作符，用于判断两个迭代器是否指向不同的位置</span>
+    <span class="hljs-type">bool</span> <span class="hljs-keyword">operator</span>!=(<span class="hljs-type">const</span> ConstForwardIterator&amp; other) <span class="hljs-type">const</span> {
+        <span class="hljs-keyword">return</span> current != other.current;
+    }
+};
+
+<span class="hljs-comment">// 反向迭代器类模板，用于以反向顺序遍历容器</span>
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">Iterator</span>&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ReverseIterator</span> {
+<span class="hljs-keyword">private</span>:
+    <span class="hljs-comment">// 当前迭代器指向的位置</span>
+    Iterator current;
+
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-comment">// 定义迭代器所指向元素的类型</span>
+    <span class="hljs-keyword">using</span> value_type = <span class="hljs-keyword">typename</span> iterator_traits&lt;Iterator&gt;::value_type;
+    <span class="hljs-comment">// 定义迭代器所指向元素的引用类型</span>
+    <span class="hljs-keyword">using</span> reference = <span class="hljs-keyword">typename</span> iterator_traits&lt;Iterator&gt;::reference;
+
+    <span class="hljs-comment">// 构造函数，从标准库的反向迭代器构造当前反向迭代器</span>
+    <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">ReverseIterator</span><span class="hljs-params">(<span class="hljs-type">const</span> std::reverse_iterator&lt;Iterator&gt;&amp; rev_it)</span>
+        : current(rev_it.base()) {</span>}
+
+    <span class="hljs-comment">// 解引用操作符，返回当前迭代器指向的元素</span>
+    <span class="hljs-keyword">auto</span> <span class="hljs-keyword">operator</span>*() <span class="hljs-type">const</span> {
+        Iterator tmp = current;
+        --tmp;  <span class="hljs-comment">// 反向迭代，因为反向迭代器的行为与正向迭代器相反</span>
+        <span class="hljs-keyword">return</span> *tmp;
+    }
+
+    <span class="hljs-comment">// 前置递增操作符，将迭代器移动到前一个位置（反向移动），并返回自身引用</span>
+    ReverseIterator&amp; <span class="hljs-keyword">operator</span>++() {
+        --current;
+        <span class="hljs-keyword">return</span> *<span class="hljs-keyword">this</span>;
+    }
+
+    <span class="hljs-comment">// 后置递增操作符，先保存当前迭代器状态，再将迭代器移动到前一个位置（反向移动），最后返回保存的状态</span>
+    ReverseIterator <span class="hljs-keyword">operator</span>++(<span class="hljs-type">int</span>) {
+        ReverseIterator tmp = *<span class="hljs-keyword">this</span>;
+        --current;
+        <span class="hljs-keyword">return</span> tmp;
+    }
+
+    <span class="hljs-comment">// 不等于比较操作符，用于判断两个迭代器是否指向不同的位置</span>
+    <span class="hljs-type">bool</span> <span class="hljs-keyword">operator</span>!=(<span class="hljs-type">const</span> ReverseIterator&amp; other) <span class="hljs-type">const</span> {
+        <span class="hljs-keyword">return</span> current != other.current;
+    }
+
+    <span class="hljs-comment">// 返回底层的正向迭代器</span>
+    <span class="hljs-function">Iterator <span class="hljs-title">base</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{
+        <span class="hljs-keyword">return</span> current;
+    }
+};
+
+<span class="hljs-comment">// 常量反向迭代器类模板，用于以反向顺序遍历容器，且不允许修改元素</span>
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">Iterator</span>&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ConstReverseIterator</span> {
+<span class="hljs-keyword">private</span>:
+    <span class="hljs-comment">// 当前迭代器指向的位置</span>
+    Iterator current;
+
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-comment">// 定义迭代器所指向元素的类型</span>
+    <span class="hljs-keyword">using</span> value_type = <span class="hljs-keyword">typename</span> iterator_traits&lt;Iterator&gt;::value_type;
+    <span class="hljs-comment">// 定义迭代器所指向元素的常量引用类型</span>
+    <span class="hljs-keyword">using</span> reference = <span class="hljs-type">const</span> <span class="hljs-keyword">typename</span> iterator_traits&lt;Iterator&gt;::value_type&amp;;
+
+    <span class="hljs-comment">// 构造函数，从标准库的常量反向迭代器构造当前常量反向迭代器</span>
+    <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">ConstReverseIterator</span><span class="hljs-params">(<span class="hljs-type">const</span> std::reverse_iterator&lt;Iterator&gt;&amp; rev_it)</span>
+        : current(rev_it.base()) {</span>}
+
+    <span class="hljs-comment">// 解引用操作符，返回当前迭代器指向的元素的常量引用</span>
+    <span class="hljs-keyword">auto</span> <span class="hljs-keyword">operator</span>*() <span class="hljs-type">const</span> {
+        Iterator tmp = current;
+        --tmp;  <span class="hljs-comment">// 反向迭代，因为反向迭代器的行为与正向迭代器相反</span>
+        <span class="hljs-keyword">return</span> *tmp;
+    }
+
+    <span class="hljs-comment">// 前置递增操作符，将迭代器移动到前一个位置（反向移动），并返回自身引用</span>
+    ConstReverseIterator&amp; <span class="hljs-keyword">operator</span>++() {
+        --current;
+        <span class="hljs-keyword">return</span> *<span class="hljs-keyword">this</span>;
+    }
+
+    <span class="hljs-comment">// 不等于比较操作符，用于判断两个迭代器是否指向不同的位置</span>
+    <span class="hljs-type">bool</span> <span class="hljs-keyword">operator</span>!=(<span class="hljs-type">const</span> ConstReverseIterator&amp; other) <span class="hljs-type">const</span> {
+        <span class="hljs-keyword">return</span> current != other.current;
+    }
+
+    <span class="hljs-comment">// 返回底层的正向迭代器</span>
+    <span class="hljs-function">Iterator <span class="hljs-title">base</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{
+        <span class="hljs-keyword">return</span> current;
+    }
+};
+
+<span class="hljs-comment">// 容器适配器类模板，用于为容器提供自定义的迭代器接口</span>
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">Container</span>&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ContainerAdapter</span> {
+<span class="hljs-keyword">private</span>:
+    <span class="hljs-comment">// 引用要适配的容器</span>
+    Container&amp; container;
+
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-comment">// 定义容器的迭代器类型</span>
+    <span class="hljs-keyword">using</span> iterator = <span class="hljs-keyword">typename</span> Container::iterator;
+    <span class="hljs-comment">// 定义容器的常量迭代器类型</span>
+    <span class="hljs-keyword">using</span> const_iterator = <span class="hljs-keyword">typename</span> Container::const_iterator;
+
+    <span class="hljs-comment">// 构造函数，初始化要适配的容器</span>
+    <span class="hljs-built_in">ContainerAdapter</span>(Container&amp; container) : <span class="hljs-built_in">container</span>(container) {}
+
+    <span class="hljs-comment">// 返回正向迭代器的起始位置</span>
+    <span class="hljs-function">ForwardIterator&lt;iterator&gt; <span class="hljs-title">begin</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">ForwardIterator</span>&lt;iterator&gt;(container.<span class="hljs-built_in">begin</span>());
+    }
+    <span class="hljs-comment">// 返回正向迭代器的结束位置</span>
+    <span class="hljs-function">ForwardIterator&lt;iterator&gt; <span class="hljs-title">end</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">ForwardIterator</span>&lt;iterator&gt;(container.<span class="hljs-built_in">end</span>());
+    }
+
+    <span class="hljs-comment">// 返回正向常量迭代器的起始位置</span>
+    <span class="hljs-function">ConstForwardIterator&lt;const_iterator&gt; <span class="hljs-title">cbegin</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">ConstForwardIterator</span>&lt;const_iterator&gt;(container.<span class="hljs-built_in">cbegin</span>());
+    }
+    <span class="hljs-comment">// 返回正向常量迭代器的结束位置</span>
+    <span class="hljs-function">ConstForwardIterator&lt;const_iterator&gt; <span class="hljs-title">cend</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">ConstForwardIterator</span>&lt;const_iterator&gt;(container.<span class="hljs-built_in">cend</span>());
+    }
+
+    <span class="hljs-comment">// 返回反向迭代器的起始位置</span>
+    <span class="hljs-function">ReverseIterator&lt;<span class="hljs-keyword">typename</span> Container::iterator&gt; <span class="hljs-title">rbegin</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">ReverseIterator</span>&lt;<span class="hljs-keyword">typename</span> Container::iterator&gt;(container.<span class="hljs-built_in">rbegin</span>());
+    }
+    <span class="hljs-comment">// 返回反向迭代器的结束位置</span>
+    <span class="hljs-function">ReverseIterator&lt;<span class="hljs-keyword">typename</span> Container::iterator&gt; <span class="hljs-title">rend</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">ReverseIterator</span>&lt;<span class="hljs-keyword">typename</span> Container::iterator&gt;(container.<span class="hljs-built_in">rend</span>());
+    }
+    <span class="hljs-comment">// 返回常量反向迭代器的起始位置</span>
+    <span class="hljs-function">ConstReverseIterator&lt;<span class="hljs-keyword">typename</span> Container::const_iterator&gt; <span class="hljs-title">crbegin</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">ConstReverseIterator</span>&lt;<span class="hljs-keyword">typename</span> Container::const_iterator&gt;(container.<span class="hljs-built_in">crbegin</span>());
+    }
+    <span class="hljs-comment">// 返回常量反向迭代器的结束位置</span>
+    <span class="hljs-function">ConstReverseIterator&lt;<span class="hljs-keyword">typename</span> Container::const_iterator&gt; <span class="hljs-title">crend</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">ConstReverseIterator</span>&lt;<span class="hljs-keyword">typename</span> Container::const_iterator&gt;(container.<span class="hljs-built_in">crend</span>());
+    }
+};
+</code></pre>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-comment">//以vector和list为例</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;vector&gt;</span></span>
+<span class="hljs-comment">// 需要使用for_eacj必须引入的算法库函数</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;algorithm&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&quot;Iterator_for_all_container.h&quot;</span></span>
+
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//class OPerator</span>
+<span class="hljs-comment">//{</span>
+<span class="hljs-comment">//public:</span>
+<span class="hljs-comment">//	OPerator();</span>
+<span class="hljs-comment">//	~OPerator();</span>
+<span class="hljs-comment">//	OPerator operator++();</span>
+<span class="hljs-comment">//	OPerator operator++(int k);</span>
+<span class="hljs-comment">//private:</span>
+<span class="hljs-comment">//	int n;</span>
+<span class="hljs-comment">//};</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//OPerator::OPerator()</span>
+<span class="hljs-comment">//{</span>
+<span class="hljs-comment">//}</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//OPerator::~OPerator()</span>
+<span class="hljs-comment">//{</span>
+<span class="hljs-comment">//}</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//OPerator OPerator::operator++() {</span>
+<span class="hljs-comment">//	// 前置++</span>
+<span class="hljs-comment">//	++n;</span>
+<span class="hljs-comment">//	return *this;</span>
+<span class="hljs-comment">//}</span>
+<span class="hljs-comment">//OPerator OPerator::operator++(int k) {</span>
+<span class="hljs-comment">//	// 后置++</span>
+<span class="hljs-comment">//	OPerator temp(*this);// 记录修改前的对象</span>
+<span class="hljs-comment">//	n++;</span>
+<span class="hljs-comment">//	return temp;</span>
+<span class="hljs-comment">//}</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//</span>
+ 遍历
+<span class="hljs-comment">//void Test() {</span>
+<span class="hljs-comment">//	vector&lt;int&gt; v;</span>
+<span class="hljs-comment">//	v.push_back(20);</span>
+<span class="hljs-comment">//	v.push_back(10);</span>
+<span class="hljs-comment">//	v.push_back(5);</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//	// 1.基本的循环</span>
+<span class="hljs-comment">//	for (auto it = v.begin(); it !=  v.end(); ++it) {</span>
+<span class="hljs-comment">//		cout &lt;&lt; *it &lt;&lt; &quot; &quot;;</span>
+<span class="hljs-comment">//	}</span>
+<span class="hljs-comment">//	cout &lt;&lt; endl;</span>
+<span class="hljs-comment">//	// 2.C++11之后，增强版for</span>
+<span class="hljs-comment">//	for (const auto&amp; elem : v) {</span>
+<span class="hljs-comment">//		cout &lt;&lt; elem &lt;&lt; &quot; &quot;;</span>
+<span class="hljs-comment">//	}</span>
+<span class="hljs-comment">//	cout &lt;&lt; endl;</span>
+<span class="hljs-comment">//	// 3.lambda表达式</span>
+<span class="hljs-comment">//	for_each(v.begin(), v.end(), [](int elem) { cout &lt;&lt; elem &lt;&lt; &quot; &quot;; });</span>
+<span class="hljs-comment">//	cout &lt;&lt; endl;</span>
+<span class="hljs-comment">//	// 4.不需要修改容器元素的话,可以使用常量迭代器</span>
+<span class="hljs-comment">//	for (auto it = v.cbegin(); it != v.cend(); ++it) {</span>
+<span class="hljs-comment">//		cout &lt;&lt; *it &lt;&lt; &quot; &quot;;</span>
+<span class="hljs-comment">//	}</span>
+<span class="hljs-comment">//	cout &lt;&lt; endl;</span>
+<span class="hljs-comment">//}</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//void Test_reverse() {</span>
+<span class="hljs-comment">//	vector&lt;int&gt; vec;</span>
+<span class="hljs-comment">//	for (int i = 0; i &lt; 5; i++) {</span>
+<span class="hljs-comment">//		vec.push_back(i);</span>
+<span class="hljs-comment">//	}</span>
+<span class="hljs-comment">//	// 反向迭代器</span>
+<span class="hljs-comment">//	for (vector&lt;int&gt;::reverse_iterator it = vec.rbegin(); it != vec.rend(); ++it) {</span>
+<span class="hljs-comment">//		cout &lt;&lt; *it &lt;&lt; &quot; &quot;;</span>
+<span class="hljs-comment">//	}</span>
+<span class="hljs-comment">//	cout &lt;&lt; endl;</span>
+<span class="hljs-comment">//	//lambda</span>
+<span class="hljs-comment">//	for_each(vec.rbegin(), vec.rend(), [](const auto&amp; elem)-&gt; void { cout &lt;&lt; elem &lt;&lt; &quot; &quot;; });</span>
+<span class="hljs-comment">//}</span>
+
+
+<span class="hljs-comment">// 使用适配器类进行容器的遍历</span>
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">Container</span>&gt;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">testContainerAdapter</span><span class="hljs-params">(Container&amp; container)</span> </span>{
+    <span class="hljs-comment">// 创建适配器实例</span>
+    <span class="hljs-function">ContainerAdapter&lt;Container&gt; <span class="hljs-title">adapter</span><span class="hljs-params">(container)</span></span>;
+
+    <span class="hljs-comment">// 正向迭代器测试</span>
+    std::cout &lt;&lt; <span class="hljs-string">&quot;正向迭代器: &quot;</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> it = adapter.<span class="hljs-built_in">begin</span>(); it != adapter.<span class="hljs-built_in">end</span>(); ++it) {
+        std::cout &lt;&lt; *it &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;
+    }
+    std::cout &lt;&lt; std::endl;
+
+    <span class="hljs-comment">// 正向常量迭代器测试</span>
+    std::cout &lt;&lt; <span class="hljs-string">&quot;正向常量迭代器: &quot;</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> it = adapter.<span class="hljs-built_in">cbegin</span>(); it != adapter.<span class="hljs-built_in">cend</span>(); ++it) {
+        std::cout &lt;&lt; *it &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;
+    }
+    std::cout &lt;&lt; std::endl;
+
+    <span class="hljs-comment">// 反向迭代器测试</span>
+    std::cout &lt;&lt; <span class="hljs-string">&quot;反向迭代器: &quot;</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> it = adapter.<span class="hljs-built_in">rbegin</span>(); it != adapter.<span class="hljs-built_in">rend</span>(); ++it) {
+        std::cout &lt;&lt; *it &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;
+    }
+    std::cout &lt;&lt; std::endl;
+
+    <span class="hljs-comment">// 常量反向迭代器测试</span>
+    std::cout &lt;&lt; <span class="hljs-string">&quot;常量反向迭代器: &quot;</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> it = adapter.<span class="hljs-built_in">crbegin</span>(); it != adapter.<span class="hljs-built_in">crend</span>(); ++it) {
+        std::cout &lt;&lt; *it &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;
+    }
+    std::cout &lt;&lt; std::endl;
+    <span class="hljs-comment">// lambda</span>
+    for_each(adapter.<span class="hljs-built_in">crbegin</span>(), adapter.<span class="hljs-built_in">crend</span>(), [](<span class="hljs-type">const</span> <span class="hljs-keyword">auto</span>&amp; elem) -&gt;<span class="hljs-type">void</span> { std::cout &lt;&lt; elem &lt;&lt; <span class="hljs-string">&quot; &quot;</span>; });
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Test_iterator</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-comment">// 测试 vector</span>
+    std::vector&lt;<span class="hljs-type">int</span>&gt; vec = { <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span> };
+    std::cout &lt;&lt; <span class="hljs-string">&quot;测试 vector 容器:&quot;</span> &lt;&lt; std::endl;
+    <span class="hljs-built_in">testContainerAdapter</span>(vec);
+
+    <span class="hljs-comment">// 测试 list</span>
+    std::list&lt;<span class="hljs-type">int</span>&gt; lst = { <span class="hljs-number">10</span>, <span class="hljs-number">20</span>, <span class="hljs-number">30</span>, <span class="hljs-number">40</span>, <span class="hljs-number">50</span> };
+    std::cout &lt;&lt; <span class="hljs-string">&quot;\n测试 list 容器:&quot;</span> &lt;&lt; std::endl;
+    <span class="hljs-built_in">testContainerAdapter</span>(lst);
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-built_in">Test_iterator</span>();
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<p><img src="../uploads/csdn/%E6%8E%A8%E8%8D%90%E6%AF%94mini-stl%E6%9B%B4%E5%A5%BD%E7%9A%84c%E5%AE%9E%E7%8E%B0%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81/img-01.png" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/用c语言实现的回调函数案例涵盖基础用法及不同消息机制gui模拟网络请求模拟状态机消息队列.html">
+      <span>上一篇</span>
+      <strong>用C语言实现的回调函数案例涵盖基础用法及不同消息机制GUI模拟网络请求模拟状态机消息队列</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/修复代码漏洞的具体案例c-html-php-sql-javascript.html">
+      <span>下一篇</span>
+      <strong>修复代码漏洞的具体案例C HTML PHP SQL JavaScript</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/编写有内存漏洞的c代码并实现内存注入的示例一个程序注入另一个程序.html">编写有内存漏洞的C代码并实现内存注入的示例一个程序注入另一个程序</a></h3>
+        <p class="post-excerpt">实现思路</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.956Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/用c语言实现的回调函数案例涵盖基础用法及不同消息机制gui模拟网络请求模拟状态机消息队列.html">用C语言实现的回调函数案例涵盖基础用法及不同消息机制GUI模拟网络请求模拟状态机消息队列</a></h3>
+        <p class="post-excerpt">以下是用 C 语言实现的回调函数案例，涵盖基础用法及不同消息机制（GUI 模拟、网络请求模拟、状态机、消息队列），包含详细注释和解释。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.946Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/修复代码漏洞的具体案例c-html-php-sql-javascript.html">修复代码漏洞的具体案例C HTML PHP SQL JavaScript</a></h3>
+        <p class="post-excerpt">以下是一些修复代码漏洞的具体案例：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:46.929Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

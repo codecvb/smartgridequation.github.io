@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>用Python写马里奥闯关游戏 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/python-编程.html">Python 编程</a>
+        </nav>
+        <h1 class="post-title">用Python写马里奥闯关游戏</h1>
+        <p class="post-deck">创建一个简化版的超级玛丽游戏。这个游戏实现了马里奥的基本移动、跳跃、收集金币、与敌人互动等核心功能。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:47.618Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>24 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-1.html">Python</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>创建一个简化版的超级玛丽游戏。这个游戏实现了马里奥的基本移动、跳跃、收集金币、与敌人互动等核心功能。</p>
+<pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> pygame
+<span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">import</span> random
+
+<span class="hljs-comment"># 初始化pygame</span>
+pygame.init()
+
+<span class="hljs-comment"># 游戏窗口设置</span>
+SCREEN_WIDTH = <span class="hljs-number">800</span>
+SCREEN_HEIGHT = <span class="hljs-number">450</span>
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption(<span class="hljs-string">&quot;超级玛丽&quot;</span>)
+
+<span class="hljs-comment"># 确保中文能正常显示</span>
+pygame.font.init()
+font_options = [<span class="hljs-string">&quot;SimHei&quot;</span>, <span class="hljs-string">&quot;WenQuanYi Micro Hei&quot;</span>, <span class="hljs-string">&quot;Heiti TC&quot;</span>, pygame.font.get_default_font()]
+font = <span class="hljs-literal">None</span>
+<span class="hljs-keyword">for</span> font_name <span class="hljs-keyword">in</span> font_options:
+    <span class="hljs-keyword">try</span>:
+        font = pygame.font.SysFont(font_name, <span class="hljs-number">36</span>)
+        <span class="hljs-keyword">break</span>
+    <span class="hljs-keyword">except</span>:
+        <span class="hljs-keyword">continue</span>
+
+<span class="hljs-comment"># 颜色定义</span>
+SKY_BLUE = (<span class="hljs-number">135</span>, <span class="hljs-number">206</span>, <span class="hljs-number">235</span>)
+WHITE = (<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>)
+BLACK = (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+GREEN = (<span class="hljs-number">34</span>, <span class="hljs-number">139</span>, <span class="hljs-number">34</span>)    <span class="hljs-comment"># 地面颜色</span>
+BROWN = (<span class="hljs-number">139</span>, <span class="hljs-number">69</span>, <span class="hljs-number">19</span>)    <span class="hljs-comment"># 敌人颜色</span>
+RED = (<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)        <span class="hljs-comment"># 马里奥颜色</span>
+YELLOW = (<span class="hljs-number">255</span>, <span class="hljs-number">215</span>, <span class="hljs-number">0</span>)   <span class="hljs-comment"># 金币颜色</span>
+GRAY = (<span class="hljs-number">169</span>, <span class="hljs-number">169</span>, <span class="hljs-number">169</span>)   <span class="hljs-comment"># 砖块颜色</span>
+
+<span class="hljs-comment"># 游戏帧率</span>
+clock = pygame.time.Clock()
+FPS = <span class="hljs-number">60</span>
+
+<span class="hljs-comment"># 马里奥类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Mario</span>(pygame.sprite.Sprite):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x, y</span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.width = <span class="hljs-number">40</span>
+        <span class="hljs-variable language_">self</span>.height = <span class="hljs-number">60</span>
+        <span class="hljs-variable language_">self</span>.image = pygame.Surface((<span class="hljs-variable language_">self</span>.width, <span class="hljs-variable language_">self</span>.height))
+        <span class="hljs-variable language_">self</span>.image.fill(RED)
+        <span class="hljs-variable language_">self</span>.rect = <span class="hljs-variable language_">self</span>.image.get_rect()
+        <span class="hljs-variable language_">self</span>.rect.x = x
+        <span class="hljs-variable language_">self</span>.rect.y = y
+
+        <span class="hljs-comment"># 移动属性</span>
+        <span class="hljs-variable language_">self</span>.vel_x = <span class="hljs-number">0</span>
+        <span class="hljs-variable language_">self</span>.vel_y = <span class="hljs-number">0</span>
+        <span class="hljs-variable language_">self</span>.speed = <span class="hljs-number">5</span>
+        <span class="hljs-variable language_">self</span>.jump_strength = -<span class="hljs-number">15</span>
+        <span class="hljs-variable language_">self</span>.gravity = <span class="hljs-number">0.8</span>
+        <span class="hljs-variable language_">self</span>.on_ground = <span class="hljs-literal">False</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">self, platforms</span>):
+        <span class="hljs-comment"># 应用重力</span>
+        <span class="hljs-variable language_">self</span>.vel_y += <span class="hljs-variable language_">self</span>.gravity
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.vel_y &gt; <span class="hljs-number">10</span>:  <span class="hljs-comment"># 限制最大下落速度</span>
+            <span class="hljs-variable language_">self</span>.vel_y = <span class="hljs-number">10</span>
+
+        <span class="hljs-comment"># 水平移动</span>
+        <span class="hljs-variable language_">self</span>.rect.x += <span class="hljs-variable language_">self</span>.vel_x
+
+        <span class="hljs-comment"># 水平碰撞检测</span>
+        <span class="hljs-keyword">for</span> platform <span class="hljs-keyword">in</span> platforms:
+            <span class="hljs-keyword">if</span> pygame.sprite.collide_rect(<span class="hljs-variable language_">self</span>, platform):
+                <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.vel_x &gt; <span class="hljs-number">0</span>:  <span class="hljs-comment"># 向右移动</span>
+                    <span class="hljs-variable language_">self</span>.rect.right = platform.rect.left
+                <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.vel_x &lt; <span class="hljs-number">0</span>:  <span class="hljs-comment"># 向左移动</span>
+                    <span class="hljs-variable language_">self</span>.rect.left = platform.rect.right
+
+        <span class="hljs-comment"># 垂直移动</span>
+        <span class="hljs-variable language_">self</span>.rect.y += <span class="hljs-variable language_">self</span>.vel_y
+        <span class="hljs-variable language_">self</span>.on_ground = <span class="hljs-literal">False</span>
+
+        <span class="hljs-comment"># 垂直碰撞检测</span>
+        <span class="hljs-keyword">for</span> platform <span class="hljs-keyword">in</span> platforms:
+            <span class="hljs-keyword">if</span> pygame.sprite.collide_rect(<span class="hljs-variable language_">self</span>, platform):
+                <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.vel_y &gt; <span class="hljs-number">0</span>:  <span class="hljs-comment"># 下落</span>
+                    <span class="hljs-variable language_">self</span>.rect.bottom = platform.rect.top
+                    <span class="hljs-variable language_">self</span>.vel_y = <span class="hljs-number">0</span>
+                    <span class="hljs-variable language_">self</span>.on_ground = <span class="hljs-literal">True</span>
+                <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.vel_y &lt; <span class="hljs-number">0</span>:  <span class="hljs-comment"># 上升</span>
+                    <span class="hljs-variable language_">self</span>.rect.top = platform.rect.bottom
+                    <span class="hljs-variable language_">self</span>.vel_y = <span class="hljs-number">0</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">jump</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.on_ground:
+            <span class="hljs-variable language_">self</span>.vel_y = <span class="hljs-variable language_">self</span>.jump_strength
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">move_left</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.vel_x = -<span class="hljs-variable language_">self</span>.speed
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">move_right</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.vel_x = <span class="hljs-variable language_">self</span>.speed
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">stop</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.vel_x = <span class="hljs-number">0</span>
+
+<span class="hljs-comment"># 平台类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Platform</span>(pygame.sprite.Sprite):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x, y, width, height, color=GREEN</span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.image = pygame.Surface((width, height))
+        <span class="hljs-variable language_">self</span>.image.fill(color)
+        <span class="hljs-variable language_">self</span>.rect = <span class="hljs-variable language_">self</span>.image.get_rect()
+        <span class="hljs-variable language_">self</span>.rect.x = x
+        <span class="hljs-variable language_">self</span>.rect.y = y
+
+<span class="hljs-comment"># 敌人类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Enemy</span>(pygame.sprite.Sprite):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x, y, width=<span class="hljs-number">40</span>, height=<span class="hljs-number">40</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.image = pygame.Surface((width, height))
+        <span class="hljs-variable language_">self</span>.image.fill(BROWN)
+        <span class="hljs-variable language_">self</span>.rect = <span class="hljs-variable language_">self</span>.image.get_rect()
+        <span class="hljs-variable language_">self</span>.rect.x = x
+        <span class="hljs-variable language_">self</span>.rect.y = y
+        <span class="hljs-variable language_">self</span>.speed = random.choice([-<span class="hljs-number">2</span>, <span class="hljs-number">2</span>])
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">self, platforms</span>):
+        <span class="hljs-variable language_">self</span>.rect.x += <span class="hljs-variable language_">self</span>.speed
+
+        <span class="hljs-comment"># 碰撞检测，让敌人在平台边缘转向</span>
+        <span class="hljs-keyword">for</span> platform <span class="hljs-keyword">in</span> platforms:
+            <span class="hljs-keyword">if</span> pygame.sprite.collide_rect(<span class="hljs-variable language_">self</span>, platform):
+                <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.speed &gt; <span class="hljs-number">0</span>:  <span class="hljs-comment"># 向右移动</span>
+                    <span class="hljs-variable language_">self</span>.rect.right = platform.rect.left
+                    <span class="hljs-variable language_">self</span>.speed = -<span class="hljs-variable language_">self</span>.speed
+                <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>.speed &lt; <span class="hljs-number">0</span>:  <span class="hljs-comment"># 向左移动</span>
+                    <span class="hljs-variable language_">self</span>.rect.left = platform.rect.right
+                    <span class="hljs-variable language_">self</span>.speed = -<span class="hljs-variable language_">self</span>.speed
+
+<span class="hljs-comment"># 金币类</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Coin</span>(pygame.sprite.Sprite):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x, y, size=<span class="hljs-number">30</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.original_image = pygame.Surface((size, size), pygame.SRCALPHA)
+        <span class="hljs-variable language_">self</span>.original_image.fill(YELLOW)
+        <span class="hljs-variable language_">self</span>.image = <span class="hljs-variable language_">self</span>.original_image.copy()
+        <span class="hljs-variable language_">self</span>.rect = <span class="hljs-variable language_">self</span>.image.get_rect()
+        <span class="hljs-variable language_">self</span>.rect.center = (x, y)
+        <span class="hljs-comment"># 添加金币旋转动画</span>
+        <span class="hljs-variable language_">self</span>.angle = <span class="hljs-number">0</span>
+        <span class="hljs-variable language_">self</span>.rotate_speed = <span class="hljs-number">5</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.angle = (<span class="hljs-variable language_">self</span>.angle + <span class="hljs-variable language_">self</span>.rotate_speed) % <span class="hljs-number">360</span>
+        <span class="hljs-variable language_">self</span>.image = pygame.transform.rotate(<span class="hljs-variable language_">self</span>.original_image, <span class="hljs-variable language_">self</span>.angle)
+        <span class="hljs-comment"># 保持旋转后位置不变</span>
+        <span class="hljs-variable language_">self</span>.rect = <span class="hljs-variable language_">self</span>.image.get_rect(center=<span class="hljs-variable language_">self</span>.rect.center)
+
+<span class="hljs-comment"># 创建游戏关卡</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">create_level</span>():
+    platforms = pygame.sprite.Group()
+    enemies = pygame.sprite.Group()
+    coins = pygame.sprite.Group()
+
+    <span class="hljs-comment"># 地面</span>
+    platforms.add(Platform(<span class="hljs-number">0</span>, SCREEN_HEIGHT - <span class="hljs-number">40</span>, SCREEN_WIDTH, <span class="hljs-number">40</span>))
+
+    <span class="hljs-comment"># 平台和砖块</span>
+    platforms.add(Platform(<span class="hljs-number">200</span>, <span class="hljs-number">350</span>, <span class="hljs-number">150</span>, <span class="hljs-number">20</span>, GRAY))
+    platforms.add(Platform(<span class="hljs-number">400</span>, <span class="hljs-number">300</span>, <span class="hljs-number">150</span>, <span class="hljs-number">20</span>, GRAY))
+    platforms.add(Platform(<span class="hljs-number">600</span>, <span class="hljs-number">250</span>, <span class="hljs-number">150</span>, <span class="hljs-number">20</span>, GRAY))
+    platforms.add(Platform(<span class="hljs-number">300</span>, <span class="hljs-number">200</span>, <span class="hljs-number">150</span>, <span class="hljs-number">20</span>, GRAY))
+    platforms.add(Platform(<span class="hljs-number">100</span>, <span class="hljs-number">150</span>, <span class="hljs-number">150</span>, <span class="hljs-number">20</span>, GRAY))
+
+    <span class="hljs-comment"># 敌人</span>
+    enemies.add(Enemy(<span class="hljs-number">250</span>, <span class="hljs-number">350</span> - <span class="hljs-number">40</span> - <span class="hljs-number">40</span>))  <span class="hljs-comment"># 放在第一个平台上</span>
+    enemies.add(Enemy(<span class="hljs-number">450</span>, <span class="hljs-number">300</span> - <span class="hljs-number">40</span> - <span class="hljs-number">40</span>))  <span class="hljs-comment"># 放在第二个平台上</span>
+
+    <span class="hljs-comment"># 金币</span>
+    coins.add(Coin(<span class="hljs-number">275</span>, <span class="hljs-number">350</span> - <span class="hljs-number">20</span> - <span class="hljs-number">15</span>))
+    coins.add(Coin(<span class="hljs-number">325</span>, <span class="hljs-number">350</span> - <span class="hljs-number">20</span> - <span class="hljs-number">15</span>))
+    coins.add(Coin(<span class="hljs-number">475</span>, <span class="hljs-number">300</span> - <span class="hljs-number">20</span> - <span class="hljs-number">15</span>))
+    coins.add(Coin(<span class="hljs-number">525</span>, <span class="hljs-number">300</span> - <span class="hljs-number">20</span> - <span class="hljs-number">15</span>))
+    coins.add(Coin(<span class="hljs-number">175</span>, <span class="hljs-number">150</span> - <span class="hljs-number">20</span> - <span class="hljs-number">15</span>))
+
+    <span class="hljs-keyword">return</span> platforms, enemies, coins
+
+<span class="hljs-comment"># 主游戏函数</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    <span class="hljs-comment"># 创建游戏元素</span>
+    platforms, enemies, coins = create_level()
+    mario = Mario(<span class="hljs-number">50</span>, SCREEN_HEIGHT - <span class="hljs-number">40</span> - <span class="hljs-number">60</span>)  <span class="hljs-comment"># 初始位置在地面上</span>
+
+    <span class="hljs-comment"># 创建精灵组 - 分开管理不同类型的精灵</span>
+    all_sprites = pygame.sprite.Group()
+    all_sprites.add(mario)
+    all_sprites.add(platforms)
+    all_sprites.add(enemies)
+    all_sprites.add(coins)
+
+    <span class="hljs-comment"># 游戏变量</span>
+    score = <span class="hljs-number">0</span>
+    game_over = <span class="hljs-literal">False</span>
+
+    <span class="hljs-comment"># 游戏主循环</span>
+    running = <span class="hljs-literal">True</span>
+    <span class="hljs-keyword">while</span> running:
+        <span class="hljs-comment"># 事件处理</span>
+        <span class="hljs-keyword">for</span> event <span class="hljs-keyword">in</span> pygame.event.get():
+            <span class="hljs-keyword">if</span> event.<span class="hljs-built_in">type</span> == pygame.QUIT:
+                running = <span class="hljs-literal">False</span>
+
+            <span class="hljs-comment"># 跳跃</span>
+            <span class="hljs-keyword">if</span> event.<span class="hljs-built_in">type</span> == pygame.KEYDOWN:
+                <span class="hljs-keyword">if</span> event.key == pygame.K_SPACE <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> game_over:
+                    mario.jump()
+                <span class="hljs-keyword">if</span> event.key == pygame.K_r <span class="hljs-keyword">and</span> game_over:
+                    <span class="hljs-comment"># 重新开始游戏</span>
+                    platforms, enemies, coins = create_level()
+                    mario = Mario(<span class="hljs-number">50</span>, SCREEN_HEIGHT - <span class="hljs-number">40</span> - <span class="hljs-number">60</span>)
+                    all_sprites.empty()
+                    all_sprites.add(mario)
+                    all_sprites.add(platforms)
+                    all_sprites.add(enemies)
+                    all_sprites.add(coins)
+                    score = <span class="hljs-number">0</span>
+                    game_over = <span class="hljs-literal">False</span>
+
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> game_over:
+            <span class="hljs-comment"># 持续按键检测</span>
+            keys = pygame.key.get_pressed()
+            <span class="hljs-keyword">if</span> keys[pygame.K_LEFT]:
+                mario.move_left()
+            <span class="hljs-keyword">elif</span> keys[pygame.K_RIGHT]:
+                mario.move_right()
+            <span class="hljs-keyword">else</span>:
+                mario.stop()
+
+            <span class="hljs-comment"># 更新游戏状态</span>
+            mario.update(platforms)
+            enemies.update(platforms)
+            coins.update()
+
+            <span class="hljs-comment"># 检测金币碰撞</span>
+            coin_hits = pygame.sprite.spritecollide(mario, coins, <span class="hljs-literal">True</span>)
+            <span class="hljs-keyword">for</span> coin <span class="hljs-keyword">in</span> coin_hits:
+                score += <span class="hljs-number">10</span>
+                <span class="hljs-comment"># 从所有精灵组中移除金币</span>
+                <span class="hljs-keyword">if</span> coin <span class="hljs-keyword">in</span> all_sprites:
+                    all_sprites.remove(coin)
+
+            <span class="hljs-comment"># 检测敌人碰撞</span>
+            enemy_hits = pygame.sprite.spritecollide(mario, enemies, <span class="hljs-literal">False</span>)
+            <span class="hljs-keyword">if</span> enemy_hits:
+                <span class="hljs-comment"># 如果从上方踩敌人</span>
+                <span class="hljs-keyword">if</span> mario.vel_y &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> mario.rect.bottom &lt;= enemy_hits[<span class="hljs-number">0</span>].rect.top + <span class="hljs-number">10</span>:
+                    <span class="hljs-comment"># 从所有精灵组中移除敌人</span>
+                    all_sprites.remove(enemy_hits[<span class="hljs-number">0</span>])
+                    enemies.remove(enemy_hits[<span class="hljs-number">0</span>])
+                    mario.vel_y = -<span class="hljs-number">10</span>  <span class="hljs-comment"># 给一个小跳跃</span>
+                    score += <span class="hljs-number">50</span>
+                <span class="hljs-keyword">else</span>:
+                    <span class="hljs-comment"># 游戏结束</span>
+                    game_over = <span class="hljs-literal">True</span>
+
+        <span class="hljs-comment"># 绘制</span>
+        screen.fill(SKY_BLUE)  <span class="hljs-comment"># 天空蓝色背景</span>
+        all_sprites.draw(screen)
+
+        <span class="hljs-comment"># 显示分数</span>
+        score_text = font.render(<span class="hljs-string">f&quot;分数: <span class="hljs-subst">{score}</span>&quot;</span>, <span class="hljs-literal">True</span>, WHITE)
+        screen.blit(score_text, (<span class="hljs-number">10</span>, <span class="hljs-number">10</span>))
+
+        <span class="hljs-comment"># 游戏结束提示</span>
+        <span class="hljs-keyword">if</span> game_over:
+            game_over_text = font.render(<span class="hljs-string">&quot;游戏结束! 按R键重新开始&quot;</span>, <span class="hljs-literal">True</span>, WHITE)
+            text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH//<span class="hljs-number">2</span>, SCREEN_HEIGHT//<span class="hljs-number">2</span>))
+            screen.blit(game_over_text, text_rect)
+
+        <span class="hljs-comment"># 刷新屏幕</span>
+        pygame.display.flip()
+
+        <span class="hljs-comment"># 控制帧率</span>
+        clock.tick(FPS)
+
+    pygame.quit()
+    sys.exit()
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    main()
+
+</code></pre>
+<p>这个超级玛丽游戏实现了以下功能：</p>
+<ol>
+<li></li>
+</ol>
+<pre><code>基本操作：
+
+
+-   左右方向键控制马里奥移动
+-   空格键控制马里奥跳跃
+-   游戏结束后按 R 键重新开始
+</code></pre>
+<ol start="2">
+<li></li>
+</ol>
+<pre><code>游戏元素：
+
+
+-   马里奥角色（红色方块）
+-   地面和平台（灰色方块）
+-   敌人（棕色方块）
+-   可收集的金币（黄色旋转方块）
+</code></pre>
+<ol start="3">
+<li></li>
+</ol>
+<pre><code>游戏机制：
+
+
+-   重力效果使马里奥能够下落
+-   碰撞检测（与平台、敌人、金币）
+-   计分系统（收集金币和踩敌人得分）
+-   游戏结束条件（碰到敌人）
+</code></pre>
+<p>要运行这个游戏，您需要先安装 Pygame 库，可以使用以下命令安装：</p>
+<pre class="hljs"><code>pip install pygame
+</code></pre>
+<p>您可以进一步扩展这个游戏，比如添加更多关卡、不同类型的敌人、马里奥的状态变化（变大、获得能力）、背景音乐和音效等。</p>
+<p><img src="../uploads/csdn/%E7%94%A8python%E5%86%99%E9%A9%AC%E9%87%8C%E5%A5%A5%E9%97%AF%E5%85%B3%E6%B8%B8%E6%88%8F/img-01.gif" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/用python识别图像中的二维码并纠正倾斜姿态后进行识别.html">
+      <span>上一篇</span>
+      <strong>用Python识别图像中的二维码并纠正倾斜姿态后进行识别</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/物联网数据检测pythongui代码编写.html">
+      <span>下一篇</span>
+      <strong>物联网数据检测PythonGUI代码编写</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/麦克斯韦方程组电磁效应python展示.html">麦克斯韦方程组电磁效应Python展示</a></h3>
+        <p class="post-excerpt">一、麦克斯韦方程组完整数学推导</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.965Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/天体轨道的物理推导全过程python绘制天体圆锥轨道.html">天体轨道的物理推导全过程Python绘制天体圆锥轨道</a></h3>
+        <p class="post-excerpt">以下是使用 Python 的matplotlib库结合numpy库，根据圆锥曲线的极坐标方程来绘制圆锥曲线（椭圆、抛物线、双曲线）的代码示例，以下代码在 Python 3 环境下运行：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.486Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/基于真实火星探测任务的实际轨道设计python版.html">基于真实火星探测任务的实际轨道设计Python版</a></h3>
+        <p class="post-excerpt">本文介绍了一个火星探测任务的轨道模拟程序，使用Python数值计算库模拟了从地球到火星的转移轨道。程序基于二体问题计算太阳引力作用下的航天器轨迹，采用Hohmann转移轨道理论设计初始轨道参数，并加入了五次轨道机动（包括深空机动和轨迹修正）。模拟结果显示：转移轨道半长轴1.262AU，偏心率0.207，总飞行时间202天，总ΔV预算约323.2m/s。程序输出了2D和3D可视化结果，展示了航天器从…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.457Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>指纹灰度图提取特征点minutiaepoints指纹识别算法 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/人工智能.html">人工智能</a>
+        </nav>
+        <h1 class="post-title">指纹灰度图提取特征点minutiaepoints指纹识别算法</h1>
+        <p class="post-deck">本文介绍了一种基于特征点提取的优化版指纹识别系统。该系统通过改进特征点提取和匹配算法，提升了识别精度和分辨率。核心优化包括：1)采用多尺度Gabor滤波器增强脊线特征；2)改进交叉数计算和方向估计方法；3)引入多维度质量评估和局部纹理模式分析；4)使用双向匹配策略结合RANSAC几何验证。实验表明，该优化方法能更准确地提取指纹细节特征点(minutiae)，并通过融合脊线数、局部模式等多特征实现更…</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.108Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>99 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-5.html">人工智能</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文介绍了一种基于特征点提取的优化版指纹识别系统。该系统通过改进特征点提取和匹配算法，提升了识别精度和分辨率。核心优化包括：1)采用多尺度Gabor滤波器增强脊线特征；2)改进交叉数计算和方向估计方法；3)引入多维度质量评估和局部纹理模式分析；4)使用双向匹配策略结合RANSAC几何验证。实验表明，该优化方法能更准确地提取指纹细节特征点(minutiae)，并通过融合脊线数、局部模式等多特征实现更可靠的匹配。系统包含完整的预处理、特征提取和匹配流程，适用于高精度指纹识别应用。</p>
+<p><img src="../uploads/csdn/%E6%8C%87%E7%BA%B9%E7%81%B0%E5%BA%A6%E5%9B%BE%E6%8F%90%E5%8F%96%E7%89%B9%E5%BE%81%E7%82%B9minutiaepoints%E6%8C%87%E7%BA%B9%E8%AF%86%E5%88%AB%E7%AE%97%E6%B3%95/img-01.png" alt=""></p>
+<p><img src="../uploads/csdn/%E6%8C%87%E7%BA%B9%E7%81%B0%E5%BA%A6%E5%9B%BE%E6%8F%90%E5%8F%96%E7%89%B9%E5%BE%81%E7%82%B9minutiaepoints%E6%8C%87%E7%BA%B9%E8%AF%86%E5%88%AB%E7%AE%97%E6%B3%95/img-02.png" alt=""></p>
+<p><img src="../uploads/csdn/%E6%8C%87%E7%BA%B9%E7%81%B0%E5%BA%A6%E5%9B%BE%E6%8F%90%E5%8F%96%E7%89%B9%E5%BE%81%E7%82%B9minutiaepoints%E6%8C%87%E7%BA%B9%E8%AF%86%E5%88%AB%E7%AE%97%E6%B3%95/img-03.png" alt=""></p>
+<pre class="hljs"><code class="language-python"><span class="hljs-string">&quot;&quot;&quot;
+指纹识别系统 - 基于特征点提取的传统方法（优化版）
+使用 minutiae（细节特征点）进行指纹匹配
+提升了特征点提取精度和匹配分辨能力
+&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">import</span> cv2
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">from</span> scipy <span class="hljs-keyword">import</span> ndimage
+<span class="hljs-keyword">from</span> skimage.morphology <span class="hljs-keyword">import</span> skeletonize, thin
+<span class="hljs-keyword">from</span> skimage <span class="hljs-keyword">import</span> filters
+<span class="hljs-keyword">from</span> collections <span class="hljs-keyword">import</span> defaultdict
+<span class="hljs-keyword">import</span> math
+<span class="hljs-keyword">from</span> scipy.spatial <span class="hljs-keyword">import</span> KDTree
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">FingerprintPreprocessor</span>:
+    <span class="hljs-string">&quot;&quot;&quot;指纹图像预处理器（优化版）&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, target_size=<span class="hljs-literal">None</span></span>):
+        <span class="hljs-variable language_">self</span>.target_size = target_size
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">preprocess</span>(<span class="hljs-params">self, image</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        完整的预处理流程（优化：增强脊线连续性）
+        Args:
+            image: 输入图像（文件路径或numpy数组）
+        Returns:
+            原始图像、增强图像、二值图像、细化图像
+        &quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(image, <span class="hljs-built_in">str</span>):
+            original = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
+            <span class="hljs-keyword">if</span> original <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+                <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">f&quot;无法加载图像: <span class="hljs-subst">{image}</span>&quot;</span>)
+        <span class="hljs-keyword">else</span>:
+            original = image.copy()
+
+        h, w = original.shape
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.target_size:
+            original = cv2.resize(original, <span class="hljs-variable language_">self</span>.target_size, interpolation=cv2.INTER_CUBIC)
+
+        <span class="hljs-keyword">if</span> original.<span class="hljs-built_in">max</span>() == original.<span class="hljs-built_in">min</span>():
+            <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;图像为空或无效&quot;</span>)
+
+        normalized = <span class="hljs-variable language_">self</span>._normalize(original)
+
+        enhanced = <span class="hljs-variable language_">self</span>._enhance(normalized)
+
+        binary = <span class="hljs-variable language_">self</span>._binarize(enhanced)
+
+        binary = <span class="hljs-variable language_">self</span>._morphology_clean(binary)
+
+        thinned = <span class="hljs-variable language_">self</span>._thin(binary)
+
+        thinned = <span class="hljs-variable language_">self</span>._clean_skeleton(thinned)
+
+        <span class="hljs-keyword">return</span> original, enhanced, binary, thinned
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_normalize</span>(<span class="hljs-params">self, image</span>):
+        <span class="hljs-string">&quot;&quot;&quot;归一化图像到0-255范围（优化：保留局部对比度）&quot;&quot;&quot;</span>
+        image = image.astype(np.float32)
+
+        <span class="hljs-comment"># 局部归一化，避免全局归一化丢失细节</span>
+        clahe = cv2.createCLAHE(clipLimit=<span class="hljs-number">1.5</span>, tileGridSize=(<span class="hljs-number">4</span>, <span class="hljs-number">4</span>))
+        normalized = clahe.apply(image.astype(np.uint8))
+
+        <span class="hljs-keyword">return</span> normalized
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_enhance</span>(<span class="hljs-params">self, image</span>):
+        <span class="hljs-string">&quot;&quot;&quot;增强指纹图像（优化：脊线增强滤波器）&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 第一步：CLAHE增强对比度</span>
+        clahe = cv2.createCLAHE(clipLimit=<span class="hljs-number">2.0</span>, tileGridSize=(<span class="hljs-number">8</span>, <span class="hljs-number">8</span>))
+        enhanced = clahe.apply(image)
+
+        <span class="hljs-comment"># 第二步：去噪</span>
+        denoised = cv2.fastNlMeansDenoising(enhanced, <span class="hljs-literal">None</span>, h=<span class="hljs-number">8</span>, templateWindowSize=<span class="hljs-number">7</span>, searchWindowSize=<span class="hljs-number">21</span>)
+
+        <span class="hljs-comment"># 第三步：脊线增强（Gabor滤波器）</span>
+        enhanced_ridge = <span class="hljs-variable language_">self</span>._ridge_enhancement(denoised)
+
+        <span class="hljs-keyword">return</span> enhanced_ridge
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_ridge_enhancement</span>(<span class="hljs-params">self, image</span>):
+        <span class="hljs-string">&quot;&quot;&quot;脊线增强：使用Gabor滤波器增强指纹脊线&quot;&quot;&quot;</span>
+        rows, cols = image.shape
+
+        <span class="hljs-comment"># 估计脊线方向</span>
+        angles = np.arange(<span class="hljs-number">0</span>, np.pi, np.pi/<span class="hljs-number">8</span>)  <span class="hljs-comment"># 8个方向</span>
+        gabor_kernels = []
+
+        <span class="hljs-comment"># 创建多方向Gabor滤波器</span>
+        <span class="hljs-keyword">for</span> theta <span class="hljs-keyword">in</span> angles:
+            kernel = cv2.getGaborKernel((<span class="hljs-number">9</span>, <span class="hljs-number">9</span>), <span class="hljs-number">2.0</span>, theta, <span class="hljs-number">6.0</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>, ktype=cv2.CV_32F)
+            kernel /= <span class="hljs-number">1.5</span> * kernel.<span class="hljs-built_in">sum</span>()
+            gabor_kernels.append(kernel)
+
+        <span class="hljs-comment"># 应用所有滤波器并取最大值</span>
+        enhanced = np.zeros_like(image, dtype=np.float32)
+        <span class="hljs-keyword">for</span> kernel <span class="hljs-keyword">in</span> gabor_kernels:
+            filtered = cv2.filter2D(image.astype(np.float32), cv2.CV_32F, kernel)
+            enhanced = np.maximum(enhanced, filtered)
+
+        <span class="hljs-comment"># 归一化到0-255</span>
+        enhanced = (enhanced - enhanced.<span class="hljs-built_in">min</span>()) / (enhanced.<span class="hljs-built_in">max</span>() - enhanced.<span class="hljs-built_in">min</span>() + <span class="hljs-number">1e-6</span>) * <span class="hljs-number">255</span>
+
+        <span class="hljs-keyword">return</span> enhanced.astype(np.uint8)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_binarize</span>(<span class="hljs-params">self, image</span>):
+        <span class="hljs-string">&quot;&quot;&quot;自适应二值化（优化：多阈值融合）&quot;&quot;&quot;</span>
+        h, w = image.shape
+        block_size = <span class="hljs-built_in">min</span>(<span class="hljs-number">25</span>, <span class="hljs-built_in">max</span>(<span class="hljs-number">3</span>, <span class="hljs-built_in">min</span>(h, w) // <span class="hljs-number">8</span>))
+        <span class="hljs-keyword">if</span> block_size % <span class="hljs-number">2</span> == <span class="hljs-number">0</span>:
+            block_size += <span class="hljs-number">1</span>
+
+        <span class="hljs-comment"># 三种二值化方法</span>
+        <span class="hljs-comment"># 1. 高斯自适应</span>
+        binary_gaussian = cv2.adaptiveThreshold(
+            image, <span class="hljs-number">255</span>,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY_INV,
+            blockSize=block_size,
+            C=<span class="hljs-number">3</span>
+        )
+
+        <span class="hljs-comment"># 2. 均值自适应</span>
+        binary_mean = cv2.adaptiveThreshold(
+            image, <span class="hljs-number">255</span>,
+            cv2.ADAPTIVE_THRESH_MEAN_C,
+            cv2.THRESH_BINARY_INV,
+            blockSize=block_size,
+            C=<span class="hljs-number">3</span>
+        )
+
+        <span class="hljs-comment"># 3. Otsu阈值</span>
+        _, binary_otsu = cv2.threshold(image, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+
+        <span class="hljs-comment"># 计算有效区域比例</span>
+        <span class="hljs-keyword">def</span> <span class="hljs-title function_">calculate_valid_ratio</span>(<span class="hljs-params">bin_img</span>):
+            white_pixels = np.<span class="hljs-built_in">sum</span>(bin_img &gt; <span class="hljs-number">0</span>)
+            ratio = white_pixels / bin_img.size
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0.1</span> &lt; ratio &lt; <span class="hljs-number">0.6</span>
+
+        <span class="hljs-comment"># 选择最优二值化结果</span>
+        candidates = []
+        <span class="hljs-keyword">if</span> calculate_valid_ratio(binary_gaussian):
+            candidates.append(binary_gaussian)
+        <span class="hljs-keyword">if</span> calculate_valid_ratio(binary_mean):
+            candidates.append(binary_mean)
+        <span class="hljs-keyword">if</span> calculate_valid_ratio(binary_otsu):
+            candidates.append(binary_otsu)
+
+        <span class="hljs-keyword">if</span> candidates:
+            <span class="hljs-comment"># 选择中间比例的结果</span>
+            ratios = [np.<span class="hljs-built_in">sum</span>(c &gt; <span class="hljs-number">0</span>) / c.size <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> candidates]
+            median_idx = np.argsort(ratios)[<span class="hljs-built_in">len</span>(ratios)//<span class="hljs-number">2</span>]
+            <span class="hljs-keyword">return</span> candidates[median_idx]
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">return</span> binary_gaussian
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_morphology_clean</span>(<span class="hljs-params">self, binary</span>):
+        <span class="hljs-string">&quot;&quot;&quot;形态学清理（优化：自适应核大小）&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 根据图像大小调整核大小</span>
+        h, w = binary.shape
+        kernel_size = <span class="hljs-built_in">min</span>(<span class="hljs-number">3</span>, <span class="hljs-built_in">max</span>(<span class="hljs-number">1</span>, <span class="hljs-built_in">min</span>(h, w) // <span class="hljs-number">100</span>))
+        kernel = np.ones((kernel_size, kernel_size), np.uint8)
+
+        <span class="hljs-comment"># 开运算去除小噪点</span>
+        cleaned = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel, iterations=<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 闭运算填充小孔</span>
+        cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_CLOSE, kernel, iterations=<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 去除孤立的小区域</span>
+        num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(cleaned, connectivity=<span class="hljs-number">8</span>)
+        min_area = <span class="hljs-number">20</span>  <span class="hljs-comment"># 最小连通区域面积</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, num_labels):
+            <span class="hljs-keyword">if</span> stats[i, cv2.CC_STAT_AREA] &lt; min_area:
+                cleaned[labels == i] = <span class="hljs-number">0</span>
+
+        <span class="hljs-keyword">return</span> cleaned
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_thin</span>(<span class="hljs-params">self, binary</span>):
+        <span class="hljs-string">&quot;&quot;&quot;细化（骨架化）（优化：多算法融合）&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 转换为布尔数组</span>
+        binary_bool = binary &gt; <span class="hljs-number">0</span>
+
+        <span class="hljs-comment"># 主骨架化</span>
+        skeleton = skeletonize(binary_bool)
+
+        <span class="hljs-comment"># 二次细化优化</span>
+        skeleton = thin(skeleton)
+
+        <span class="hljs-comment"># 转换回8位图像</span>
+        skeleton_8bit = (skeleton * <span class="hljs-number">255</span>).astype(np.uint8)
+
+        <span class="hljs-keyword">return</span> skeleton_8bit
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_clean_skeleton</span>(<span class="hljs-params">self, skeleton</span>):
+        <span class="hljs-string">&quot;&quot;&quot;清理骨架，去除毛刺（优化：长度过滤）&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 找到所有连通的脊线</span>
+        num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(skeleton, connectivity=<span class="hljs-number">8</span>)
+
+        <span class="hljs-comment"># 过滤短于最小长度的脊线（毛刺）</span>
+        min_length = <span class="hljs-number">15</span>  <span class="hljs-comment"># 最小脊线长度</span>
+        cleaned = np.zeros_like(skeleton)
+
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, num_labels):
+            <span class="hljs-keyword">if</span> stats[i, cv2.CC_STAT_AREA] &gt;= min_length:
+                cleaned[labels == i] = <span class="hljs-number">255</span>
+
+        <span class="hljs-comment"># 形态学微调</span>
+        kernel = np.ones((<span class="hljs-number">2</span>, <span class="hljs-number">2</span>), np.uint8)
+        cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_CLOSE, kernel, iterations=<span class="hljs-number">1</span>)
+
+        <span class="hljs-keyword">return</span> cleaned
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MinutiaeExtractor</span>:
+    <span class="hljs-string">&quot;&quot;&quot;特征点提取器（优化版）&quot;&quot;&quot;</span>
+
+    <span class="hljs-comment"># 特征点类型</span>
+    ENDING = <span class="hljs-number">1</span>
+    BIFURCATION = <span class="hljs-number">2</span>
+    UNKNOWN = <span class="hljs-number">0</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.min_distance = <span class="hljs-number">8</span>  <span class="hljs-comment"># 特征点最小间距（减小以保留更多细节）</span>
+        <span class="hljs-variable language_">self</span>.border_distance = <span class="hljs-number">15</span>  <span class="hljs-comment"># 边界距离</span>
+        <span class="hljs-variable language_">self</span>.min_quality = <span class="hljs-number">0.2</span>  <span class="hljs-comment"># 最小质量阈值</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">extract</span>(<span class="hljs-params">self, thinned_image, original_image=<span class="hljs-literal">None</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        提取特征点（优化：多尺度特征点检测）
+        Args:
+            thinned_image: 细化后的二值图像
+            original_image: 原始图像（用于计算质量）
+        Returns:
+            特征点列表 [(x, y, type, angle, quality, ridge_count, local_pattern), ...]
+        &quot;&quot;&quot;</span>
+        h, w = thinned_image.shape
+        minutiae = []
+
+        <span class="hljs-comment"># 创建掩码，排除边界区域</span>
+        mask = np.ones((h, w), dtype=<span class="hljs-built_in">bool</span>)
+        mask[:<span class="hljs-variable language_">self</span>.border_distance, :] = <span class="hljs-literal">False</span>
+        mask[-<span class="hljs-variable language_">self</span>.border_distance:, :] = <span class="hljs-literal">False</span>
+        mask[:, :<span class="hljs-variable language_">self</span>.border_distance] = <span class="hljs-literal">False</span>
+        mask[:, -<span class="hljs-variable language_">self</span>.border_distance:] = <span class="hljs-literal">False</span>
+
+        <span class="hljs-comment"># 多尺度检测</span>
+        scales = [<span class="hljs-number">1</span>, <span class="hljs-number">0.8</span>, <span class="hljs-number">1.2</span>]
+        scale_minutiae = []
+
+        <span class="hljs-keyword">for</span> scale <span class="hljs-keyword">in</span> scales:
+            <span class="hljs-keyword">if</span> scale != <span class="hljs-number">1</span>:
+                scaled_h, scaled_w = <span class="hljs-built_in">int</span>(h * scale), <span class="hljs-built_in">int</span>(w * scale)
+                scaled_img = cv2.resize(thinned_image, (scaled_w, scaled_h), interpolation=cv2.INTER_NEAREST)
+            <span class="hljs-keyword">else</span>:
+                scaled_img = thinned_image
+
+            scale_m = <span class="hljs-variable language_">self</span>._extract_single_scale(scaled_img, original_image, scale)
+            scale_minutiae.extend(scale_m)
+
+        <span class="hljs-comment"># 合并多尺度特征点</span>
+        minutiae = <span class="hljs-variable language_">self</span>._merge_multiscale_minutiae(scale_minutiae)
+
+        <span class="hljs-comment"># 过滤低质量特征点</span>
+        minutiae = [m <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> minutiae <span class="hljs-keyword">if</span> m[<span class="hljs-string">&#x27;quality&#x27;</span>] &gt;= <span class="hljs-variable language_">self</span>.min_quality]
+
+        <span class="hljs-comment"># 过滤距离过近的特征点</span>
+        minutiae = <span class="hljs-variable language_">self</span>._filter_close_minutiae(minutiae)
+
+        <span class="hljs-keyword">return</span> minutiae
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_extract_single_scale</span>(<span class="hljs-params">self, thinned_image, original_image, scale=<span class="hljs-number">1.0</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;单尺度特征点提取&quot;&quot;&quot;</span>
+        h, w = thinned_image.shape
+        minutiae = []
+
+        <span class="hljs-comment"># 遍历图像（排除边界）</span>
+        <span class="hljs-keyword">for</span> y <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, h - <span class="hljs-number">1</span>):
+            <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, w - <span class="hljs-number">1</span>):
+                <span class="hljs-keyword">if</span> thinned_image[y, x] == <span class="hljs-number">0</span>:
+                    <span class="hljs-keyword">continue</span>
+
+                <span class="hljs-comment"># 计算交叉数（优化：16邻域）</span>
+                cn = <span class="hljs-variable language_">self</span>._crossing_number_16(thinned_image, x, y)
+
+                <span class="hljs-comment"># 判断特征点类型</span>
+                <span class="hljs-keyword">if</span> cn == <span class="hljs-number">1</span>:
+                    minutiae_type = <span class="hljs-variable language_">self</span>.ENDING
+                <span class="hljs-keyword">elif</span> cn == <span class="hljs-number">3</span>:
+                    minutiae_type = <span class="hljs-variable language_">self</span>.BIFURCATION
+                <span class="hljs-keyword">else</span>:
+                    <span class="hljs-keyword">continue</span>
+
+                <span class="hljs-comment"># 还原到原始尺度</span>
+                orig_x, orig_y = <span class="hljs-built_in">int</span>(x / scale), <span class="hljs-built_in">int</span>(y / scale)
+
+                <span class="hljs-comment"># 计算方向（优化：更精确的方向计算）</span>
+                angle = <span class="hljs-variable language_">self</span>._compute_angle_improved(thinned_image, x, y, minutiae_type)
+
+                <span class="hljs-comment"># 计算质量（优化：多维度质量评估）</span>
+                quality = <span class="hljs-variable language_">self</span>._compute_quality_improved(thinned_image, x, y, original_image, orig_x, orig_y)
+
+                <span class="hljs-comment"># 计算局部脊线数</span>
+                ridge_count = <span class="hljs-variable language_">self</span>._count_local_ridge(original_image, orig_x, orig_y)
+
+                <span class="hljs-comment"># 提取局部纹理模式</span>
+                local_pattern = <span class="hljs-variable language_">self</span>._extract_local_pattern(original_image, orig_x, orig_y)
+
+                minutiae.append({
+                    <span class="hljs-string">&#x27;x&#x27;</span>: orig_x,
+                    <span class="hljs-string">&#x27;y&#x27;</span>: orig_y,
+                    <span class="hljs-string">&#x27;type&#x27;</span>: minutiae_type,
+                    <span class="hljs-string">&#x27;angle&#x27;</span>: angle,
+                    <span class="hljs-string">&#x27;quality&#x27;</span>: quality,
+                    <span class="hljs-string">&#x27;ridge_count&#x27;</span>: ridge_count,
+                    <span class="hljs-string">&#x27;local_pattern&#x27;</span>: local_pattern,
+                    <span class="hljs-string">&#x27;scale&#x27;</span>: scale
+                })
+
+        <span class="hljs-keyword">return</span> minutiae
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_merge_multiscale_minutiae</span>(<span class="hljs-params">self, minutiae</span>):
+        <span class="hljs-string">&quot;&quot;&quot;合并多尺度特征点&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(minutiae) == <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">return</span> []
+
+        <span class="hljs-comment"># 按位置聚类</span>
+        merged = []
+        positions = [(m[<span class="hljs-string">&#x27;x&#x27;</span>], m[<span class="hljs-string">&#x27;y&#x27;</span>]) <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> minutiae]
+        <span class="hljs-keyword">if</span> positions:
+            kdtree = KDTree(positions)
+
+            used = <span class="hljs-built_in">set</span>()
+            <span class="hljs-keyword">for</span> i, m <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(minutiae):
+                <span class="hljs-keyword">if</span> i <span class="hljs-keyword">in</span> used:
+                    <span class="hljs-keyword">continue</span>
+
+                <span class="hljs-comment"># 找到邻近的特征点</span>
+                idx = kdtree.query_ball_point((m[<span class="hljs-string">&#x27;x&#x27;</span>], m[<span class="hljs-string">&#x27;y&#x27;</span>]), r=<span class="hljs-number">5</span>)
+                cluster = [minutiae[j] <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> idx <span class="hljs-keyword">if</span> j <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> used]
+
+                <span class="hljs-keyword">if</span> cluster:
+                    <span class="hljs-comment"># 取质量最高的作为代表</span>
+                    best = <span class="hljs-built_in">max</span>(cluster, key=<span class="hljs-keyword">lambda</span> x: x[<span class="hljs-string">&#x27;quality&#x27;</span>])
+                    merged.append(best)
+
+                    <span class="hljs-comment"># 标记为已使用</span>
+                    <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> idx:
+                        used.add(j)
+
+        <span class="hljs-keyword">return</span> merged
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_crossing_number_16</span>(<span class="hljs-params">self, image, x, y</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        计算16邻域交叉数（优化：更精确的特征点判断）
+        用于判断特征点类型
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 16邻域像素值（顺时针方向）</span>
+        p = []
+        angles = np.arange(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>*np.pi, np.pi/<span class="hljs-number">8</span>)
+        <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> angles:
+            dx = <span class="hljs-built_in">int</span>(<span class="hljs-built_in">round</span>(np.cos(a)))
+            dy = <span class="hljs-built_in">int</span>(<span class="hljs-built_in">round</span>(np.sin(a)))
+            px = x + dx
+            py = y + dy
+            <span class="hljs-keyword">if</span> <span class="hljs-number">0</span> &lt;= px &lt; image.shape[<span class="hljs-number">1</span>] <span class="hljs-keyword">and</span> <span class="hljs-number">0</span> &lt;= py &lt; image.shape[<span class="hljs-number">0</span>]:
+                p.append(<span class="hljs-number">1</span> <span class="hljs-keyword">if</span> image[py, px] &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> <span class="hljs-number">0</span>)
+            <span class="hljs-keyword">else</span>:
+                p.append(<span class="hljs-number">0</span>)
+
+        <span class="hljs-comment"># 计算交叉数</span>
+        cn = <span class="hljs-number">0</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">16</span>):
+            cn += <span class="hljs-built_in">abs</span>(p[(i + <span class="hljs-number">1</span>) % <span class="hljs-number">16</span>] - p[i])
+
+        cn = cn // <span class="hljs-number">2</span>
+
+        <span class="hljs-keyword">return</span> cn
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_compute_angle_improved</span>(<span class="hljs-params">self, image, x, y, minutiae_type</span>):
+        <span class="hljs-string">&quot;&quot;&quot;计算特征点方向（优化：精确的方向估计）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> minutiae_type == <span class="hljs-variable language_">self</span>.ENDING:
+            <span class="hljs-comment"># 端点：追踪更长的脊线</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>._trace_ridge_direction_improved(image, x, y)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 分叉点：计算主方向</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>._compute_bifurcation_angle_improved(image, x, y)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_trace_ridge_direction_improved</span>(<span class="hljs-params">self, image, x, y, max_steps=<span class="hljs-number">30</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;追踪脊线方向（优化：更稳健的追踪）&quot;&quot;&quot;</span>
+        h, w = image.shape
+
+        <span class="hljs-comment"># 记录路径</span>
+        path = [(x, y)]
+
+        <span class="hljs-comment"># 8邻域方向</span>
+        directions = [
+            (<span class="hljs-number">0</span>, -<span class="hljs-number">1</span>), (<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>), (<span class="hljs-number">1</span>, <span class="hljs-number">0</span>), (<span class="hljs-number">1</span>, <span class="hljs-number">1</span>),
+            (<span class="hljs-number">0</span>, <span class="hljs-number">1</span>), (-<span class="hljs-number">1</span>, <span class="hljs-number">1</span>), (-<span class="hljs-number">1</span>, <span class="hljs-number">0</span>), (-<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>)
+        ]
+
+        <span class="hljs-comment"># 追踪脊线</span>
+        current_x, current_y = x, y
+        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(max_steps):
+            next_points = []
+            <span class="hljs-keyword">for</span> dx, dy <span class="hljs-keyword">in</span> directions:
+                nx, ny = current_x + dx, current_y + dy
+                <span class="hljs-keyword">if</span> <span class="hljs-number">0</span> &lt;= nx &lt; w <span class="hljs-keyword">and</span> <span class="hljs-number">0</span> &lt;= ny &lt; h:
+                    <span class="hljs-keyword">if</span> image[ny, nx] &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> (nx, ny) <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> path:
+                        next_points.append((nx, ny))
+
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(next_points) == <span class="hljs-number">1</span>:
+                current_x, current_y = next_points[<span class="hljs-number">0</span>]
+                path.append((current_x, current_y))
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-keyword">break</span>
+
+        <span class="hljs-comment"># 计算方向（使用路径的整体方向）</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(path) &gt;= <span class="hljs-number">3</span>:
+            dx = path[-<span class="hljs-number">1</span>][<span class="hljs-number">0</span>] - path[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>]
+            dy = path[-<span class="hljs-number">1</span>][<span class="hljs-number">1</span>] - path[<span class="hljs-number">0</span>][<span class="hljs-number">1</span>]
+        <span class="hljs-keyword">elif</span> <span class="hljs-built_in">len</span>(path) &gt; <span class="hljs-number">1</span>:
+            dx = path[-<span class="hljs-number">1</span>][<span class="hljs-number">0</span>] - path[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>]
+            dy = path[-<span class="hljs-number">1</span>][<span class="hljs-number">1</span>] - path[<span class="hljs-number">0</span>][<span class="hljs-number">1</span>]
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+
+        <span class="hljs-keyword">if</span> dx == <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> dy == <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+
+        <span class="hljs-keyword">return</span> math.atan2(dy, dx)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_compute_bifurcation_angle_improved</span>(<span class="hljs-params">self, image, x, y</span>):
+        <span class="hljs-string">&quot;&quot;&quot;计算分叉点的主方向（优化）&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 找到三个分支并追踪</span>
+        branches = <span class="hljs-variable language_">self</span>._find_branches_improved(image, x, y)
+
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(branches) &lt; <span class="hljs-number">2</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+
+        <span class="hljs-comment"># 计算主方向（分支的平均方向）</span>
+        angles = [math.atan2(dy, dx) <span class="hljs-keyword">for</span> dx, dy <span class="hljs-keyword">in</span> branches]
+        avg_angle = np.mean(angles)
+
+        <span class="hljs-keyword">return</span> avg_angle
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_find_branches_improved</span>(<span class="hljs-params">self, image, x, y</span>):
+        <span class="hljs-string">&quot;&quot;&quot;找到分叉点的所有分支（优化：追踪分支方向）&quot;&quot;&quot;</span>
+        h, w = image.shape
+        branches = []
+
+        <span class="hljs-comment"># 8邻域方向</span>
+        directions = [
+            (<span class="hljs-number">0</span>, -<span class="hljs-number">1</span>), (<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>), (<span class="hljs-number">1</span>, <span class="hljs-number">0</span>), (<span class="hljs-number">1</span>, <span class="hljs-number">1</span>),
+            (<span class="hljs-number">0</span>, <span class="hljs-number">1</span>), (-<span class="hljs-number">1</span>, <span class="hljs-number">1</span>), (-<span class="hljs-number">1</span>, <span class="hljs-number">0</span>), (-<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>)
+        ]
+
+        <span class="hljs-keyword">for</span> dx, dy <span class="hljs-keyword">in</span> directions:
+            nx, ny = x + dx, y + dy
+            <span class="hljs-keyword">if</span> <span class="hljs-number">0</span> &lt;= nx &lt; w <span class="hljs-keyword">and</span> <span class="hljs-number">0</span> &lt;= ny &lt; h <span class="hljs-keyword">and</span> image[ny, nx] &gt; <span class="hljs-number">0</span>:
+                <span class="hljs-comment"># 追踪这个分支</span>
+                branch_path = <span class="hljs-variable language_">self</span>._trace_branch(image, nx, ny, x, y)
+                <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(branch_path) &gt; <span class="hljs-number">5</span>:  <span class="hljs-comment"># 有效分支</span>
+                    end_x, end_y = branch_path[-<span class="hljs-number">1</span>]
+                    total_dx = end_x - x
+                    total_dy = end_y - y
+                    branches.append((total_dx, total_dy))
+
+        <span class="hljs-keyword">return</span> branches
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_trace_branch</span>(<span class="hljs-params">self, image, x, y, start_x, start_y, max_steps=<span class="hljs-number">20</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;追踪单个分支&quot;&quot;&quot;</span>
+        path = [(x, y)]
+        current_x, current_y = x, y
+
+        directions = [
+            (<span class="hljs-number">0</span>, -<span class="hljs-number">1</span>), (<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>), (<span class="hljs-number">1</span>, <span class="hljs-number">0</span>), (<span class="hljs-number">1</span>, <span class="hljs-number">1</span>),
+            (<span class="hljs-number">0</span>, <span class="hljs-number">1</span>), (-<span class="hljs-number">1</span>, <span class="hljs-number">1</span>), (-<span class="hljs-number">1</span>, <span class="hljs-number">0</span>), (-<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>)
+        ]
+
+        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(max_steps):
+            next_points = []
+            <span class="hljs-keyword">for</span> dx, dy <span class="hljs-keyword">in</span> directions:
+                nx, ny = current_x + dx, current_y + dy
+                <span class="hljs-keyword">if</span> <span class="hljs-number">0</span> &lt;= nx &lt; image.shape[<span class="hljs-number">1</span>] <span class="hljs-keyword">and</span> <span class="hljs-number">0</span> &lt;= ny &lt; image.shape[<span class="hljs-number">0</span>]:
+                    <span class="hljs-keyword">if</span> image[ny, nx] &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> (nx, ny) <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> path <span class="hljs-keyword">and</span> (nx, ny) != (start_x, start_y):
+                        next_points.append((nx, ny))
+
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(next_points) == <span class="hljs-number">1</span>:
+                current_x, current_y = next_points[<span class="hljs-number">0</span>]
+                path.append((current_x, current_y))
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-keyword">break</span>
+
+        <span class="hljs-keyword">return</span> path
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_compute_quality_improved</span>(<span class="hljs-params">self, thinned_image, x, y, original_image, orig_x, orig_y</span>):
+        <span class="hljs-string">&quot;&quot;&quot;计算特征点质量（优化：多维度评估）&quot;&quot;&quot;</span>
+        quality = <span class="hljs-number">1.0</span>
+
+        <span class="hljs-keyword">if</span> original_image <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-comment"># 维度1：局部对比度</span>
+            h, w = original_image.shape
+            margin = <span class="hljs-number">8</span>
+            x1, y1 = <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, orig_x - margin), <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, orig_y - margin)
+            x2, y2 = <span class="hljs-built_in">min</span>(w, orig_x + margin), <span class="hljs-built_in">min</span>(h, orig_y + margin)
+
+            local = original_image[y1:y2, x1:x2]
+            <span class="hljs-keyword">if</span> local.size &gt; <span class="hljs-number">0</span>:
+                contrast = local.std()
+                contrast_score = <span class="hljs-built_in">min</span>(contrast / <span class="hljs-number">40.0</span>, <span class="hljs-number">1.0</span>)
+            <span class="hljs-keyword">else</span>:
+                contrast_score = <span class="hljs-number">0.5</span>
+
+            <span class="hljs-comment"># 维度2：脊线连续性</span>
+            continuity_score = <span class="hljs-variable language_">self</span>._compute_continuity_score(thinned_image, x, y)
+
+            <span class="hljs-comment"># 维度3：局部梯度</span>
+            grad_x = cv2.Sobel(original_image, cv2.CV_64F, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, ksize=<span class="hljs-number">3</span>)
+            grad_y = cv2.Sobel(original_image, cv2.CV_64F, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, ksize=<span class="hljs-number">3</span>)
+            grad_mag = np.sqrt(grad_x**<span class="hljs-number">2</span> + grad_y**<span class="hljs-number">2</span>)
+            grad_score = <span class="hljs-built_in">min</span>(grad_mag[orig_y, orig_x] / <span class="hljs-number">200.0</span>, <span class="hljs-number">1.0</span>)
+
+            <span class="hljs-comment"># 综合质量分数</span>
+            quality = (contrast_score * <span class="hljs-number">0.5</span> + continuity_score * <span class="hljs-number">0.3</span> + grad_score * <span class="hljs-number">0.2</span>)
+
+        <span class="hljs-keyword">return</span> quality
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_compute_continuity_score</span>(<span class="hljs-params">self, image, x, y</span>):
+        <span class="hljs-string">&quot;&quot;&quot;计算脊线连续性分数&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 检查周围像素的连通性</span>
+        neighbors = []
+        <span class="hljs-keyword">for</span> dx <span class="hljs-keyword">in</span> [-<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>]:
+            <span class="hljs-keyword">for</span> dy <span class="hljs-keyword">in</span> [-<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>]:
+                <span class="hljs-keyword">if</span> dx == <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> dy == <span class="hljs-number">0</span>:
+                    <span class="hljs-keyword">continue</span>
+                nx, ny = x + dx, y + dy
+                <span class="hljs-keyword">if</span> <span class="hljs-number">0</span> &lt;= nx &lt; image.shape[<span class="hljs-number">1</span>] <span class="hljs-keyword">and</span> <span class="hljs-number">0</span> &lt;= ny &lt; image.shape[<span class="hljs-number">0</span>]:
+                    neighbors.append(image[ny, nx] &gt; <span class="hljs-number">0</span>)
+
+        <span class="hljs-comment"># 连续的邻居数越多，分数越高</span>
+        continuous_count = <span class="hljs-built_in">sum</span>(neighbors)
+        <span class="hljs-keyword">return</span> continuous_count / <span class="hljs-number">8.0</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_count_local_ridge</span>(<span class="hljs-params">self, original_image, x, y</span>):
+        <span class="hljs-string">&quot;&quot;&quot;计算局部脊线数量&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> original_image <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+
+        <span class="hljs-comment"># 局部窗口内的脊线数</span>
+        margin = <span class="hljs-number">15</span>
+        h, w = original_image.shape
+        x1, y1 = <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, x - margin), <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, y - margin)
+        x2, y2 = <span class="hljs-built_in">min</span>(w, x + margin), <span class="hljs-built_in">min</span>(h, y + margin)
+
+        local = original_image[y1:y2, x1:x2]
+        <span class="hljs-keyword">if</span> local.size == <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+
+        <span class="hljs-comment"># 使用阈值找到脊线</span>
+        thresh = filters.threshold_otsu(local)
+        binary_local = local &lt; thresh
+
+        <span class="hljs-comment"># 计算垂直和水平方向的脊线数</span>
+        row_proj = np.<span class="hljs-built_in">sum</span>(binary_local, axis=<span class="hljs-number">1</span>)
+        col_proj = np.<span class="hljs-built_in">sum</span>(binary_local, axis=<span class="hljs-number">0</span>)
+
+        <span class="hljs-comment"># 脊线数 = 投影中的峰值数</span>
+        row_peaks = np.<span class="hljs-built_in">sum</span>(np.convolve(row_proj, [<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>], mode=<span class="hljs-string">&#x27;valid&#x27;</span>) &lt; <span class="hljs-number">0</span>)
+        col_peaks = np.<span class="hljs-built_in">sum</span>(np.convolve(col_proj, [<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>], mode=<span class="hljs-string">&#x27;valid&#x27;</span>) &lt; <span class="hljs-number">0</span>)
+
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">min</span>((row_peaks + col_peaks) // <span class="hljs-number">2</span>, <span class="hljs-number">10</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_extract_local_pattern</span>(<span class="hljs-params">self, original_image, x, y</span>):
+        <span class="hljs-string">&quot;&quot;&quot;提取局部纹理模式（用于增强特征描述）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> original_image <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">return</span> np.zeros(<span class="hljs-number">8</span>)
+
+        <span class="hljs-comment"># 8方向的局部梯度模式</span>
+        margin = <span class="hljs-number">5</span>
+        h, w = original_image.shape
+        patterns = []
+
+        directions = [
+            (<span class="hljs-number">0</span>, -<span class="hljs-number">1</span>), (<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>), (<span class="hljs-number">1</span>, <span class="hljs-number">0</span>), (<span class="hljs-number">1</span>, <span class="hljs-number">1</span>),
+            (<span class="hljs-number">0</span>, <span class="hljs-number">1</span>), (-<span class="hljs-number">1</span>, <span class="hljs-number">1</span>), (-<span class="hljs-number">1</span>, <span class="hljs-number">0</span>), (-<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>)
+        ]
+
+        <span class="hljs-keyword">for</span> dx, dy <span class="hljs-keyword">in</span> directions:
+            x1, y1 = <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, x - dx * margin), <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, y - dy * margin)
+            x2, y2 = <span class="hljs-built_in">min</span>(w, x + dx * margin), <span class="hljs-built_in">min</span>(h, y + dy * margin)
+
+            <span class="hljs-keyword">if</span> x1 &lt; x2 <span class="hljs-keyword">and</span> y1 &lt; y2:
+                local_mean = np.mean(original_image[y1:y2, x1:x2])
+                patterns.append(local_mean)
+            <span class="hljs-keyword">else</span>:
+                patterns.append(<span class="hljs-number">0</span>)
+
+        <span class="hljs-comment"># 归一化模式</span>
+        patterns = np.array(patterns)
+        <span class="hljs-keyword">if</span> np.<span class="hljs-built_in">max</span>(patterns) &gt; <span class="hljs-number">0</span>:
+            patterns = (patterns - np.<span class="hljs-built_in">min</span>(patterns)) / (np.<span class="hljs-built_in">max</span>(patterns) - np.<span class="hljs-built_in">min</span>(patterns))
+
+        <span class="hljs-keyword">return</span> patterns
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_filter_close_minutiae</span>(<span class="hljs-params">self, minutiae</span>):
+        <span class="hljs-string">&quot;&quot;&quot;过滤距离过近的特征点（优化：保留高质量特征点）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(minutiae) == <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">return</span> minutiae
+
+        <span class="hljs-comment"># 按质量排序（质量高的优先保留）</span>
+        minutiae = <span class="hljs-built_in">sorted</span>(minutiae, key=<span class="hljs-keyword">lambda</span> m: m[<span class="hljs-string">&#x27;quality&#x27;</span>], reverse=<span class="hljs-literal">True</span>)
+
+        filtered = []
+        <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> minutiae:
+            is_valid = <span class="hljs-literal">True</span>
+
+            <span class="hljs-comment"># 检查与已保留特征点的距离</span>
+            <span class="hljs-keyword">for</span> fm <span class="hljs-keyword">in</span> filtered:
+                dist = math.sqrt((m[<span class="hljs-string">&#x27;x&#x27;</span>] - fm[<span class="hljs-string">&#x27;x&#x27;</span>])**<span class="hljs-number">2</span> + (m[<span class="hljs-string">&#x27;y&#x27;</span>] - fm[<span class="hljs-string">&#x27;y&#x27;</span>])**<span class="hljs-number">2</span>)
+                <span class="hljs-keyword">if</span> dist &lt; <span class="hljs-variable language_">self</span>.min_distance:
+                    <span class="hljs-comment"># 如果新特征点质量远高于已保留的，则替换</span>
+                    <span class="hljs-keyword">if</span> m[<span class="hljs-string">&#x27;quality&#x27;</span>] &gt; fm[<span class="hljs-string">&#x27;quality&#x27;</span>] * <span class="hljs-number">1.5</span>:
+                        filtered.remove(fm)
+                    <span class="hljs-keyword">else</span>:
+                        is_valid = <span class="hljs-literal">False</span>
+                    <span class="hljs-keyword">break</span>
+
+            <span class="hljs-keyword">if</span> is_valid:
+                filtered.append(m)
+
+        <span class="hljs-keyword">return</span> filtered
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MinutiaeMatcher</span>:
+    <span class="hljs-string">&quot;&quot;&quot;特征点匹配器（优化版）&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.angle_threshold = math.pi / <span class="hljs-number">6</span>  <span class="hljs-comment"># 角度阈值（30度，更严格）</span>
+        <span class="hljs-variable language_">self</span>.distance_threshold = <span class="hljs-number">15</span>  <span class="hljs-comment"># 距离阈值（更小，更精确）</span>
+        <span class="hljs-variable language_">self</span>.match_threshold = <span class="hljs-number">0.4</span>  <span class="hljs-comment"># 匹配阈值（更高，减少误匹配）</span>
+        <span class="hljs-variable language_">self</span>.ridge_count_weight = <span class="hljs-number">0.2</span>  <span class="hljs-comment"># 脊线数权重</span>
+        <span class="hljs-variable language_">self</span>.local_pattern_weight = <span class="hljs-number">0.3</span>  <span class="hljs-comment"># 局部模式权重</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">match</span>(<span class="hljs-params">self, minutiae1, minutiae2, image_size=(<span class="hljs-params"><span class="hljs-number">256</span>, <span class="hljs-number">256</span></span>)</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        匹配两组特征点（优化：多特征融合匹配）
+        Args:
+            minutiae1: 参考指纹特征点
+            minutiae2: 查询指纹特征点
+            image_size: 图像尺寸
+        Returns:
+            匹配分数 (0-1)，匹配的特征点对
+        &quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(minutiae1) == <span class="hljs-number">0</span> <span class="hljs-keyword">or</span> <span class="hljs-built_in">len</span>(minutiae2) == <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0.0</span>, []
+
+        <span class="hljs-comment"># 构建增强的局部特征描述符</span>
+        desc1 = <span class="hljs-variable language_">self</span>._build_descriptors_enhanced(minutiae1)
+        desc2 = <span class="hljs-variable language_">self</span>._build_descriptors_enhanced(minutiae2)
+
+        <span class="hljs-comment"># 使用双向匹配策略</span>
+        matches_forward = <span class="hljs-variable language_">self</span>._local_structure_match_enhanced(minutiae1, minutiae2, desc1, desc2)
+        matches_backward = <span class="hljs-variable language_">self</span>._local_structure_match_enhanced(minutiae2, minutiae1, desc2, desc1)
+
+        <span class="hljs-comment"># 只保留双向匹配的特征点对</span>
+        mutual_matches = <span class="hljs-variable language_">self</span>._find_mutual_matches(matches_forward, matches_backward)
+
+        <span class="hljs-comment"># 几何一致性验证</span>
+        consistent_matches = <span class="hljs-variable language_">self</span>._geometric_consistency_improved(mutual_matches, minutiae1, minutiae2)
+
+        <span class="hljs-comment"># 计算匹配分数</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(consistent_matches) == <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0.0</span>, []
+
+        <span class="hljs-comment"># 匹配分数 = 匹配的特征点数 / min(两组特征点数)</span>
+        base_score = <span class="hljs-built_in">len</span>(consistent_matches) / <span class="hljs-built_in">min</span>(<span class="hljs-built_in">len</span>(minutiae1), <span class="hljs-built_in">len</span>(minutiae2))
+
+        <span class="hljs-comment"># 质量加权分数</span>
+        quality_scores = []
+        <span class="hljs-keyword">for</span> i, j, score <span class="hljs-keyword">in</span> consistent_matches:
+            q1 = minutiae1[i][<span class="hljs-string">&#x27;quality&#x27;</span>]
+            q2 = minutiae2[j][<span class="hljs-string">&#x27;quality&#x27;</span>]
+            quality_scores.append((q1 + q2) / <span class="hljs-number">2</span>)
+
+        quality_score = np.mean(quality_scores) <span class="hljs-keyword">if</span> quality_scores <span class="hljs-keyword">else</span> <span class="hljs-number">0</span>
+
+        <span class="hljs-comment"># 综合分数</span>
+        final_score = <span class="hljs-number">0.7</span> * base_score + <span class="hljs-number">0.3</span> * quality_score
+
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">min</span>(final_score, <span class="hljs-number">1.0</span>), consistent_matches
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_build_descriptors_enhanced</span>(<span class="hljs-params">self, minutiae, radius=<span class="hljs-number">40</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;构建增强的局部特征描述符&quot;&quot;&quot;</span>
+        descriptors = []
+
+        <span class="hljs-keyword">for</span> i, m <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(minutiae):
+            <span class="hljs-comment"># 找到邻近的特征点</span>
+            neighbors = []
+            <span class="hljs-keyword">for</span> j, other <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(minutiae):
+                <span class="hljs-keyword">if</span> i == j:
+                    <span class="hljs-keyword">continue</span>
+
+                dist = math.sqrt((m[<span class="hljs-string">&#x27;x&#x27;</span>] - other[<span class="hljs-string">&#x27;x&#x27;</span>])**<span class="hljs-number">2</span> + (m[<span class="hljs-string">&#x27;y&#x27;</span>] - other[<span class="hljs-string">&#x27;y&#x27;</span>])**<span class="hljs-number">2</span>)
+                <span class="hljs-keyword">if</span> dist &lt; radius:
+                    <span class="hljs-comment"># 增强的相对特征</span>
+                    rel_x = other[<span class="hljs-string">&#x27;x&#x27;</span>] - m[<span class="hljs-string">&#x27;x&#x27;</span>]
+                    rel_y = other[<span class="hljs-string">&#x27;y&#x27;</span>] - m[<span class="hljs-string">&#x27;y&#x27;</span>]
+                    rel_angle = math.atan2(rel_y, rel_x)
+                    rel_dist = dist
+
+                    <span class="hljs-comment"># 角度差</span>
+                    angle_diff = <span class="hljs-built_in">abs</span>(m[<span class="hljs-string">&#x27;angle&#x27;</span>] - other[<span class="hljs-string">&#x27;angle&#x27;</span>])
+                    angle_diff = <span class="hljs-built_in">min</span>(angle_diff, <span class="hljs-number">2</span> * math.pi - angle_diff)
+
+                    <span class="hljs-comment"># 脊线数差</span>
+                    ridge_diff = <span class="hljs-built_in">abs</span>(m.get(<span class="hljs-string">&#x27;ridge_count&#x27;</span>, <span class="hljs-number">0</span>) - other.get(<span class="hljs-string">&#x27;ridge_count&#x27;</span>, <span class="hljs-number">0</span>))
+
+                    neighbors.append({
+                        <span class="hljs-string">&#x27;rel_x&#x27;</span>: rel_x,
+                        <span class="hljs-string">&#x27;rel_y&#x27;</span>: rel_y,
+                        <span class="hljs-string">&#x27;rel_angle&#x27;</span>: rel_angle,
+                        <span class="hljs-string">&#x27;rel_dist&#x27;</span>: rel_dist,
+                        <span class="hljs-string">&#x27;angle_diff&#x27;</span>: angle_diff,
+                        <span class="hljs-string">&#x27;ridge_diff&#x27;</span>: ridge_diff,
+                        <span class="hljs-string">&#x27;type&#x27;</span>: other[<span class="hljs-string">&#x27;type&#x27;</span>],
+                        <span class="hljs-string">&#x27;angle&#x27;</span>: other[<span class="hljs-string">&#x27;angle&#x27;</span>],
+                        <span class="hljs-string">&#x27;quality&#x27;</span>: other[<span class="hljs-string">&#x27;quality&#x27;</span>],
+                        <span class="hljs-string">&#x27;local_pattern&#x27;</span>: other.get(<span class="hljs-string">&#x27;local_pattern&#x27;</span>, np.zeros(<span class="hljs-number">8</span>))
+                    })
+
+            <span class="hljs-comment"># 按距离排序邻居</span>
+            neighbors = <span class="hljs-built_in">sorted</span>(neighbors, key=<span class="hljs-keyword">lambda</span> n: n[<span class="hljs-string">&#x27;rel_dist&#x27;</span>])
+
+            descriptors.append({
+                <span class="hljs-string">&#x27;center&#x27;</span>: m,
+                <span class="hljs-string">&#x27;neighbors&#x27;</span>: neighbors[:<span class="hljs-number">10</span>],  <span class="hljs-comment"># 保留前10个最近邻</span>
+                <span class="hljs-string">&#x27;ridge_count&#x27;</span>: m.get(<span class="hljs-string">&#x27;ridge_count&#x27;</span>, <span class="hljs-number">0</span>),
+                <span class="hljs-string">&#x27;local_pattern&#x27;</span>: m.get(<span class="hljs-string">&#x27;local_pattern&#x27;</span>, np.zeros(<span class="hljs-number">8</span>))
+            })
+
+        <span class="hljs-keyword">return</span> descriptors
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_local_structure_match_enhanced</span>(<span class="hljs-params">self, minutiae1, minutiae2, desc1, desc2</span>):
+        <span class="hljs-string">&quot;&quot;&quot;基于增强局部结构的匹配&quot;&quot;&quot;</span>
+        matches = []
+
+        <span class="hljs-keyword">for</span> i, d1 <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(desc1):
+            best_match = -<span class="hljs-number">1</span>
+            best_score = <span class="hljs-number">0</span>
+
+            <span class="hljs-keyword">for</span> j, d2 <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(desc2):
+                <span class="hljs-comment"># 类型必须相同</span>
+                <span class="hljs-keyword">if</span> d1[<span class="hljs-string">&#x27;center&#x27;</span>][<span class="hljs-string">&#x27;type&#x27;</span>] != d2[<span class="hljs-string">&#x27;center&#x27;</span>][<span class="hljs-string">&#x27;type&#x27;</span>]:
+                    <span class="hljs-keyword">continue</span>
+
+                <span class="hljs-comment"># 计算增强的局部结构相似度</span>
+                score = <span class="hljs-variable language_">self</span>._compare_local_structures_enhanced(d1, d2)
+
+                <span class="hljs-keyword">if</span> score &gt; best_score <span class="hljs-keyword">and</span> score &gt; <span class="hljs-variable language_">self</span>.match_threshold:
+                    best_score = score
+                    best_match = j
+
+            <span class="hljs-keyword">if</span> best_match &gt;= <span class="hljs-number">0</span>:
+                matches.append((i, best_match, best_score))
+
+        <span class="hljs-keyword">return</span> matches
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_compare_local_structures_enhanced</span>(<span class="hljs-params">self, desc1, desc2</span>):
+        <span class="hljs-string">&quot;&quot;&quot;比较两个增强的局部结构&quot;&quot;&quot;</span>
+        n1 = desc1[<span class="hljs-string">&#x27;neighbors&#x27;</span>]
+        n2 = desc2[<span class="hljs-string">&#x27;neighbors&#x27;</span>]
+
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(n1) == <span class="hljs-number">0</span> <span class="hljs-keyword">or</span> <span class="hljs-built_in">len</span>(n2) == <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0.0</span>
+
+        <span class="hljs-comment"># 匹配邻近特征点</span>
+        matched_neighbors = <span class="hljs-number">0</span>
+        total_score = <span class="hljs-number">0</span>
+
+        <span class="hljs-comment"># 脊线数相似度</span>
+        ridge_sim = <span class="hljs-number">1.0</span> - <span class="hljs-built_in">min</span>(<span class="hljs-built_in">abs</span>(desc1[<span class="hljs-string">&#x27;ridge_count&#x27;</span>] - desc2[<span class="hljs-string">&#x27;ridge_count&#x27;</span>]) / <span class="hljs-number">10.0</span>, <span class="hljs-number">1.0</span>)
+
+        <span class="hljs-comment"># 局部模式相似度</span>
+        pattern_sim = np.<span class="hljs-built_in">sum</span>(np.minimum(desc1[<span class="hljs-string">&#x27;local_pattern&#x27;</span>], desc2[<span class="hljs-string">&#x27;local_pattern&#x27;</span>])) / <span class="hljs-number">8.0</span>
+
+        <span class="hljs-comment"># 邻居匹配</span>
+        <span class="hljs-keyword">for</span> neighbor1 <span class="hljs-keyword">in</span> n1:
+            best_neighbor_score = <span class="hljs-number">0</span>
+
+            <span class="hljs-keyword">for</span> neighbor2 <span class="hljs-keyword">in</span> n2:
+                <span class="hljs-keyword">if</span> neighbor1[<span class="hljs-string">&#x27;type&#x27;</span>] != neighbor2[<span class="hljs-string">&#x27;type&#x27;</span>]:
+                    <span class="hljs-keyword">continue</span>
+
+                <span class="hljs-comment"># 距离相似度</span>
+                dist_diff = <span class="hljs-built_in">abs</span>(neighbor1[<span class="hljs-string">&#x27;rel_dist&#x27;</span>] - neighbor2[<span class="hljs-string">&#x27;rel_dist&#x27;</span>])
+                dist_sim = <span class="hljs-number">1.0</span> - <span class="hljs-built_in">min</span>(dist_diff / <span class="hljs-variable language_">self</span>.distance_threshold, <span class="hljs-number">1.0</span>)
+
+                <span class="hljs-comment"># 角度相似度</span>
+                angle_diff = <span class="hljs-built_in">abs</span>(neighbor1[<span class="hljs-string">&#x27;rel_angle&#x27;</span>] - neighbor2[<span class="hljs-string">&#x27;rel_angle&#x27;</span>])
+                angle_diff = <span class="hljs-built_in">min</span>(angle_diff, <span class="hljs-number">2</span> * math.pi - angle_diff)
+                angle_sim = <span class="hljs-number">1.0</span> - <span class="hljs-built_in">min</span>(angle_diff / <span class="hljs-variable language_">self</span>.angle_threshold, <span class="hljs-number">1.0</span>)
+
+                <span class="hljs-comment"># 角度差相似度</span>
+                angle_diff_sim = <span class="hljs-number">1.0</span> - <span class="hljs-built_in">min</span>(<span class="hljs-built_in">abs</span>(neighbor1[<span class="hljs-string">&#x27;angle_diff&#x27;</span>] - neighbor2[<span class="hljs-string">&#x27;angle_diff&#x27;</span>]) / (math.pi/<span class="hljs-number">2</span>), <span class="hljs-number">1.0</span>)
+
+                <span class="hljs-comment"># 综合邻居相似度</span>
+                neighbor_score = (dist_sim * <span class="hljs-number">0.4</span> + angle_sim * <span class="hljs-number">0.4</span> + angle_diff_sim * <span class="hljs-number">0.2</span>)
+
+                <span class="hljs-keyword">if</span> neighbor_score &gt; best_neighbor_score:
+                    best_neighbor_score = neighbor_score
+
+            <span class="hljs-keyword">if</span> best_neighbor_score &gt; <span class="hljs-number">0.5</span>:
+                matched_neighbors += <span class="hljs-number">1</span>
+                total_score += best_neighbor_score
+
+        <span class="hljs-comment"># 计算整体相似度</span>
+        neighbor_score = matched_neighbors / <span class="hljs-built_in">max</span>(<span class="hljs-built_in">len</span>(n1), <span class="hljs-built_in">len</span>(n2)) <span class="hljs-keyword">if</span> <span class="hljs-built_in">max</span>(<span class="hljs-built_in">len</span>(n1), <span class="hljs-built_in">len</span>(n2)) &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> <span class="hljs-number">0</span>
+        <span class="hljs-keyword">if</span> matched_neighbors &gt; <span class="hljs-number">0</span>:
+            avg_neighbor_score = total_score / matched_neighbors
+        <span class="hljs-keyword">else</span>:
+            avg_neighbor_score = <span class="hljs-number">0</span>
+
+        <span class="hljs-comment"># 综合所有特征</span>
+        total_score = (
+            neighbor_score * avg_neighbor_score * (<span class="hljs-number">1</span> - <span class="hljs-variable language_">self</span>.ridge_count_weight - <span class="hljs-variable language_">self</span>.local_pattern_weight) +
+            ridge_sim * <span class="hljs-variable language_">self</span>.ridge_count_weight +
+            pattern_sim * <span class="hljs-variable language_">self</span>.local_pattern_weight
+        )
+
+        <span class="hljs-keyword">return</span> total_score
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_find_mutual_matches</span>(<span class="hljs-params">self, matches_forward, matches_backward</span>):
+        <span class="hljs-string">&quot;&quot;&quot;找到双向匹配的特征点对&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 构建反向匹配映射</span>
+        backward_map = {(j, i): score <span class="hljs-keyword">for</span> i, j, score <span class="hljs-keyword">in</span> matches_backward}
+
+        mutual_matches = []
+        <span class="hljs-keyword">for</span> i, j, score_forward <span class="hljs-keyword">in</span> matches_forward:
+            <span class="hljs-keyword">if</span> (i, j) <span class="hljs-keyword">in</span> backward_map:
+                score_backward = backward_map[(i, j)]
+                avg_score = (score_forward + score_backward) / <span class="hljs-number">2</span>
+                mutual_matches.append((i, j, avg_score))
+
+        <span class="hljs-keyword">return</span> mutual_matches
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_geometric_consistency_improved</span>(<span class="hljs-params">self, matches, minutiae1, minutiae2</span>):
+        <span class="hljs-string">&quot;&quot;&quot;检查几何一致性（优化：RANSAC算法）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(matches) &lt; <span class="hljs-number">3</span>:
+            <span class="hljs-keyword">return</span> matches
+
+        <span class="hljs-comment"># 使用RANSAC筛选一致的匹配</span>
+        src_pts = np.float32([[minutiae1[i][<span class="hljs-string">&#x27;x&#x27;</span>], minutiae1[i][<span class="hljs-string">&#x27;y&#x27;</span>]] <span class="hljs-keyword">for</span> i, j, _ <span class="hljs-keyword">in</span> matches])
+        dst_pts = np.float32([[minutiae2[j][<span class="hljs-string">&#x27;x&#x27;</span>], minutiae2[j][<span class="hljs-string">&#x27;y&#x27;</span>]] <span class="hljs-keyword">for</span> i, j, _ <span class="hljs-keyword">in</span> matches])
+
+        <span class="hljs-comment"># 计算变换矩阵并找到内点</span>
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-comment"># 使用仿射变换</span>
+            M, mask = cv2.estimateAffine2D(src_pts, dst_pts, ransacReprojThreshold=<span class="hljs-number">10.0</span>)
+            mask = mask.ravel().tolist()
+
+            <span class="hljs-comment"># 筛选内点</span>
+            consistent_matches = [matches[i] <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(matches)) <span class="hljs-keyword">if</span> mask[i]]
+
+            <span class="hljs-keyword">return</span> consistent_matches
+        <span class="hljs-keyword">except</span>:
+            <span class="hljs-comment"># 如果RANSAC失败，使用原始几何一致性</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>._geometric_consistency_original(matches, minutiae1, minutiae2)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_geometric_consistency_original</span>(<span class="hljs-params">self, matches, minutiae1, minutiae2</span>):
+        <span class="hljs-string">&quot;&quot;&quot;原始几何一致性检查&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(matches) &lt; <span class="hljs-number">2</span>:
+            <span class="hljs-keyword">return</span> matches
+
+        <span class="hljs-comment"># 计算所有匹配对的几何一致性</span>
+        consistent_count = defaultdict(<span class="hljs-built_in">int</span>)
+        total_pairs = <span class="hljs-number">0</span>
+
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(matches)):
+            <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(i + <span class="hljs-number">1</span>, <span class="hljs-built_in">len</span>(matches)):
+                idx1_i, idx2_i, _ = matches[i]
+                idx1_j, idx2_j, _ = matches[j]
+
+                m1_i = minutiae1[idx1_i]
+                m1_j = minutiae1[idx1_j]
+                m2_i = minutiae2[idx2_i]
+                m2_j = minutiae2[idx2_j]
+
+                <span class="hljs-comment"># 计算两组中的距离和角度</span>
+                dist1 = math.sqrt((m1_i[<span class="hljs-string">&#x27;x&#x27;</span>] - m1_j[<span class="hljs-string">&#x27;x&#x27;</span>])**<span class="hljs-number">2</span> + (m1_i[<span class="hljs-string">&#x27;y&#x27;</span>] - m1_j[<span class="hljs-string">&#x27;y&#x27;</span>])**<span class="hljs-number">2</span>)
+                dist2 = math.sqrt((m2_i[<span class="hljs-string">&#x27;x&#x27;</span>] - m2_j[<span class="hljs-string">&#x27;x&#x27;</span>])**<span class="hljs-number">2</span> + (m2_i[<span class="hljs-string">&#x27;y&#x27;</span>] - m2_j[<span class="hljs-string">&#x27;y&#x27;</span>])**<span class="hljs-number">2</span>)
+
+                angle1 = math.atan2(m1_j[<span class="hljs-string">&#x27;y&#x27;</span>] - m1_i[<span class="hljs-string">&#x27;y&#x27;</span>], m1_j[<span class="hljs-string">&#x27;x&#x27;</span>] - m1_i[<span class="hljs-string">&#x27;x&#x27;</span>])
+                angle2 = math.atan2(m2_j[<span class="hljs-string">&#x27;y&#x27;</span>] - m2_i[<span class="hljs-string">&#x27;y&#x27;</span>], m2_j[<span class="hljs-string">&#x27;x&#x27;</span>] - m2_i[<span class="hljs-string">&#x27;x&#x27;</span>])
+                angle_diff = <span class="hljs-built_in">abs</span>(angle1 - angle2)
+                angle_diff = <span class="hljs-built_in">min</span>(angle_diff, <span class="hljs-number">2</span> * math.pi - angle_diff)
+
+                <span class="hljs-comment"># 检查一致性</span>
+                <span class="hljs-keyword">if</span> dist1 &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> dist2 &gt; <span class="hljs-number">0</span>:
+                    ratio = <span class="hljs-built_in">min</span>(dist1, dist2) / <span class="hljs-built_in">max</span>(dist1, dist2)
+                    <span class="hljs-keyword">if</span> ratio &gt; <span class="hljs-number">0.8</span> <span class="hljs-keyword">and</span> angle_diff &lt; math.pi/<span class="hljs-number">8</span>:
+                        consistent_count[i] += <span class="hljs-number">1</span>
+                        consistent_count[j] += <span class="hljs-number">1</span>
+                    total_pairs += <span class="hljs-number">1</span>
+
+        <span class="hljs-comment"># 筛选一致性高的匹配</span>
+        threshold = <span class="hljs-built_in">max</span>(<span class="hljs-number">1</span>, total_pairs // <span class="hljs-number">10</span>)
+        consistent_matches = [<span class="hljs-keyword">match</span> <span class="hljs-keyword">for</span> i, <span class="hljs-keyword">match</span> <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(matches) <span class="hljs-keyword">if</span> consistent_count.get(i, <span class="hljs-number">0</span>) &gt;= threshold]
+
+        <span class="hljs-keyword">return</span> consistent_matches
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">FingerprintRecognizer</span>:
+    <span class="hljs-string">&quot;&quot;&quot;指纹识别器 - 完整流程（优化版）&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, target_size=(<span class="hljs-params"><span class="hljs-number">256</span>, <span class="hljs-number">256</span></span>)</span>):
+        <span class="hljs-variable language_">self</span>.preprocessor = FingerprintPreprocessor(target_size=target_size)
+        <span class="hljs-variable language_">self</span>.extractor = MinutiaeExtractor()
+        <span class="hljs-variable language_">self</span>.matcher = MinutiaeMatcher()
+
+        <span class="hljs-variable language_">self</span>.reference_minutiae = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>.reference_image = <span class="hljs-literal">None</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">enroll</span>(<span class="hljs-params">self, image_path</span>):
+        <span class="hljs-string">&quot;&quot;&quot;注册参考指纹&quot;&quot;&quot;</span>
+        original, enhanced, binary, thinned = <span class="hljs-variable language_">self</span>.preprocessor.preprocess(image_path)
+
+        <span class="hljs-variable language_">self</span>.reference_minutiae = <span class="hljs-variable language_">self</span>.extractor.extract(thinned, original)
+        <span class="hljs-variable language_">self</span>.reference_image = original
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;已注册参考指纹，提取到 <span class="hljs-subst">{<span class="hljs-built_in">len</span>(self.reference_minutiae)}</span> 个特征点（优化版）&quot;</span>)
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.reference_minutiae
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">verify</span>(<span class="hljs-params">self, query_image_path, threshold=<span class="hljs-number">0.3</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;验证查询指纹（优化：更高的默认阈值）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.reference_minutiae <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;请先注册参考指纹&quot;</span>)
+
+        <span class="hljs-comment"># 预处理查询指纹</span>
+        original, enhanced, binary, thinned = <span class="hljs-variable language_">self</span>.preprocessor.preprocess(query_image_path)
+
+        <span class="hljs-comment"># 提取特征点</span>
+        query_minutiae = <span class="hljs-variable language_">self</span>.extractor.extract(thinned, original)
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;查询指纹提取到 <span class="hljs-subst">{<span class="hljs-built_in">len</span>(query_minutiae)}</span> 个特征点（优化版）&quot;</span>)
+
+        <span class="hljs-comment"># 匹配</span>
+        score, matches = <span class="hljs-variable language_">self</span>.matcher.<span class="hljs-keyword">match</span>(<span class="hljs-variable language_">self</span>.reference_minutiae, query_minutiae)
+
+        is_match = score &gt; threshold
+
+        details = {
+            <span class="hljs-string">&#x27;reference_minutiae_count&#x27;</span>: <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.reference_minutiae),
+            <span class="hljs-string">&#x27;query_minutiae_count&#x27;</span>: <span class="hljs-built_in">len</span>(query_minutiae),
+            <span class="hljs-string">&#x27;matched_count&#x27;</span>: <span class="hljs-built_in">len</span>(matches),
+            <span class="hljs-string">&#x27;score&#x27;</span>: score,
+            <span class="hljs-string">&#x27;matches&#x27;</span>: matches
+        }
+
+        <span class="hljs-keyword">return</span> is_match, score, details
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">visualize</span>(<span class="hljs-params">self, image_path, output_path=<span class="hljs-literal">None</span>, show=<span class="hljs-literal">True</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;可视化特征点提取结果（保持不变）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+
+        <span class="hljs-comment"># 预处理</span>
+        original, enhanced, binary, thinned = <span class="hljs-variable language_">self</span>.preprocessor.preprocess(image_path)
+
+        <span class="hljs-comment"># 提取特征点</span>
+        minutiae = <span class="hljs-variable language_">self</span>.extractor.extract(thinned, original)
+
+        <span class="hljs-comment"># 创建可视化</span>
+        fig, axes = plt.subplots(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">12</span>, <span class="hljs-number">12</span>))
+
+        <span class="hljs-comment"># 原始图像</span>
+        axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].imshow(original, cmap=<span class="hljs-string">&#x27;gray&#x27;</span>)
+        axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].set_title(<span class="hljs-string">&#x27;Original Image&#x27;</span>)
+        axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].axis(<span class="hljs-string">&#x27;off&#x27;</span>)
+
+        <span class="hljs-comment"># 增强图像</span>
+        axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].imshow(enhanced, cmap=<span class="hljs-string">&#x27;gray&#x27;</span>)
+        axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].set_title(<span class="hljs-string">&#x27;Enhanced Image (Optimized)&#x27;</span>)
+        axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].axis(<span class="hljs-string">&#x27;off&#x27;</span>)
+
+        <span class="hljs-comment"># 二值图像</span>
+        axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].imshow(binary, cmap=<span class="hljs-string">&#x27;gray&#x27;</span>)
+        axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].set_title(<span class="hljs-string">&#x27;Binary Image&#x27;</span>)
+        axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].axis(<span class="hljs-string">&#x27;off&#x27;</span>)
+
+        <span class="hljs-comment"># 细化图像 + 特征点</span>
+        axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].imshow(thinned, cmap=<span class="hljs-string">&#x27;gray&#x27;</span>)
+
+        <span class="hljs-comment"># 绘制特征点</span>
+        <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> minutiae:
+            color = <span class="hljs-string">&#x27;red&#x27;</span> <span class="hljs-keyword">if</span> m[<span class="hljs-string">&#x27;type&#x27;</span>] == MinutiaeExtractor.ENDING <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;blue&#x27;</span>
+            marker = <span class="hljs-string">&#x27;o&#x27;</span> <span class="hljs-keyword">if</span> m[<span class="hljs-string">&#x27;type&#x27;</span>] == MinutiaeExtractor.ENDING <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;s&#x27;</span>
+            <span class="hljs-comment"># 根据质量调整大小</span>
+            size = <span class="hljs-number">3</span> + m[<span class="hljs-string">&#x27;quality&#x27;</span>] * <span class="hljs-number">4</span>
+            axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].plot(m[<span class="hljs-string">&#x27;x&#x27;</span>], m[<span class="hljs-string">&#x27;y&#x27;</span>], marker, color=color, markersize=size)
+
+        axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].set_title(<span class="hljs-string">f&#x27;Thinned Image with Minutiae (Optimized)\n&#x27;</span>
+                            <span class="hljs-string">f&#x27;Red: Endings (<span class="hljs-subst">{<span class="hljs-built_in">sum</span>(<span class="hljs-number">1</span> <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> minutiae <span class="hljs-keyword">if</span> m[<span class="hljs-string">&quot;type&quot;</span>] == <span class="hljs-number">1</span>)}</span>), &#x27;</span>
+                            <span class="hljs-string">f&#x27;Blue: Bifurcations (<span class="hljs-subst">{<span class="hljs-built_in">sum</span>(<span class="hljs-number">1</span> <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> minutiae <span class="hljs-keyword">if</span> m[<span class="hljs-string">&quot;type&quot;</span>] == <span class="hljs-number">2</span>)}</span>)&#x27;</span>)
+        axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].axis(<span class="hljs-string">&#x27;off&#x27;</span>)
+
+        plt.tight_layout()
+
+        <span class="hljs-keyword">if</span> output_path:
+            plt.savefig(output_path, dpi=<span class="hljs-number">150</span>, bbox_inches=<span class="hljs-string">&#x27;tight&#x27;</span>)
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;可视化结果已保存: <span class="hljs-subst">{output_path}</span>&quot;</span>)
+
+        <span class="hljs-keyword">if</span> show:
+            plt.show()
+
+        plt.close()
+
+        <span class="hljs-keyword">return</span> minutiae
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">visualize_match</span>(<span class="hljs-params">self, query_image_path, output_path=<span class="hljs-literal">None</span>, show=<span class="hljs-literal">True</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;可视化匹配结果（保持不变）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.reference_minutiae <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;请先注册参考指纹&quot;</span>)
+
+        <span class="hljs-comment"># 处理查询指纹</span>
+        original, enhanced, binary, thinned = <span class="hljs-variable language_">self</span>.preprocessor.preprocess(query_image_path)
+        query_minutiae = <span class="hljs-variable language_">self</span>.extractor.extract(thinned, original)
+
+        <span class="hljs-comment"># 匹配</span>
+        score, matches = <span class="hljs-variable language_">self</span>.matcher.<span class="hljs-keyword">match</span>(<span class="hljs-variable language_">self</span>.reference_minutiae, query_minutiae)
+
+        <span class="hljs-comment"># 可视化</span>
+        fig, axes = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">14</span>, <span class="hljs-number">7</span>))
+
+        <span class="hljs-comment"># 参考指纹</span>
+        axes[<span class="hljs-number">0</span>].imshow(<span class="hljs-variable language_">self</span>.reference_image, cmap=<span class="hljs-string">&#x27;gray&#x27;</span>)
+        <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.reference_minutiae:
+            color = <span class="hljs-string">&#x27;red&#x27;</span> <span class="hljs-keyword">if</span> m[<span class="hljs-string">&#x27;type&#x27;</span>] == MinutiaeExtractor.ENDING <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;blue&#x27;</span>
+            axes[<span class="hljs-number">0</span>].plot(m[<span class="hljs-string">&#x27;x&#x27;</span>], m[<span class="hljs-string">&#x27;y&#x27;</span>], <span class="hljs-string">&#x27;o&#x27;</span>, color=color, markersize=<span class="hljs-number">4</span>)
+        axes[<span class="hljs-number">0</span>].set_title(<span class="hljs-string">f&#x27;Reference Fingerprint (Optimized)\n<span class="hljs-subst">{<span class="hljs-built_in">len</span>(self.reference_minutiae)}</span> minutiae&#x27;</span>)
+        axes[<span class="hljs-number">0</span>].axis(<span class="hljs-string">&#x27;off&#x27;</span>)
+
+        <span class="hljs-comment"># 查询指纹</span>
+        axes[<span class="hljs-number">1</span>].imshow(original, cmap=<span class="hljs-string">&#x27;gray&#x27;</span>)
+        <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> query_minutiae:
+            color = <span class="hljs-string">&#x27;red&#x27;</span> <span class="hljs-keyword">if</span> m[<span class="hljs-string">&#x27;type&#x27;</span>] == MinutiaeExtractor.ENDING <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;blue&#x27;</span>
+            axes[<span class="hljs-number">1</span>].plot(m[<span class="hljs-string">&#x27;x&#x27;</span>], m[<span class="hljs-string">&#x27;y&#x27;</span>], <span class="hljs-string">&#x27;o&#x27;</span>, color=color, markersize=<span class="hljs-number">4</span>)
+        axes[<span class="hljs-number">1</span>].set_title(<span class="hljs-string">f&#x27;Query Fingerprint (Optimized)\n<span class="hljs-subst">{<span class="hljs-built_in">len</span>(query_minutiae)}</span> minutiae\nMatch Score: <span class="hljs-subst">{score:<span class="hljs-number">.2</span>%}</span>&#x27;</span>)
+        axes[<span class="hljs-number">1</span>].axis(<span class="hljs-string">&#x27;off&#x27;</span>)
+
+        plt.tight_layout()
+
+        <span class="hljs-keyword">if</span> output_path:
+            plt.savefig(output_path, dpi=<span class="hljs-number">150</span>, bbox_inches=<span class="hljs-string">&#x27;tight&#x27;</span>)
+
+        <span class="hljs-keyword">if</span> show:
+            plt.show()
+
+        plt.close()
+
+        <span class="hljs-keyword">return</span> score, matches
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    <span class="hljs-string">&quot;&quot;&quot;主函数 - 演示用法（保持不变）&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">import</span> argparse
+    <span class="hljs-keyword">import</span> os
+
+    parser = argparse.ArgumentParser(description=<span class="hljs-string">&#x27;指纹识别系统（特征点方法 - 优化版）&#x27;</span>)
+    parser.add_argument(<span class="hljs-string">&#x27;--reference&#x27;</span>, <span class="hljs-built_in">type</span>=<span class="hljs-built_in">str</span>, required=<span class="hljs-literal">True</span>,
+                        <span class="hljs-built_in">help</span>=<span class="hljs-string">&#x27;参考指纹图像路径&#x27;</span>)
+    parser.add_argument(<span class="hljs-string">&#x27;--query&#x27;</span>, <span class="hljs-built_in">type</span>=<span class="hljs-built_in">str</span>,
+                        <span class="hljs-built_in">help</span>=<span class="hljs-string">&#x27;查询指纹图像路径&#x27;</span>)
+    parser.add_argument(<span class="hljs-string">&#x27;--query_dir&#x27;</span>, <span class="hljs-built_in">type</span>=<span class="hljs-built_in">str</span>,
+                        <span class="hljs-built_in">help</span>=<span class="hljs-string">&#x27;查询指纹目录（批量识别）&#x27;</span>)
+    parser.add_argument(<span class="hljs-string">&#x27;--threshold&#x27;</span>, <span class="hljs-built_in">type</span>=<span class="hljs-built_in">float</span>, default=<span class="hljs-number">0.3</span>,
+                        <span class="hljs-built_in">help</span>=<span class="hljs-string">&#x27;匹配阈值（默认0.3，优化版更高）&#x27;</span>)
+    parser.add_argument(<span class="hljs-string">&#x27;--visualize&#x27;</span>, action=<span class="hljs-string">&#x27;store_true&#x27;</span>,
+                        <span class="hljs-built_in">help</span>=<span class="hljs-string">&#x27;可视化特征点&#x27;</span>)
+    parser.add_argument(<span class="hljs-string">&#x27;--output&#x27;</span>, <span class="hljs-built_in">type</span>=<span class="hljs-built_in">str</span>,
+                        <span class="hljs-built_in">help</span>=<span class="hljs-string">&#x27;输出图像路径&#x27;</span>)
+
+    args = parser.parse_args()
+
+    <span class="hljs-comment"># 创建识别器</span>
+    recognizer = FingerprintRecognizer()
+
+    <span class="hljs-comment"># 注册参考指纹</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">60</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;指纹识别系统 - 特征点方法（优化版）&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span> * <span class="hljs-number">60</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n注册参考指纹: <span class="hljs-subst">{args.reference}</span>&quot;</span>)
+
+    <span class="hljs-keyword">if</span> args.visualize:
+        recognizer.visualize(args.reference, args.output, show=<span class="hljs-literal">False</span>)
+
+    recognizer.enroll(args.reference)
+
+    <span class="hljs-comment"># 批量识别</span>
+    <span class="hljs-keyword">if</span> args.query_dir:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n批量识别目录: <span class="hljs-subst">{args.query_dir}</span>&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;-&quot;</span> * <span class="hljs-number">60</span>)
+
+        query_files = [f <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> os.listdir(args.query_dir)
+                       <span class="hljs-keyword">if</span> f.lower().endswith((<span class="hljs-string">&#x27;.png&#x27;</span>, <span class="hljs-string">&#x27;.jpg&#x27;</span>, <span class="hljs-string">&#x27;.jpeg&#x27;</span>, <span class="hljs-string">&#x27;.bmp&#x27;</span>, <span class="hljs-string">&#x27;.tif&#x27;</span>))]
+
+        results = []
+        <span class="hljs-keyword">for</span> query_file <span class="hljs-keyword">in</span> <span class="hljs-built_in">sorted</span>(query_files):
+            query_path = os.path.join(args.query_dir, query_file)
+            <span class="hljs-keyword">try</span>:
+                is_match, score, details = recognizer.verify(query_path, args.threshold)
+                status = <span class="hljs-string">&quot;✓ MATCH&quot;</span> <span class="hljs-keyword">if</span> is_match <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;✗ NO MATCH&quot;</span>
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{query_file:30s}</span> | Score: <span class="hljs-subst">{score:<span class="hljs-number">.2</span>%}</span> | <span class="hljs-subst">{status}</span>&quot;</span>)
+                results.append((query_file, score, is_match))
+            <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{query_file:30s}</span> | Error: <span class="hljs-subst">{e}</span>&quot;</span>)
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;-&quot;</span> * <span class="hljs-number">60</span>)
+        matches = <span class="hljs-built_in">sum</span>(<span class="hljs-number">1</span> <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> results <span class="hljs-keyword">if</span> r[<span class="hljs-number">2</span>])
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n统计: <span class="hljs-subst">{matches}</span>/<span class="hljs-subst">{<span class="hljs-built_in">len</span>(results)}</span> 个指纹匹配成功（优化版）&quot;</span>)
+
+        <span class="hljs-keyword">return</span> results
+
+    <span class="hljs-comment"># 单张识别</span>
+    <span class="hljs-keyword">if</span> args.query:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n验证查询指纹: <span class="hljs-subst">{args.query}</span>&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;-&quot;</span> * <span class="hljs-number">60</span>)
+
+        is_match, score, details = recognizer.verify(args.query, args.threshold)
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;参考指纹特征点数: <span class="hljs-subst">{details[<span class="hljs-string">&#x27;reference_minutiae_count&#x27;</span>]}</span>&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;查询指纹特征点数: <span class="hljs-subst">{details[<span class="hljs-string">&#x27;query_minutiae_count&#x27;</span>]}</span>&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;匹配特征点数: <span class="hljs-subst">{details[<span class="hljs-string">&#x27;matched_count&#x27;</span>]}</span>&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;匹配分数: <span class="hljs-subst">{score:<span class="hljs-number">.2</span>%}</span>&quot;</span>)
+
+        <span class="hljs-keyword">if</span> is_match:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n✓ 判定: 匹配成功 (分数 &gt; <span class="hljs-subst">{args.threshold}</span>)&quot;</span>)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n✗ 判定: 不匹配 (分数 &lt;= <span class="hljs-subst">{args.threshold}</span>)&quot;</span>)
+
+        <span class="hljs-keyword">if</span> args.visualize:
+            recognizer.visualize_match(args.query, args.output, show=<span class="hljs-literal">True</span>)
+
+        <span class="hljs-keyword">return</span> is_match, score, details
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n请指定 --query 或 --query_dir 进行识别&quot;</span>)
+
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&#x27;__main__&#x27;</span>:
+    main()
+
+<span class="hljs-comment">#python fingerprint_minutiae.py --reference picture/1.png --query picture/2.png --visualize --output match_result.png</span>
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/无人机表演点云路径规划python版.html">
+      <span>上一篇</span>
+      <strong>无人机表演点云路径规划Python版</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/基于目标检测和场景流估计联合优化的3d多目标跟踪关键词多目标跟踪场景流目标检测.html">
+      <span>下一篇</span>
+      <strong>基于目标检测和场景流估计联合优化的3D多目标跟踪关键词多目标跟踪场景流目标检测</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/详细案例说明ai所用的算法列出公式用python代码说明用法.html">详细案例说明AI所用的算法列出公式用Python代码说明用法</a></h3>
+        <p class="post-excerpt">我们来详细拆解一个最经典、最基础的 AI 算法 ——线性回归 (Linear Regression)。它是理解几乎所有更复杂 AI 模型（如神经网络）的基石。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.312Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/神经网络解决图论中最优路径的问题matlab代码.html">神经网络解决图论中最优路径的问题MATLAB代码</a></h3>
+        <p class="post-excerpt">解决思路</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.288Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/用ai训练数据预测房地产价格走势.html">用AI训练数据预测房地产价格走势</a></h3>
+        <p class="post-excerpt">房地产数据分析与预测系统开发报告</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.186Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

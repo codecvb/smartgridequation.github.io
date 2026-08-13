@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>stm32实现按键单击双击三击长按功能的proteus8仿真 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/嵌入式与硬件.html">嵌入式与硬件</a>
+        </nav>
+        <h1 class="post-title">stm32实现按键单击双击三击长按功能的proteus8仿真</h1>
+        <p class="post-deck">本文展示了一个基于STM32F1的按键检测与LED控制系统。</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.579Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>39 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-19.html">随笔</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>本文展示了一个基于STM32F1的按键检测与LED控制系统。</p>
+<p>系统通过硬件消抖和状态机实现稳定检测4种按键事件：单击(PA9)、双击(PA10)、三击(PA11)和长按(PA12)。按键模块采用结构体封装状态参数，包括消抖时间(6ms)、点击间隔(50ms)和长按判定(200ms)。</p>
+<p>LED模块提供独立控制各LED的接口，事件触发后相应LED会短暂点亮。</p>
+<p>主程序通过状态机轮询检测按键事件，并调用对应LED控制函数，实现按键动作与LED指示的精确对应。</p>
+<p>代码如下</p>
+<p>led.h</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> __LED_H</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> __LED_H</span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;stm32f1xx_hal.h&quot;</span></span>
+
+<span class="hljs-comment">// LED控制函数声明</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_Init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_ClickOn</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_ClickOff</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_DoubleClickOn</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_DoubleClickOff</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_TripleClickOn</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_TripleClickOff</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_LongPressOn</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_LongPressOff</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_AllOn</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_AllOff</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span> <span class="hljs-comment">/* __LED_H */</span></span>
+
+</code></pre>
+<p>led.c</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;led.h&quot;</span></span>
+
+<span class="hljs-comment">// LED初始化（已在main.c的GPIO初始化中完成硬件配置）</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_Init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+  <span class="hljs-comment">// 初始化时关闭所有LED</span>
+  <span class="hljs-built_in">LED_AllOff</span>();
+}
+
+<span class="hljs-comment">// 单击LED控制（PA9）</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_ClickOn</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+  <span class="hljs-built_in">HAL_GPIO_WritePin</span>(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);  <span class="hljs-comment">// 假设低电平点亮</span>
+}
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_ClickOff</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+  <span class="hljs-built_in">HAL_GPIO_WritePin</span>(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
+}
+
+<span class="hljs-comment">// 双击LED控制（PA10）</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_DoubleClickOn</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+  <span class="hljs-built_in">HAL_GPIO_WritePin</span>(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
+}
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_DoubleClickOff</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+  <span class="hljs-built_in">HAL_GPIO_WritePin</span>(GPIOA, GPIO_PIN_10, GPIO_PIN_SET);
+}
+
+<span class="hljs-comment">// 三击LED控制（PA11）</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_TripleClickOn</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+  <span class="hljs-built_in">HAL_GPIO_WritePin</span>(GPIOA, GPIO_PIN_11, GPIO_PIN_RESET);
+}
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_TripleClickOff</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+  <span class="hljs-built_in">HAL_GPIO_WritePin</span>(GPIOA, GPIO_PIN_11, GPIO_PIN_SET);
+}
+
+<span class="hljs-comment">// 长按LED控制（PA12）</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_LongPressOn</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+  <span class="hljs-built_in">HAL_GPIO_WritePin</span>(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
+}
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_LongPressOff</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+  <span class="hljs-built_in">HAL_GPIO_WritePin</span>(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);
+}
+
+<span class="hljs-comment">// 所有LED打开</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_AllOn</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+  <span class="hljs-built_in">HAL_GPIO_WritePin</span>(GPIOA, GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12, GPIO_PIN_RESET);
+}
+
+<span class="hljs-comment">// 所有LED关闭</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">LED_AllOff</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+  <span class="hljs-built_in">HAL_GPIO_WritePin</span>(GPIOA, GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12, GPIO_PIN_SET);
+}
+
+</code></pre>
+<p>key.h</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> __KEY_H</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> __KEY_H</span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;stm32f1xx_hal.h&quot;</span></span>
+
+<span class="hljs-comment">// 按键状态定义</span>
+<span class="hljs-keyword">typedef</span> <span class="hljs-keyword">enum</span> {
+  KEY_RELEASED = <span class="hljs-number">0</span>,  <span class="hljs-comment">// 按键释放</span>
+  KEY_PRESSED        <span class="hljs-comment">// 按键按下</span>
+} Key_State_TypeDef;
+
+<span class="hljs-comment">// 按键事件定义</span>
+<span class="hljs-keyword">typedef</span> <span class="hljs-keyword">enum</span> {
+  KEY_EVENT_NONE = <span class="hljs-number">0</span>,       <span class="hljs-comment">// 无事件</span>
+  KEY_EVENT_CLICK,          <span class="hljs-comment">// 单击事件</span>
+  KEY_EVENT_DOUBLE_CLICK,   <span class="hljs-comment">// 双击事件</span>
+  KEY_EVENT_TRIPLE_CLICK,   <span class="hljs-comment">// 三击事件</span>
+  KEY_EVENT_LONG_PRESS      <span class="hljs-comment">// 长按事件</span>
+} Key_Event_TypeDef;
+
+<span class="hljs-comment">// 按键结构体定义</span>
+<span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> {
+  <span class="hljs-type">uint16_t</span> debounce_time;    <span class="hljs-comment">// 消抖时间(ms)</span>
+  <span class="hljs-type">uint16_t</span> click_interval;   <span class="hljs-comment">// 点击间隔时间(ms)</span>
+  <span class="hljs-type">uint16_t</span> long_press_time;  <span class="hljs-comment">// 长按判定时间(ms)</span>
+
+  Key_State_TypeDef state;   <span class="hljs-comment">// 当前按键状态</span>
+  Key_State_TypeDef last_state; <span class="hljs-comment">// 上一次按键状态</span>
+
+  <span class="hljs-type">uint32_t</span> press_time;       <span class="hljs-comment">// 按下时间戳</span>
+  <span class="hljs-type">uint32_t</span> release_time;     <span class="hljs-comment">// 释放时间戳</span>
+  <span class="hljs-type">uint8_t</span> click_count;       <span class="hljs-comment">// 点击计数</span>
+
+  Key_Event_TypeDef event;   <span class="hljs-comment">// 按键事件</span>
+} Key_TypeDef;
+
+<span class="hljs-comment">// 函数声明</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Key_Init</span><span class="hljs-params">(Key_TypeDef *key, <span class="hljs-type">uint16_t</span> debounce, <span class="hljs-type">uint16_t</span> interval, <span class="hljs-type">uint16_t</span> long_press)</span></span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Key_Scan</span><span class="hljs-params">(Key_TypeDef *key)</span></span>;
+<span class="hljs-function">Key_Event_TypeDef <span class="hljs-title">Key_GetEvent</span><span class="hljs-params">(Key_TypeDef *key)</span></span>;
+<span class="hljs-function">Key_State_TypeDef <span class="hljs-title">Key_ReadState</span><span class="hljs-params">(Key_TypeDef *key)</span></span>;
+
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span> <span class="hljs-comment">/* __KEY_H */</span></span>
+
+</code></pre>
+<p>key.c</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;key.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;main.h&quot;</span></span>
+
+<span class="hljs-comment">// 获取当前时间(ms)</span>
+<span class="hljs-comment">//static uint32_t Key_GetTick(void) {</span>
+<span class="hljs-comment">//  return TIM2-&gt;CNT;  // 使用定时器6的计数器值作为时间基准</span>
+<span class="hljs-comment">//}</span>
+
+<span class="hljs-type">int</span> flag = <span class="hljs-number">0</span>;
+<span class="hljs-type">uint32_t</span> current_time;
+
+Key_Event_TypeDef event;
+
+<span class="hljs-function"><span class="hljs-type">uint32_t</span>  <span class="hljs-title">Key_GetTick</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">HAL_GetTick</span>();
+}
+
+<span class="hljs-comment">// 读取按键原始状态（未消抖）</span>
+<span class="hljs-function"><span class="hljs-type">static</span> Key_State_TypeDef <span class="hljs-title">Key_ReadRawState</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>{
+  <span class="hljs-comment">// 读取PA5引脚状态，按键按下时为低电平</span>
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">HAL_GPIO_ReadPin</span>(GPIOA, GPIO_PIN_5) == GPIO_PIN_SET) {
+    <span class="hljs-keyword">return</span> KEY_PRESSED;
+  } <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">return</span> KEY_RELEASED;
+  }
+}
+
+<span class="hljs-comment">// 按键初始化</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Key_Init</span><span class="hljs-params">(Key_TypeDef *key, <span class="hljs-type">uint16_t</span> debounce, <span class="hljs-type">uint16_t</span> interval, <span class="hljs-type">uint16_t</span> long_press)</span> </span>{
+  key-&gt;debounce_time = debounce;
+  key-&gt;click_interval = interval;
+  key-&gt;long_press_time = long_press;
+
+  key-&gt;state = KEY_RELEASED;
+  key-&gt;last_state = KEY_RELEASED;
+
+  key-&gt;press_time = <span class="hljs-number">0</span>;
+  key-&gt;release_time = <span class="hljs-number">0</span>;
+  key-&gt;click_count = <span class="hljs-number">0</span>;
+
+  key-&gt;event = KEY_EVENT_NONE;
+}
+
+<span class="hljs-comment">// 按键扫描（状态机实现）</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Key_Scan</span><span class="hljs-params">(Key_TypeDef *key)</span> </span>{
+    <span class="hljs-type">uint32_t</span> current_time = <span class="hljs-built_in">Key_GetTick</span>();
+    Key_State_TypeDef raw_state = <span class="hljs-built_in">Key_ReadRawState</span>();
+
+    <span class="hljs-comment">// 状态机处理</span>
+    <span class="hljs-keyword">switch</span>(key-&gt;state) {
+        <span class="hljs-keyword">case</span> KEY_RELEASED:
+            <span class="hljs-comment">// 检测到按键按下，进入消抖和按下状态</span>
+            <span class="hljs-keyword">if</span> (raw_state == KEY_PRESSED) {
+                key-&gt;press_time = current_time;
+                key-&gt;state = KEY_PRESSED;
+            }
+            <span class="hljs-comment">// 检查多击间隔超时</span>
+            <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (key-&gt;click_count &gt; <span class="hljs-number">0</span> &amp;&amp;
+                    current_time - key-&gt;release_time &gt;= key-&gt;click_interval) {
+                <span class="hljs-comment">// 根据点击次数设置事件</span>
+                <span class="hljs-keyword">switch</span>(key-&gt;click_count) {
+                    <span class="hljs-keyword">case</span> <span class="hljs-number">1</span>:
+                        key-&gt;event = KEY_EVENT_CLICK;
+                        <span class="hljs-keyword">break</span>;
+                    <span class="hljs-keyword">case</span> <span class="hljs-number">2</span>:
+                        key-&gt;event = KEY_EVENT_DOUBLE_CLICK;
+                        <span class="hljs-keyword">break</span>;
+                    <span class="hljs-keyword">case</span> <span class="hljs-number">3</span>:
+                        key-&gt;event = KEY_EVENT_TRIPLE_CLICK;
+                        <span class="hljs-keyword">break</span>;
+                    <span class="hljs-keyword">default</span>:
+                        key-&gt;event = KEY_EVENT_NONE;
+                        <span class="hljs-keyword">break</span>;
+                }
+                key-&gt;click_count = <span class="hljs-number">0</span>;  <span class="hljs-comment">// 重置点击计数</span>
+            }
+            <span class="hljs-keyword">break</span>;
+
+        <span class="hljs-keyword">case</span> KEY_PRESSED:
+            <span class="hljs-comment">// 检测长按</span>
+            <span class="hljs-keyword">if</span> (raw_state == KEY_PRESSED &amp;&amp;
+                current_time - key-&gt;press_time &gt;= key-&gt;long_press_time) {
+                key-&gt;event = KEY_EVENT_LONG_PRESS;
+                key-&gt;state = KEY_RELEASED;  <span class="hljs-comment">// 长按后回到释放状态</span>
+                key-&gt;click_count = <span class="hljs-number">0</span>;       <span class="hljs-comment">// 重置点击计数</span>
+            }
+            <span class="hljs-comment">// 按键释放</span>
+            <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (raw_state == KEY_RELEASED) {
+                key-&gt;release_time = current_time;
+                key-&gt;click_count++;         <span class="hljs-comment">// 增加点击计数</span>
+                key-&gt;state = KEY_RELEASED;  <span class="hljs-comment">// 回到释放状态</span>
+
+                <span class="hljs-comment">// 三击后直接触发事件（避免等待间隔）</span>
+                <span class="hljs-keyword">if</span> (key-&gt;click_count &gt;= <span class="hljs-number">3</span>) {
+                    key-&gt;event = KEY_EVENT_TRIPLE_CLICK;
+                    key-&gt;click_count = <span class="hljs-number">0</span>;
+                }
+            }
+            <span class="hljs-keyword">break</span>;
+    }
+}
+
+<span class="hljs-comment">// 获取按键事件</span>
+<span class="hljs-function">Key_Event_TypeDef <span class="hljs-title">Key_GetEvent</span><span class="hljs-params">(Key_TypeDef *key)</span> </span>{
+  event = key-&gt;event;
+  key-&gt;event = KEY_EVENT_NONE;  <span class="hljs-comment">// 读取后清除事件</span>
+  <span class="hljs-keyword">return</span> event;
+}
+
+<span class="hljs-comment">// 读取当前按键状态（已消抖）</span>
+<span class="hljs-function">Key_State_TypeDef <span class="hljs-title">Key_ReadState</span><span class="hljs-params">(Key_TypeDef *key)</span> </span>{
+  <span class="hljs-keyword">return</span> key-&gt;state;
+}
+
+</code></pre>
+<p>main.c</p>
+<pre class="hljs"><code class="language-cpp"><span class="hljs-comment">/* USER CODE BEGIN Header */</span>
+<span class="hljs-comment">/**
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : Main program body
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2025 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */</span>
+<span class="hljs-comment">/* USER CODE END Header */</span>
+<span class="hljs-comment">/* Includes ------------------------------------------------------------------*/</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;main.h&quot;</span></span>
+
+<span class="hljs-comment">/* Private includes ----------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN Includes */</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;key.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;led.h&quot;</span></span>
+<span class="hljs-comment">/* USER CODE END Includes */</span>
+
+<span class="hljs-comment">/* Private typedef -----------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN PTD */</span>
+
+<span class="hljs-comment">/* USER CODE END PTD */</span>
+
+<span class="hljs-comment">/* Private define ------------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN PD */</span>
+<span class="hljs-comment">/* USER CODE END PD */</span>
+
+<span class="hljs-comment">/* Private macro -------------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN PM */</span>
+
+TIM_HandleTypeDef htim2;
+
+<span class="hljs-comment">// 按键对象</span>
+Key_TypeDef key;
+
+<span class="hljs-comment">/* USER CODE END PM */</span>
+
+<span class="hljs-comment">/* Private variables ---------------------------------------------------------*/</span>
+ TIM_HandleTypeDef htim2;
+
+<span class="hljs-comment">/* USER CODE BEGIN PV */</span>
+<span class="hljs-keyword">extern</span>  <span class="hljs-type">int</span> flag;
+<span class="hljs-keyword">extern</span> Key_Event_TypeDef event;
+<span class="hljs-comment">/* USER CODE END PV */</span>
+
+<span class="hljs-comment">/* Private function prototypes -----------------------------------------------*/</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">SystemClock_Config</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">MX_GPIO_Init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">MX_TIM2_Init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;
+<span class="hljs-comment">/* USER CODE BEGIN PFP */</span>
+
+<span class="hljs-comment">/* USER CODE END PFP */</span>
+
+<span class="hljs-comment">/* Private user code ---------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN 0 */</span>
+
+<span class="hljs-comment">/* USER CODE END 0 */</span>
+
+<span class="hljs-comment">/**
+  * @brief  The application entry point.
+  * @retval int
+  */</span>
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+  <span class="hljs-comment">/* USER CODE BEGIN 1 */</span>
+
+  <span class="hljs-comment">/* USER CODE END 1 */</span>
+
+  <span class="hljs-comment">/* MCU Configuration--------------------------------------------------------*/</span>
+
+  <span class="hljs-comment">/* Reset of all peripherals, Initializes the Flash interface and the Systick. */</span>
+  <span class="hljs-built_in">HAL_Init</span>();
+
+  <span class="hljs-comment">/* USER CODE BEGIN Init */</span>
+
+  <span class="hljs-comment">/* USER CODE END Init */</span>
+
+  <span class="hljs-comment">/* Configure the system clock */</span>
+  <span class="hljs-built_in">SystemClock_Config</span>();
+
+  <span class="hljs-comment">/* USER CODE BEGIN SysInit */</span>
+
+  <span class="hljs-comment">/* USER CODE END SysInit */</span>
+
+  <span class="hljs-comment">/* Initialize all configured peripherals */</span>
+  <span class="hljs-built_in">MX_GPIO_Init</span>();
+  <span class="hljs-built_in">MX_TIM2_Init</span>();
+  <span class="hljs-comment">/* USER CODE BEGIN 2 */</span>
+
+
+  <span class="hljs-comment">// 初始化LED</span>
+  <span class="hljs-built_in">LED_Init</span>();
+
+  <span class="hljs-comment">// 初始化按键：消抖20ms，点击间隔300ms，长按1000ms</span>
+  <span class="hljs-built_in">Key_Init</span>(&amp;key, <span class="hljs-number">6</span>, <span class="hljs-number">50</span>, <span class="hljs-number">200</span>);
+
+  <span class="hljs-comment">// 启动定时器，用于按键扫描计时</span>
+  <span class="hljs-built_in">HAL_TIM_Base_Start</span>(&amp;htim2);
+
+  <span class="hljs-comment">// 关闭所有LED</span>
+  <span class="hljs-built_in">LED_AllOff</span>();
+
+
+  <span class="hljs-comment">/* USER CODE END 2 */</span>
+
+  <span class="hljs-comment">/* Infinite loop */</span>
+  <span class="hljs-comment">/* USER CODE BEGIN WHILE */</span>
+  <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>)
+  {
+    <span class="hljs-comment">/* USER CODE END WHILE */</span>
+
+    <span class="hljs-comment">/* USER CODE BEGIN 3 */</span>
+
+    <span class="hljs-comment">//按键扫描</span>
+    <span class="hljs-built_in">Key_Scan</span>(&amp;key);
+
+    <span class="hljs-comment">// 获取按键事件</span>
+    Key_Event_TypeDef event = <span class="hljs-built_in">Key_GetEvent</span>(&amp;key);
+
+    <span class="hljs-comment">// 根据事件控制LED</span>
+    <span class="hljs-keyword">switch</span>(event) {
+      <span class="hljs-keyword">case</span> KEY_EVENT_CLICK:
+        <span class="hljs-built_in">LED_ClickOn</span>();      <span class="hljs-comment">// 单击 - PA9亮</span>
+        <span class="hljs-built_in">HAL_Delay</span>(<span class="hljs-number">50</span>);     <span class="hljs-comment">// 亮500ms</span>
+        <span class="hljs-built_in">LED_ClickOff</span>();
+        <span class="hljs-keyword">break</span>;
+
+      <span class="hljs-keyword">case</span> KEY_EVENT_DOUBLE_CLICK:
+        <span class="hljs-built_in">LED_DoubleClickOn</span>();<span class="hljs-comment">// 双击 - PA10亮</span>
+        <span class="hljs-built_in">HAL_Delay</span>(<span class="hljs-number">50</span>);
+        <span class="hljs-built_in">LED_DoubleClickOff</span>();
+        <span class="hljs-keyword">break</span>;
+
+      <span class="hljs-keyword">case</span> KEY_EVENT_TRIPLE_CLICK:
+        <span class="hljs-built_in">LED_TripleClickOn</span>();<span class="hljs-comment">// 三击 - PA11亮</span>
+        <span class="hljs-built_in">HAL_Delay</span>(<span class="hljs-number">50</span>);
+        <span class="hljs-built_in">LED_TripleClickOff</span>();
+        <span class="hljs-keyword">break</span>;
+
+      <span class="hljs-keyword">case</span> KEY_EVENT_LONG_PRESS:
+        <span class="hljs-built_in">LED_LongPressOn</span>();  <span class="hljs-comment">// 长按 - PA12亮</span>
+				<span class="hljs-built_in">HAL_Delay</span>(<span class="hljs-number">100</span>);
+        <span class="hljs-built_in">LED_LongPressOff</span>();
+
+        <span class="hljs-keyword">break</span>;
+
+      <span class="hljs-keyword">default</span>:
+        <span class="hljs-keyword">break</span>;
+    }
+
+    <span class="hljs-built_in">HAL_Delay</span>(<span class="hljs-number">10</span>);
+
+  }
+
+
+  <span class="hljs-comment">/* USER CODE END 3 */</span>
+}
+
+<span class="hljs-comment">/**
+  * @brief System Clock Configuration
+  * @retval None
+  */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">SystemClock_Config</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {<span class="hljs-number">0</span>};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {<span class="hljs-number">0</span>};
+
+  <span class="hljs-comment">/** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */</span>
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">HAL_RCC_OscConfig</span>(&amp;RCC_OscInitStruct) != HAL_OK)
+  {
+    <span class="hljs-built_in">Error_Handler</span>();
+  }
+
+  <span class="hljs-comment">/** Initializes the CPU, AHB and APB buses clocks
+  */</span>
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">HAL_RCC_ClockConfig</span>(&amp;RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    <span class="hljs-built_in">Error_Handler</span>();
+  }
+}
+
+<span class="hljs-comment">/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">MX_TIM2_Init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+
+  <span class="hljs-comment">/* USER CODE BEGIN TIM2_Init 0 */</span>
+
+  <span class="hljs-comment">/* USER CODE END TIM2_Init 0 */</span>
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {<span class="hljs-number">0</span>};
+  TIM_SlaveConfigTypeDef sSlaveConfig = {<span class="hljs-number">0</span>};
+  TIM_MasterConfigTypeDef sMasterConfig = {<span class="hljs-number">0</span>};
+
+  <span class="hljs-comment">/* USER CODE BEGIN TIM2_Init 1 */</span>
+
+  <span class="hljs-comment">/* USER CODE END TIM2_Init 1 */</span>
+  htim<span class="hljs-number">2.</span>Instance = TIM2;
+  htim<span class="hljs-number">2.</span>Init.Prescaler = <span class="hljs-number">7199</span>;
+  htim<span class="hljs-number">2.</span>Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim<span class="hljs-number">2.</span>Init.Period = <span class="hljs-number">99999</span>;
+  htim<span class="hljs-number">2.</span>Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim<span class="hljs-number">2.</span>Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">HAL_TIM_Base_Init</span>(&amp;htim2) != HAL_OK)
+  {
+    <span class="hljs-built_in">Error_Handler</span>();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">HAL_TIM_ConfigClockSource</span>(&amp;htim2, &amp;sClockSourceConfig) != HAL_OK)
+  {
+    <span class="hljs-built_in">Error_Handler</span>();
+  }
+  sSlaveConfig.SlaveMode = TIM_SLAVEMODE_TRIGGER;
+  sSlaveConfig.InputTrigger = TIM_TS_ITR0;
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">HAL_TIM_SlaveConfigSynchro</span>(&amp;htim2, &amp;sSlaveConfig) != HAL_OK)
+  {
+    <span class="hljs-built_in">Error_Handler</span>();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">HAL_TIMEx_MasterConfigSynchronization</span>(&amp;htim2, &amp;sMasterConfig) != HAL_OK)
+  {
+    <span class="hljs-built_in">Error_Handler</span>();
+  }
+  <span class="hljs-comment">/* USER CODE BEGIN TIM2_Init 2 */</span>
+
+  <span class="hljs-comment">/* USER CODE END TIM2_Init 2 */</span>
+
+}
+
+<span class="hljs-comment">/**
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */</span>
+<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">MX_GPIO_Init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+  GPIO_InitTypeDef GPIO_InitStruct = {<span class="hljs-number">0</span>};
+
+  <span class="hljs-comment">/* GPIO Ports Clock Enable */</span>
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  <span class="hljs-comment">/*Configure GPIO pin Output Level */</span>
+
+
+  <span class="hljs-comment">/*Configure GPIO pin : PA5 */</span>
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  <span class="hljs-built_in">HAL_GPIO_Init</span>(GPIOA, &amp;GPIO_InitStruct);
+
+  <span class="hljs-comment">/*Configure GPIO pin : PA9 */</span>
+  GPIO_InitStruct.Pin = GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  <span class="hljs-built_in">HAL_GPIO_Init</span>(GPIOA, &amp;GPIO_InitStruct);
+
+  <span class="hljs-comment">/*Configure GPIO pins : PA10 PA11 PA12 */</span>
+  GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  <span class="hljs-built_in">HAL_GPIO_Init</span>(GPIOA, &amp;GPIO_InitStruct);
+
+}
+
+<span class="hljs-comment">/* USER CODE BEGIN 4 */</span>
+
+
+<span class="hljs-comment">/* USER CODE END 4 */</span>
+
+<span class="hljs-comment">/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Error_Handler</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+</span>{
+  <span class="hljs-comment">/* USER CODE BEGIN Error_Handler_Debug */</span>
+  <span class="hljs-comment">/* User can add his own implementation to report the HAL error return state */</span>
+  __disable_irq();
+  <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>)
+  {
+  }
+  <span class="hljs-comment">/* USER CODE END Error_Handler_Debug */</span>
+}
+
+<span class="hljs-meta">#<span class="hljs-keyword">ifdef</span>  USE_FULL_ASSERT</span>
+<span class="hljs-comment">/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">assert_failed</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span> *file, <span class="hljs-type">uint32_t</span> line)</span>
+</span>{
+  <span class="hljs-comment">/* USER CODE BEGIN 6 */</span>
+  <span class="hljs-comment">/* User can add his own implementation to report the file name and line number,
+     ex: printf(&quot;Wrong parameters value: file %s on line %d\r\n&quot;, file, line) */</span>
+  <span class="hljs-comment">/* USER CODE END 6 */</span>
+}
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span> <span class="hljs-comment">/* USE_FULL_ASSERT */</span></span>
+</code></pre>
+<p>效果如下，包含了长按，三连击，双击，单击的效果：</p>
+<p><img src="../uploads/csdn/stm32%E5%AE%9E%E7%8E%B0%E6%8C%89%E9%94%AE%E5%8D%95%E5%87%BB%E5%8F%8C%E5%87%BB%E4%B8%89%E5%87%BB%E9%95%BF%E6%8C%89%E5%8A%9F%E8%83%BD%E7%9A%84proteus8%E4%BB%BF%E7%9C%9F/img-01.gif" alt=""></p>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/windows系统下codeblocks的lvgl智能穿戴手表圆形界面代码.html">
+      <span>上一篇</span>
+      <strong>windows系统下codeblocks的lvgl智能穿戴手表圆形界面代码</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/stm32f103zet6sdiofatfs读写sd卡例程读写挂载错误排除.html">
+      <span>下一篇</span>
+      <strong>STM32F103ZET6SDIOFATFS读写SD卡例程读写挂载错误排除</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/一个月的阴晴圆缺变化回弹html仿真.html">一个月的阴晴圆缺变化回弹HTML仿真</a></h3>
+        <p class="post-excerpt">这篇文章介绍了一个交互式的3D月球光照演变演示工具，通过可视化方式展示月相变化的完整周期（约29.5天）。该网页应用采用Three.js构建三维场景，包含以下核心功能：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.698Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/最小子序和应该怎么求解.html">最小子序和应该怎么求解</a></h3>
+        <p class="post-excerpt">最小子序和问题指的是在一个整数数组里找出一个连续的子数组，让该子数组的和达到最小。下面为你介绍两种常见的解决办法：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.565Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/阿尔忒弥斯二号任务的核心轨迹.html">阿尔忒弥斯二号任务的核心轨迹</a></h3>
+        <p class="post-excerpt">阿尔忒弥斯二号任务的核心轨迹特点在于采用了自由返回轨道——这是一种在地月空间中利用引力设计的天然安全走廊，即便飞船动力完全失效，也能被月球引力“甩”回地球。以下从轨迹特点和涉及的物理计算两方面展开：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.907Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

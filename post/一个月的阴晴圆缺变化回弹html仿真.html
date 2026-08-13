@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一盏灯，一个角落，写给自己的文字">
+  <title>一个月的阴晴圆缺变化回弹HTML仿真 · 常青笔记</title>
+  <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../vendor/highlight/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span class="brand-text">常青笔记</span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="../index.html" class="">首页</a>
+        <a href="../categories.html" class="">分类</a>
+        <a href="../archive.html" class="">归档</a>
+        <a href="../tags.html" class="">标签</a>
+        <a href="../about.html" class="">关于</a>
+        
+          <a class="nav-cta" href="../archive.html">全部文章</a>
+        
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../archive.html">归档</a>
+          <span aria-hidden="true">/</span>
+          <a href="../category/编程技术.html">编程技术</a>
+        </nav>
+        <h1 class="post-title">一个月的阴晴圆缺变化回弹HTML仿真</h1>
+        <p class="post-deck">这篇文章介绍了一个交互式的3D月球光照演变演示工具，通过可视化方式展示月相变化的完整周期（约29.5天）。该网页应用采用Three.js构建三维场景，包含以下核心功能：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.698Z">2026/08/14 03:09</time>
+          <span>·</span>
+          <span>75 分钟</span>
+          <span>·</span>
+          <span>0 次阅读</span>
+        </div>
+        <div class="tag-row post-tags">
+          
+            <a class="tag-chip" href="../tags/tag-19.html">随笔</a>
+          
+        </div>
+      </header>
+      <div class="prose">
+        <p>这篇文章介绍了一个交互式的3D月球光照演变演示工具，通过可视化方式展示月相变化的完整周期（约29.5天）。该网页应用采用Three.js构建三维场景，包含以下核心功能：</p>
+<ol>
+<li>实时3D渲染地月系统，展示不同月相下月球受太阳光照的变化</li>
+<li>右上角显示当前月相名称（如新月、上弦月等）及光照百分比</li>
+<li>底部控制面板支持播放/暂停、调速（1×-20×）、跳转关键节点（如满月）</li>
+<li>左侧显示模拟天数，滑块可精确调节月相进度</li>
+<li>交互功能包括：鼠标拖拽旋转视角、滚轮缩放、键盘快捷键控制</li>
+</ol>
+<p>这个教育工具将复杂的天文现象转化为直观的动态可视化，适用于天文爱好者和教学场景。</p>
+<p><img src="../uploads/csdn/%E4%B8%80%E4%B8%AA%E6%9C%88%E7%9A%84%E9%98%B4%E6%99%B4%E5%9C%86%E7%BC%BA%E5%8F%98%E5%8C%96%E5%9B%9E%E5%BC%B9html%E4%BB%BF%E7%9C%9F/img-01.png" alt=""></p>
+<pre class="hljs"><code class="language-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;zh-CN&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">&quot;UTF-8&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;viewport&quot;</span> <span class="hljs-attr">content</span>=<span class="hljs-string">&quot;width=device-width, initial-scale=1.0&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>月球光照3D演变 — 月相变化<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">style</span>&gt;</span>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:&#x27;Segoe UI&#x27;,&#x27;PingFang SC&#x27;,&#x27;Microsoft YaHei&#x27;,system-ui,sans-serif}
+#container{position:absolute;inset:0}
+
+/* Phase viewer — top right */
+#phase-viewer{
+  position:absolute;top:20px;right:20px;
+  width:160px;height:190px;
+  background:rgba(0,0,0,.65);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  backdrop-filter:blur(12px);
+  display:flex;flex-direction:column;align-items:center;
+  padding:12px 10px 8px;z-index:10;user-select:none;
+}
+#phase-viewer canvas{
+  width:110px;height:110px;
+  border-radius:50%;
+  box-shadow:0 0 20px rgba(255,255,200,.08);
+}
+#phase-name{
+  margin-top:6px;font-size:14px;font-weight:600;
+  letter-spacing:1px;white-space:nowrap;
+}
+#phase-illum{
+  font-size:11px;opacity:.7;margin-top:2px;
+}
+
+/* Day badge — top left */
+#day-badge{
+  position:absolute;top:20px;left:20px;
+  background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;backdrop-filter:blur(12px);
+  padding:10px 18px;z-index:10;user-select:none;
+  font-size:13px;line-height:1.5;
+}
+#day-badge .num{font-size:26px;font-weight:700;letter-spacing:.5px}
+#day-badge .label{opacity:.6;font-size:11px;margin-left:4px}
+#day-badge .sub{opacity:.5;font-size:11px;margin-top:2px}
+
+/* Controls — bottom center */
+#controls{
+  position:absolute;bottom:30px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;backdrop-filter:blur(16px);
+  padding:14px 24px 16px;z-index:10;user-select:none;
+  min-width:420px;max-width:90vw;
+  display:flex;flex-direction:column;gap:10px;
+}
+#controls .row{display:flex;align-items:center;gap:12px}
+#controls .row.top{justify-content:space-between}
+#controls .row.bottom{justify-content:center;gap:16px}
+#day-slider{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:4px;border-radius:2px;
+  background:linear-gradient(90deg,#444,#888 50%,#444);
+  outline:none;cursor:pointer;flex:1;
+}
+#day-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:16px;height:16px;border-radius:50%;
+  background:#f0c040;border:2px solid rgba(255,255,255,.3);
+  cursor:pointer;box-shadow:0 0 12px rgba(240,192,64,.35);
+  transition:transform .15s;
+}
+#day-slider::-webkit-slider-thumb:hover{transform:scale(1.2)}
+#day-slider::-moz-range-thumb{
+  width:16px;height:16px;border-radius:50%;
+  background:#f0c040;border:2px solid rgba(255,255,255,.3);
+  cursor:pointer;
+}
+
+#controls button{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  color:#fff;border-radius:8px;padding:6px 14px;font-size:14px;
+  cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;gap:4px;line-height:1;
+}
+#controls button:hover{background:rgba(255,255,255,.15)}
+#controls button.active{background:rgba(240,192,64,.2);border-color:#f0c040}
+#speed-select{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;
+  cursor:pointer;outline:none;
+}
+#speed-select option{background:#222}
+#controls .day-info{font-size:13px;opacity:.8;white-space:nowrap}
+#controls .illum-info{font-size:12px;opacity:.6}
+
+/* Phase progress bar */
+#phase-bar{
+  width:100%;height:2px;border-radius:1px;
+  background:rgba(255,255,255,.08);margin-top:2px;overflow:hidden;
+}
+#phase-bar .fill{
+  height:100%;border-radius:1px;
+  background:linear-gradient(90deg,#f0c040,#ffd700);
+  transition:width .1s;
+}
+
+/* Hint */
+#hint{
+  position:absolute;bottom:100px;left:50%;transform:translateX(-50%);
+  color:rgba(255,255,255,.25);font-size:11px;z-index:5;
+  pointer-events:none;text-align:center;letter-spacing:.3px;
+}
+
+/* Responsive */
+@media(max-width:600px){
+  #controls{min-width:auto;width:calc(100vw - 24px);padding:12px 16px 14px;border-radius:12px}
+  #phase-viewer{width:130px;height:160px;padding:8px;top:12px;right:12px}
+  #phase-viewer canvas{width:90px;height:90px}
+  #day-badge{padding:6px 12px;top:12px;left:12px}
+  #day-badge .num{font-size:20px}
+  #hint{display:none}
+}
+<span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;container&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;day-badge&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;num&quot;</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;day-num&quot;</span>&gt;</span>1<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;label&quot;</span>&gt;</span>天<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;sub&quot;</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;date-label&quot;</span>&gt;</span>新月期<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;phase-viewer&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">canvas</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;phase-canvas&quot;</span> <span class="hljs-attr">width</span>=<span class="hljs-string">&quot;220&quot;</span> <span class="hljs-attr">height</span>=<span class="hljs-string">&quot;220&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">canvas</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;phase-name&quot;</span>&gt;</span>🌑 新月<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;phase-illum&quot;</span>&gt;</span>光照 0%<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;hint&quot;</span>&gt;</span>🖱 拖拽旋转 · 滚轮缩放<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;controls&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;row top&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;day-info&quot;</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;day-info&quot;</span>&gt;</span>第 0.0 天 / 29.5 天<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;illum-info&quot;</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;illum-info&quot;</span>&gt;</span>光照 0.0%<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;row&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;range&quot;</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;day-slider&quot;</span> <span class="hljs-attr">min</span>=<span class="hljs-string">&quot;0&quot;</span> <span class="hljs-attr">max</span>=<span class="hljs-string">&quot;295&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;0&quot;</span> <span class="hljs-attr">step</span>=<span class="hljs-string">&quot;1&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;phase-bar&quot;</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;fill&quot;</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;phase-fill&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;width:0%&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;row bottom&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;play-btn&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;active&quot;</span> <span class="hljs-attr">title</span>=<span class="hljs-string">&quot;播放/暂停&quot;</span>&gt;</span>⏸<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;reset-btn&quot;</span> <span class="hljs-attr">title</span>=<span class="hljs-string">&quot;重置到新月&quot;</span>&gt;</span>⟲<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">select</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;speed-select&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;1&quot;</span>&gt;</span>1×<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;2&quot;</span>&gt;</span>2×<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;5&quot;</span>&gt;</span>5×<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;10&quot;</span>&gt;</span>10×<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;20&quot;</span>&gt;</span>20×<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">select</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;today-btn&quot;</span> <span class="hljs-attr">title</span>=<span class="hljs-string">&quot;满月&quot;</span>&gt;</span>🌕<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;importmap&quot;</span>&gt;</span><span class="language-javascript">
+{
+  <span class="hljs-string">&quot;imports&quot;</span>:{
+    <span class="hljs-string">&quot;three&quot;</span>:<span class="hljs-string">&quot;https://unpkg.com/three@0.160.0/build/three.module.js&quot;</span>,
+    <span class="hljs-string">&quot;three/addons/&quot;</span>:<span class="hljs-string">&quot;https://unpkg.com/three@0.160.0/examples/jsm/&quot;</span>
+  }
+}
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span>&gt;</span><span class="language-javascript">
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> <span class="hljs-variable constant_">THREE</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;three&#x27;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">OrbitControls</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;three/addons/controls/OrbitControls.js&#x27;</span>;
+
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-comment">// Constants</span>
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">LUNAR_CYCLE</span> = <span class="hljs-number">29.5</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">ORBIT_RADIUS</span> = <span class="hljs-number">3.2</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">EARTH_RADIUS</span> = <span class="hljs-number">1.0</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">MOON_RADIUS</span> = <span class="hljs-number">0.3</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">SUN_DIST</span> = <span class="hljs-number">80</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">PHASE_NAMES</span> = [
+  { <span class="hljs-attr">min</span>:<span class="hljs-number">0.00</span>, <span class="hljs-attr">max</span>:<span class="hljs-number">0.03</span>, <span class="hljs-attr">name</span>:<span class="hljs-string">&#x27;🌑 新月&#x27;</span>,     <span class="hljs-attr">en</span>:<span class="hljs-string">&#x27;New Moon&#x27;</span> },
+  { <span class="hljs-attr">min</span>:<span class="hljs-number">0.03</span>, <span class="hljs-attr">max</span>:<span class="hljs-number">0.22</span>, <span class="hljs-attr">name</span>:<span class="hljs-string">&#x27;🌒 蛾眉月&#x27;</span>,   <span class="hljs-attr">en</span>:<span class="hljs-string">&#x27;Waxing Crescent&#x27;</span> },
+  { <span class="hljs-attr">min</span>:<span class="hljs-number">0.22</span>, <span class="hljs-attr">max</span>:<span class="hljs-number">0.28</span>, <span class="hljs-attr">name</span>:<span class="hljs-string">&#x27;🌓 上弦月&#x27;</span>,   <span class="hljs-attr">en</span>:<span class="hljs-string">&#x27;First Quarter&#x27;</span> },
+  { <span class="hljs-attr">min</span>:<span class="hljs-number">0.28</span>, <span class="hljs-attr">max</span>:<span class="hljs-number">0.47</span>, <span class="hljs-attr">name</span>:<span class="hljs-string">&#x27;🌔 盈凸月&#x27;</span>,   <span class="hljs-attr">en</span>:<span class="hljs-string">&#x27;Waxing Gibbous&#x27;</span> },
+  { <span class="hljs-attr">min</span>:<span class="hljs-number">0.47</span>, <span class="hljs-attr">max</span>:<span class="hljs-number">0.53</span>, <span class="hljs-attr">name</span>:<span class="hljs-string">&#x27;🌕 满月&#x27;</span>,     <span class="hljs-attr">en</span>:<span class="hljs-string">&#x27;Full Moon&#x27;</span> },
+  { <span class="hljs-attr">min</span>:<span class="hljs-number">0.53</span>, <span class="hljs-attr">max</span>:<span class="hljs-number">0.72</span>, <span class="hljs-attr">name</span>:<span class="hljs-string">&#x27;🌖 亏凸月&#x27;</span>,   <span class="hljs-attr">en</span>:<span class="hljs-string">&#x27;Waning Gibbous&#x27;</span> },
+  { <span class="hljs-attr">min</span>:<span class="hljs-number">0.72</span>, <span class="hljs-attr">max</span>:<span class="hljs-number">0.78</span>, <span class="hljs-attr">name</span>:<span class="hljs-string">&#x27;🌗 下弦月&#x27;</span>,   <span class="hljs-attr">en</span>:<span class="hljs-string">&#x27;Third Quarter&#x27;</span> },
+  { <span class="hljs-attr">min</span>:<span class="hljs-number">0.78</span>, <span class="hljs-attr">max</span>:<span class="hljs-number">1.00</span>, <span class="hljs-attr">name</span>:<span class="hljs-string">&#x27;🌘 残月&#x27;</span>,     <span class="hljs-attr">en</span>:<span class="hljs-string">&#x27;Waning Crescent&#x27;</span> },
+];
+
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-comment">// State</span>
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-keyword">let</span> day = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">let</span> isPlaying = <span class="hljs-literal">true</span>;
+<span class="hljs-keyword">let</span> speed = <span class="hljs-number">1</span>;
+
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-comment">// Three.js Scene</span>
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-keyword">const</span> container = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;container&#x27;</span>);
+<span class="hljs-keyword">const</span> scene = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Scene</span>();
+
+<span class="hljs-keyword">const</span> camera = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">PerspectiveCamera</span>(<span class="hljs-number">45</span>, <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span>/<span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">500</span>);
+camera.<span class="hljs-property">position</span>.<span class="hljs-title function_">set</span>(<span class="hljs-number">5</span>, <span class="hljs-number">3.5</span>, <span class="hljs-number">5</span>);
+
+<span class="hljs-keyword">const</span> renderer = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">WebGLRenderer</span>({ <span class="hljs-attr">antialias</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">alpha</span>:<span class="hljs-literal">true</span> });
+renderer.<span class="hljs-title function_">setSize</span>(<span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span>, <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span>);
+renderer.<span class="hljs-title function_">setPixelRatio</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(<span class="hljs-variable language_">window</span>.<span class="hljs-property">devicePixelRatio</span>, <span class="hljs-number">2</span>));
+renderer.<span class="hljs-property">toneMapping</span> = <span class="hljs-variable constant_">THREE</span>.<span class="hljs-property">ACESFilmicToneMapping</span>;
+renderer.<span class="hljs-property">toneMappingExposure</span> = <span class="hljs-number">1.2</span>;
+container.<span class="hljs-title function_">appendChild</span>(renderer.<span class="hljs-property">domElement</span>);
+
+<span class="hljs-keyword">const</span> controls = <span class="hljs-keyword">new</span> <span class="hljs-title class_">OrbitControls</span>(camera, renderer.<span class="hljs-property">domElement</span>);
+controls.<span class="hljs-property">enableDamping</span> = <span class="hljs-literal">true</span>;
+controls.<span class="hljs-property">dampingFactor</span> = <span class="hljs-number">0.08</span>;
+controls.<span class="hljs-property">minDistance</span> = <span class="hljs-number">2.5</span>;
+controls.<span class="hljs-property">maxDistance</span> = <span class="hljs-number">20</span>;
+controls.<span class="hljs-property">target</span>.<span class="hljs-title function_">set</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+controls.<span class="hljs-title function_">update</span>();
+
+<span class="hljs-comment">// ── Stars ──</span>
+<span class="hljs-keyword">const</span> starCount = <span class="hljs-number">4000</span>;
+<span class="hljs-keyword">const</span> starGeo = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">BufferGeometry</span>();
+<span class="hljs-keyword">const</span> starPos = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Float32Array</span>(starCount * <span class="hljs-number">3</span>);
+<span class="hljs-keyword">const</span> starSizes = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Float32Array</span>(starCount);
+<span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>; i&lt;starCount; i++){
+  <span class="hljs-keyword">const</span> r = <span class="hljs-number">80</span> + <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * <span class="hljs-number">120</span>;
+  <span class="hljs-keyword">const</span> theta = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span> * <span class="hljs-number">2</span>;
+  <span class="hljs-keyword">const</span> phi = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">acos</span>(<span class="hljs-number">2</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() - <span class="hljs-number">1</span>);
+  starPos[i*<span class="hljs-number">3</span>]   = r * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sin</span>(phi) * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">cos</span>(theta);
+  starPos[i*<span class="hljs-number">3</span>+<span class="hljs-number">1</span>] = r * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sin</span>(phi) * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sin</span>(theta);
+  starPos[i*<span class="hljs-number">3</span>+<span class="hljs-number">2</span>] = r * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">cos</span>(phi);
+  starSizes[i] = <span class="hljs-number">0.5</span> + <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * <span class="hljs-number">1.5</span>;
+}
+starGeo.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">&#x27;position&#x27;</span>, <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">BufferAttribute</span>(starPos, <span class="hljs-number">3</span>));
+starGeo.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">&#x27;size&#x27;</span>, <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">BufferAttribute</span>(starSizes, <span class="hljs-number">1</span>));
+<span class="hljs-keyword">const</span> starMat = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">PointsMaterial</span>({
+  <span class="hljs-attr">color</span>: <span class="hljs-number">0xffffff</span>, <span class="hljs-attr">size</span>: <span class="hljs-number">0.25</span>, <span class="hljs-attr">transparent</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.8</span>,
+  <span class="hljs-attr">sizeAttenuation</span>: <span class="hljs-literal">true</span>,
+});
+scene.<span class="hljs-title function_">add</span>(<span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Points</span>(starGeo, starMat));
+
+<span class="hljs-comment">// ── Lights ──</span>
+<span class="hljs-keyword">const</span> ambient = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">AmbientLight</span>(<span class="hljs-number">0x111833</span>, <span class="hljs-number">0.03</span>);
+scene.<span class="hljs-title function_">add</span>(ambient);
+
+<span class="hljs-keyword">const</span> hemiLight = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">HemisphereLight</span>(<span class="hljs-number">0x4488ff</span>, <span class="hljs-number">0x442200</span>, <span class="hljs-number">0.1</span>);
+scene.<span class="hljs-title function_">add</span>(hemiLight);
+
+<span class="hljs-keyword">const</span> sunLight = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">DirectionalLight</span>(<span class="hljs-number">0xffeedd</span>, <span class="hljs-number">3.5</span>);
+sunLight.<span class="hljs-property">position</span>.<span class="hljs-title function_">set</span>(<span class="hljs-variable constant_">SUN_DIST</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+scene.<span class="hljs-title function_">add</span>(sunLight);
+
+<span class="hljs-keyword">const</span> fillLight = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">DirectionalLight</span>(<span class="hljs-number">0x4488ff</span>, <span class="hljs-number">0.08</span>);
+fillLight.<span class="hljs-property">position</span>.<span class="hljs-title function_">set</span>(-<span class="hljs-number">4</span>, <span class="hljs-number">2</span>, -<span class="hljs-number">4</span>);
+scene.<span class="hljs-title function_">add</span>(fillLight);
+
+<span class="hljs-comment">// ── Sun visual (distant glow) ──</span>
+<span class="hljs-keyword">const</span> sunGeo = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">SphereGeometry</span>(<span class="hljs-number">3</span>, <span class="hljs-number">16</span>, <span class="hljs-number">16</span>);
+<span class="hljs-keyword">const</span> sunMat = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">MeshBasicMaterial</span>({ <span class="hljs-attr">color</span>:<span class="hljs-number">0xffdd44</span> });
+<span class="hljs-keyword">const</span> sunMesh = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Mesh</span>(sunGeo, sunMat);
+sunMesh.<span class="hljs-property">position</span>.<span class="hljs-title function_">set</span>(<span class="hljs-variable constant_">SUN_DIST</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+scene.<span class="hljs-title function_">add</span>(sunMesh);
+
+<span class="hljs-comment">// Glow</span>
+<span class="hljs-keyword">const</span> glowGeo = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">SphereGeometry</span>(<span class="hljs-number">4.5</span>, <span class="hljs-number">16</span>, <span class="hljs-number">16</span>);
+<span class="hljs-keyword">const</span> glowMat = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">MeshBasicMaterial</span>({
+  <span class="hljs-attr">color</span>:<span class="hljs-number">0xffdd44</span>, <span class="hljs-attr">transparent</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">opacity</span>:<span class="hljs-number">0.15</span>,
+});
+<span class="hljs-keyword">const</span> glowMesh = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Mesh</span>(glowGeo, glowMat);
+glowMesh.<span class="hljs-property">position</span>.<span class="hljs-title function_">copy</span>(sunMesh.<span class="hljs-property">position</span>);
+scene.<span class="hljs-title function_">add</span>(glowMesh);
+
+<span class="hljs-comment">// Sun rays (lens flare-like sprites)</span>
+<span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>; i&lt;<span class="hljs-number">6</span>; i++){
+  <span class="hljs-keyword">const</span> a = (i / <span class="hljs-number">6</span>) * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span> * <span class="hljs-number">2</span>;
+  <span class="hljs-keyword">const</span> rayGeo = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">PlaneGeometry</span>(<span class="hljs-number">0.8</span>, <span class="hljs-number">12</span> + <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()*<span class="hljs-number">8</span>);
+  <span class="hljs-keyword">const</span> rayMat = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">MeshBasicMaterial</span>({
+    <span class="hljs-attr">color</span>:<span class="hljs-number">0xffdd44</span>, <span class="hljs-attr">transparent</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">opacity</span>:<span class="hljs-number">0.06</span>,
+    <span class="hljs-attr">side</span>: <span class="hljs-variable constant_">THREE</span>.<span class="hljs-property">DoubleSide</span>, <span class="hljs-attr">depthWrite</span>:<span class="hljs-literal">false</span>,
+  });
+  <span class="hljs-keyword">const</span> ray = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Mesh</span>(rayGeo, rayMat);
+  ray.<span class="hljs-property">position</span>.<span class="hljs-title function_">set</span>(<span class="hljs-variable constant_">SUN_DIST</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+  ray.<span class="hljs-property">rotation</span>.<span class="hljs-property">x</span> = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">cos</span>(a) * <span class="hljs-number">0.2</span>;
+  ray.<span class="hljs-property">rotation</span>.<span class="hljs-property">y</span> = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sin</span>(a) * <span class="hljs-number">0.2</span>;
+  ray.<span class="hljs-property">rotation</span>.<span class="hljs-property">z</span> = a;
+  scene.<span class="hljs-title function_">add</span>(ray);
+}
+
+<span class="hljs-comment">// ── Earth ──</span>
+<span class="hljs-comment">// Procedural earth texture</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">createEarthTexture</span>(<span class="hljs-params"></span>){
+  <span class="hljs-keyword">const</span> c = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;canvas&#x27;</span>);
+  c.<span class="hljs-property">width</span> = <span class="hljs-number">512</span>; c.<span class="hljs-property">height</span> = <span class="hljs-number">256</span>;
+  <span class="hljs-keyword">const</span> ctx = c.<span class="hljs-title function_">getContext</span>(<span class="hljs-string">&#x27;2d&#x27;</span>);
+
+  <span class="hljs-comment">// Ocean gradient</span>
+  <span class="hljs-keyword">const</span> grad = ctx.<span class="hljs-title function_">createLinearGradient</span>(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">256</span>);
+  grad.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">0</span>,<span class="hljs-string">&#x27;#1a2a6c&#x27;</span>);
+  grad.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">0.3</span>,<span class="hljs-string">&#x27;#1e3a8a&#x27;</span>);
+  grad.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">0.5</span>,<span class="hljs-string">&#x27;#1e5799&#x27;</span>);
+  grad.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">0.7</span>,<span class="hljs-string">&#x27;#1e3a8a&#x27;</span>);
+  grad.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">1</span>,<span class="hljs-string">&#x27;#1a2a6c&#x27;</span>);
+  ctx.<span class="hljs-property">fillStyle</span> = grad;
+  ctx.<span class="hljs-title function_">fillRect</span>(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">512</span>,<span class="hljs-number">256</span>);
+
+  <span class="hljs-comment">// Land masses (procedural blobs)</span>
+  <span class="hljs-keyword">const</span> landColors = [<span class="hljs-string">&#x27;#3a7a3a&#x27;</span>,<span class="hljs-string">&#x27;#4a8a3a&#x27;</span>,<span class="hljs-string">&#x27;#5a7a3a&#x27;</span>,<span class="hljs-string">&#x27;#6a8a4a&#x27;</span>,<span class="hljs-string">&#x27;#3a6a2a&#x27;</span>,<span class="hljs-string">&#x27;#5a6a3a&#x27;</span>];
+  <span class="hljs-keyword">const</span> continents = [
+    { <span class="hljs-attr">x</span>:<span class="hljs-number">300</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">90</span>,<span class="hljs-attr">w</span>:<span class="hljs-number">100</span>,<span class="hljs-attr">h</span>:<span class="hljs-number">60</span>, <span class="hljs-attr">n</span>:<span class="hljs-number">12</span> },
+    { <span class="hljs-attr">x</span>:<span class="hljs-number">350</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">70</span>,<span class="hljs-attr">w</span>:<span class="hljs-number">60</span>,<span class="hljs-attr">h</span>:<span class="hljs-number">30</span>, <span class="hljs-attr">n</span>:<span class="hljs-number">8</span> },
+    { <span class="hljs-attr">x</span>:<span class="hljs-number">280</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">100</span>,<span class="hljs-attr">w</span>:<span class="hljs-number">40</span>,<span class="hljs-attr">h</span>:<span class="hljs-number">50</span>, <span class="hljs-attr">n</span>:<span class="hljs-number">6</span> },
+    { <span class="hljs-attr">x</span>:<span class="hljs-number">290</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">155</span>,<span class="hljs-attr">w</span>:<span class="hljs-number">35</span>,<span class="hljs-attr">h</span>:<span class="hljs-number">60</span>, <span class="hljs-attr">n</span>:<span class="hljs-number">8</span> },
+    { <span class="hljs-attr">x</span>:<span class="hljs-number">140</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">80</span>,<span class="hljs-attr">w</span>:<span class="hljs-number">60</span>,<span class="hljs-attr">h</span>:<span class="hljs-number">45</span>, <span class="hljs-attr">n</span>:<span class="hljs-number">10</span> },
+    { <span class="hljs-attr">x</span>:<span class="hljs-number">160</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">155</span>,<span class="hljs-attr">w</span>:<span class="hljs-number">25</span>,<span class="hljs-attr">h</span>:<span class="hljs-number">55</span>, <span class="hljs-attr">n</span>:<span class="hljs-number">7</span> },
+    { <span class="hljs-attr">x</span>:<span class="hljs-number">420</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">185</span>,<span class="hljs-attr">w</span>:<span class="hljs-number">25</span>,<span class="hljs-attr">h</span>:<span class="hljs-number">20</span>, <span class="hljs-attr">n</span>:<span class="hljs-number">5</span> },
+    { <span class="hljs-attr">x</span>:<span class="hljs-number">120</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">240</span>,<span class="hljs-attr">w</span>:<span class="hljs-number">300</span>,<span class="hljs-attr">h</span>:<span class="hljs-number">20</span>, <span class="hljs-attr">n</span>:<span class="hljs-number">4</span> },
+    { <span class="hljs-attr">x</span>:<span class="hljs-number">240</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">55</span>,<span class="hljs-attr">w</span>:<span class="hljs-number">25</span>,<span class="hljs-attr">h</span>:<span class="hljs-number">20</span>, <span class="hljs-attr">n</span>:<span class="hljs-number">4</span> },
+  ];
+  <span class="hljs-keyword">for</span>(<span class="hljs-keyword">const</span> cont <span class="hljs-keyword">of</span> continents){
+    <span class="hljs-keyword">const</span> color = landColors[<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()*landColors.<span class="hljs-property">length</span>)];
+    ctx.<span class="hljs-property">fillStyle</span> = color;
+    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>; i&lt;cont.<span class="hljs-property">n</span>; i++){
+      <span class="hljs-keyword">const</span> ox = (<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()-<span class="hljs-number">0.5</span>)*cont.<span class="hljs-property">w</span>;
+      <span class="hljs-keyword">const</span> oy = (<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()-<span class="hljs-number">0.5</span>)*cont.<span class="hljs-property">h</span>;
+      <span class="hljs-keyword">const</span> rw = cont.<span class="hljs-property">w</span> * (<span class="hljs-number">0.3</span> + <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()*<span class="hljs-number">0.4</span>);
+      <span class="hljs-keyword">const</span> rh = cont.<span class="hljs-property">h</span> * (<span class="hljs-number">0.3</span> + <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()*<span class="hljs-number">0.4</span>);
+      ctx.<span class="hljs-title function_">beginPath</span>();
+      ctx.<span class="hljs-title function_">ellipse</span>(cont.<span class="hljs-property">x</span>+ox, cont.<span class="hljs-property">y</span>+oy, rw/<span class="hljs-number">2</span>, rh/<span class="hljs-number">2</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()*<span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>);
+      ctx.<span class="hljs-title function_">fill</span>();
+    }
+  }
+
+  <span class="hljs-comment">// Ice caps</span>
+  ctx.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">&#x27;rgba(220,230,255,0.5)&#x27;</span>;
+  ctx.<span class="hljs-title function_">fillRect</span>(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">512</span>,<span class="hljs-number">20</span>);
+  ctx.<span class="hljs-title function_">fillRect</span>(<span class="hljs-number">0</span>,<span class="hljs-number">236</span>,<span class="hljs-number">512</span>,<span class="hljs-number">20</span>);
+
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">CanvasTexture</span>(c);
+}
+
+<span class="hljs-keyword">const</span> earthMat = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">MeshStandardMaterial</span>({
+  <span class="hljs-attr">map</span>: <span class="hljs-title function_">createEarthTexture</span>(),
+  <span class="hljs-attr">roughness</span>: <span class="hljs-number">0.6</span>,
+  <span class="hljs-attr">metalness</span>: <span class="hljs-number">0.05</span>,
+});
+<span class="hljs-keyword">const</span> earthGroup = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Group</span>();
+earthGroup.<span class="hljs-property">rotation</span>.<span class="hljs-property">x</span> = <span class="hljs-number">0.408</span>;
+scene.<span class="hljs-title function_">add</span>(earthGroup);
+
+<span class="hljs-keyword">const</span> earth = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Mesh</span>(<span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">SphereGeometry</span>(<span class="hljs-variable constant_">EARTH_RADIUS</span>, <span class="hljs-number">64</span>, <span class="hljs-number">64</span>), earthMat);
+earthGroup.<span class="hljs-title function_">add</span>(earth);
+
+<span class="hljs-comment">// Atmosphere glow</span>
+<span class="hljs-keyword">const</span> atmoMat = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">MeshPhongMaterial</span>({
+  <span class="hljs-attr">color</span>: <span class="hljs-number">0x4488ff</span>, <span class="hljs-attr">transparent</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">opacity</span>:<span class="hljs-number">0.08</span>,
+  <span class="hljs-attr">side</span>: <span class="hljs-variable constant_">THREE</span>.<span class="hljs-property">BackSide</span>,
+});
+<span class="hljs-keyword">const</span> atmo = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Mesh</span>(<span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">SphereGeometry</span>(<span class="hljs-variable constant_">EARTH_RADIUS</span> * <span class="hljs-number">1.02</span>, <span class="hljs-number">48</span>, <span class="hljs-number">48</span>), atmoMat);
+earthGroup.<span class="hljs-title function_">add</span>(atmo);
+
+<span class="hljs-comment">// Moon</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">createMoonTexture</span>(<span class="hljs-params"></span>){
+  <span class="hljs-keyword">const</span> c = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&quot;canvas&quot;</span>);
+  c.<span class="hljs-property">width</span> = <span class="hljs-number">256</span>; c.<span class="hljs-property">height</span> = <span class="hljs-number">128</span>;
+  <span class="hljs-keyword">const</span> ctx = c.<span class="hljs-title function_">getContext</span>(<span class="hljs-string">&quot;2d&quot;</span>);
+  ctx.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">&quot;#c8c0b8&quot;</span>;
+  ctx.<span class="hljs-title function_">fillRect</span>(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">256</span>,<span class="hljs-number">128</span>);
+  <span class="hljs-comment">// Craters</span>
+  <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>; i&lt;<span class="hljs-number">60</span>; i++){
+    <span class="hljs-keyword">const</span> x = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()*<span class="hljs-number">256</span>;
+    <span class="hljs-keyword">const</span> y = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()*<span class="hljs-number">128</span>;
+    <span class="hljs-keyword">const</span> r = <span class="hljs-number">1.5</span> + <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()*<span class="hljs-number">6</span>;
+    <span class="hljs-keyword">const</span> b = <span class="hljs-number">100</span> + <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()*<span class="hljs-number">80</span>;
+    ctx.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">&quot;rgb(&quot;</span>+b+<span class="hljs-string">&quot;,&quot;</span>+(b-<span class="hljs-number">10</span>)+<span class="hljs-string">&quot;,&quot;</span>+(b-<span class="hljs-number">20</span>)+<span class="hljs-string">&quot;)&quot;</span>;
+    ctx.<span class="hljs-title function_">beginPath</span>(); ctx.<span class="hljs-title function_">arc</span>(x,y,r,<span class="hljs-number">0</span>,<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>); ctx.<span class="hljs-title function_">fill</span>();
+    ctx.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">&quot;rgb(&quot;</span>+(b+<span class="hljs-number">30</span>)+<span class="hljs-string">&quot;,&quot;</span>+(b+<span class="hljs-number">20</span>)+<span class="hljs-string">&quot;,&quot;</span>+(b+<span class="hljs-number">10</span>)+<span class="hljs-string">&quot;)&quot;</span>;
+    ctx.<span class="hljs-title function_">beginPath</span>(); ctx.<span class="hljs-title function_">arc</span>(x-r*<span class="hljs-number">0.2</span>,y-r*<span class="hljs-number">0.2</span>,r*<span class="hljs-number">0.4</span>,<span class="hljs-number">0</span>,<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>); ctx.<span class="hljs-title function_">fill</span>();
+  }
+  <span class="hljs-keyword">const</span> maria = [{<span class="hljs-attr">x</span>:<span class="hljs-number">130</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">60</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">15</span>},{<span class="hljs-attr">x</span>:<span class="hljs-number">80</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">55</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">10</span>},{<span class="hljs-attr">x</span>:<span class="hljs-number">150</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">50</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">8</span>},{<span class="hljs-attr">x</span>:<span class="hljs-number">110</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">70</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">12</span>},{<span class="hljs-attr">x</span>:<span class="hljs-number">170</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">65</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">6</span>},{<span class="hljs-attr">x</span>:<span class="hljs-number">60</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">75</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">7</span>}];
+  <span class="hljs-keyword">for</span>(<span class="hljs-keyword">const</span> m <span class="hljs-keyword">of</span> maria){
+    ctx.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">&quot;rgba(60,55,50,0.35)&quot;</span>;
+    ctx.<span class="hljs-title function_">beginPath</span>(); ctx.<span class="hljs-title function_">ellipse</span>(m.<span class="hljs-property">x</span>,m.<span class="hljs-property">y</span>,m.<span class="hljs-property">r</span>*<span class="hljs-number">1.4</span>,m.<span class="hljs-property">r</span>,<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()*<span class="hljs-number">0.3</span>,<span class="hljs-number">0</span>,<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>); ctx.<span class="hljs-title function_">fill</span>();
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">CanvasTexture</span>(c);
+}
+
+<span class="hljs-keyword">const</span> moonMat = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">MeshStandardMaterial</span>({
+  <span class="hljs-attr">map</span>: <span class="hljs-title function_">createMoonTexture</span>(),
+  <span class="hljs-attr">roughness</span>: <span class="hljs-number">0.25</span>,
+  <span class="hljs-attr">metalness</span>: <span class="hljs-number">0.0</span>,
+});
+<span class="hljs-keyword">const</span> moon = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Mesh</span>(<span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">SphereGeometry</span>(<span class="hljs-variable constant_">MOON_RADIUS</span>, <span class="hljs-number">48</span>, <span class="hljs-number">48</span>), moonMat);
+scene.<span class="hljs-title function_">add</span>(moon);
+
+<span class="hljs-comment">// Orbit pathOrbit pathOrbit path ──</span>
+<span class="hljs-keyword">const</span> orbitPoints = [];
+<span class="hljs-keyword">const</span> segs = <span class="hljs-number">80</span>;
+<span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>; i&lt;=segs; i++){
+  <span class="hljs-keyword">const</span> a = (i/segs)*<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>;
+  orbitPoints.<span class="hljs-title function_">push</span>(<span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Vector3</span>(<span class="hljs-variable constant_">ORBIT_RADIUS</span>*<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">cos</span>(a), <span class="hljs-number">0</span>, <span class="hljs-variable constant_">ORBIT_RADIUS</span>*<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sin</span>(a)));
+}
+<span class="hljs-keyword">const</span> orbitGeo = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">BufferGeometry</span>().<span class="hljs-title function_">setFromPoints</span>(orbitPoints);
+<span class="hljs-keyword">const</span> orbitMat = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">LineBasicMaterial</span>({ <span class="hljs-attr">color</span>:<span class="hljs-number">0x446688</span>, <span class="hljs-attr">transparent</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">opacity</span>:<span class="hljs-number">0.2</span> });
+<span class="hljs-keyword">const</span> orbitLine = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Line</span>(orbitGeo, orbitMat);
+scene.<span class="hljs-title function_">add</span>(orbitLine);
+
+<span class="hljs-comment">// ── Earth orbit ring (reference) ──</span>
+<span class="hljs-keyword">const</span> ringGeo = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">RingGeometry</span>(<span class="hljs-variable constant_">ORBIT_RADIUS</span>-<span class="hljs-number">0.02</span>, <span class="hljs-variable constant_">ORBIT_RADIUS</span>+<span class="hljs-number">0.02</span>, <span class="hljs-number">64</span>);
+<span class="hljs-keyword">const</span> ringMat = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">MeshBasicMaterial</span>({
+  <span class="hljs-attr">color</span>:<span class="hljs-number">0x446688</span>, <span class="hljs-attr">side</span>:<span class="hljs-variable constant_">THREE</span>.<span class="hljs-property">DoubleSide</span>, <span class="hljs-attr">transparent</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">opacity</span>:<span class="hljs-number">0.05</span>,
+});
+<span class="hljs-keyword">const</span> ring = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Mesh</span>(ringGeo, ringMat);
+ring.<span class="hljs-property">rotation</span>.<span class="hljs-property">x</span> = -<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>;
+scene.<span class="hljs-title function_">add</span>(ring);
+
+<span class="hljs-comment">// ── Phase labels in 3D ──</span>
+<span class="hljs-keyword">const</span> phaseLabelPositions = [
+  { <span class="hljs-attr">a</span>:<span class="hljs-number">0</span>, <span class="hljs-attr">label</span>:<span class="hljs-string">&#x27;🌕 满月&#x27;</span> },
+  { <span class="hljs-attr">a</span>:<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">0.25</span>, <span class="hljs-attr">label</span>:<span class="hljs-string">&#x27;🌔 盈凸月&#x27;</span> },
+  { <span class="hljs-attr">a</span>:<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">0.5</span>, <span class="hljs-attr">label</span>:<span class="hljs-string">&#x27;🌓 上弦月&#x27;</span> },
+  { <span class="hljs-attr">a</span>:<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">0.75</span>, <span class="hljs-attr">label</span>:<span class="hljs-string">&#x27;🌒 蛾眉月&#x27;</span> },
+  { <span class="hljs-attr">a</span>:<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>, <span class="hljs-attr">label</span>:<span class="hljs-string">&#x27;🌑 新月&#x27;</span> },
+  { <span class="hljs-attr">a</span>:<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">1.25</span>, <span class="hljs-attr">label</span>:<span class="hljs-string">&#x27;🌘 残月&#x27;</span> },
+  { <span class="hljs-attr">a</span>:<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">1.5</span>, <span class="hljs-attr">label</span>:<span class="hljs-string">&#x27;🌗 下弦月&#x27;</span> },
+  { <span class="hljs-attr">a</span>:<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">1.75</span>, <span class="hljs-attr">label</span>:<span class="hljs-string">&#x27;🌖 亏凸月&#x27;</span> },
+];
+
+<span class="hljs-comment">// Use sprites for labels</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">makeLabelSprite</span>(<span class="hljs-params">text, isActive=<span class="hljs-literal">false</span></span>){
+  <span class="hljs-keyword">const</span> c = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;canvas&#x27;</span>);
+  c.<span class="hljs-property">width</span> = <span class="hljs-number">200</span>; c.<span class="hljs-property">height</span> = <span class="hljs-number">48</span>;
+  <span class="hljs-keyword">const</span> ctx = c.<span class="hljs-title function_">getContext</span>(<span class="hljs-string">&#x27;2d&#x27;</span>);
+  ctx.<span class="hljs-property">font</span> = <span class="hljs-string">&#x27;16px &quot;Segoe UI&quot;,&quot;PingFang SC&quot;,sans-serif&#x27;</span>;
+  ctx.<span class="hljs-property">textAlign</span> = <span class="hljs-string">&#x27;center&#x27;</span>;
+  ctx.<span class="hljs-property">textBaseline</span> = <span class="hljs-string">&#x27;middle&#x27;</span>;
+  ctx.<span class="hljs-property">fillStyle</span> = isActive ? <span class="hljs-string">&#x27;rgba(255,255,255,0.9)&#x27;</span> : <span class="hljs-string">&#x27;rgba(255,255,255,0.2)&#x27;</span>;
+  ctx.<span class="hljs-title function_">fillText</span>(text, <span class="hljs-number">100</span>, <span class="hljs-number">24</span>);
+  <span class="hljs-keyword">const</span> tex = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">CanvasTexture</span>(c);
+  tex.<span class="hljs-property">needsUpdate</span> = <span class="hljs-literal">true</span>;
+  <span class="hljs-keyword">const</span> mat = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">SpriteMaterial</span>({
+    <span class="hljs-attr">map</span>: tex, <span class="hljs-attr">transparent</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">depthTest</span>:<span class="hljs-literal">false</span>,
+    <span class="hljs-attr">opacity</span>: isActive ? <span class="hljs-number">0.9</span> : <span class="hljs-number">0.3</span>,
+  });
+  <span class="hljs-keyword">const</span> sprite = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Sprite</span>(mat);
+  sprite.<span class="hljs-property">scale</span>.<span class="hljs-title function_">set</span>(<span class="hljs-number">1.6</span>, <span class="hljs-number">0.4</span>, <span class="hljs-number">1</span>);
+  <span class="hljs-keyword">return</span> sprite;
+}
+
+<span class="hljs-keyword">const</span> labelSprites = [];
+<span class="hljs-keyword">for</span>(<span class="hljs-keyword">const</span> pl <span class="hljs-keyword">of</span> phaseLabelPositions){
+  <span class="hljs-keyword">const</span> spr = <span class="hljs-title function_">makeLabelSprite</span>(pl.<span class="hljs-property">label</span>, <span class="hljs-literal">false</span>);
+  <span class="hljs-keyword">const</span> r = <span class="hljs-variable constant_">ORBIT_RADIUS</span> + <span class="hljs-number">0.8</span>;
+  spr.<span class="hljs-property">position</span>.<span class="hljs-title function_">set</span>(r*<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">cos</span>(pl.<span class="hljs-property">a</span>), -<span class="hljs-number">0.3</span>, r*<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sin</span>(pl.<span class="hljs-property">a</span>));
+  scene.<span class="hljs-title function_">add</span>(spr);
+  labelSprites.<span class="hljs-title function_">push</span>({ <span class="hljs-attr">sprite</span>:spr, <span class="hljs-attr">angle</span>:pl.<span class="hljs-property">a</span>, <span class="hljs-attr">label</span>:pl.<span class="hljs-property">label</span> });
+}
+
+<span class="hljs-comment">// Sun direction indicator (light rays)</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">createLightRays</span>(<span class="hljs-params"></span>){
+  <span class="hljs-keyword">const</span> group = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Group</span>();
+  <span class="hljs-keyword">const</span> mat = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">LineBasicMaterial</span>({ <span class="hljs-attr">color</span>:<span class="hljs-number">0xffdd44</span>, <span class="hljs-attr">transparent</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">opacity</span>:<span class="hljs-number">0.06</span> });
+  <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>; i&lt;<span class="hljs-number">30</span>; i++){
+    <span class="hljs-keyword">const</span> y = (<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()-<span class="hljs-number">0.5</span>)*<span class="hljs-number">6</span>;
+    <span class="hljs-keyword">const</span> z = (<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()-<span class="hljs-number">0.5</span>)*<span class="hljs-number">6</span>;
+    <span class="hljs-keyword">const</span> pts = [
+      <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Vector3</span>(-<span class="hljs-number">1</span>, y, z),
+      <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Vector3</span>(<span class="hljs-variable constant_">ORBIT_RADIUS</span>+<span class="hljs-number">0.5</span>, y, z),
+    ];
+    <span class="hljs-keyword">const</span> g = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">BufferGeometry</span>().<span class="hljs-title function_">setFromPoints</span>(pts);
+    <span class="hljs-keyword">const</span> line = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Line</span>(g, mat);
+    group.<span class="hljs-title function_">add</span>(line);
+  }
+  scene.<span class="hljs-title function_">add</span>(group);
+}
+<span class="hljs-title function_">createLightRays</span>();
+
+<span class="hljs-comment">// Directional light helper (subtle)</span>
+<span class="hljs-keyword">const</span> arrowDir = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Vector3</span>(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+<span class="hljs-keyword">const</span> arrowHelper = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">ArrowHelper</span>(arrowDir, <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Vector3</span>(-<span class="hljs-variable constant_">ORBIT_RADIUS</span>-<span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">3.5</span>, <span class="hljs-number">0xffdd44</span>, <span class="hljs-number">0.4</span>, <span class="hljs-number">0.2</span>);
+arrowHelper.<span class="hljs-property">line</span>.<span class="hljs-property">material</span>.<span class="hljs-property">transparent</span> = <span class="hljs-literal">true</span>;
+arrowHelper.<span class="hljs-property">line</span>.<span class="hljs-property">material</span>.<span class="hljs-property">opacity</span> = <span class="hljs-number">0.15</span>;
+arrowHelper.<span class="hljs-property">cone</span>.<span class="hljs-property">material</span>.<span class="hljs-property">transparent</span> = <span class="hljs-literal">true</span>;
+arrowHelper.<span class="hljs-property">cone</span>.<span class="hljs-property">material</span>.<span class="hljs-property">opacity</span> = <span class="hljs-number">0.15</span>;
+scene.<span class="hljs-title function_">add</span>(arrowHelper);
+
+<span class="hljs-comment">// &quot;日光方向&quot; label</span>
+<span class="hljs-keyword">const</span> sunLabelCanvas = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;canvas&#x27;</span>);
+sunLabelCanvas.<span class="hljs-property">width</span> = <span class="hljs-number">120</span>; sunLabelCanvas.<span class="hljs-property">height</span> = <span class="hljs-number">32</span>;
+<span class="hljs-keyword">const</span> slCtx = sunLabelCanvas.<span class="hljs-title function_">getContext</span>(<span class="hljs-string">&#x27;2d&#x27;</span>);
+slCtx.<span class="hljs-property">font</span> = <span class="hljs-string">&#x27;12px &quot;Segoe UI&quot;,&quot;PingFang SC&quot;,sans-serif&#x27;</span>;
+slCtx.<span class="hljs-property">textAlign</span> = <span class="hljs-string">&#x27;center&#x27;</span>; slCtx.<span class="hljs-property">textBaseline</span> = <span class="hljs-string">&#x27;middle&#x27;</span>;
+slCtx.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">&#x27;rgba(255,221,68,0.2)&#x27;</span>;
+slCtx.<span class="hljs-title function_">fillText</span>(<span class="hljs-string">&#x27;☀ 日光方向&#x27;</span>, <span class="hljs-number">60</span>, <span class="hljs-number">16</span>);
+<span class="hljs-keyword">const</span> slTex = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">CanvasTexture</span>(sunLabelCanvas);
+<span class="hljs-keyword">const</span> slMat = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">SpriteMaterial</span>({ <span class="hljs-attr">map</span>:slTex, <span class="hljs-attr">transparent</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">depthTest</span>:<span class="hljs-literal">false</span>, <span class="hljs-attr">opacity</span>:<span class="hljs-number">0.2</span> });
+<span class="hljs-keyword">const</span> slSprite = <span class="hljs-keyword">new</span> <span class="hljs-variable constant_">THREE</span>.<span class="hljs-title class_">Sprite</span>(slMat);
+slSprite.<span class="hljs-property">scale</span>.<span class="hljs-title function_">set</span>(<span class="hljs-number">2</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">1</span>);
+slSprite.<span class="hljs-property">position</span>.<span class="hljs-title function_">set</span>(<span class="hljs-variable constant_">ORBIT_RADIUS</span>*<span class="hljs-number">0.7</span>, <span class="hljs-number">0.8</span>, <span class="hljs-number">0</span>);
+scene.<span class="hljs-title function_">add</span>(slSprite);
+
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-comment">// 2D Moon Phase Drawing</span>
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-keyword">const</span> phaseCanvas = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;phase-canvas&#x27;</span>);
+<span class="hljs-keyword">const</span> pctx = phaseCanvas.<span class="hljs-title function_">getContext</span>(<span class="hljs-string">&#x27;2d&#x27;</span>);
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">P_SIZE</span> = <span class="hljs-number">220</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">P_R</span> = <span class="hljs-number">95</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">P_CX</span> = <span class="hljs-variable constant_">P_SIZE</span>/<span class="hljs-number">2</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">P_CY</span> = <span class="hljs-variable constant_">P_SIZE</span>/<span class="hljs-number">2</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">drawPhaseViewer</span>(<span class="hljs-params">phase</span>){
+  <span class="hljs-keyword">const</span> p = ((phase % <span class="hljs-number">1</span>) + <span class="hljs-number">1</span>) % <span class="hljs-number">1</span>;
+  pctx.<span class="hljs-title function_">clearRect</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-variable constant_">P_SIZE</span>, <span class="hljs-variable constant_">P_SIZE</span>);
+
+  <span class="hljs-comment">// Background glow</span>
+  <span class="hljs-keyword">const</span> grd = pctx.<span class="hljs-title function_">createRadialGradient</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-number">0</span>, <span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_R</span>*<span class="hljs-number">0.3</span>);
+  grd.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">0</span>, <span class="hljs-string">&#x27;rgba(255,255,230,0.03)&#x27;</span>);
+  grd.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">1</span>, <span class="hljs-string">&#x27;rgba(255,255,230,0)&#x27;</span>);
+  pctx.<span class="hljs-property">fillStyle</span> = grd;
+  pctx.<span class="hljs-title function_">fillRect</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-variable constant_">P_SIZE</span>, <span class="hljs-variable constant_">P_SIZE</span>);
+
+  <span class="hljs-comment">// Moon dark side</span>
+  pctx.<span class="hljs-title function_">save</span>();
+  pctx.<span class="hljs-title function_">beginPath</span>();
+  pctx.<span class="hljs-title function_">arc</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_R</span>, <span class="hljs-number">0</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>);
+  pctx.<span class="hljs-title function_">clip</span>();
+
+  <span class="hljs-comment">// Dark lunar surface</span>
+  <span class="hljs-keyword">const</span> darkGrd = pctx.<span class="hljs-title function_">createRadialGradient</span>(<span class="hljs-variable constant_">P_CX</span>-<span class="hljs-number">10</span>, <span class="hljs-variable constant_">P_CY</span>-<span class="hljs-number">10</span>, <span class="hljs-number">5</span>, <span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_R</span>);
+  darkGrd.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">0</span>, <span class="hljs-string">&#x27;#4a4845&#x27;</span>);
+  darkGrd.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">1</span>, <span class="hljs-string">&#x27;#1a1918&#x27;</span>);
+  pctx.<span class="hljs-property">fillStyle</span> = darkGrd;
+  pctx.<span class="hljs-title function_">fillRect</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-variable constant_">P_SIZE</span>, <span class="hljs-variable constant_">P_SIZE</span>);
+
+  <span class="hljs-comment">// Mare on dark side</span>
+  pctx.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">&#x27;rgba(40,38,35,0.3)&#x27;</span>;
+  <span class="hljs-keyword">const</span> darkMare = [
+    {<span class="hljs-attr">x</span>:-<span class="hljs-number">15</span>,<span class="hljs-attr">y</span>:-<span class="hljs-number">10</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">12</span>},{<span class="hljs-attr">x</span>:<span class="hljs-number">10</span>,<span class="hljs-attr">y</span>:-<span class="hljs-number">5</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">8</span>},{<span class="hljs-attr">x</span>:-<span class="hljs-number">5</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">15</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">10</span>},
+    {<span class="hljs-attr">x</span>:<span class="hljs-number">20</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">5</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">6</span>},{<span class="hljs-attr">x</span>:-<span class="hljs-number">25</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">5</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">7</span>},
+  ];
+  <span class="hljs-keyword">for</span>(<span class="hljs-keyword">const</span> m <span class="hljs-keyword">of</span> darkMare){
+    pctx.<span class="hljs-title function_">beginPath</span>();
+    pctx.<span class="hljs-title function_">ellipse</span>(<span class="hljs-variable constant_">P_CX</span>+m.<span class="hljs-property">x</span>, <span class="hljs-variable constant_">P_CY</span>+m.<span class="hljs-property">y</span>, m.<span class="hljs-property">r</span>, m.<span class="hljs-property">r</span>*<span class="hljs-number">0.7</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">0</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>);
+    pctx.<span class="hljs-title function_">fill</span>();
+  }
+
+  <span class="hljs-comment">// ──  Lit portion — elliptical terminator ──</span>
+  <span class="hljs-comment">// Terminator = great circle projected onto the viewing disk</span>
+  <span class="hljs-comment">// Ellipse: x²/(R²·cos²(2πp)) + y²/R² = 1</span>
+  <span class="hljs-keyword">const</span> ea = <span class="hljs-variable constant_">P_R</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">abs</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">cos</span>(p * <span class="hljs-number">2</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>));
+  <span class="hljs-keyword">const</span> eb = <span class="hljs-variable constant_">P_R</span>;
+
+  <span class="hljs-comment">// Lit surface gradient</span>
+  <span class="hljs-keyword">const</span> litGrd = pctx.<span class="hljs-title function_">createLinearGradient</span>(<span class="hljs-variable constant_">P_CX</span>+<span class="hljs-variable constant_">P_R</span>*<span class="hljs-number">0.5</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_CX</span>-<span class="hljs-variable constant_">P_R</span>*<span class="hljs-number">0.5</span>, <span class="hljs-variable constant_">P_CY</span>);
+  litGrd.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">0</span>, <span class="hljs-string">&#x27;#fff8e8&#x27;</span>);
+  litGrd.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">0.3</span>, <span class="hljs-string">&#x27;#fff5d6&#x27;</span>);
+  litGrd.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">0.6</span>, <span class="hljs-string">&#x27;#f5e8c8&#x27;</span>);
+  litGrd.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">1</span>, <span class="hljs-string">&#x27;#e8d8b8&#x27;</span>);
+
+  <span class="hljs-keyword">if</span>(p &lt; <span class="hljs-number">0.005</span>){
+    <span class="hljs-comment">// Near new moon - thin crescent on right</span>
+    pctx.<span class="hljs-title function_">beginPath</span>();
+    pctx.<span class="hljs-title function_">ellipse</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, ea, eb, <span class="hljs-number">0</span>, -<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-literal">false</span>);
+    pctx.<span class="hljs-title function_">arc</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_R</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, -<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-literal">true</span>);
+    pctx.<span class="hljs-title function_">closePath</span>();
+    pctx.<span class="hljs-property">fillStyle</span> = litGrd;
+    pctx.<span class="hljs-title function_">fill</span>();
+  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(p &gt; <span class="hljs-number">0.495</span> &amp;&amp; p &lt; <span class="hljs-number">0.505</span>){
+    <span class="hljs-comment">// Near full moon - entire disk lit</span>
+    pctx.<span class="hljs-title function_">beginPath</span>();
+    pctx.<span class="hljs-title function_">arc</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_R</span>, <span class="hljs-number">0</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>, <span class="hljs-literal">false</span>);
+    pctx.<span class="hljs-title function_">closePath</span>();
+    pctx.<span class="hljs-property">fillStyle</span> = litGrd;
+    pctx.<span class="hljs-title function_">fill</span>();
+  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(p &lt; <span class="hljs-number">0.25</span>){
+    <span class="hljs-comment">// Waxing crescent - lit right crescent</span>
+    pctx.<span class="hljs-title function_">beginPath</span>();
+    pctx.<span class="hljs-title function_">ellipse</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, ea, eb, <span class="hljs-number">0</span>, -<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-literal">false</span>);
+    pctx.<span class="hljs-title function_">arc</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_R</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, -<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-literal">true</span>);
+    pctx.<span class="hljs-title function_">closePath</span>();
+    pctx.<span class="hljs-property">fillStyle</span> = litGrd;
+    pctx.<span class="hljs-title function_">fill</span>();
+  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(p &lt; <span class="hljs-number">0.5</span>){
+    <span class="hljs-comment">// Waxing gibbous - full circle lit, dark left crescent</span>
+    pctx.<span class="hljs-title function_">beginPath</span>();
+    pctx.<span class="hljs-title function_">arc</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_R</span>, <span class="hljs-number">0</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>, <span class="hljs-literal">false</span>);
+    pctx.<span class="hljs-title function_">closePath</span>();
+    pctx.<span class="hljs-property">fillStyle</span> = litGrd;
+    pctx.<span class="hljs-title function_">fill</span>();
+    pctx.<span class="hljs-title function_">beginPath</span>();
+    pctx.<span class="hljs-title function_">ellipse</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, ea, eb, <span class="hljs-number">0</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-number">3</span>*<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-literal">false</span>);
+    pctx.<span class="hljs-title function_">arc</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_R</span>, <span class="hljs-number">3</span>*<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-literal">true</span>);
+    pctx.<span class="hljs-title function_">closePath</span>();
+    pctx.<span class="hljs-property">fillStyle</span> = darkGrd;
+    pctx.<span class="hljs-title function_">fill</span>();
+  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(p &lt; <span class="hljs-number">0.75</span>){
+    <span class="hljs-comment">// Waning gibbous - full circle lit, dark right crescent</span>
+    pctx.<span class="hljs-title function_">beginPath</span>();
+    pctx.<span class="hljs-title function_">arc</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_R</span>, <span class="hljs-number">0</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>, <span class="hljs-literal">false</span>);
+    pctx.<span class="hljs-title function_">closePath</span>();
+    pctx.<span class="hljs-property">fillStyle</span> = litGrd;
+    pctx.<span class="hljs-title function_">fill</span>();
+    pctx.<span class="hljs-title function_">beginPath</span>();
+    pctx.<span class="hljs-title function_">ellipse</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, ea, eb, <span class="hljs-number">0</span>, -<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-literal">false</span>);
+    pctx.<span class="hljs-title function_">arc</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_R</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, -<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-literal">true</span>);
+    pctx.<span class="hljs-title function_">closePath</span>();
+    pctx.<span class="hljs-property">fillStyle</span> = darkGrd;
+    pctx.<span class="hljs-title function_">fill</span>();
+  } <span class="hljs-keyword">else</span> {
+    <span class="hljs-comment">// Waning crescent - lit left crescent</span>
+    pctx.<span class="hljs-title function_">beginPath</span>();
+    pctx.<span class="hljs-title function_">ellipse</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, ea, eb, <span class="hljs-number">0</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-number">3</span>*<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-literal">false</span>);
+    pctx.<span class="hljs-title function_">arc</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_R</span>, <span class="hljs-number">3</span>*<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>/<span class="hljs-number">2</span>, <span class="hljs-literal">true</span>);
+    pctx.<span class="hljs-title function_">closePath</span>();
+    pctx.<span class="hljs-property">fillStyle</span> = litGrd;
+    pctx.<span class="hljs-title function_">fill</span>();
+  }
+
+  <span class="hljs-comment">// Craters on lit side</span>
+  pctx.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">&#x27;rgba(200,190,175,0.15)&#x27;</span>;
+  <span class="hljs-keyword">const</span> litCraters = [
+    {<span class="hljs-attr">x</span>:<span class="hljs-variable constant_">P_CX</span>-<span class="hljs-number">25</span>, <span class="hljs-attr">y</span>:<span class="hljs-variable constant_">P_CY</span>-<span class="hljs-number">30</span>, <span class="hljs-attr">r</span>:<span class="hljs-number">6</span>}, {<span class="hljs-attr">x</span>:<span class="hljs-variable constant_">P_CX</span>+<span class="hljs-number">15</span>, <span class="hljs-attr">y</span>:<span class="hljs-variable constant_">P_CY</span>-<span class="hljs-number">20</span>, <span class="hljs-attr">r</span>:<span class="hljs-number">4</span>},
+    {<span class="hljs-attr">x</span>:<span class="hljs-variable constant_">P_CX</span>-<span class="hljs-number">10</span>, <span class="hljs-attr">y</span>:<span class="hljs-variable constant_">P_CY</span>+<span class="hljs-number">25</span>, <span class="hljs-attr">r</span>:<span class="hljs-number">5</span>}, {<span class="hljs-attr">x</span>:<span class="hljs-variable constant_">P_CX</span>+<span class="hljs-number">30</span>, <span class="hljs-attr">y</span>:<span class="hljs-variable constant_">P_CY</span>+<span class="hljs-number">10</span>, <span class="hljs-attr">r</span>:<span class="hljs-number">3</span>},
+    {<span class="hljs-attr">x</span>:<span class="hljs-variable constant_">P_CX</span>-<span class="hljs-number">35</span>, <span class="hljs-attr">y</span>:<span class="hljs-variable constant_">P_CY</span>+<span class="hljs-number">5</span>, <span class="hljs-attr">r</span>:<span class="hljs-number">4</span>},
+  ];
+  <span class="hljs-keyword">for</span>(<span class="hljs-keyword">const</span> c <span class="hljs-keyword">of</span> litCraters){
+    pctx.<span class="hljs-title function_">beginPath</span>();
+    pctx.<span class="hljs-title function_">arc</span>(c.<span class="hljs-property">x</span>, c.<span class="hljs-property">y</span>, c.<span class="hljs-property">r</span>, <span class="hljs-number">0</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>);
+    pctx.<span class="hljs-title function_">fill</span>();
+  }
+
+  <span class="hljs-comment">// Mare on lit side</span>
+  <span class="hljs-keyword">const</span> litMare = [
+    {<span class="hljs-attr">x</span>:<span class="hljs-variable constant_">P_CX</span>-<span class="hljs-number">8</span>,<span class="hljs-attr">y</span>:<span class="hljs-variable constant_">P_CY</span>-<span class="hljs-number">12</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">14</span>},{<span class="hljs-attr">x</span>:<span class="hljs-variable constant_">P_CX</span>+<span class="hljs-number">12</span>,<span class="hljs-attr">y</span>:<span class="hljs-variable constant_">P_CY</span>-<span class="hljs-number">8</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">10</span>},{<span class="hljs-attr">x</span>:<span class="hljs-variable constant_">P_CX</span>-<span class="hljs-number">20</span>,<span class="hljs-attr">y</span>:<span class="hljs-variable constant_">P_CY</span>+<span class="hljs-number">8</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">8</span>},
+    {<span class="hljs-attr">x</span>:<span class="hljs-variable constant_">P_CX</span>+<span class="hljs-number">5</span>,<span class="hljs-attr">y</span>:<span class="hljs-variable constant_">P_CY</span>+<span class="hljs-number">18</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">11</span>},{<span class="hljs-attr">x</span>:<span class="hljs-variable constant_">P_CX</span>-<span class="hljs-number">30</span>,<span class="hljs-attr">y</span>:<span class="hljs-variable constant_">P_CY</span>-<span class="hljs-number">5</span>,<span class="hljs-attr">r</span>:<span class="hljs-number">6</span>},
+  ];
+  <span class="hljs-keyword">for</span>(<span class="hljs-keyword">const</span> m <span class="hljs-keyword">of</span> litMare){
+    pctx.<span class="hljs-title function_">beginPath</span>();
+    pctx.<span class="hljs-title function_">ellipse</span>(m.<span class="hljs-property">x</span>, m.<span class="hljs-property">y</span>, m.<span class="hljs-property">r</span>, m.<span class="hljs-property">r</span>*<span class="hljs-number">0.7</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()*<span class="hljs-number">0.3</span>, <span class="hljs-number">0</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>);
+    pctx.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">`rgba(<span class="hljs-subst">${<span class="hljs-number">100</span>+<span class="hljs-built_in">Math</span>.random()*<span class="hljs-number">30</span>}</span>,<span class="hljs-subst">${<span class="hljs-number">95</span>+<span class="hljs-built_in">Math</span>.random()*<span class="hljs-number">30</span>}</span>,<span class="hljs-subst">${<span class="hljs-number">85</span>+<span class="hljs-built_in">Math</span>.random()*<span class="hljs-number">30</span>}</span>,0.1)`</span>;
+    pctx.<span class="hljs-title function_">fill</span>();
+  }
+
+  <span class="hljs-comment">// Remove clip</span>
+  pctx.<span class="hljs-title function_">restore</span>();
+
+  <span class="hljs-comment">// Outermost ring</span>
+  pctx.<span class="hljs-title function_">beginPath</span>();
+  pctx.<span class="hljs-title function_">arc</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_R</span>, <span class="hljs-number">0</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>);
+  pctx.<span class="hljs-property">strokeStyle</span> = <span class="hljs-string">&#x27;rgba(255,255,255,0.08)&#x27;</span>;
+  pctx.<span class="hljs-property">lineWidth</span> = <span class="hljs-number">1</span>;
+  pctx.<span class="hljs-title function_">stroke</span>();
+
+  <span class="hljs-comment">// Outer glow</span>
+  <span class="hljs-keyword">const</span> glow2 = pctx.<span class="hljs-title function_">createRadialGradient</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_R</span>-<span class="hljs-number">2</span>, <span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_R</span>+<span class="hljs-number">8</span>);
+  glow2.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">0</span>, <span class="hljs-string">&#x27;rgba(255,240,200,0)&#x27;</span>);
+  glow2.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">0.5</span>, <span class="hljs-string">&#x27;rgba(255,240,200,0.02)&#x27;</span>);
+  glow2.<span class="hljs-title function_">addColorStop</span>(<span class="hljs-number">1</span>, <span class="hljs-string">&#x27;rgba(255,240,200,0)&#x27;</span>);
+  pctx.<span class="hljs-property">fillStyle</span> = glow2;
+  pctx.<span class="hljs-title function_">beginPath</span>();
+  pctx.<span class="hljs-title function_">arc</span>(<span class="hljs-variable constant_">P_CX</span>, <span class="hljs-variable constant_">P_CY</span>, <span class="hljs-variable constant_">P_R</span>+<span class="hljs-number">8</span>, <span class="hljs-number">0</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>);
+  pctx.<span class="hljs-title function_">fill</span>();
+}
+
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-comment">// Phase helpers</span>
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getPhase</span>(<span class="hljs-params">dayVal</span>){
+  <span class="hljs-keyword">return</span> ((dayVal / <span class="hljs-variable constant_">LUNAR_CYCLE</span>) % <span class="hljs-number">1</span> + <span class="hljs-number">1</span>) % <span class="hljs-number">1</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getPhaseName</span>(<span class="hljs-params">phase</span>){
+  <span class="hljs-keyword">for</span>(<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> <span class="hljs-variable constant_">PHASE_NAMES</span>){
+    <span class="hljs-keyword">if</span>(phase &gt;= p.<span class="hljs-property">min</span> &amp;&amp; phase &lt; p.<span class="hljs-property">max</span>) <span class="hljs-keyword">return</span> p;
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-variable constant_">PHASE_NAMES</span>[<span class="hljs-number">0</span>];
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getIllumination</span>(<span class="hljs-params">phase</span>){
+  <span class="hljs-comment">// f = (1 - cos(2π·p)) / 2  ;  p=0 new, p=0.5 full</span>
+  <span class="hljs-keyword">return</span> (<span class="hljs-number">1</span> - <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">cos</span>(phase * <span class="hljs-number">2</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>)) / <span class="hljs-number">2</span>;
+}
+
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-comment">// Update scene</span>
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">updateScene</span>(<span class="hljs-params">dayVal</span>){
+  <span class="hljs-keyword">const</span> angle = (dayVal / <span class="hljs-variable constant_">LUNAR_CYCLE</span>) * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span> * <span class="hljs-number">2</span>;
+  <span class="hljs-keyword">const</span> phase = <span class="hljs-title function_">getPhase</span>(dayVal);
+
+  <span class="hljs-comment">// Moon position</span>
+  moon.<span class="hljs-property">position</span>.<span class="hljs-title function_">set</span>(
+    <span class="hljs-variable constant_">ORBIT_RADIUS</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">cos</span>(angle),
+    <span class="hljs-number">0</span>,
+    <span class="hljs-variable constant_">ORBIT_RADIUS</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sin</span>(angle)
+  );
+
+  <span class="hljs-comment">// Moon self-rotation (tidal locked approx)</span>
+  moon.<span class="hljs-property">rotation</span>.<span class="hljs-property">y</span> = -angle;
+  moon.<span class="hljs-property">rotation</span>.<span class="hljs-property">x</span> = <span class="hljs-number">0.1</span>;
+
+  <span class="hljs-comment">// Earth rotation (1 full rotation per day, around tilted axis)</span>
+  <span class="hljs-keyword">const</span> earthAngle = (dayVal * <span class="hljs-number">2</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>) % (<span class="hljs-number">2</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>);
+  earth.<span class="hljs-property">rotation</span>.<span class="hljs-property">y</span> = earthAngle;
+  atmo.<span class="hljs-property">rotation</span>.<span class="hljs-property">y</span> = earthAngle;
+
+
+  <span class="hljs-comment">// Update 2D phase viewer</span>
+  <span class="hljs-title function_">drawPhaseViewer</span>(phase);
+
+  <span class="hljs-comment">// Update phase labels</span>
+  <span class="hljs-keyword">const</span> nearestAngle = angle % (<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>);
+  <span class="hljs-keyword">let</span> minDist = <span class="hljs-title class_">Infinity</span>;
+  <span class="hljs-keyword">let</span> nearestIdx = -<span class="hljs-number">1</span>;
+  <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>; i&lt;labelSprites.<span class="hljs-property">length</span>; i++){
+    <span class="hljs-keyword">let</span> diff = labelSprites[i].<span class="hljs-property">angle</span> - nearestAngle;
+    diff = ((diff + <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>) % (<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>) + <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>) % (<span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>*<span class="hljs-number">2</span>) - <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>;
+    <span class="hljs-keyword">if</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">abs</span>(diff) &lt; minDist){
+      minDist = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">abs</span>(diff);
+      nearestIdx = i;
+    }
+  }
+  labelSprites.<span class="hljs-title function_">forEach</span>(<span class="hljs-function">(<span class="hljs-params">ls, i</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> active = i === nearestIdx;
+    ls.<span class="hljs-property">sprite</span>.<span class="hljs-property">material</span>.<span class="hljs-property">opacity</span> = active ? <span class="hljs-number">0.8</span> : <span class="hljs-number">0.15</span>;
+  });
+
+  <span class="hljs-comment">// ── Update UI ──</span>
+  <span class="hljs-keyword">const</span> dayDisp = dayVal.<span class="hljs-title function_">toFixed</span>(<span class="hljs-number">1</span>);
+  <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;day-num&#x27;</span>).<span class="hljs-property">textContent</span> = dayDisp;
+
+  <span class="hljs-keyword">const</span> illum = <span class="hljs-title function_">getIllumination</span>(phase);
+  <span class="hljs-keyword">const</span> pct = (illum * <span class="hljs-number">100</span>).<span class="hljs-title function_">toFixed</span>(<span class="hljs-number">1</span>);
+
+  <span class="hljs-keyword">const</span> pn = <span class="hljs-title function_">getPhaseName</span>(phase);
+  <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;phase-name&#x27;</span>).<span class="hljs-property">textContent</span> = pn.<span class="hljs-property">name</span>;
+  <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;phase-illum&#x27;</span>).<span class="hljs-property">textContent</span> = <span class="hljs-string">`光照 <span class="hljs-subst">${pct}</span>%`</span>;
+
+  <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;day-info&#x27;</span>).<span class="hljs-property">textContent</span> = <span class="hljs-string">`第 <span class="hljs-subst">${dayDisp}</span> 天 / <span class="hljs-subst">${LUNAR_CYCLE}</span> 天`</span>;
+  <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;illum-info&#x27;</span>).<span class="hljs-property">textContent</span> = <span class="hljs-string">`光照 <span class="hljs-subst">${pct}</span>%`</span>;
+
+  <span class="hljs-comment">// Date label</span>
+  <span class="hljs-keyword">const</span> subLabels = {
+    <span class="hljs-string">&#x27;🌑 新月&#x27;</span>:<span class="hljs-string">&#x27;月出·月落同太阳同步&#x27;</span>,
+    <span class="hljs-string">&#x27;🌒 蛾眉月&#x27;</span>:<span class="hljs-string">&#x27;傍晚西方可见&#x27;</span>,
+    <span class="hljs-string">&#x27;🌓 上弦月&#x27;</span>:<span class="hljs-string">&#x27;下午至午夜可见&#x27;</span>,
+    <span class="hljs-string">&#x27;🌔 盈凸月&#x27;</span>:<span class="hljs-string">&#x27;傍晚至凌晨可见&#x27;</span>,
+    <span class="hljs-string">&#x27;🌕 满月&#x27;</span>:<span class="hljs-string">&#x27;整夜可见&#x27;</span>,
+    <span class="hljs-string">&#x27;🌖 亏凸月&#x27;</span>:<span class="hljs-string">&#x27;深夜至早晨可见&#x27;</span>,
+    <span class="hljs-string">&#x27;🌗 下弦月&#x27;</span>:<span class="hljs-string">&#x27;午夜至上午可见&#x27;</span>,
+    <span class="hljs-string">&#x27;🌘 残月&#x27;</span>:<span class="hljs-string">&#x27;黎明前东方可见&#x27;</span>,
+  };
+  <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;date-label&#x27;</span>).<span class="hljs-property">textContent</span> = subLabels[pn.<span class="hljs-property">name</span>] || <span class="hljs-string">&#x27;&#x27;</span>;
+
+  <span class="hljs-comment">// Slider</span>
+  <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;day-slider&#x27;</span>).<span class="hljs-property">value</span> = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">round</span>(dayVal * <span class="hljs-number">10</span>);
+
+  <span class="hljs-comment">// Phase bar</span>
+  <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;phase-fill&#x27;</span>).<span class="hljs-property">style</span>.<span class="hljs-property">width</span> = <span class="hljs-string">`<span class="hljs-subst">${(phase * <span class="hljs-number">100</span>).toFixed(<span class="hljs-number">1</span>)}</span>%`</span>;
+}
+
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-comment">// Animation loop</span>
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-keyword">let</span> lastTime = <span class="hljs-number">0</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">animate</span>(<span class="hljs-params">time</span>){
+  <span class="hljs-title function_">requestAnimationFrame</span>(animate);
+
+  <span class="hljs-keyword">const</span> dt = lastTime ? <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>((time - lastTime) / <span class="hljs-number">1000</span>, <span class="hljs-number">0.05</span>) : <span class="hljs-number">0.016</span>;
+  lastTime = time;
+
+  <span class="hljs-keyword">if</span>(isPlaying){
+    day = (day + dt * speed * (<span class="hljs-number">1</span> / <span class="hljs-number">2</span>)) % <span class="hljs-variable constant_">LUNAR_CYCLE</span>;
+    <span class="hljs-comment">// 1 day per ~2 seconds at 1× speed</span>
+  }
+
+  <span class="hljs-title function_">updateScene</span>(day);
+
+  controls.<span class="hljs-title function_">update</span>();
+  renderer.<span class="hljs-title function_">render</span>(scene, camera);
+}
+
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-comment">// UI event bindings</span>
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-keyword">const</span> slider = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;day-slider&#x27;</span>);
+slider.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;input&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  isPlaying = <span class="hljs-literal">false</span>;
+  <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;play-btn&#x27;</span>).<span class="hljs-property">textContent</span> = <span class="hljs-string">&#x27;▶&#x27;</span>;
+  <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;play-btn&#x27;</span>).<span class="hljs-property">classList</span>.<span class="hljs-title function_">remove</span>(<span class="hljs-string">&#x27;active&#x27;</span>);
+  day = <span class="hljs-built_in">parseFloat</span>(slider.<span class="hljs-property">value</span>) / <span class="hljs-number">10</span>;
+  <span class="hljs-title function_">updateScene</span>(day);
+});
+
+<span class="hljs-keyword">const</span> playBtn = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;play-btn&#x27;</span>);
+playBtn.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;click&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  isPlaying = !isPlaying;
+  playBtn.<span class="hljs-property">textContent</span> = isPlaying ? <span class="hljs-string">&#x27;⏸&#x27;</span> : <span class="hljs-string">&#x27;▶&#x27;</span>;
+  playBtn.<span class="hljs-property">classList</span>.<span class="hljs-title function_">toggle</span>(<span class="hljs-string">&#x27;active&#x27;</span>, isPlaying);
+});
+
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;reset-btn&#x27;</span>).<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;click&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  isPlaying = <span class="hljs-literal">false</span>;
+  playBtn.<span class="hljs-property">textContent</span> = <span class="hljs-string">&#x27;▶&#x27;</span>;
+  playBtn.<span class="hljs-property">classList</span>.<span class="hljs-title function_">remove</span>(<span class="hljs-string">&#x27;active&#x27;</span>);
+  day = <span class="hljs-number">0</span>;
+  slider.<span class="hljs-property">value</span> = <span class="hljs-string">&#x27;0&#x27;</span>;
+  <span class="hljs-title function_">updateScene</span>(day);
+});
+
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;today-btn&#x27;</span>).<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;click&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  isPlaying = <span class="hljs-literal">false</span>;
+  playBtn.<span class="hljs-property">textContent</span> = <span class="hljs-string">&#x27;▶&#x27;</span>;
+  playBtn.<span class="hljs-property">classList</span>.<span class="hljs-title function_">remove</span>(<span class="hljs-string">&#x27;active&#x27;</span>);
+  day = <span class="hljs-variable constant_">LUNAR_CYCLE</span> / <span class="hljs-number">2</span>; <span class="hljs-comment">// full moon</span>
+  slider.<span class="hljs-property">value</span> = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">round</span>(day * <span class="hljs-number">10</span>);
+  <span class="hljs-title function_">updateScene</span>(day);
+});
+
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;speed-select&#x27;</span>).<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;change&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> {
+  speed = <span class="hljs-built_in">parseFloat</span>(e.<span class="hljs-property">target</span>.<span class="hljs-property">value</span>);
+});
+
+<span class="hljs-comment">// Keyboard shortcuts</span>
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;keydown&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> {
+  <span class="hljs-keyword">if</span>(e.<span class="hljs-property">key</span> === <span class="hljs-string">&#x27; &#x27;</span>){
+    e.<span class="hljs-title function_">preventDefault</span>();
+    playBtn.<span class="hljs-title function_">click</span>();
+  }
+  <span class="hljs-keyword">if</span>(e.<span class="hljs-property">key</span> === <span class="hljs-string">&#x27;ArrowRight&#x27;</span>){
+    <span class="hljs-keyword">const</span> step = <span class="hljs-variable constant_">LUNAR_CYCLE</span> / <span class="hljs-number">100</span>;
+    isPlaying = <span class="hljs-literal">false</span>;
+    playBtn.<span class="hljs-property">textContent</span> = <span class="hljs-string">&#x27;▶&#x27;</span>;
+    playBtn.<span class="hljs-property">classList</span>.<span class="hljs-title function_">remove</span>(<span class="hljs-string">&#x27;active&#x27;</span>);
+    day = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(day + step, <span class="hljs-variable constant_">LUNAR_CYCLE</span>);
+    slider.<span class="hljs-property">value</span> = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">round</span>(day * <span class="hljs-number">10</span>);
+    <span class="hljs-title function_">updateScene</span>(day);
+  }
+  <span class="hljs-keyword">if</span>(e.<span class="hljs-property">key</span> === <span class="hljs-string">&#x27;ArrowLeft&#x27;</span>){
+    <span class="hljs-keyword">const</span> step = <span class="hljs-variable constant_">LUNAR_CYCLE</span> / <span class="hljs-number">100</span>;
+    isPlaying = <span class="hljs-literal">false</span>;
+    playBtn.<span class="hljs-property">textContent</span> = <span class="hljs-string">&#x27;▶&#x27;</span>;
+    playBtn.<span class="hljs-property">classList</span>.<span class="hljs-title function_">remove</span>(<span class="hljs-string">&#x27;active&#x27;</span>);
+    day = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(day - step, <span class="hljs-number">0</span>);
+    slider.<span class="hljs-property">value</span> = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">round</span>(day * <span class="hljs-number">10</span>);
+    <span class="hljs-title function_">updateScene</span>(day);
+  }
+  <span class="hljs-keyword">if</span>(e.<span class="hljs-property">key</span> === <span class="hljs-string">&#x27;f&#x27;</span> || e.<span class="hljs-property">key</span> === <span class="hljs-string">&#x27;F&#x27;</span>){
+    <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;today-btn&#x27;</span>).<span class="hljs-title function_">click</span>();
+  }
+  <span class="hljs-keyword">if</span>(e.<span class="hljs-property">key</span> === <span class="hljs-string">&#x27;r&#x27;</span> || e.<span class="hljs-property">key</span> === <span class="hljs-string">&#x27;R&#x27;</span>){
+    <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;reset-btn&#x27;</span>).<span class="hljs-title function_">click</span>();
+  }
+});
+
+<span class="hljs-comment">// Resize</span>
+<span class="hljs-variable language_">window</span>.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;resize&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> w = <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span>;
+  <span class="hljs-keyword">const</span> h = <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span>;
+  camera.<span class="hljs-property">aspect</span> = w / h;
+  camera.<span class="hljs-title function_">updateProjectionMatrix</span>();
+  renderer.<span class="hljs-title function_">setSize</span>(w, h);
+});
+
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+<span class="hljs-comment">// Start</span>
+<span class="hljs-comment">// ──────────────────────────────────────────</span>
+day = <span class="hljs-number">0</span>;
+<span class="hljs-title function_">updateScene</span>(<span class="hljs-number">0</span>);
+<span class="hljs-title function_">animate</span>(<span class="hljs-number">0</span>);
+
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;🌙 月球光照3D演变已启动 — 鼠标拖拽旋转场景&#x27;</span>);
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="../archive.html">回到归档</a>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+
+<section class="wrap pager">
+  
+    <a class="pager-item" href="../post/使用pandapower计算ieee33模型潮流计算并给出ui界面展示.html">
+      <span>上一篇</span>
+      <strong>使用pandapower计算ieee33模型潮流计算并给出ui界面展示</strong>
+    </a>
+  
+  
+    <a class="pager-item right" href="../post/2的100次方mod5用代码怎么计算.html">
+      <span>下一篇</span>
+      <strong>2的100次方mod5用代码怎么计算</strong>
+    </a>
+  
+</section>
+
+
+
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    
+      <article class="post-card">
+        <span class="post-index">01</span>
+        <h3 class="post-card-title"><a href="../post/最小子序和应该怎么求解.html">最小子序和应该怎么求解</a></h3>
+        <p class="post-excerpt">最小子序和问题指的是在一个整数数组里找出一个连续的子数组，让该子数组的和达到最小。下面为你介绍两种常见的解决办法：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:50.565Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">02</span>
+        <h3 class="post-card-title"><a href="../post/阿尔忒弥斯二号任务的核心轨迹.html">阿尔忒弥斯二号任务的核心轨迹</a></h3>
+        <p class="post-excerpt">阿尔忒弥斯二号任务的核心轨迹特点在于采用了自由返回轨道——这是一种在地月空间中利用引力设计的天然安全走廊，即便飞船动力完全失效，也能被月球引力“甩”回地球。以下从轨迹特点和涉及的物理计算两方面展开：</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:49.907Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <span class="post-index">03</span>
+        <h3 class="post-card-title"><a href="../post/同步整流buck降压变换器.html">同步整流Buck降压变换器</a></h3>
+        <p class="post-excerpt">1\. 电路拓扑识别</p>
+        <div class="post-meta">
+          <time datetime="2026-08-13T19:09:48.662Z">2026/08/14</time>
+          <span>·</span>
+          <span>0 阅读</span>
+        </div>
+      </article>
+    
+  </div>
+</section>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site">常青笔记</p>
+        <p class="footer-note">用文字把日子留住。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../archive.html">全部文章</a>
+        <a href="../categories.html">分类</a>
+        
+        
+        
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© 2026 常青笔记 · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>
