@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= pageTitle ? pageTitle + ' · 管理后台' : '管理后台' %></title>
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/vendor/highlight/styles/github-dark.min.css">
+</head>
+<body class="admin-body">
+  <header class="admin-topbar">
+    <a class="brand admin-brand" href="/admin">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">管理后台</span>
+    </a>
+    <nav class="admin-top-nav">
+      <a href="/">查看博客</a>
+      <form method="post" action="/logout">
+        <button class="link-button" type="submit">退出</button>
+      </form>
+    </nav>
+  </header>
+
+  <div class="admin-shell">
+    <aside class="admin-side">
+      <a class="admin-nav-item <%= path === '/admin' ? 'is-active' : '' %>" href="/admin">仪表盘</a>
+      <a class="admin-nav-item <%= path === '/admin/posts' ? 'is-active' : '' %>" href="/admin/posts">文章管理</a>
+      <a class="admin-nav-item <%= path === '/admin/posts/new' ? 'is-active' : '' %>" href="/admin/posts/new">写文章</a>
+      <a class="admin-nav-item <%= path === '/admin/settings' ? 'is-active' : '' %>" href="/admin/settings">站点设置</a>
+    </aside>
+    <main class="admin-main">
+      <%- include(view.replace(/^admin\//, '')) %>
+    </main>
+  </div>
+
+  <script src="/vendor/highlight/lib/common.js" defer></script>
+  <script src="/vendor/markdown-it/markdown-it.min.js" defer></script>
+  <script src="/js/editor.js" defer></script>
+  <script src="/js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="<%= site.siteSubtitle %>">
+  <title><%= pageTitle ? pageTitle + ' · ' + site.siteTitle : site.siteTitle %></title>
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/vendor/highlight/styles/github-dark.min.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-text"><%= site.siteTitle %></span>
+      </a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-label="打开菜单">菜单</button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航">
+        <a href="/" class="<%= path === '/' ? 'is-active' : '' %>">首页</a>
+        <a href="/archive" class="<%= path === '/archive' ? 'is-active' : '' %>">归档</a>
+        <a href="/tags" class="<%= path === '/tags' ? 'is-active' : '' %>">标签</a>
+        <a href="/about" class="<%= path === '/about' ? 'is-active' : '' %>">关于</a>
+        <% if (staticSite) { %>
+          <a class="nav-cta" href="/archive.html">全部文章</a>
+        <% } else if (user) { %>
+          <a class="nav-cta" href="/admin">管理</a>
+        <% } else { %>
+          <a class="nav-cta" href="/login">登录</a>
+        <% } %>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <%- include(view.replace(/^site\//, '')) %>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <p class="footer-site"><%= site.siteTitle %></p>
+        <p class="footer-note"><%= site.footerText %></p>
+      </div>
+      <div class="footer-links">
+        <% if (site.github) { %><a href="<%= site.github %>" rel="me noopener" target="_blank">GitHub</a><% } %>
+        <% if (site.email) { %><a href="mailto:<%= site.email %>">来信</a><% } %>
+        <% if (!staticSite) { %>
+        <a href="/login">管理入口</a>
+        <% } %>
+      </div>
+    </div>
+    <div class="wrap footer-bottom">© <%= new Date().getFullYear() %> <%= site.siteTitle %> · 用 Markdown 写的自留地</div>
+  </footer>
+  <script src="/js/app.js" defer></script>
+</body>
+</html>

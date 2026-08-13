@@ -1,0 +1,17 @@
+<section class="page-head">
+  <div class="wrap">
+    <p class="kicker">TAGS</p>
+    <h1><%= selected ? '标签：' + selected : '全部标签' %></h1>
+    <p class="page-desc"><%= selected ? '查看这个标签下的所有文章。' : '按主题翻翻我的笔记。' %></p>
+  </div>
+</section>
+
+<section class="wrap tag-cloud large">
+  <% tags.forEach(function(tag) { %>
+    <a class="tag-chip <%= selected === tag.name ? 'is-selected' : '' %>" href="/tags?tag=<%= encodeURIComponent(tag.name) %>">
+      <%= tag.name %><em><%= tag.count %></em>
+    </a>
+  <% }) %>
+</section>
+
+<%- include('_post-list', { posts: posts }) %>

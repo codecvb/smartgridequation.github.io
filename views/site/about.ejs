@@ -1,0 +1,21 @@
+<section class="page-head">
+  <div class="wrap">
+    <p class="kicker">ABOUT</p>
+    <h1>关于我</h1>
+  </div>
+</section>
+
+<section class="wrap about-wrap">
+  <div class="about-card">
+    <span class="about-seal" aria-hidden="true"><%= site.author.slice(0, 1) %></span>
+    <div>
+      <h2><%= site.author %></h2>
+      <div class="prose"><%- renderMarkdown(site.bio) %></div>
+      <div class="about-links">
+        <% if (site.github) { %><a class="btn-ghost" href="<%= site.github %>" rel="me noopener" target="_blank">GitHub</a><% } %>
+        <% if (site.email) { %><a class="btn-ghost" href="mailto:<%= site.email %>">写邮件</a><% } %>
+        <a class="btn-ghost" href="/archive">读文章</a>
+      </div>
+    </div>
+  </div>
+</section>

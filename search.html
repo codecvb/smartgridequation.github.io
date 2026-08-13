@@ -1,0 +1,19 @@
+<section class="page-head">
+  <div class="wrap">
+    <p class="kicker">SEARCH</p>
+    <h1>搜索文章</h1>
+    <form class="search-form wide" id="static-search-form" action="search.html" method="get" role="search">
+      <input id="static-search-input" name="q" type="search" placeholder="搜索文章…" aria-label="搜索文章">
+      <button type="submit">搜索</button>
+    </form>
+  </div>
+</section>
+
+<section class="wrap list-section">
+  <div class="list" id="static-search-results"></div>
+</section>
+
+<script>
+  window.STATIC_POSTS = [{"id":"3da9b085-4273-4869-955a-5f840280c4c9","title":"你好，世界","slug":"hello-world","summary":"这套博客的第一篇文章：介绍 Markdown 写作、目录、标签、搜索与图片上传等能力。","content":"# 你好，世界\n\n这是你的第一篇文章，由系统自动创建，用来演示整套博客的写作能力。\n\n## 用 Markdown 写作\n\n**加粗**、*斜体*、`行内代码`，还有链接 [OpenAI](https://openai.com)。\n\n> 好的博客像一盏灯，不需要很亮，但要在黑夜里持续亮着。\n\n## 代码块\n\n```js\nconsole.log('欢迎来到你的博客');\n```\n\n## 已经内置的能力\n\n- 自动目录与阅读时长\n- 标签归档与全文搜索\n- 图片上传与 Markdown 编辑器\n- 草稿、发布与阅读统计\n\n登录后台后，在「写文章」页面开始你的第一篇正式内容吧。`","tags":["随笔","Markdown"],"status":"published","viewCount":0,"createdAt":"2026-08-10T13:27:53.894Z","updatedAt":"2026-08-10T13:27:53.894Z","publishedAt":"2026-08-10T13:27:53.894Z"},{"id":"70fa1c95-927a-4b03-9251-9c62a84696b5","title":"把博客放上云端：免费挂载方案盘点","slug":"free-hosting-options-2026","summary":"整理 2026 年仍可用的免费与低价部署方案，从开箱即用的 Render 到长期免费的 Oracle Cloud。","content":"# 把博客放上云端\n\n写好的博客需要一台“常亮”的服务器。以下是 2026 年 8 月核实过的免费与低价挂载方案。\n\n## 上手最快：Render 免费 Web Service\n\nRender 官方免费档支持 Web Service 直接部署 Node.js 应用，15 分钟无访问会自动休眠，下次访问会唤醒。免费实例的磁盘是临时的，适合试用；长期使用建议挂载持久磁盘或外接数据库。\n\n## 长期免费：Oracle Cloud Always Free\n\nOracle Cloud 的 Always Free 永久免费额度包含虚拟机（AMD 与 Arm），适合把博客长期挂在云上。需要自己配置系统、Node.js 环境与域名。\n\n## 其他选择\n\n- Railway：新用户 30 天 \\$5 试用，之后 \\$1/月起\n- Fly.io：旧账户保留免费额度，新用户按量付费\n- Cloudflare Workers：免费档每天 10 万次请求，但需要把应用改造成 Workers 架构\n\n详细的步骤见仓库里的部署指南。`","tags":["部署","指南"],"status":"published","viewCount":1,"createdAt":"2026-08-09T13:27:53.894Z","updatedAt":"2026-08-09T13:27:53.894Z","publishedAt":"2026-08-09T13:27:53.894Z"}];
+</script>
+<script src="/js/static-search.js" defer></script>

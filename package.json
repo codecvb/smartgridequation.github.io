@@ -1,0 +1,25 @@
+{
+  "name": "evergreen-blog",
+  "version": "1.0.0",
+  "description": "自建 Markdown 博客：登录、写作、发布，一站完成。",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build:static": "node scripts/build-static.js",
+    "reset-password": "node scripts/reset-password.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "highlight.js": "^11.11.1",
+    "markdown-it": "^14.1.0",
+    "multer": "^2.0.2",
+    "dotenv": "^16.4.7"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+.data/
+public/uploads/*
+!public/uploads/.gitkeep
+npm-debug.log*
+.DS_Store
+.env
+deploy/oracle/blog-deploy.tar.gz
+backups/

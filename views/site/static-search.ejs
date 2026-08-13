@@ -1,0 +1,19 @@
+<section class="page-head">
+  <div class="wrap">
+    <p class="kicker">SEARCH</p>
+    <h1>搜索文章</h1>
+    <form class="search-form wide" id="static-search-form" action="search.html" method="get" role="search">
+      <input id="static-search-input" name="q" type="search" placeholder="搜索文章…" aria-label="搜索文章">
+      <button type="submit">搜索</button>
+    </form>
+  </div>
+</section>
+
+<section class="wrap list-section">
+  <div class="list" id="static-search-results"></div>
+</section>
+
+<script>
+  window.STATIC_POSTS = <%- JSON.stringify(posts).replace(/</g, '\\u003c') %>;
+</script>
+<script src="/js/static-search.js" defer></script>

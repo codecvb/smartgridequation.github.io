@@ -1,0 +1,82 @@
+<section class="wrap post-page">
+  <div class="post-layout">
+    <article class="post-article">
+      <header class="post-header">
+        <div class="tag-row">
+          <% post.tags.forEach(function(tag) { %>
+            <a class="tag-chip" href="/tags?tag=<%= encodeURIComponent(tag) %>"><%= tag %></a>
+          <% }) %>
+        </div>
+        <h1 class="post-title"><%= post.title %></h1>
+        <% if (post.summary) { %><p class="post-deck"><%= post.summary %></p><% } %>
+        <div class="post-meta">
+          <time datetime="<%= post.publishedAt %>"><%= formatDate(post.publishedAt, true) %></time>
+          <span>·</span>
+          <span><%= post.readMinutes %> 分钟</span>
+          <span>·</span>
+          <span><%= post.viewCount %> 次阅读</span>
+        </div>
+      </header>
+      <div class="prose">
+        <%- post.contentHtml %>
+      </div>
+      <div class="post-actions">
+        <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
+        <a class="btn-ghost" href="/archive">回到归档</a>
+      </div>
+    </article>
+    <% if (post.toc && post.toc.length) { %>
+      <aside class="toc" aria-label="目录">
+        <p class="toc-title">目录</p>
+        <nav class="toc-nav">
+          <% post.toc.forEach(function(item) { %>
+            <a class="toc-level-<%= item.level %>" href="#<%= item.id %>"><%= item.text %></a>
+          <% }) %>
+        </nav>
+      </aside>
+    <% } %>
+  </div>
+</section>
+
+<% if (prev || next) { %>
+<section class="wrap pager">
+  <% if (prev) { %>
+    <a class="pager-item" href="/post/<%= prev.slug %>">
+      <span>上一篇</span>
+      <strong><%= prev.title %></strong>
+    </a>
+  <% } else { %>
+    <span class="pager-placeholder"></span>
+  <% } %>
+  <% if (next) { %>
+    <a class="pager-item right" href="/post/<%= next.slug %>">
+      <span>下一篇</span>
+      <strong><%= next.title %></strong>
+    </a>
+  <% } else { %>
+    <span class="pager-placeholder"></span>
+  <% } %>
+</section>
+<% } %>
+
+<% if (related && related.length) { %>
+<section class="wrap related-section">
+  <div class="section-head">
+    <h2>相关阅读</h2>
+  </div>
+  <div class="post-grid">
+    <% related.forEach(function(post, i) { %>
+      <article class="post-card">
+        <span class="post-index"><%= String(i + 1).padStart(2, '0') %></span>
+        <h3 class="post-card-title"><a href="/post/<%= post.slug %>"><%= post.title %></a></h3>
+        <p class="post-excerpt"><%= post.summary || '……' %></p>
+        <div class="post-meta">
+          <time datetime="<%= post.publishedAt %>"><%= formatDate(post.publishedAt) %></time>
+          <span>·</span>
+          <span><%= post.viewCount %> 阅读</span>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+</section>
+<% } %>

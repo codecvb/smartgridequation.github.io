@@ -1,0 +1,20 @@
+<section class="auth-wrap">
+  <div class="auth-card">
+    <p class="kicker">SIGN IN</p>
+    <h1>登录管理后台</h1>
+    <p class="auth-sub">只有你能进来写东西。</p>
+    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+    <form method="post" action="/login" class="form">
+      <label class="field">
+        <span>用户名</span>
+        <input name="username" required autofocus autocomplete="username">
+      </label>
+      <label class="field">
+        <span>密码</span>
+        <input type="password" name="password" required autocomplete="current-password">
+      </label>
+      <button class="btn-primary btn-block" type="submit">进入后台</button>
+    </form>
+    <p class="auth-note">回到 <a href="/">博客首页</a></p>
+  </div>
+</section>

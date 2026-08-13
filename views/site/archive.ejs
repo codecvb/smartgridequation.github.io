@@ -1,0 +1,15 @@
+<section class="page-head">
+  <div class="wrap">
+    <p class="kicker">ARCHIVE</p>
+    <h1><%= heading %></h1>
+    <p class="page-desc"><%= description %></p>
+    <% if (!tags.length) { %>
+      <form class="search-form wide" action="<%= staticSite ? 'search.html' : '/search' %>" method="get" role="search">
+        <input name="q" type="search" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="搜索文章…" aria-label="搜索文章">
+        <button type="submit">搜索</button>
+      </form>
+    <% } %>
+  </div>
+</section>
+
+<%- include('_post-list', { posts: posts }) %>
