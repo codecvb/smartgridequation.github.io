@@ -465,7 +465,7 @@ textarea {
   position: relative;
   padding: 30px 32px 34px;
   background: var(--ink);
-  background-image: linear-gradient(120deg, rgba(23, 25, 29, 0.97), rgba(23, 25, 29, 0.84)), url('/img/paper-ink.png');
+  background-image: linear-gradient(120deg, rgba(23, 25, 29, 0.97), rgba(23, 25, 29, 0.84)), url('../img/paper-ink.png');
   background-size: cover;
   background-position: center;
   color: #f4f2ed;

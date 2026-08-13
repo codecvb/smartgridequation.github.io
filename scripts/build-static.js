@@ -52,6 +52,18 @@ function writeFile(relPath, html) {
   fs.writeFileSync(file, html);
 }
 
+function rewritePageLinks(html, depth) {
+  const prefix = depth === 0 ? '' : '../'.repeat(depth);
+  return html
+    .replace(/href="\/"/g, `href="${prefix}index.html"`)
+    .replace(/(href|src|action)="\/(?!\/)([^"]+)"/g, (match, attr, target) => `${attr}="${prefix}${target}"`);
+}
+
+function writePage(relPath, html) {
+  const depth = relPath.split('/').length - 1;
+  writeFile(relPath, rewritePageLinks(html, depth));
+}
+
 function copyDir(src, dest) {
   fs.cpSync(src, dest, { recursive: true });
 }
@@ -80,7 +92,7 @@ function build() {
   const stats = store.getStats();
   const tagFiles = new Map(tags.map((tag, index) => [tag.name.toLowerCase(), `tag-${index + 1}.html`]));
 
-  writeFile('index.html', staticLinks(renderSite('home', {
+  writePage('index.html', staticLinks(renderSite('home', {
     path: '/',
     pageTitle: '首页',
     featured: published[0] || null,
@@ -89,7 +101,7 @@ function build() {
     tags: tags.slice(0, 8)
   }), tagFiles));
 
-  writeFile('archive.html', staticLinks(renderSite('archive', {
+  writePage('archive.html', staticLinks(renderSite('archive', {
     path: '/archive',
     pageTitle: '归档',
     heading: '全部文章',
@@ -98,7 +110,7 @@ function build() {
     tags: []
   }), tagFiles));
 
-  writeFile('tags.html', staticLinks(renderSite('tags', {
+  writePage('tags.html', staticLinks(renderSite('tags', {
     path: '/tags',
     pageTitle: '标签',
     selected: '',
@@ -107,7 +119,7 @@ function build() {
   }), tagFiles));
 
   tags.forEach((tag, index) => {
-    writeFile(`tags/tag-${index + 1}.html`, staticLinks(renderSite('tags', {
+    writePage(`tags/tag-${index + 1}.html`, staticLinks(renderSite('tags', {
       path: '/tags',
       pageTitle: `标签：${tag.name}`,
       selected: tag.name,
@@ -123,7 +135,7 @@ function build() {
       toc: getToc(post.content),
       readMinutes: readTime(post.content)
     };
-    writeFile(`post/${post.slug}.html`, staticLinks(renderSite('post', {
+    writePage(`post/${post.slug}.html`, staticLinks(renderSite('post', {
       path: `/post/${post.slug}`,
       pageTitle: post.title,
       post: postView,
@@ -133,12 +145,12 @@ function build() {
     }), tagFiles));
   }
 
-  writeFile('about.html', staticLinks(renderSite('about', {
+  writePage('about.html', staticLinks(renderSite('about', {
     path: '/about',
     pageTitle: '关于'
   }), tagFiles));
 
-  writeFile('404.html', staticLinks(renderSite('error', {
+  writePage('404.html', staticLinks(renderSite('error', {
     path: '/',
     pageTitle: '未找到',
     statusCode: 404,
@@ -157,7 +169,7 @@ function build() {
     views: VIEWS_DIR,
     filename: path.join(VIEWS_DIR, 'static-search.ejs')
   });
-  writeFile('search.html', searchHtml);
+  writePage('search.html', searchHtml);
 
   copyDir(path.join(PUBLIC_DIR, 'css'), path.join(ROOT, 'css'));
   copyDir(path.join(PUBLIC_DIR, 'js'), path.join(ROOT, 'js'));
@@ -167,6 +179,11 @@ function build() {
     path.join(ROOT, 'node_modules', 'highlight.js', 'styles', 'github-dark.min.css'),
     path.join(ROOT, 'vendor', 'highlight', 'styles', 'github-dark.min.css')
   );
+
+  const cssPath = path.join(ROOT, 'css', 'app.css');
+  let css = fs.readFileSync(cssPath, 'utf8');
+  css = css.replace(/url\(\s*['"]\/(img|uploads)\//g, (match, dir) => `url('../${dir}/`);
+  fs.writeFileSync(cssPath, css);
   writeFile('.nojekyll', '');
 
   console.log(`Static site generated: ${published.length} posts, ${tags.length} tags.`);

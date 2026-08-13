@@ -32,7 +32,7 @@
     results.innerHTML = list.map(function (post, i) {
       var tags = (post.tags || []).join(' / ');
       return [
-        '<a class="list-item" href="/post/' + encodeURIComponent(post.slug) + '.html">',
+        '<a class="list-item" href="post/' + encodeURIComponent(post.slug) + '.html">',
         '  <span class="list-index">' + String(i + 1).padStart(2, '0') + '</span>',
         '  <span class="list-main">',
         '    <span class="list-title">' + escapeHtml(post.title) + '</span>',
