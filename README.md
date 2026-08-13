@@ -49,6 +49,38 @@ git push
 
 导出的 `index.html`、`post/`、`tags/`、`search.html` 等文件位于仓库根目录，推送到 `<username>.github.io` 仓库后即可通过 `https://<username>.github.io/` 访问。后台登录、写作、上传等动态功能仍需要部署到 Node 服务，见 [DEPLOY.md](DEPLOY.md)。
 
+## 一键发布 Markdown 文章
+
+把 Markdown 文件放进 `posts/` 目录，然后执行：
+
+```bash
+npm run publish
+git add -A
+git commit -m "publish articles"
+git push
+```
+
+也可以直接指定文件：
+
+```bash
+npm run publish -- 任意路径/文章.md
+```
+
+脚本会自动读取 Markdown，生成标题、摘要、标签、slug，写入文章数据并重新生成首页和静态页面。建议在文件开头用 frontmatter 写清元信息：
+
+```markdown
+---
+title: 文章标题
+slug: article-slug
+summary: 一句话摘要
+tags: 随笔, 读书笔记
+---
+
+# 文章标题
+```
+
+不写 frontmatter 也能发布：标题取第一个 `# 标题`，摘要取第一段正文，slug 自动由标题生成。
+
 ## 目录结构
 
 ```text
