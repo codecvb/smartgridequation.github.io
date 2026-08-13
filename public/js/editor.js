@@ -56,6 +56,15 @@
   function renderPreview() {
     preview.innerHTML = md.render(content.value || '');
     charCount.textContent = (content.value || '').length + ' 字';
+    if (window.renderMathInElement) {
+      window.renderMathInElement(preview, {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '$', right: '$', display: false }
+        ],
+        throwOnError: false
+      });
+    }
   }
 
   content.addEventListener('input', renderPreview);

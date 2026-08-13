@@ -179,6 +179,14 @@ function build() {
     path.join(ROOT, 'node_modules', 'highlight.js', 'styles', 'github-dark.min.css'),
     path.join(ROOT, 'vendor', 'highlight', 'styles', 'github-dark.min.css')
   );
+  copyFile(
+    path.join(ROOT, 'node_modules', 'katex', 'dist', 'katex.min.css'),
+    path.join(ROOT, 'vendor', 'katex', 'katex.min.css')
+  );
+  copyDir(
+    path.join(ROOT, 'node_modules', 'katex', 'dist', 'fonts'),
+    path.join(ROOT, 'vendor', 'katex', 'fonts')
+  );
 
   const cssPath = path.join(ROOT, 'css', 'app.css');
   let css = fs.readFileSync(cssPath, 'utf8');

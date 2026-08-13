@@ -38,11 +38,13 @@ app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 app.use('/vendor/markdown-it', express.static(path.join(__dirname, 'node_modules', 'markdown-it', 'dist')));
 app.use('/vendor/highlight/styles', express.static(path.join(__dirname, 'node_modules', 'highlight.js', 'styles')));
 app.use('/vendor/highlight/lib', express.static(path.join(__dirname, 'node_modules', 'highlight.js', 'lib')));
+app.use('/vendor/katex', express.static(path.join(__dirname, 'node_modules', 'katex', 'dist')));
 
 app.use((req, res, next) => {
   res.locals.site = store.getSettings();
   res.locals.path = req.path;
   res.locals.user = null;
+  res.locals.staticSite = false;
   const token = req.cookies[SESSION_COOKIE];
   if (token) res.locals.user = store.getUserByToken(token);
   req.user = res.locals.user;
