@@ -1,0 +1,4 @@
+npm run publish
+git add -A
+git commit -m "publish article"
+git push
