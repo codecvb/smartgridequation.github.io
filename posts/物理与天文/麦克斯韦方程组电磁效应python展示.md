@@ -15,10 +15,10 @@ tags: 物理, 天文, Python, 物理仿真
 ### 基本物理前提
 
 
-场量：电场 $E\\boldsymbol E$ 、磁场 $B\\boldsymbol B$ ，电荷密度 $ρ\\rho$ ，电流密度 $j\\boldsymbol j$
+场量：电场 $E\boldsymbol E$ 、磁场 $B\boldsymbol B$ ，电荷密度 $ρ\rho$ ，电流密度 $j\boldsymbol j$
 
 
-真空参数：真空介电常数 $ε0\\varepsilon\_0$ ，真空磁导率 $μ0\\mu\_0$ ，光速 $c=1ε0μ0c=\\dfrac{1}{\\sqrt{\\varepsilon\_0\\mu\_0}}$
+真空参数：真空介电常数 $ε0\varepsilon_0$ ，真空磁导率 $μ0\mu_0$ ，光速 $c=1ε0μ0c=\dfrac{1}{\sqrt{\varepsilon_0\mu_0}}$
 
 
 ---
@@ -30,16 +30,16 @@ tags: 物理, 天文, Python, 物理仿真
 静电库仑定律积分形式：
 
 
-$∯SE⋅dS=1ε0∭VρdV\\oiint\_S \\boldsymbol{E}\\cdot d\\boldsymbol{S}=\\frac{1}{\\varepsilon\_0}\\iiint\_V \\rho dV$
+$∯SE⋅dS=1ε0∭VρdV\oiint_S \boldsymbol{E}\cdot d\boldsymbol{S}=\frac{1}{\varepsilon_0}\iiint_V \rho dV$
 
 
-高斯散度定理 $∯A⋅dS=∭∇⋅AdV\\oiint\\boldsymbol A\\cdot d\\boldsymbol S=\\iiint\\nabla\\cdot\\boldsymbol A dV$
+高斯散度定理 $∯A⋅dS=∭∇⋅AdV\oiint\boldsymbol A\cdot d\boldsymbol S=\iiint\nabla\cdot\boldsymbol A dV$
 
 
 求微分形式：
 
 
-$∇⋅E=ρε0\\nabla\\cdot\\boldsymbol E=\\frac{\\rho}{\\varepsilon\_0}$
+$∇⋅E=ρε0\nabla\cdot\boldsymbol E=\frac{\rho}{\varepsilon_0}$
 
 
 ### 2\. 高斯磁场定律（无磁单极）
@@ -48,13 +48,13 @@ $∇⋅E=ρε0\\nabla\\cdot\\boldsymbol E=\\frac{\\rho}{\\varepsilon\_0}$
 闭合曲面磁通量恒为 0：
 
 
-$∯SB⋅dS=0\\oiint\_S \\boldsymbol{B}\\cdot d\\boldsymbol{S}=0$
+$∯SB⋅dS=0\oiint_S \boldsymbol{B}\cdot d\boldsymbol{S}=0$
 
 
 微分形式：
 
 
-$∇⋅B=0\\nabla\\cdot\\boldsymbol B=0$
+$∇⋅B=0\nabla\cdot\boldsymbol B=0$
 
 
 ### 3\. 法拉第电磁感应定律（磁变生电场）
@@ -63,16 +63,16 @@ $∇⋅B=0\\nabla\\cdot\\boldsymbol B=0$
 积分形式：
 
 
-$∮LE⋅dl=−ddt∬SB⋅dS\\oint\_L \\boldsymbol{E}\\cdot d\\boldsymbol l = -\\frac{d}{dt}\\iint\_S \\boldsymbol{B}\\cdot d\\boldsymbol S$
+$∮LE⋅dl=−ddt∬SB⋅dS\oint_L \boldsymbol{E}\cdot d\boldsymbol l = -\frac{d}{dt}\iint_S \boldsymbol{B}\cdot d\boldsymbol S$
 
 
-斯托克斯旋度定理 $∮A⋅dl=∬(∇×A)⋅dS\\oint\\boldsymbol A\\cdot d\\boldsymbol l=\\iint(\\nabla\\times\\boldsymbol A)\\cdot d\\boldsymbol S$
+斯托克斯旋度定理 $∮A⋅dl=∬(∇×A)⋅dS\oint\boldsymbol A\cdot d\boldsymbol l=\iint(\nabla\times\boldsymbol A)\cdot d\boldsymbol S$
 
 
 微分形式：
 
 
-$∇×E=−∂B∂t\\nabla\\times\\boldsymbol E = -\\frac{\\partial \\boldsymbol B}{\\partial t}$
+$∇×E=−∂B∂t\nabla\times\boldsymbol E = -\frac{\partial \boldsymbol B}{\partial t}$
 
 
 ### 4\. 安培 - 麦克斯韦环路定律（电流 + 电变生磁场）
@@ -84,13 +84,13 @@ $∇×E=−∂B∂t\\nabla\\times\\boldsymbol E = -\\frac{\\partial \\boldsymbol
 积分形式：
 
 
-$∮LB⋅dl=μ0(∬Sj⋅dS+ε0ddt∬SE⋅dS)\\oint\_L \\boldsymbol{B}\\cdot d\\boldsymbol l=\\mu\_0\\left(\\iint\_S\\boldsymbol j\\cdot d\\boldsymbol S+\\varepsilon\_0\\frac{d}{dt}\\iint\_S\\boldsymbol E\\cdot d\\boldsymbol S\\right)$
+$∮LB⋅dl=μ0(∬Sj⋅dS+ε0ddt∬SE⋅dS)\oint_L \boldsymbol{B}\cdot d\boldsymbol l=\mu_0\left(\iint_S\boldsymbol j\cdot d\boldsymbol S+\varepsilon_0\frac{d}{dt}\iint_S\boldsymbol E\cdot d\boldsymbol S\right)$
 
 
 微分形式：
 
 
-$∇×B=μ0j+μ0ε0∂E∂t\\nabla\\times\\boldsymbol B=\\mu\_0\\boldsymbol j+\\mu\_0\\varepsilon\_0\\frac{\\partial \\boldsymbol E}{\\partial t}$
+$∇×B=μ0j+μ0ε0∂E∂t\nabla\times\boldsymbol B=\mu_0\boldsymbol j+\mu_0\varepsilon_0\frac{\partial \boldsymbol E}{\partial t}$
 
 
 ---
@@ -99,22 +99,22 @@ $∇×B=μ0j+μ0ε0∂E∂t\\nabla\\times\\boldsymbol B=\\mu\_0\\boldsymbol j+\\
 ### 四式汇总 微分麦克斯韦方程组
 
 
-$\\end{cases}$
+$\end{cases}$
 
 
 ### 衍生：真空电磁波波动方程
 
 
-真空无电荷无电流： $ρ=0,j=0\\rho=0,\\boldsymbol j=0$
+真空无电荷无电流： $ρ=0,j=0\rho=0,\boldsymbol j=0$
 
 
-对旋度式再次取旋度，利用矢量恒等式 $∇×(∇×A)=∇(∇⋅A)−∇2A\\nabla\\times(\\nabla\\times\\boldsymbol A)=\\nabla(\\nabla\\cdot\\boldsymbol A)-\\nabla^2\\boldsymbol A$
+对旋度式再次取旋度，利用矢量恒等式 $∇×(∇×A)=∇(∇⋅A)−∇2A\nabla\times(\nabla\times\boldsymbol A)=\nabla(\nabla\cdot\boldsymbol A)-\nabla^2\boldsymbol A$
 
 
 推得电磁波方程：
 
 
-$\\nabla^2\\boldsymbol B=\\frac{1}{c^2}\\frac{\\partial^2\\boldsymbol B}{\\partial t^2}$
+$\nabla^2\boldsymbol B=\frac{1}{c^2}\frac{\partial^2\boldsymbol B}{\partial t^2}$
 
 
 ---

@@ -167,7 +167,7 @@ grid on<span class="token punctuation">;</span>
 
 3.
 
-    cost\_uv = $Δx2+Δy2+Δz2\\sqrt{\\Delta x^2+\\Delta y^2+\\Delta z^2}$ ，这是**沿着山地表面行走的实际距离**，不是平面距离，上坡下坡都会增加路径代价。
+    cost\_uv = $Δx2+Δy2+Δz2\sqrt{\Delta x^2+\Delta y^2+\Delta z^2}$ ，这是**沿着山地表面行走的实际距离**，不是平面距离，上坡下坡都会增加路径代价。
 
 
 4.
@@ -189,7 +189,7 @@ grid on<span class="token punctuation">;</span>
 
 1.
 
-    将 XY 平面切分成 $n×nn\\times n$ 网格，每个网格交点 $(i,j)(i,j)$ 对应三维坐标 $(xi,j,yi,j,zi,j)(x\_{i,j},y\_{i,j},z\_{i,j})$ ，作为图的**节点**。
+    将 XY 平面切分成 $n×nn\times n$ 网格，每个网格交点 $(i,j)(i,j)$ 对应三维坐标 $(xi,j,yi,j,zi,j)(x_{i,j},y_{i,j},z_{i,j})$ ，作为图的**节点**。
 
 
 2.
@@ -204,7 +204,7 @@ grid on<span class="token punctuation">;</span>
 
 >
 >
-> 关键点：高程差 $Δz\\Delta z$ 会增加行走代价。爬上陡坡，两点平面很近，但地表路径代价会很大；下坡同样也要计入行走距离。
+> 关键点：高程差 $Δz\Delta z$ 会增加行走代价。爬上陡坡，两点平面很近，但地表路径代价会很大；下坡同样也要计入行走距离。
 >
 >
 

@@ -339,6 +339,18 @@ function firstParagraph(markdown) {
   return text.length > 200 ? `${text.slice(0, 200)}…` : text;
 }
 
+function restoreMathEscapes(markdown) {
+  return markdown.replace(/(\$\$[\s\S]*?\$\$|\$[^\n$]+\$)/g, (match) => {
+    return match
+      .replace(/\\\\/g, '\\')
+      .replace(/\\_/g, '_')
+      .replace(/\\\*/g, '*')
+      .replace(/\\~/g, '~')
+      .replace(/\\\[/g, '[')
+      .replace(/\\\]/g, ']')
+      .replace(/\\#/g, '#');
+  });
+}
 function buildFrontmatter(meta) {
   const lines = ['---', `title: ${meta.title}`, `slug: ${meta.slug}`, `category: ${meta.category}`];
   if (meta.summary) lines.push(`summary: ${meta.summary}`);
@@ -404,6 +416,7 @@ async function processFile(file, log) {
     .replace(/[ \t]+\n/g, '\n')
     .replace(/\n{4,}/g, '\n\n\n')
     .trim();
+  markdown = restoreMathEscapes(markdown);
 
   const tags = [...new Set([...category.tags, ...topicTags(fileName)])];
   const meta = {
