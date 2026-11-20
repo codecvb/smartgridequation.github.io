@@ -57,12 +57,13 @@
           
             <a class="tag-chip" href="../tags/tag-1.html">Python</a>
           
-            <a class="tag-chip" href="../tags/tag-29.html">YOLO</a>
+            <a class="tag-chip" href="../tags/tag-30.html">YOLO</a>
           
         </div>
       </header>
-      <div class="prose">
-        <p>本文介绍了一个基于YOLO的目标检测类ObjectDetector，支持YOLOv8标准模型和YOLO-World自定义模型。该类提供了两种模型加载方式：标准YOLOv8模型（80类）和可自定义检测类别的YOLO-World模型。主要功能包括模型自动加载和单张图片检测，能够输出检测目标的类别、数量和平均置信度，并保存检测结果图像。使用示例展示了如何初始化检测器并进行图片检测。该实现具有自动回退机制，当指定模型加载失败时会自动切换为标准模型。</p>
+      
+        <div class="prose">
+          <p>本文介绍了一个基于YOLO的目标检测类ObjectDetector，支持YOLOv8标准模型和YOLO-World自定义模型。该类提供了两种模型加载方式：标准YOLOv8模型（80类）和可自定义检测类别的YOLO-World模型。主要功能包括模型自动加载和单张图片检测，能够输出检测目标的类别、数量和平均置信度，并保存检测结果图像。使用示例展示了如何初始化检测器并进行图片检测。该实现具有自动回退机制，当指定模型加载失败时会自动切换为标准模型。</p>
 <p><img src="../uploads/csdn/yolopython%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%A7%8D%E7%89%A9%E4%BD%93%E8%AF%86%E5%88%AB%E6%97%B6%E9%92%9F%E6%B0%B4%E6%9D%AF%E5%B0%8F%E7%86%8A%E8%B7%AF%E4%BA%BA%E8%BD%A6%E8%BE%86/img-01.png" alt=""><img src="../uploads/csdn/yolopython%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%A7%8D%E7%89%A9%E4%BD%93%E8%AF%86%E5%88%AB%E6%97%B6%E9%92%9F%E6%B0%B4%E6%9D%AF%E5%B0%8F%E7%86%8A%E8%B7%AF%E4%BA%BA%E8%BD%A6%E8%BE%86/img-02.jpeg" alt=""></p>
 <pre class="hljs"><code class="language-python"><span class="hljs-keyword">from</span> ultralytics <span class="hljs-keyword">import</span> YOLO
 <span class="hljs-keyword">import</span> cv2
@@ -162,7 +163,8 @@
     detector.detect_image(image_path)
 </code></pre>
 
-      </div>
+        </div>
+      
       <div class="post-actions">
         <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
         <a class="btn-ghost" href="../archive.html">回到归档</a>
@@ -198,7 +200,10 @@
     
       <article class="post-card">
         <span class="post-index">01</span>
-        <h3 class="post-card-title"><a href="../post/详细案例说明ai所用的算法列出公式用python代码说明用法.html">详细案例说明AI所用的算法列出公式用Python代码说明用法</a></h3>
+        <h3 class="post-card-title">
+          
+          <a href="../post/详细案例说明ai所用的算法列出公式用python代码说明用法.html">详细案例说明AI所用的算法列出公式用Python代码说明用法</a>
+        </h3>
         <p class="post-excerpt">我们来详细拆解一个最经典、最基础的 AI 算法 ——线性回归 (Linear Regression)。它是理解几乎所有更复杂 AI 模型（如神经网络）的基石。</p>
         <div class="post-meta">
           <time datetime="2026-08-13T19:09:48.312Z">2026/08/14</time>
@@ -209,7 +214,10 @@
     
       <article class="post-card">
         <span class="post-index">02</span>
-        <h3 class="post-card-title"><a href="../post/无人机表演点云路径规划python版.html">无人机表演点云路径规划Python版</a></h3>
+        <h3 class="post-card-title">
+          
+          <a href="../post/无人机表演点云路径规划python版.html">无人机表演点云路径规划Python版</a>
+        </h3>
         <p class="post-excerpt">摘要：本文介绍了一个无人机表演路径规划系统，支持加载两个TXT格式的点云数据文件进行路径规划。系统采用PyQt5框架开发3D可视化界面，包含点云加载、路径优化、动画控制等功能模块。核心算法通过KD树实现点云匹配和路径优化，支持多种插值方式生成平滑动画。系统可调整无人机数量、大小、颜色等参数，提供3D可视化视图和轨迹显示功能，适用于大型无人机编队表演的路径规划需求。</p>
         <div class="post-meta">
           <time datetime="2026-08-13T19:09:48.134Z">2026/08/14</time>
@@ -220,7 +228,10 @@
     
       <article class="post-card">
         <span class="post-index">03</span>
-        <h3 class="post-card-title"><a href="../post/yolop车道检测.html">YOLOP车道检测</a></h3>
+        <h3 class="post-card-title">
+          
+          <a href="../post/yolop车道检测.html">YOLOP车道检测</a>
+        </h3>
         <p class="post-excerpt">YOLOP 是一种全景驾驶感知的实时多任务网络，其车道检测以单阶段端到端方式，通过共享特征提取与多任务联合优化，实现对车道线的高效分割与定位，核心依赖卷积神经网络、特征融合、损失函数设计等 AI 技术，以及矩阵运算、概率统计、最优化理论等数学方法。以下从原理、AI 知识、数学知识三方面详解。</p>
         <div class="post-meta">
           <time datetime="2026-08-13T19:09:47.856Z">2026/08/14</time>

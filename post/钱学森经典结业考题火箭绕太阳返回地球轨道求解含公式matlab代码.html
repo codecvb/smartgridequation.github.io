@@ -53,9 +53,9 @@
         </div>
         <div class="tag-row post-tags">
           
-            <a class="tag-chip" href="../tags/tag-4.html">物理</a>
+            <a class="tag-chip" href="../tags/tag-3.html">物理</a>
           
-            <a class="tag-chip" href="../tags/tag-3.html">天文</a>
+            <a class="tag-chip" href="../tags/tag-4.html">天文</a>
           
             <a class="tag-chip" href="../tags/tag-2.html">MATLAB</a>
           
@@ -63,8 +63,9 @@
           
         </div>
       </header>
-      <div class="prose">
-        <p>本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi mathvariant="bold-italic">r</mi><mo>¨</mo></mover><mo>=</mo><mo>−</mo><mi>μ</mi><mfrac><mi mathvariant="bold-italic">r</mi><msup><mi>r</mi><mn>3</mn></msup></mfrac></mrow><annotation encoding="application/x-tex">\ddot{\boldsymbol{r}}=-\mu\frac{\boldsymbol{r}}{r^3}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6813em;"></span><span class="mord katex-accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6813em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord boldsymbol" style="margin-right:0.0319em;">r</span></span></span></span><span style="top:-3.0134em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">¨</span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.0501em;vertical-align:-0.345em;"></span><span class="mord">−</span><span class="mord mathnormal">μ</span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7051em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">r</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7463em;"><span style="top:-2.786em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="katex-sizing reset-size3 size1 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord boldsymbol mtight" style="margin-right:0.0319em;">r</span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span>，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返回时与地球距离偏差仅数千公里。可视化展示了火箭与地球轨道的平面投影和距离变化曲线，验证了轨道返回的可行性。代码规范完整，可直接运行并导出PDF。</p>
+      
+        <div class="prose">
+          <p>本文基于钱学森考题，利用MATLAB求解火箭绕太阳返回地球轨道问题。采用二体运动方程<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi mathvariant="bold-italic">r</mi><mo>¨</mo></mover><mo>=</mo><mo>−</mo><mi>μ</mi><mfrac><mi mathvariant="bold-italic">r</mi><msup><mi>r</mi><mn>3</mn></msup></mfrac></mrow><annotation encoding="application/x-tex">\ddot{\boldsymbol{r}}=-\mu\frac{\boldsymbol{r}}{r^3}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6813em;"></span><span class="mord katex-accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6813em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord boldsymbol" style="margin-right:0.0319em;">r</span></span></span></span><span style="top:-3.0134em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">¨</span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.0501em;vertical-align:-0.345em;"></span><span class="mord">−</span><span class="mord mathnormal">μ</span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7051em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">r</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7463em;"><span style="top:-2.786em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="katex-sizing reset-size3 size1 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord boldsymbol mtight" style="margin-right:0.0319em;">r</span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span>，设置太阳引力常数和地球轨道参数作为初始条件。通过Runge-Kutta法数值积分求解微分方程，计算火箭轨道参数，包括半长轴、偏心率等。结果显示，火箭在1.05倍地球公转速度下形成椭圆轨道，1年后返回时与地球距离偏差仅数千公里。可视化展示了火箭与地球轨道的平面投影和距离变化曲线，验证了轨道返回的可行性。代码规范完整，可直接运行并导出PDF。</p>
 <p><img src="../uploads/csdn/%E9%92%B1%E5%AD%A6%E6%A3%AE%E7%BB%8F%E5%85%B8%E7%BB%93%E4%B8%9A%E8%80%83%E9%A2%98%E7%81%AB%E7%AE%AD%E7%BB%95%E5%A4%AA%E9%98%B3%E8%BF%94%E5%9B%9E%E5%9C%B0%E7%90%83%E8%BD%A8%E9%81%93%E6%B1%82%E8%A7%A3%E5%90%AB%E5%85%AC%E5%BC%8Fmatlab%E4%BB%A3%E7%A0%81/img-01.png" alt=""></p>
 <pre class="hljs"><code class="language-Matlab"><span class="hljs-comment">%% 钱学森考题：火箭绕太阳返回地球轨道求解（MATLAB完整版）</span>
 <span class="hljs-comment">% 核心对应理论公式：\ddot{\boldsymbol{r}} = -\mu \frac{\boldsymbol{r}}{r^3}</span>
@@ -145,7 +146,8 @@ grid on; <span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x
 <p><img src="../uploads/csdn/%E9%92%B1%E5%AD%A6%E6%A3%AE%E7%BB%8F%E5%85%B8%E7%BB%93%E4%B8%9A%E8%80%83%E9%A2%98%E7%81%AB%E7%AE%AD%E7%BB%95%E5%A4%AA%E9%98%B3%E8%BF%94%E5%9B%9E%E5%9C%B0%E7%90%83%E8%BD%A8%E9%81%93%E6%B1%82%E8%A7%A3%E5%90%AB%E5%85%AC%E5%BC%8Fmatlab%E4%BB%A3%E7%A0%81/img-02.jpeg" alt=""></p>
 <p><img src="../uploads/csdn/%E9%92%B1%E5%AD%A6%E6%A3%AE%E7%BB%8F%E5%85%B8%E7%BB%93%E4%B8%9A%E8%80%83%E9%A2%98%E7%81%AB%E7%AE%AD%E7%BB%95%E5%A4%AA%E9%98%B3%E8%BF%94%E5%9B%9E%E5%9C%B0%E7%90%83%E8%BD%A8%E9%81%93%E6%B1%82%E8%A7%A3%E5%90%AB%E5%85%AC%E5%BC%8Fmatlab%E4%BB%A3%E7%A0%81/img-03.jpeg" alt=""><img src="../uploads/csdn/%E9%92%B1%E5%AD%A6%E6%A3%AE%E7%BB%8F%E5%85%B8%E7%BB%93%E4%B8%9A%E8%80%83%E9%A2%98%E7%81%AB%E7%AE%AD%E7%BB%95%E5%A4%AA%E9%98%B3%E8%BF%94%E5%9B%9E%E5%9C%B0%E7%90%83%E8%BD%A8%E9%81%93%E6%B1%82%E8%A7%A3%E5%90%AB%E5%85%AC%E5%BC%8Fmatlab%E4%BB%A3%E7%A0%81/img-04.jpeg" alt=""><img src="../uploads/csdn/%E9%92%B1%E5%AD%A6%E6%A3%AE%E7%BB%8F%E5%85%B8%E7%BB%93%E4%B8%9A%E8%80%83%E9%A2%98%E7%81%AB%E7%AE%AD%E7%BB%95%E5%A4%AA%E9%98%B3%E8%BF%94%E5%9B%9E%E5%9C%B0%E7%90%83%E8%BD%A8%E9%81%93%E6%B1%82%E8%A7%A3%E5%90%AB%E5%85%AC%E5%BC%8Fmatlab%E4%BB%A3%E7%A0%81/img-05.jpeg" alt=""><img src="../uploads/csdn/%E9%92%B1%E5%AD%A6%E6%A3%AE%E7%BB%8F%E5%85%B8%E7%BB%93%E4%B8%9A%E8%80%83%E9%A2%98%E7%81%AB%E7%AE%AD%E7%BB%95%E5%A4%AA%E9%98%B3%E8%BF%94%E5%9B%9E%E5%9C%B0%E7%90%83%E8%BD%A8%E9%81%93%E6%B1%82%E8%A7%A3%E5%90%AB%E5%85%AC%E5%BC%8Fmatlab%E4%BB%A3%E7%A0%81/img-06.jpeg" alt=""></p>
 
-      </div>
+        </div>
+      
       <div class="post-actions">
         <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
         <a class="btn-ghost" href="../archive.html">回到归档</a>
@@ -181,7 +183,10 @@ grid on; <span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x
     
       <article class="post-card">
         <span class="post-index">01</span>
-        <h3 class="post-card-title"><a href="../post/计算卫星与地面时差用广义相对论给出计算公式与matlab代码.html">计算卫星与地面时差用广义相对论给出计算公式与MATLAB代码</a></h3>
+        <h3 class="post-card-title">
+          
+          <a href="../post/计算卫星与地面时差用广义相对论给出计算公式与matlab代码.html">计算卫星与地面时差用广义相对论给出计算公式与MATLAB代码</a>
+        </h3>
         <p class="post-excerpt">一、相对论时差的主要来源</p>
         <div class="post-meta">
           <time datetime="2026-08-13T19:09:49.817Z">2026/08/14</time>
@@ -192,7 +197,10 @@ grid on; <span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x
     
       <article class="post-card">
         <span class="post-index">02</span>
-        <h3 class="post-card-title"><a href="../post/空间飞行器轨道旅行者号行星际飞行轨道递推计算与分析matlab代码.html">空间飞行器轨道旅行者号行星际飞行轨道递推计算与分析Matlab代码</a></h3>
+        <h3 class="post-card-title">
+          
+          <a href="../post/空间飞行器轨道旅行者号行星际飞行轨道递推计算与分析matlab代码.html">空间飞行器轨道旅行者号行星际飞行轨道递推计算与分析Matlab代码</a>
+        </h3>
         <p class="post-excerpt">本文基于Wagner和Wie的论文思路，实现了旅行者号引力辅助(MGA)轨迹的教学版仿真。程序首先计算各行星在简化圆轨道下的日心状态，通过分段Lambert求解得到转移轨道。核心部分分析了飞越点的关键参数：相对速度(vinf)、转角(delta)、近拱点距离(rp)和速度增量(DeltaV\GA)。结果显示木星、土星、天王星飞越时的转角分别为47.8°、83.3°和88.1°。程序还提供了3D可视…</p>
         <div class="post-meta">
           <time datetime="2026-08-13T19:09:49.721Z">2026/08/14</time>
@@ -203,7 +211,10 @@ grid on; <span class="hljs-built_in">legend</span>(<span class="hljs-string">&#x
     
       <article class="post-card">
         <span class="post-index">03</span>
-        <h3 class="post-card-title"><a href="../post/嫦娥号地月轨道环月一个月matlab仿真.html">嫦娥号地月轨道环月一个月MATLAB仿真</a></h3>
+        <h3 class="post-card-title">
+          
+          <a href="../post/嫦娥号地月轨道环月一个月matlab仿真.html">嫦娥号地月轨道环月一个月MATLAB仿真</a>
+        </h3>
         <p class="post-excerpt">本文基于MATLAB实现了嫦娥系列探测器登月任务的轨道仿真，包含地月转移轨道和30天的环月轨道运行。仿真考虑了地球停泊轨道（200km）、地月转移轨道（200×405000km）、中途修正、月球捕获和环月轨道（100km）等关键阶段。结果显示：总速度增量约3.3km/s，转移时间约5.2天，30天环月运行约450圈轨道。通过数值积分和可视化分析，验证了轨道设计的合理性。该仿真为深空探测任务提供了轨…</p>
         <div class="post-meta">
           <time datetime="2026-08-13T19:09:49.515Z">2026/08/14</time>

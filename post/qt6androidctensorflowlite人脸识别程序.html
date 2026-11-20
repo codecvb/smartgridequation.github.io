@@ -61,8 +61,9 @@
           
         </div>
       </header>
-      <div class="prose">
-        <p>本文聚焦于在QT6框架下，面向Android平台，利用C++与TensorFlow Lite（TFLite）实现的人脸识别程序开发。研究目的在于探索一种跨平台、高性能的移动端人脸识别解决方案，突破传统Java或Python方案在实时性与资源管控上的局限。方法上，程序以QT6的Android JNI接口为桥梁，实现C++业务逻辑与Android系统服务的交互；核心推理引擎采用TFLite的C++ API，加载预训练的轻量化人脸检测与特征提取模型（如MobileNet-SSD或FaceNet变体）。在架构设计中，通过QT的信号槽机制处理摄像头帧数据，并利用OpenCV进行图像预处理与后处理，显著提升了数据流转效率。项目重点解决了Android平台下内存管理、模型量化（INT8/FP16）对精度的影响以及多线程推理等关键问题。实验结果表明，该程序在主流Android设备上能够实现实时（&gt;30 FPS）且准确的人脸定位与识别，验证了QT6与TFLite在移动端C++生态下联合开发的可行性。本文为后续在嵌入式或移动设备上开发高性能、低延迟的视觉AI应用提供了可复用的技术框架与实践参考，具有重要的工程应用价值。</p>
+      
+        <div class="prose">
+          <p>本文聚焦于在QT6框架下，面向Android平台，利用C++与TensorFlow Lite（TFLite）实现的人脸识别程序开发。研究目的在于探索一种跨平台、高性能的移动端人脸识别解决方案，突破传统Java或Python方案在实时性与资源管控上的局限。方法上，程序以QT6的Android JNI接口为桥梁，实现C++业务逻辑与Android系统服务的交互；核心推理引擎采用TFLite的C++ API，加载预训练的轻量化人脸检测与特征提取模型（如MobileNet-SSD或FaceNet变体）。在架构设计中，通过QT的信号槽机制处理摄像头帧数据，并利用OpenCV进行图像预处理与后处理，显著提升了数据流转效率。项目重点解决了Android平台下内存管理、模型量化（INT8/FP16）对精度的影响以及多线程推理等关键问题。实验结果表明，该程序在主流Android设备上能够实现实时（&gt;30 FPS）且准确的人脸定位与识别，验证了QT6与TFLite在移动端C++生态下联合开发的可行性。本文为后续在嵌入式或移动设备上开发高性能、低延迟的视觉AI应用提供了可复用的技术框架与实践参考，具有重要的工程应用价值。</p>
 <p><img src="../uploads/csdn/qt6androidctensorflowlite%E4%BA%BA%E8%84%B8%E8%AF%86%E5%88%AB%E7%A8%8B%E5%BA%8F/img-01.jpeg" alt=""></p>
 <pre class="hljs"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;mainwindow.h&quot;</span></span>
 <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;ui_mainwindow.h&quot;</span></span>
@@ -810,7 +811,8 @@ MainWindow::~<span class="hljs-built_in">MainWindow</span>()
 </code></pre>
 <p>需要完整程序请私信或者留邮箱。</p>
 
-      </div>
+        </div>
+      
       <div class="post-actions">
         <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
         <a class="btn-ghost" href="../archive.html">回到归档</a>
@@ -846,7 +848,10 @@ MainWindow::~<span class="hljs-built_in">MainWindow</span>()
     
       <article class="post-card">
         <span class="post-index">01</span>
-        <h3 class="post-card-title"><a href="../post/qt6androidc自制美观闹钟.html">QT6AndroidC自制美观闹钟</a></h3>
+        <h3 class="post-card-title">
+          
+          <a href="../post/qt6androidc自制美观闹钟.html">QT6AndroidC自制美观闹钟</a>
+        </h3>
         <p class="post-excerpt">该代码实现了一个基于Qt的闹钟应用，主要功能包括：</p>
         <div class="post-meta">
           <time datetime="2026-08-13T19:09:46.902Z">2026/08/14</time>
@@ -857,7 +862,10 @@ MainWindow::~<span class="hljs-built_in">MainWindow</span>()
     
       <article class="post-card">
         <span class="post-index">02</span>
-        <h3 class="post-card-title"><a href="../post/qt6androidc拍照程序.html">QT6AndroidC拍照程序</a></h3>
+        <h3 class="post-card-title">
+          
+          <a href="../post/qt6androidc拍照程序.html">QT6AndroidC拍照程序</a>
+        </h3>
         <p class="post-excerpt">该代码实现了一个基于Qt框架的摄像头拍照应用程序。主要功能包括：1) 检查并请求相机权限；2) 初始化摄像头设备，优先选择后置摄像头；3) 提供实时摄像头预览；4) 点击按钮拍照并保存图片。图片会尝试保存到多个可能的位置（如DCIM/Camera、Pictures目录等）。程序还包含状态提示功能，会显示权限请求、摄像头状态、拍照结果等信息。当摄像头错误或保存失败时，会输出相应的错误信息。整个程序通…</p>
         <div class="post-meta">
           <time datetime="2026-08-13T19:09:46.893Z">2026/08/14</time>
@@ -868,7 +876,10 @@ MainWindow::~<span class="hljs-built_in">MainWindow</span>()
     
       <article class="post-card">
         <span class="post-index">03</span>
-        <h3 class="post-card-title"><a href="../post/模仿微信发送消息界面traecn版qt6.html">模仿微信发送消息界面traecn版QT6</a></h3>
+        <h3 class="post-card-title">
+          
+          <a href="../post/模仿微信发送消息界面traecn版qt6.html">模仿微信发送消息界面traecn版QT6</a>
+        </h3>
         <p class="post-excerpt">本文介绍了一个基于Qt框架的微信克隆应用主窗口实现。该应用采用左右布局设计，左侧为聊天列表（包含搜索栏和联系人列表），右侧为聊天窗口堆栈。通过QListWidget管理联系人列表，QStackedWidget实现多聊天窗口切换，并支持点击联系人切换对应聊天界面。代码展示了UI初始化、示例联系人创建和信号槽连接等核心功能实现，为开发类微信应用提供了基础框架参考。</p>
         <div class="post-meta">
           <time datetime="2026-08-13T19:09:48.779Z">2026/08/14</time>

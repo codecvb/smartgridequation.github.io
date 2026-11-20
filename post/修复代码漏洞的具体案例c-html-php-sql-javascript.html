@@ -61,8 +61,9 @@
           
         </div>
       </header>
-      <div class="prose">
-        <p>以下是一些修复代码漏洞的具体案例：</p>
+      
+        <div class="prose">
+          <p>以下是一些修复代码漏洞的具体案例：</p>
 <h2 id="案例一-sql-注入漏洞修复-web-应用程序" class="prose-heading"><strong>案例一：SQL 注入漏洞修复（Web 应用程序）</strong></h2>
 <ol>
 <li><strong>漏洞描述</strong>
@@ -251,7 +252,8 @@
 <p>在修改后的 <code>setUsername</code> 方法中，<code>strncpy</code> 函数只会复制最多 <code>sizeof(username) - 1</code> 个字符（也就是 <code>9</code> 个字符），这样就可以避免写入超出 <code>username</code> 数组范围的数据，然后手动将最后一个字节设置为 <code>'\0'</code> ，保证 <code>username</code> 始终是一个合法的、以 <code>'\0'</code> 结尾的字符串，从而消除了缓冲区溢出的漏洞，也就阻断了攻击者利用该漏洞执行恶意代码的途径。</p>
 <p>再次强调，以上只是从安全角度进行的原理性示例讲解，在实际中，软件的安全保障需要综合考虑众多因素，并且利用代码漏洞执行恶意代码是非法和违背道德伦理的行为，安全工作者们致力于不断发现并修复这些漏洞来保障系统的安全稳定运行。</p>
 
-      </div>
+        </div>
+      
       <div class="post-actions">
         <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
         <a class="btn-ghost" href="../archive.html">回到归档</a>
@@ -308,7 +310,10 @@
     
       <article class="post-card">
         <span class="post-index">01</span>
-        <h3 class="post-card-title"><a href="../post/编写有内存漏洞的c代码并实现内存注入的示例一个程序注入另一个程序.html">编写有内存漏洞的C代码并实现内存注入的示例一个程序注入另一个程序</a></h3>
+        <h3 class="post-card-title">
+          
+          <a href="../post/编写有内存漏洞的c代码并实现内存注入的示例一个程序注入另一个程序.html">编写有内存漏洞的C代码并实现内存注入的示例一个程序注入另一个程序</a>
+        </h3>
         <p class="post-excerpt">实现思路</p>
         <div class="post-meta">
           <time datetime="2026-08-13T19:09:46.956Z">2026/08/14</time>
@@ -319,7 +324,10 @@
     
       <article class="post-card">
         <span class="post-index">02</span>
-        <h3 class="post-card-title"><a href="../post/用c语言实现的回调函数案例涵盖基础用法及不同消息机制gui模拟网络请求模拟状态机消息队列.html">用C语言实现的回调函数案例涵盖基础用法及不同消息机制GUI模拟网络请求模拟状态机消息队列</a></h3>
+        <h3 class="post-card-title">
+          
+          <a href="../post/用c语言实现的回调函数案例涵盖基础用法及不同消息机制gui模拟网络请求模拟状态机消息队列.html">用C语言实现的回调函数案例涵盖基础用法及不同消息机制GUI模拟网络请求模拟状态机消息队列</a>
+        </h3>
         <p class="post-excerpt">以下是用 C 语言实现的回调函数案例，涵盖基础用法及不同消息机制（GUI 模拟、网络请求模拟、状态机、消息队列），包含详细注释和解释。</p>
         <div class="post-meta">
           <time datetime="2026-08-13T19:09:46.946Z">2026/08/14</time>
@@ -330,7 +338,10 @@
     
       <article class="post-card">
         <span class="post-index">03</span>
-        <h3 class="post-card-title"><a href="../post/推荐比mini-stl更好的c实现项目代码.html">推荐比mini stl更好的C实现项目代码</a></h3>
+        <h3 class="post-card-title">
+          
+          <a href="../post/推荐比mini-stl更好的c实现项目代码.html">推荐比mini stl更好的C实现项目代码</a>
+        </h3>
         <p class="post-excerpt">代码来源 -- STL模拟: STL模拟 的各类实现 - Gitee.com</p>
         <div class="post-meta">
           <time datetime="2026-08-13T19:09:46.937Z">2026/08/14</time>

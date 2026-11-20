@@ -434,8 +434,8 @@ textarea {
 
 .stat-list {
   display: grid;
-  grid-template-columns: repeat(3, minmax(92px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(4, minmax(82px, 1fr));
+  gap: 8px;
   margin: 0;
 }
 
@@ -454,7 +454,14 @@ textarea {
   border-left-color: var(--amber);
 }
 
+.stat-list > div:nth-child(4) {
+  border-left-color: var(--navy);
+}
+
 .stat-list dt {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   margin-bottom: 5px;
   color: var(--ink-3);
   font-size: 12px;
@@ -466,6 +473,42 @@ textarea {
   font-size: 30px;
   font-weight: 700;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.live-dot {
+  display: inline-block;
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 4px rgba(46, 107, 79, 0.12);
+  animation: live-pulse 2.4s ease-out infinite;
+}
+
+.live-note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 12px 0 0;
+  padding-bottom: 18px;
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.live-note span:last-child {
+  margin-left: 2px;
+}
+
+@keyframes live-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(46, 107, 79, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgba(46, 107, 79, 0);
+  }
 }
 
 /* ============ Sections ============ */
@@ -606,6 +649,25 @@ textarea {
   font-family: var(--serif);
   font-size: 19px;
   line-height: 1.45;
+}
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  min-height: 20px;
+  margin-right: 7px;
+  padding: 1px 6px;
+  border: 1px solid #d6a391;
+  border-radius: 4px;
+  background: var(--terracotta-soft);
+  color: #913d2b;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  vertical-align: 0.14em;
 }
 
 .recent-title a:hover {
@@ -1107,6 +1169,66 @@ textarea {
   border-top: 1px solid var(--line);
 }
 
+.pdf-intro {
+  margin-bottom: 24px;
+}
+
+.pdf-document {
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.pdf-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+
+.pdf-file-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.pdf-file-meta strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdf-file-meta .type-badge {
+  margin-right: 0;
+}
+
+.pdf-actions {
+  display: flex;
+  flex: none;
+  gap: 8px;
+}
+
+.pdf-frame {
+  display: block;
+  width: 100%;
+  height: min(78vh, 920px);
+  min-height: 560px;
+  border: 0;
+  background: #e9e6df;
+}
+
 .toc {
   position: sticky;
   top: 92px;
@@ -1486,7 +1608,7 @@ textarea {
 
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 26px;
 }
@@ -1509,6 +1631,25 @@ textarea {
   font-family: var(--serif);
   font-size: 32px;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-card p {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.pdf-publish-form {
+  max-width: 900px;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
 }
 
 .panel {
@@ -1935,6 +2076,25 @@ textarea {
     font-size: 16px;
   }
 
+  .stat-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pdf-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pdf-actions .btn-primary,
+  .pdf-actions .btn-ghost {
+    flex: 1;
+  }
+
+  .pdf-frame {
+    height: 68vh;
+    min-height: 460px;
+  }
+
   .section-head h2 {
     font-size: 22px;
   }
@@ -2063,5 +2223,9 @@ textarea {
   *::before,
   *::after {
     transition: none !important;
+  }
+
+  .live-dot {
+    animation: none;
   }
 }

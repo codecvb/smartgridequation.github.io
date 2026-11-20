@@ -9,6 +9,7 @@ const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const store = require('./lib/store');
 const audience = require('./lib/audience');
+const { getPdfMetadata } = require('./lib/pdf');
 const { renderMarkdown, getToc } = require('./lib/markdown');
 
 const app = express();
@@ -114,7 +115,7 @@ app.get('/', (req, res) => {
     view: 'site/home',
     pageTitle: '首页',
     featured,
-    posts: posts.slice(1),
+    posts,
     stats: store.getStats(),
     audience: audience.getAudienceStats(),
     tags: store.getTags().slice(0, 8),
@@ -479,14 +480,16 @@ admin.post('/pdfs', (req, res) => {
     }
 
     const originalName = normalizeUploadName(req.file.originalname);
-    const fallbackTitle = originalName.replace(/\.pdf$/i, '').replace(/[-_]+/g, ' ').trim();
+    const metadata = getPdfMetadata(req.file.path);
+    const fallbackTitle =
+      metadata.title || originalName.replace(/\.pdf$/i, '').replace(/[-_]+/g, ' ').trim();
     const status = req.body.action === 'draft' ? 'draft' : 'published';
     try {
       store.createPost({
         kind: 'pdf',
         title: req.body.title || fallbackTitle || 'PDF 文档',
         slug: req.body.slug,
-        summary: req.body.summary,
+        summary: req.body.summary || metadata.subject,
         content: req.body.content,
         tags: req.body.tags || 'PDF',
         category: req.body.category || '资料',

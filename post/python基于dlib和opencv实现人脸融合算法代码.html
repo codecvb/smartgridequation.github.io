@@ -61,8 +61,9 @@
           
         </div>
       </header>
-      <div class="prose">
-        <p>该代码实现了一个基于Dlib和OpenCV的人脸融合工具FaceMerger。主要功能包括：1) 使用Dlib检测68个人脸特征点；2) 通过三角剖分和仿射变换将源人脸特征点映射到目标人脸；3) 采用泊松融合(seamlessClone)实现自然过渡。核心步骤为：提取特征点→计算凸包→三角剖分→逐三角形变形→泊松融合。最终输出将源人脸特征区域无缝融合到目标人脸上的结果。该算法适用于需要保持目标人脸整体结构同时融合源人脸特征的场景，如人脸编辑、特效制作等应用。</p>
+      
+        <div class="prose">
+          <p>该代码实现了一个基于Dlib和OpenCV的人脸融合工具FaceMerger。主要功能包括：1) 使用Dlib检测68个人脸特征点；2) 通过三角剖分和仿射变换将源人脸特征点映射到目标人脸；3) 采用泊松融合(seamlessClone)实现自然过渡。核心步骤为：提取特征点→计算凸包→三角剖分→逐三角形变形→泊松融合。最终输出将源人脸特征区域无缝融合到目标人脸上的结果。该算法适用于需要保持目标人脸整体结构同时融合源人脸特征的场景，如人脸编辑、特效制作等应用。</p>
 <pre class="hljs"><code class="language-python"><span class="hljs-keyword">import</span> cv2
 <span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
 <span class="hljs-keyword">import</span> dlib
@@ -185,7 +186,8 @@
 </code></pre>
 <p><img src="../uploads/csdn/python%E5%9F%BA%E4%BA%8Edlib%E5%92%8Copencv%E5%AE%9E%E7%8E%B0%E4%BA%BA%E8%84%B8%E8%9E%8D%E5%90%88%E7%AE%97%E6%B3%95%E4%BB%A3%E7%A0%81/img-01.png" alt=""></p>
 
-      </div>
+        </div>
+      
       <div class="post-actions">
         <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
         <a class="btn-ghost" href="../archive.html">回到归档</a>
@@ -221,7 +223,10 @@
     
       <article class="post-card">
         <span class="post-index">01</span>
-        <h3 class="post-card-title"><a href="../post/详细案例说明ai所用的算法列出公式用python代码说明用法.html">详细案例说明AI所用的算法列出公式用Python代码说明用法</a></h3>
+        <h3 class="post-card-title">
+          
+          <a href="../post/详细案例说明ai所用的算法列出公式用python代码说明用法.html">详细案例说明AI所用的算法列出公式用Python代码说明用法</a>
+        </h3>
         <p class="post-excerpt">我们来详细拆解一个最经典、最基础的 AI 算法 ——线性回归 (Linear Regression)。它是理解几乎所有更复杂 AI 模型（如神经网络）的基石。</p>
         <div class="post-meta">
           <time datetime="2026-08-13T19:09:48.312Z">2026/08/14</time>
@@ -232,7 +237,10 @@
     
       <article class="post-card">
         <span class="post-index">02</span>
-        <h3 class="post-card-title"><a href="../post/无人机表演点云路径规划python版.html">无人机表演点云路径规划Python版</a></h3>
+        <h3 class="post-card-title">
+          
+          <a href="../post/无人机表演点云路径规划python版.html">无人机表演点云路径规划Python版</a>
+        </h3>
         <p class="post-excerpt">摘要：本文介绍了一个无人机表演路径规划系统，支持加载两个TXT格式的点云数据文件进行路径规划。系统采用PyQt5框架开发3D可视化界面，包含点云加载、路径优化、动画控制等功能模块。核心算法通过KD树实现点云匹配和路径优化，支持多种插值方式生成平滑动画。系统可调整无人机数量、大小、颜色等参数，提供3D可视化视图和轨迹显示功能，适用于大型无人机编队表演的路径规划需求。</p>
         <div class="post-meta">
           <time datetime="2026-08-13T19:09:48.134Z">2026/08/14</time>
@@ -243,7 +251,10 @@
     
       <article class="post-card">
         <span class="post-index">03</span>
-        <h3 class="post-card-title"><a href="../post/yolopython实现多种物体识别时钟水杯小熊路人车辆.html">YOLOpython实现多种物体识别时钟水杯小熊路人车辆</a></h3>
+        <h3 class="post-card-title">
+          
+          <a href="../post/yolopython实现多种物体识别时钟水杯小熊路人车辆.html">YOLOpython实现多种物体识别时钟水杯小熊路人车辆</a>
+        </h3>
         <p class="post-excerpt">本文介绍了一个基于YOLO的目标检测类ObjectDetector，支持YOLOv8标准模型和YOLO-World自定义模型。该类提供了两种模型加载方式：标准YOLOv8模型（80类）和可自定义检测类别的YOLO-World模型。主要功能包括模型自动加载和单张图片检测，能够输出检测目标的类别、数量和平均置信度，并保存检测结果图像。使用示例展示了如何初始化检测器并进行图片检测。该实现具有自动回退机制…</p>
         <div class="post-meta">
           <time datetime="2026-08-13T19:09:47.835Z">2026/08/14</time>

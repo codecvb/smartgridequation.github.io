@@ -57,10 +57,24 @@ function renderSite(view, data) {
   });
 }
 
+function writeWithRetry(file, content) {
+  for (let attempt = 1; attempt <= 6; attempt += 1) {
+    try {
+      fs.writeFileSync(file, content);
+      return;
+    } catch (error) {
+      if (attempt === 6 || !['UNKNOWN', 'EBUSY', 'EPERM', 'EACCES'].includes(error.code)) {
+        throw error;
+      }
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, attempt * 120);
+    }
+  }
+}
+
 function writeFile(relPath, html) {
   const file = path.join(OUTPUT_ROOT, relPath);
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, html);
+  writeWithRetry(file, html);
 }
 
 function rewritePageLinks(html, depth) {
@@ -117,7 +131,7 @@ function build() {
     path: '/',
     pageTitle: '首页',
     featured: published[0] || null,
-    posts: published.slice(1),
+    posts: published.slice(0, 9),
     stats,
     audience: { ...store.getAudienceStats(), online: 0 },
     tags: tags.slice(0, 8),
@@ -233,7 +247,7 @@ function build() {
   const cssPath = path.join(OUTPUT_ROOT, 'css', 'app.css');
   let css = fs.readFileSync(cssPath, 'utf8');
   css = css.replace(/url\(\s*['"]\/(img|uploads)\//g, (match, dir) => `url('../${dir}/`);
-  fs.writeFileSync(cssPath, css);
+  writeWithRetry(cssPath, css);
   writeFile('.nojekyll', '');
 
   console.log(`Static site generated: ${published.length} posts, ${tags.length} tags, ${categories.length} categories.`);
