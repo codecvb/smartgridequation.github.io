@@ -47,4 +47,56 @@
     });
     pre.appendChild(button);
   });
+
+  const liveStats = document.querySelector('[data-live-stats]');
+  if (liveStats && window.fetch) {
+    const endpoint = liveStats.getAttribute('data-live-endpoint') || '/api/audience';
+    const updated = document.querySelector('[data-live-updated]');
+    const fields = {
+      online: document.querySelector('[data-live-online]'),
+      returning: document.querySelector('[data-live-returning]'),
+      visitors: document.querySelector('[data-live-visitors]')
+    };
+    let refreshing = false;
+
+    function renderCount(node, value) {
+      if (!node || value === undefined || value === null) return;
+      node.textContent = Number(value).toLocaleString('zh-CN');
+    }
+
+    async function refreshLiveStats() {
+      if (refreshing || document.hidden) return;
+      refreshing = true;
+      try {
+        const response = await fetch(endpoint, {
+          cache: 'no-store',
+          credentials: 'same-origin',
+          headers: { Accept: 'application/json' }
+        });
+        if (!response.ok) throw new Error('audience request failed with status ' + response.status);
+        const data = await response.json();
+        renderCount(fields.online, data.online);
+        renderCount(fields.returning, data.returning);
+        renderCount(fields.visitors, data.visitors);
+        if (updated) {
+          updated.textContent = new Date().toLocaleTimeString('zh-CN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          });
+        }
+      } catch (error) {
+        console.warn('Live audience refresh failed:', error);
+        if (updated) updated.textContent = '连接中断，稍后重试';
+      } finally {
+        refreshing = false;
+      }
+    }
+
+    refreshLiveStats();
+    window.setInterval(refreshLiveStats, 8000);
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) refreshLiveStats();
+    });
+  }
 })();

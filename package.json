@@ -6,8 +6,10 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "test": "node scripts/smoke-test.js",
     "build:static": "node scripts/build-static.js",
     "publish": "node scripts/publish-markdown.js",
+    "publish:pdf": "node scripts/publish-pdf.js",
     "import:csdn": "node scripts/import-csdn.js",
     "reset-password": "node scripts/reset-password.js"
   },

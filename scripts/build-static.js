@@ -7,6 +7,9 @@ const store = require('../lib/store');
 const { renderMarkdown, getToc } = require('../lib/markdown');
 
 const ROOT = path.join(__dirname, '..');
+const OUTPUT_ROOT = process.env.BLOG_STATIC_OUTPUT_DIR
+  ? path.resolve(process.env.BLOG_STATIC_OUTPUT_DIR)
+  : ROOT;
 const VIEWS_DIR = path.join(ROOT, 'views', 'site');
 const PUBLIC_DIR = path.join(ROOT, 'public');
 const LAYOUT = path.join(VIEWS_DIR, 'layout.ejs');
@@ -28,6 +31,13 @@ function readTime(content) {
   return Math.max(1, minutes);
 }
 
+function formatFileSize(bytes) {
+  const size = Number(bytes) || 0;
+  if (size >= 1024 * 1024) return (size / (1024 * 1024)).toFixed(1) + ' MB';
+  if (size >= 1024) return Math.round(size / 1024) + ' KB';
+  return size + ' B';
+}
+
 function renderSite(view, data) {
   const template = fs.readFileSync(LAYOUT, 'utf8');
   return ejs.render(template, {
@@ -38,6 +48,7 @@ function renderSite(view, data) {
     view,
     formatDate,
     readTime,
+    formatFileSize,
     renderMarkdown,
     ...data
   }, {
@@ -47,7 +58,7 @@ function renderSite(view, data) {
 }
 
 function writeFile(relPath, html) {
-  const file = path.join(ROOT, relPath);
+  const file = path.join(OUTPUT_ROOT, relPath);
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, html);
 }
@@ -108,6 +119,7 @@ function build() {
     featured: published[0] || null,
     posts: published.slice(1),
     stats,
+    audience: { ...store.getAudienceStats(), online: 0 },
     tags: tags.slice(0, 8),
     categories
   }), tagFiles, categoryFiles));
@@ -201,24 +213,24 @@ function build() {
   });
   writePage('search.html', searchHtml);
 
-  copyDir(path.join(PUBLIC_DIR, 'css'), path.join(ROOT, 'css'));
-  copyDir(path.join(PUBLIC_DIR, 'js'), path.join(ROOT, 'js'));
-  copyDir(path.join(PUBLIC_DIR, 'img'), path.join(ROOT, 'img'));
-  copyDir(path.join(PUBLIC_DIR, 'uploads'), path.join(ROOT, 'uploads'));
+  copyDir(path.join(PUBLIC_DIR, 'css'), path.join(OUTPUT_ROOT, 'css'));
+  copyDir(path.join(PUBLIC_DIR, 'js'), path.join(OUTPUT_ROOT, 'js'));
+  copyDir(path.join(PUBLIC_DIR, 'img'), path.join(OUTPUT_ROOT, 'img'));
+  copyDir(path.join(PUBLIC_DIR, 'uploads'), path.join(OUTPUT_ROOT, 'uploads'));
   copyFile(
     path.join(ROOT, 'node_modules', 'highlight.js', 'styles', 'github-dark.min.css'),
-    path.join(ROOT, 'vendor', 'highlight', 'styles', 'github-dark.min.css')
+    path.join(OUTPUT_ROOT, 'vendor', 'highlight', 'styles', 'github-dark.min.css')
   );
   copyFile(
     path.join(ROOT, 'node_modules', 'katex', 'dist', 'katex.min.css'),
-    path.join(ROOT, 'vendor', 'katex', 'katex.min.css')
+    path.join(OUTPUT_ROOT, 'vendor', 'katex', 'katex.min.css')
   );
   copyDir(
     path.join(ROOT, 'node_modules', 'katex', 'dist', 'fonts'),
-    path.join(ROOT, 'vendor', 'katex', 'fonts')
+    path.join(OUTPUT_ROOT, 'vendor', 'katex', 'fonts')
   );
 
-  const cssPath = path.join(ROOT, 'css', 'app.css');
+  const cssPath = path.join(OUTPUT_ROOT, 'css', 'app.css');
   let css = fs.readFileSync(cssPath, 'utf8');
   css = css.replace(/url\(\s*['"]\/(img|uploads)\//g, (match, dir) => `url('../${dir}/`);
   fs.writeFileSync(cssPath, css);

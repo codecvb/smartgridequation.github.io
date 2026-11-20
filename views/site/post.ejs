@@ -22,9 +22,29 @@
           <% }) %>
         </div>
       </header>
-      <div class="prose">
-        <%- post.contentHtml %>
-      </div>
+      <% if (post.kind === 'pdf') { %>
+        <% if (post.contentHtml) { %>
+          <div class="prose pdf-intro"><%- post.contentHtml %></div>
+        <% } %>
+        <section class="pdf-document" aria-label="PDF 文档预览">
+          <div class="pdf-toolbar">
+            <div class="pdf-file-meta">
+              <span class="type-badge">PDF</span>
+              <strong><%= post.pdfName || post.title + '.pdf' %></strong>
+              <span><%= formatFileSize(post.pdfSize) %></span>
+            </div>
+            <div class="pdf-actions">
+              <a class="btn-primary" href="<%= post.pdfUrl %>" download="<%= post.pdfName || post.title + '.pdf' %>">下载 PDF</a>
+              <a class="btn-ghost" href="<%= post.pdfUrl %>" target="_blank" rel="noopener">新窗口打开</a>
+            </div>
+          </div>
+          <iframe class="pdf-frame" src="<%= post.pdfUrl %>#view=FitH" title="<%= post.title %> PDF 预览" loading="lazy"></iframe>
+        </section>
+      <% } else { %>
+        <div class="prose">
+          <%- post.contentHtml %>
+        </div>
+      <% } %>
       <div class="post-actions">
         <button class="btn-ghost" type="button" data-copy-link>复制链接</button>
         <a class="btn-ghost" href="/archive">回到归档</a>
@@ -73,7 +93,10 @@
     <% related.forEach(function(post, i) { %>
       <article class="post-card">
         <span class="post-index"><%= String(i + 1).padStart(2, '0') %></span>
-        <h3 class="post-card-title"><a href="/post/<%= post.slug %>"><%= post.title %></a></h3>
+        <h3 class="post-card-title">
+          <% if (post.kind === 'pdf') { %><span class="type-badge">PDF</span><% } %>
+          <a href="/post/<%= post.slug %>"><%= post.title %></a>
+        </h3>
         <p class="post-excerpt"><%= post.summary || '……' %></p>
         <div class="post-meta">
           <time datetime="<%= post.publishedAt %>"><%= formatDate(post.publishedAt) %></time>

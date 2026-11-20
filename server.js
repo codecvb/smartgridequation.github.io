@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const store = require('./lib/store');
+const audience = require('./lib/audience');
 const { renderMarkdown, getToc } = require('./lib/markdown');
 
 const app = express();
@@ -48,6 +49,11 @@ app.use((req, res, next) => {
   const token = req.cookies[SESSION_COOKIE];
   if (token) res.locals.user = store.getUserByToken(token);
   req.user = res.locals.user;
+  next();
+});
+
+app.use((req, res, next) => {
+  audience.trackPage(req, res);
   next();
 });
 
@@ -95,6 +101,12 @@ app.locals.renderMarkdown = renderMarkdown;
 
 // Public site ---------------------------------------------------------------
 
+app.get('/api/audience', (req, res) => {
+  audience.trackPresence(req, res);
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(audience.getAudienceStats());
+});
+
 app.get('/', (req, res) => {
   const posts = store.listPosts({ status: 'published', limit: 9 });
   const featured = posts[0] || null;
@@ -104,6 +116,7 @@ app.get('/', (req, res) => {
     featured,
     posts: posts.slice(1),
     stats: store.getStats(),
+    audience: audience.getAudienceStats(),
     tags: store.getTags().slice(0, 8),
     categories: store.getCategories()
   });
@@ -277,6 +290,25 @@ const upload = multer({
   }
 });
 
+const PDF_DIR = path.join(__dirname, 'public', 'uploads', 'pdfs');
+const pdfUpload = multer({
+  storage: multer.diskStorage({
+    destination(req, file, cb) {
+      fs.mkdirSync(PDF_DIR, { recursive: true });
+      cb(null, PDF_DIR);
+    },
+    filename(req, file, cb) {
+      cb(null, `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.pdf`);
+    }
+  }),
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter(req, file, cb) {
+    const isPdf = file.mimetype === 'application/pdf' || /\.pdf$/i.test(file.originalname);
+    if (isPdf) return cb(null, true);
+    cb(new Error('仅支持上传 PDF 文件'));
+  }
+});
+
 const admin = express.Router();
 admin.use(requireAuth);
 
@@ -287,6 +319,7 @@ admin.get('/', (req, res) => {
     view: 'admin/dashboard',
     pageTitle: '仪表盘',
     stats,
+    audience: audience.getAudienceStats(),
     recent: posts.slice(0, 6),
     totalPosts: posts.length
   });
@@ -385,6 +418,90 @@ admin.post('/posts/:id/toggle', (req, res) => {
     store.updatePost(post.id, {}, post.status === 'published' ? 'save' : 'publish');
   }
   res.redirect('/admin/posts');
+});
+
+function listPdfPosts() {
+  return store.listPosts({}).filter((post) => post.kind === 'pdf');
+}
+
+function renderPdfPublisher(res, options = {}) {
+  res.render('admin/layout', {
+    view: 'admin/pdf-publish',
+    pageTitle: '发布 PDF',
+    pdfs: listPdfPosts(),
+    ok: !!options.ok,
+    error: options.error || ''
+  });
+}
+
+function normalizeUploadName(name) {
+  const base = path.basename(String(name || 'document.pdf'));
+  const decoded = Buffer.from(base, 'latin1').toString('utf8');
+  if (!decoded.includes('\uFFFD') && /[^\x00-\x7F]/.test(decoded)) return decoded;
+  return base;
+}
+
+function humanFileSize(bytes) {
+  const size = Number(bytes) || 0;
+  if (size >= 1024 * 1024) return (size / (1024 * 1024)).toFixed(1) + ' MB';
+  if (size >= 1024) return Math.round(size / 1024) + ' KB';
+  return size + ' B';
+}
+
+function isPdfFile(filePath) {
+  const header = Buffer.alloc(1024);
+  const fd = fs.openSync(filePath, 'r');
+  try {
+    const read = fs.readSync(fd, header, 0, header.length, 0);
+    return header.subarray(0, read).toString('ascii').includes('%PDF-');
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+app.locals.formatFileSize = humanFileSize;
+
+admin.get('/pdfs', (req, res) => {
+  renderPdfPublisher(res, { ok: !!req.query.ok });
+});
+
+admin.post('/pdfs', (req, res) => {
+  pdfUpload.single('pdf')(req, res, (uploadError) => {
+    if (uploadError) {
+      return renderPdfPublisher(res, { error: uploadError.message });
+    }
+    if (!req.file) {
+      return renderPdfPublisher(res, { error: '请选择一个 PDF 文件' });
+    }
+    if (!isPdfFile(req.file.path)) {
+      fs.rmSync(req.file.path, { force: true });
+      return renderPdfPublisher(res, { error: '文件内容不是有效的 PDF' });
+    }
+
+    const originalName = normalizeUploadName(req.file.originalname);
+    const fallbackTitle = originalName.replace(/\.pdf$/i, '').replace(/[-_]+/g, ' ').trim();
+    const status = req.body.action === 'draft' ? 'draft' : 'published';
+    try {
+      store.createPost({
+        kind: 'pdf',
+        title: req.body.title || fallbackTitle || 'PDF 文档',
+        slug: req.body.slug,
+        summary: req.body.summary,
+        content: req.body.content,
+        tags: req.body.tags || 'PDF',
+        category: req.body.category || '资料',
+        status,
+        pdfUrl: '/uploads/pdfs/' + req.file.filename,
+        pdfName: originalName,
+        pdfSize: req.file.size
+      });
+    } catch (error) {
+      fs.rmSync(req.file.path, { force: true });
+      return renderPdfPublisher(res, { error: 'PDF 发布失败：' + error.message });
+    }
+
+    res.redirect('/admin/pdfs?ok=1');
+  });
 });
 
 admin.get('/settings', (req, res) => {

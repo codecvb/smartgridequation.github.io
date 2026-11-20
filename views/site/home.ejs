@@ -9,12 +9,16 @@
         <button type="submit">搜索</button>
       </form>
     </div>
-    <dl class="stat-list">
-      <div><dt>文章</dt><dd><%= stats.posts %></dd></div>
-      <div><dt>分类</dt><dd><%= stats.categories %></dd></div>
+    <dl class="stat-list"<% if (!staticSite) { %> data-live-stats data-live-endpoint="/api/audience"<% } %>>
+      <div class="stat-live"><dt><span class="live-dot"></span>在线</dt><dd data-live-online><%= staticSite ? '—' : audience.online %></dd></div>
+      <div><dt>随访用户</dt><dd data-live-returning><%= audience.returning %></dd></div>
+      <div><dt>独立访客</dt><dd data-live-visitors><%= audience.visitors %></dd></div>
       <div><dt>阅读</dt><dd><%= stats.views %></dd></div>
     </dl>
   </div>
+  <% if (!staticSite) { %>
+    <div class="wrap"><p class="live-note"><span class="live-dot"></span>实时更新<span data-live-updated>刚刚同步</span></p></div>
+  <% } %>
 </section>
 
 <section class="wrap section categories-section">
@@ -50,7 +54,10 @@
       <article class="recent-item">
         <span class="recent-index"><%= String(i + 1).padStart(2, '0') %></span>
         <div class="recent-main">
-          <h3 class="recent-title"><a href="/post/<%= post.slug %>"><%= post.title %></a></h3>
+          <h3 class="recent-title">
+            <% if (post.kind === 'pdf') { %><span class="type-badge">PDF</span><% } %>
+            <a href="/post/<%= post.slug %>"><%= post.title %></a>
+          </h3>
           <p class="recent-summary"><%= post.summary || '……' %></p>
         </div>
         <div class="recent-meta">

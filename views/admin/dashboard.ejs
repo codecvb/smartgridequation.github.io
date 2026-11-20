@@ -3,14 +3,19 @@
     <p class="kicker">DASHBOARD</p>
     <h1>仪表盘</h1>
   </div>
-  <a class="btn-primary" href="/admin/posts/new">写新文章</a>
+  <div class="editor-head-actions">
+    <a class="btn-ghost" href="/admin/pdfs">发布 PDF</a>
+    <a class="btn-primary" href="/admin/posts/new">写新文章</a>
+  </div>
 </section>
 
-<div class="stat-grid">
+<div class="stat-grid" data-live-stats data-live-endpoint="/api/audience">
+  <div class="stat-card stat-card-live"><p><span class="live-dot"></span>在线用户</p><strong data-live-online><%= audience.online %></strong></div>
+  <div class="stat-card"><p>随访用户</p><strong data-live-returning><%= audience.returning %></strong></div>
+  <div class="stat-card"><p>独立访客</p><strong data-live-visitors><%= audience.visitors %></strong></div>
   <div class="stat-card"><p>已发布</p><strong><%= stats.posts %></strong></div>
   <div class="stat-card"><p>草稿</p><strong><%= stats.drafts %></strong></div>
   <div class="stat-card"><p>总阅读</p><strong><%= stats.views %></strong></div>
-  <div class="stat-card"><p>标签</p><strong><%= stats.tags %></strong></div>
 </div>
 
 <section class="panel">
